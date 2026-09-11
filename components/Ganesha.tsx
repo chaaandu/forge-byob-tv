@@ -7,7 +7,8 @@ import { GANESH_CHECK_MS, GANESH_LOTTIE_URL } from '@/config'
 import { isFestival } from '@/lib/schedule'
 
 /**
- * Ganesh Chaturthi, as an 80px figure in the bottom-left corner of both slides.
+ * Ganesh Chaturthi — the idol at about 80px, with the mooshika running across
+ * the bottom of it, in the bottom-left corner of both slides.
  *
  * On the wall from 14 to 16 September 2026 and gone afterwards without anyone
  * touching the laptop — `isFestival` owns the window and `config.ts` owns the
@@ -49,27 +50,12 @@ import { isFestival } from '@/lib/schedule'
  *    they would be illegible smears, and copy on this wall belongs in Forge
  *    type where it can be read and changed.
  *
- * 3. **The mooshika.** Ganesha's vahana runs in from off-frame right at frame
- *    46, crosses the bottom of the composition and is gone by frame 83 — about
- *    1.2 seconds of the 7.3. It is stripped **because it does not fit, and the
- *    arithmetic is not close.** Measured over all 218 frames: the idol alone
- *    occupies 917x709, but the rat's path takes the composition's live area to
- *    the full 1920 x 783. That is aspect 2.45 against the idol's 1.29 — so an
- *    80px-tall ornament that contained the rat would be **196px wide**, in a
- *    gutter that is 92px. There is no 196x80 clear rectangle in either slide's
- *    bottom corner; `/weekly`'s fourth row leaves 92px on the left and about
- *    the same on the right.
+ * 3. **Nothing else — and in particular not the mooshika.** Ganesha's vahana
+ *    runs in from off-frame right at frame 46 and is gone by 83, and the first
+ *    version of this file stripped it. That was wrong, and the reason it looked
+ *    right is in `CROP` below.
  *
- *    It had to be found by measuring, and the way it was missed is worth
- *    keeping. The first crop came from six sampled frames — 0, 40, 90, 140, 190
- *    and 217 — and the rat is on screen for none of them. It sat between two
- *    samples. So for 1.2 seconds of every loop the corner showed a rat sliced
- *    through the middle by the crop's bottom edge, which is precisely this
- *    wall's stated failure mode: it rendered convincingly and nothing reported
- *    it. **Anything that re-crops this must scan every frame**, not a sample —
- *    `noRat` in the scan that produced `CROP` is the union over all 218.
- *
- * 4. **Nothing else.** The `loopOut()` expression on one rotation is left in,
+ *    The `loopOut()` expression on one rotation is left in,
  *    which is why this imports the full `lottie.min.js` rather than
  *    `lottie_light` — the light build silently drops expressions, and the
  *    symptom would be one sub-animation quietly stopping partway through.
@@ -85,26 +71,55 @@ import { isFestival } from '@/lib/schedule'
  */
 
 /**
- * The crop, measured rather than guessed.
+ * The crop, measured rather than guessed — and **measured on every frame, not
+ * on a sample.** That distinction is the whole history of this constant.
  *
- * The composition is 1920x1080 but the idol only occupies part of it, and the
- * rat sub-composition sits entirely off-canvas — a naive bounding box of the
- * SVG's own geometry reports 2606x803 spanning x -386 to 2220, because it
- * counts elements the 1920x1080 frame clips away. Rendering twelve frames to
- * PNG and taking the union of the non-background pixels gives the box that is
- * actually on screen: x 476-1392, y 282-990, across every frame of the loop.
+ * The composition is 1920x1080 and the idol occupies only part of it, so the
+ * ornament is a window onto it. A naive bounding box of the SVG's own geometry
+ * is no help: it reports 2606x803 spanning x -386 to 2220, because it counts
+ * elements the 1920x1080 frame clips away. The box has to come from rasterising
+ * frames and taking the union of the non-background pixels.
  *
- * Six pixels of air on each side, and the result is what `viewBoxSize` hands
- * lottie-web. **Without it the ornament is 80px of mostly empty frame** with an
- * idol perhaps 50px tall in the middle of it — which renders convincingly, is
- * what the artist's file literally says, and is not what 80px was asked for.
+ * ── How this was wrong, which is the useful part ──
+ *
+ * The first version rasterised **six** frames — 0, 40, 90, 140, 190, 217 — and
+ * got x 476-1392, y 282-990. That is the idol exactly, and it is wrong, because
+ * the mooshika is on screen for none of those six. It runs frames **46 to 83**,
+ * about 1.2 seconds of the 7.3, and it sat in the gap between two samples. So
+ * the corner showed a rat sliced in half by the crop's bottom edge twice a
+ * minute while every measurement that had been taken said the crop was right —
+ * this wall's stated failure mode exactly: rendering convincingly, reporting
+ * nothing.
+ *
+ * Rasterising all 218 frames gives the two boxes that actually matter:
+ *
+ *   idol  x 476-1392, y 282- 990   (917 x 709)
+ *   rat   x   0-1918, y 808-1064   (the full width — it enters at the right
+ *                                   edge on f46 and exits at the left on f83)
+ *
+ * ── Why the crop is the idol's width and the rat's height ──
+ *
+ * The rat crosses the *entire* composition, so a crop containing its whole path
+ * would be 1920 wide — aspect 2.45, which at any usable height is far wider
+ * than the 104px this corner has. But it does not need to contain the path. It
+ * needs to contain the rat's **vertical band**, so the animal is never cut
+ * through the middle; horizontally the rat is *supposed* to enter and leave at
+ * the edges, which is what it does in the artist's own 1920 frame.
+ *
+ * So: the idol's x range, extended down to clear the rat's lowest point at
+ * 1064. Six units of air on every side. The rat now runs in at the right edge,
+ * across the bottom, and out at the left, whole the entire way.
+ *
+ * **The bottom edge is the load-bearing number here.** Raise it back towards
+ * 996 and the idol still looks perfect — it is the rat, for 1.2s of every 7.3,
+ * that loses its feet.
  */
-const CROP = '470 276 928 720'
+const CROP = '470 276 928 794'
 
 /** The crop's aspect, so the CSS only has to be told a height. Kept here rather
     than restated as a number in `mesa-tv.css`: two places to change is one
     place to forget, and the symptom would be a squashed idol. */
-const CROP_ASPECT = 928 / 720
+const CROP_ASPECT = 928 / 794
 
 export function Ganesha() {
   const host = useRef<HTMLDivElement>(null)
@@ -191,18 +206,9 @@ export function Ganesha() {
         // replaced with a re-export whose comp ids differ, the strip below
         // should no-op rather than throw and take the slide down with it.
         if (figure !== undefined) {
-          figure.layers = figure.layers.filter(
-            (layer: { ty?: number; nm?: string }) =>
-              // The two text layers, by type.
-              layer.ty !== 5 &&
-              // The mooshika, by name — `rat Comp 1`. **Matched on the name
-              // rather than on its `refId` of `comp_1`**, because a re-export
-              // renumbers comps freely while the artist's layer name usually
-              // survives; matching the id would silently stop stripping and put
-              // the sliced rat back. Anchored at the start so it cannot catch a
-              // name that merely contains the letters.
-              !/^rat\b/i.test(layer.nm ?? ''),
-          )
+          // The two text layers, by type. **The mooshika stays** — see `CROP`,
+          // which is sized to hold its whole run rather than slicing it.
+          figure.layers = figure.layers.filter((layer: { ty?: number }) => layer.ty !== 5)
         }
 
         // **The only thing that can still this.** lottie-web's SVG renderer

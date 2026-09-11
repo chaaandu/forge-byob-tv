@@ -178,21 +178,29 @@ npm run build        # next build
   about a team; a festival illustration is not claiming to be anyone's mark.
   `public/lottie/ganesha-NOTICE.txt` carries the author and licence beside the
   file, the way `Crown-NOTICE.txt` does. The JSON is the untouched download so
-  it can go back into the LottieFiles editor; the maroon background layer, the
-  two baked-in text layers and the mooshika are stripped at runtime, not in the
-  file.
+  it can go back into the LottieFiles editor; the maroon background layer and
+  the two baked-in text layers are stripped at runtime, not in the file.
 
-  **The rat is the one that had to be measured, and it is a warning about
-  cropping.** The ornament is a crop, because the idol occupies only part of a
-  1920x1080 composition — and the first crop was taken from six sampled frames,
-  none of which the rat is on screen for. It runs in from off-frame right at
-  frame 46 and is gone by 83, so for 1.2 seconds of every loop the corner
-  showed a rat sliced through by the crop's bottom edge: rendering
-  convincingly, reporting nothing, exactly this wall's stated failure mode. It
-  cannot be kept — measured over all 218 frames its path takes the live area to
-  the full **1920 x 783**, so an 80px-tall ornament containing it would be
-  **196px wide** and `/weekly`'s fourth row leaves 92px. **Anything that
-  re-crops this must scan every frame, not a sample.**
+  **The crop must be measured on every frame, and the mooshika is why.** The
+  ornament is a crop, because the idol occupies only part of a 1920x1080
+  composition. The first crop was taken from six sampled frames — 0, 40, 90,
+  140, 190, 217 — and Ganesha's vahana is on screen for none of them: it runs
+  frames 46 to 83, about 1.2 seconds of the 7.3, and sat in the gap between two
+  samples. So for those frames the corner showed a rat sliced through by the
+  crop's bottom edge, twice a minute, while every measurement taken said the
+  crop was right. Rendering convincingly and reporting nothing is this wall's
+  stated failure mode, and a sampled measurement is how it got in.
+
+  The fix is the shape of the crop, not the removal of the rat — **the rat was
+  briefly stripped and that was wrong.** It is 928x794 rather than 928x720: the
+  idol's width, extended down to clear the rat's lowest point at y 1064. The
+  animal crosses the *whole* 1920 composition, so no affordable crop holds its
+  path; it only has to hold its **vertical band**, and horizontally it enters
+  and leaves at the edges exactly as it does in the artist's own frame. The box
+  is 88px rather than 80 so the idol still renders at 78.5px inside the taller
+  crop, and a taller crop is a narrower one — 102.9px wide against the old
+  103px, so the footprint did not move. **104px is the width ceiling** in that
+  gutter; check the width before changing the height.
 
   **If it should stop looping, that is one word** — `loop: false` on the
   `loadAnimation` call — and what remains is a figure that arrives once and

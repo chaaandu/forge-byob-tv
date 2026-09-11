@@ -1105,15 +1105,35 @@
      has the argument for why a looping ornament is here at all; this block is
      only about where it sits, which took measuring on both boards.
 
-     **Height, not width.** The idol's crop is 928x720, and the component hands
-     that ratio down as `--ganesha-aspect` so exactly one number lives here. Set
-     a width instead and the figure squashes the moment the crop is re-measured.
+     **Height, not width.** The crop is 928x794, and the component hands that
+     ratio down as `--ganesha-aspect` so exactly one number lives here. Set a
+     width instead and the figure squashes the moment the crop is re-measured.
 
      `vw`, not `px`, like every other dimension in this file — the wall is driven
      at 1920 but the frame is measured at 1600 and 2560 too, and a fixed-px
      ornament is the `--s-*` trap in miniature: it would hold its size while the
-     board contracted around it and close the gap noted below. */
-  --h-ganesha: 4.1667vw; /* 80px */
+     board contracted around it and close the gap noted below.
+
+     ── 88 rather than the 80 that was asked for, and the idol is still 80 ──
+
+     **This box is not the idol; it is the idol plus the strip the mooshika runs
+     across.** The rat's lowest point is at y 1064 against the idol's 990, so the
+     crop had to grow 74 units at the bottom to stop cutting the animal in half —
+     see `CROP` in `components/Ganesha.tsx`. The idol therefore occupies 709/794
+     of this height rather than all of it.
+
+     At the 80px originally specified the idol would have rendered **71px**, a
+     visible shrink to pay for a rat. At 88 it renders **78.5px** — within a pixel
+     and a half of where it started — and the whole box still fits, because a
+     taller crop is a *narrower* one: aspect fell from 1.289 to 1.169, so 88px
+     tall is 102.9px wide against the old 80px tall at 103px. The footprint is
+     unchanged and the gap to card 31 is the same 9px.
+
+     The idol also sits about 8px higher than it did, which is the box growing
+     downward under a bottom that stays pinned to `--s-safe-y`. That was the
+     explicit trade. **104px is the ceiling** — see the inset note below — so if
+     this grows again, check the width before the height. */
+  --h-ganesha: 4.5833vw; /* 88px */
 
   /* ── Why the left inset is 28px and not `--s-safe-x`'s 48 ──
 
@@ -1121,16 +1141,20 @@
      space in its bottom-left corner and does not care where this sits.
      `/weekly` does: its fourth row holds nine cards rather than ten, so the row
      is centred and card 31's left edge lands at **x=140**. That leaves 92px
-     between the safe margin and the board — and the idol at 80px tall is
-     **104px wide**.
+     between the safe margin and the board — and the ornament is **103px wide**.
 
      So the two options were to shrink it below what was asked for, or to spend
      20px of a 48px margin. This spends the margin: the ornament starts at 28px
-     (1.5% of the frame) and ends 8px clear of card 31, where at 48px it would
+     (1.5% of the frame) and ends 9px clear of card 31, where at 48px it would
      have crossed the card's rounded corner and touched the `31` numeral. Losing
      a numeral's left edge to a decoration is a board bug; an ornament sitting
      nearer the bezel than the board does is not, and 1.5% is still well inside
      any panel's real overscan.
+
+     **That inset sets the width ceiling at 104px**: 140 for the card, less the
+     28 here, less an 8px gap. Every height change has to be checked against it,
+     because the height is what decides the width — the aspect comes from the
+     crop, not from this file.
 
      If the weekly grid ever returns to ten cards on the bottom row, this has to
      move or shrink — that row is what is holding it out here.
@@ -1144,9 +1168,9 @@
      this ornament lives in does *not* grow with the frame the way a `vw` inset
      would assume.
 
-     Measured, with this as `1.4583vw`: at 2560x1440 the idol grew to 138px wide
-     while card 31's left edge moved only to 172px, and the ornament **crossed
-     into the card by 3px**. Three pixels, in the corner, on a board nobody is
+     Measured, with this as `1.4583vw`: at 2560x1440 the ornament grew to 138px
+     wide while card 31's left edge moved only to 172px, and it **crossed into
+     the card by 3px**. Three pixels, in the corner, on a board nobody is
      standing next to — which is exactly the class of bug this wall cannot
      report. Pinned at 28px the same measurement clears by 7px, and 1600 and
      2000 clear by 10px and 7px.
