@@ -271,35 +271,40 @@ describe('Podium', () => {
     expect(of('   ', 'VBC139')).toBe('39')
   })
 
-  it('idles the three podium marks, on three timelines, and nothing else', () => {
-    // ── This has been asserted three ways, and the history is the point ──
+  it('idles nothing on /podium, marks included', () => {
+    // ── This has been asserted four ways, and the history is the point ──
     //
     // It pinned that the three marks idle on three *different* timelines
     // (hashing the team id put all three on the same one on the real feed —
     // three ids into three buckets collide about one time in nine, and that
     // hash is worse than that). Then it pinned that nothing idles at all, when
-    // both boards were stilled. It pins the three again now, by decision.
+    // both boards were stilled. Then the three again, by decision. Now none
+    // again, and this time for a reason that is not a preference: the glance is
+    // a `rotateY` under a `perspective`, which displaces an off-centre child
+    // differently from the element's own centre, so it swung the crown off the
+    // mark it sits on once every seventeen seconds.
     //
     // Every version has asserted the same underlying property: **exactly which
     // elements are allowed to move at rest.** That is what the overtake is
     // spending, and it is not something a reader can check from a screenshot,
     // because a screenshot of a moving frame and a still one are the same
     // picture.
+    //
+    // Unscoped on purpose. Scoping to the mark band would pass just as happily
+    // with a numeral dancing again, which is half the regression this catches.
     const host = document.createElement('div')
     document.body.append(host)
     const root = createRoot(host)
     act(() => root.render(<Podium ranked={rankTeams(TRADING)} />))
 
-    const marks = [...host.querySelectorAll('.tv-pod-mark-band [class*="tv-idle-"]')]
-    expect(marks).toHaveLength(3)
-    // Never in lockstep. Place-based assignment cannot collide; a hash can.
-    expect(new Set(marks.map((el) => el.className)).size).toBe(3)
-
-    // **And the three marks are the *only* things idling on this slide.**
-    // Unscoped on purpose: scoping to the mark band would pass just as happily
-    // with a numeral dancing again, which is the regression this half catches.
-    expect(host.querySelectorAll('[class*="tv-idle-"]')).toHaveLength(3)
+    expect(host.querySelectorAll('[class*="tv-idle-"]')).toHaveLength(0)
     expect(host.querySelectorAll('[class*="tv-look-"]')).toHaveLength(0)
+
+    // **The crown is the exception, and it is bounded rather than trusted.**
+    // One element, and the class it carries is the one whose animation ends —
+    // `tv-crown-drop` runs once on mount. A second crown class, or the drop
+    // moving onto the mark itself, fails here.
+    expect(host.querySelectorAll('.tv-crown-glyph')).toHaveLength(1)
     act(() => root.unmount())
     host.remove()
   })

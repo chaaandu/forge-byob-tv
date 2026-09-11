@@ -36,25 +36,36 @@ import type { OvertakeEvent, Team } from '@/lib/types'
  * bigger circle. The numerals are printed, but they are captions now rather than
  * a third encoding.
  *
- * ── What moves at rest, and it is three things ──
+ * ── Nothing moves at rest, and that is the third time this has been decided ──
  *
- * This wall's rule is that movement means something happened. The only things
- * spending it are the three podium marks, which idle — see `idleOf` for why
- * that is scoped to exactly the top three and why `/weekly` does not get it.
- * Everything else on both slides holds completely still: the other thirty-six
- * cards, the list of seven, both mastheads, the numerals. No lustre sweeps, no
- * numeral dance, no plinth sheens — all of those went with the metals.
+ * The three marks idled: a slow bob, a glance on a `rotateY`, a tilt, on three
+ * timelines so they could never fall into lockstep. It was removed once, asked
+ * for back, and is now removed again — by decision, after seeing it next to the
+ * crown.
+ *
+ * **What settled it was a measurement, not a preference.** The glance is a
+ * `rotateY` of up to 34 degrees under a 900px `perspective`, and a perspective
+ * transform moves an off-centre child *differently from the element's own
+ * centre*. The crown sits on the disc's upper-left rim, a long way off centre,
+ * so every glance swung it out of contact with the head it is sitting on and
+ * back again — a crown visibly detaching from its mark once every seventeen
+ * seconds, on a wall nobody is watching closely enough to catch it. The bob
+ * alone would have been survivable; the glance could not be, because the crown
+ * cannot be welded to a rotation it does not share the centre of.
+ *
+ * The two fixes were "take the crown off the idle" and "take the idle off the
+ * board", and only one of them leaves the slide saying something true. So the
+ * board is still, and the only motion on it is an arrival: the crown landing,
+ * and an overtake. Both are things that happened.
+ *
+ * `lib/seed.ts` stays — `VentureLogo` still reads it for the mark tints.
  *
  * **No `layout` prop**, here or anywhere in the board tree — there is a source
- * scan in render.test.tsx that fails the build on one. The idle is CSS keyframes
- * on `transform` alone, so it is compositor work rather than a JS loop running
- * for the weeks this page stays open without reloading.
+ * scan in render.test.tsx that fails the build on one.
  */
 
 const TOP = 10
 const PODIUM_PLACES = 3
-
-const IDLE_TIMELINES = ['tv-idle-1', 'tv-idle-2', 'tv-idle-3'] as const
 
 /**
  * The ranks in the order the pillars are drawn: 2 · 1 · 3.
@@ -128,42 +139,6 @@ export function podiumTeams(ranked: readonly Team[]): Team[] {
 function revenueOf(team: Team | undefined): string {
   if (team === undefined || team.totalRevenue <= 0) return '—'
   return formatRupees(team.totalRevenue)
-}
-
-/**
- * Which of the three idle timelines this mark runs.
- *
- * **By podium place, not by team.** Three places and three timelines, so the
- * marks on screen can never fall into lockstep — the entire visible
- * requirement, and one a hash cannot promise: three ids into three buckets
- * collide about one time in nine even with a good hash, and `lib/seed.ts`
- * documents a worse failure on top of that.
- *
- * ── This was removed and then asked for back ──
- *
- * The argument for removing it was `/weekly`'s: this board has one thing it
- * needs to be able to say — a rank changed hands — and it says it with a
- * two-and-a-half-second interrupt, which reads as an interrupt only against a
- * still frame. That argument is sound and it is **overruled here on purpose**,
- * for the top three and nowhere else.
- *
- * What makes it survivable is the scope. Three marks idling is not the same
- * proposition as forty: the wall's rule is that movement *means* something, and
- * on this slide the movement is confined to exactly the three ventures the
- * slide exists to celebrate, so it reads as those three being alive rather than
- * as the page being busy. Everything else on both boards — the other
- * thirty-six cards, the list of seven, both mastheads — holds completely still,
- * which is what the overtake still has to rise above.
- *
- * The idle is also deliberately unlike the kick: slow, small, and
- * non-directional, where an overtake is fast, large and travels across the
- * frame. `app/mesa-tv.css` has the keyframes and the amplitudes.
- *
- * `/weekly` does **not** get this back. Ten idling marks on a board of
- * thirty-nine is the case the rule was written for.
- */
-function idleOf(place: number): string {
-  return IDLE_TIMELINES[(place - 1) % IDLE_TIMELINES.length]!
 }
 
 /**
@@ -266,30 +241,25 @@ function PodiumCard({
             its size through the first paint rather than assembling itself on
             the wall. Empty rather than a placeholder mark — a grey circle is
             filler, and this wall carries none. */}
-        {/* The idle rides this box, not the disc inside it: a CSS animation
-            beats an inline style, so sharing an element with the flip's
-            `transform` would let the idle simply win and the mark would never
-            turn over during an overtake. `VentureDisc` carries the same
-            three-layer split on `/weekly` and says so at length.
+        {/* This box carried the idle, on its own layer rather than on the disc
+            inside it — a CSS animation beats an inline style, so sharing an
+            element with the flip's `transform` would have let the idle simply
+            win and the mark would never have turned over during an overtake.
+            The layer is kept now that the idle is gone, because it is also the
+            crown's frame of reference and the flip still writes a `transform`
+            one level down. `VentureDisc` carries the same three-layer split on
+            `/weekly` and says so at length.
 
-            An empty seat does not idle. A place with no team yet is holding its
-            size through the first paint, and a placeholder that bobs reads as
-            content rather than as absence. */}
+            **`position: relative` is what anchors the crown**, and it used to
+            be inherited rather than stated: a transformed element is already a
+            containing block for absolute descendants, so while the idle was
+            here the crown positioned correctly for free. Removing the idle
+            removed the transform, and with it the containing block — the crown
+            would have silently re-parented to the band and moved. It was
+            already declared for exactly that reason; this is the day that
+            mattered. */}
         <div
-          className={team === undefined ? undefined : idleOf(place)}
-          style={{
-            width: '100%',
-            aspectRatio: 1,
-            // **Stated, not inherited from the transform.** A transformed
-            // element is already a containing block for absolute descendants,
-            // so the crown would position correctly here without this — until
-            // the day `idleOf` hands a place no timeline, at which point the
-            // crown silently re-parents to the band and moves. Declaring it
-            // costs nothing and makes the crown's frame of reference a fact
-            // rather than a side effect of an animation being present.
-            position: 'relative',
-            ...(team === undefined ? {} : { willChange: 'transform' }),
-          }}
+          style={{ width: '100%', aspectRatio: 1, position: 'relative' }}
         >
           {/* Drawn before the disc so it sits *under* the mark in paint order.
               A crown overlapping the monogram's edge would cover the one thing

@@ -81,31 +81,39 @@ npm run build        # next build
   not drawn a mark yet"; borrowed artwork says something false about who a team
   is. Adding a real logo is one commit: the file in `public/logos/` and the id in
   that list, together.
-- **Exactly three things move at rest: `/podium`'s ranks 1, 2 and 3.** Their
-  marks idle, on three timelines assigned by place so they can never fall into
-  lockstep. Everything else on both slides holds still — the other thirty-six
-  cards, the list of seven, both mastheads, every numeral. No sweeps, no dance;
-  those went with the metals.
+- **Nothing moves at rest, on either slide.** Not one of the thirty-nine cards,
+  not the list of seven, not the three podium marks, not a masthead or a
+  numeral. No sweeps and no dance; those went with the metals. The only motion
+  either page can produce is an *arrival* — the crown landing when a slide
+  mounts, and an overtake — and both are things that happened.
 
-  The wall's rule is that movement means something happened, and this is the one
-  deliberate exception to it. What makes it survivable is the scope: movement
-  confined to the three ventures the slide exists to celebrate reads as those
-  three being alive, where ten idling marks on a board of thirty-nine reads as
-  the page being busy. The idle is also unlike the kick by design — slow, small
-  and non-directional against fast, large and travelling.
+  `/podium`'s top three idled for a while: a bob, a glance on a `rotateY`, a
+  tilt, on three timelines so they could never fall into lockstep. It was
+  removed, asked for back, and **removed again after the crown arrived**, for a
+  reason that is mechanical rather than aesthetic and that binds anything
+  proposing to idle a mark again:
 
-  `/weekly` does not get this. `render.test.tsx` pins both halves, and the
-  second half is the one that is easy to lose.
+  > The glance is a `rotateY` of up to 34° under the 900px `perspective` on
+  > `.tv-pod-mark-band`, and a perspective transform displaces an **off-centre
+  > child differently from the element's own centre**. The crown sits well off
+  > centre, on the disc's upper-left rim. So every glance swung it out of
+  > contact with the head it was sitting on and back again, seventeen seconds
+  > apart, on a wall nobody is watching closely enough to catch it. A crown
+  > cannot be welded to a rotation whose centre it does not share.
 
-  **The crown is a fourth moving thing and it is not a fourth exception**, which
-  is a distinction worth being exact about because the next ornament will claim
-  it too. `components/Crown.tsx` drops onto rank 1 and *stops* — one run, on
-  mount, `animation: … both` with no iteration count. What the rule above bans
-  is motion **at rest**, and a thing that is over 1.4 seconds after the slide
-  arrives is not at rest, it is an entrance. The board is still three idling
-  marks and nothing else thirty seconds later, which is the property that
-  matters and the one the tests pin. An ornament that loops — a twinkle, a
-  sheen, a pulse — is a fourth exception and does not get in on this precedent.
+  The bob alone would have survived; the glance could not. Bring the idle back
+  and the crown has to come off, or be re-solved — those are the only two
+  options, and the first one costs more than the idle is worth.
+
+  **The crown is motion and it is not an exception**, which is worth being exact
+  about because the next ornament will claim it is. `components/Crown.tsx` drops
+  onto rank 1 and *stops* — one run, on mount, `animation: … both` with no
+  iteration count. What this rule bans is motion **at rest**, and a thing that
+  is over 1.4 seconds after the slide arrives is not at rest, it is an entrance.
+  The board is completely still thirty seconds later, which is the property that
+  matters and the one `render.test.tsx` pins. **An ornament that loops — a
+  twinkle, a sheen, a pulse, a looping Lottie — does not get in on this
+  precedent** and has to make its own argument.
 - **Gold is back, as exactly one object.** `--forge-metal-gold` sat unread from
   the deletion of the plinths until the crown, kept on §5's stated condition
   that if it returned it would "arrive as one decision in one place". The crown

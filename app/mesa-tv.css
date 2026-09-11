@@ -898,9 +898,9 @@
      and becomes a second object. The numeral above is centred and the crown is
      at the left, so the 6% of upward overhang has nothing to collide with. */
   --d-crown: 34%;
-  --x-crown: -8%;
-  --y-crown: -6%;
-  --r-crown: -24deg;
+  --x-crown: 4%;
+  --y-crown: -18%;
+  --r-crown: -20deg;
 
   /* Air between a rank numeral and the mark under it, and between the mark and
      the name under that. The numeral sits closer to its mark than the mark does
@@ -1008,15 +1008,21 @@
   /* The muted mint a venture name is set in on a card. Quieter than the figure
      on purpose: it is a label, not the headline. */
 
-  /* ── Idle intensity: "playful" ──
+  /* ── The idle's three amplitudes are deleted, not zeroed ──
 
-     Unitless, so one set of keyframes serves any intensity through `calc()`.
-     Amplitude resolves to px, the other two to deg. */
-  --idle-amp: 16;
-  --idle-turn: 34;
-  --idle-tilt: 9;
-  /* The look-down, in degrees. A `rotateX` under the same perspective the
-     glance uses, so the mark drops its *face* rather than sliding down. */
+     `--idle-amp: 16`, `--idle-turn: 34` and `--idle-tilt: 9` drove the podium
+     marks' bob, glance and tilt through `calc()`. The idle is gone; a zeroed
+     token is a thing the next person has to work out is dead, and an absent one
+     is absent. The same argument the four metal tokens got.
+
+     **The turn is the one worth recording.** 34 degrees of `rotateY` under the
+     900px `perspective` on `.tv-pod-mark-band` is what made the idle and the
+     crown mutually exclusive: a perspective transform displaces an off-centre
+     child differently from the element's own centre, so the crown — seated well
+     off centre on the disc's upper-left rim — swung out of contact with its
+     mark on every glance and back again. Seventeen seconds apart, on a wall
+     with nobody watching. Anything that idles this mark again inherits that
+     problem whole. */
 
   --track-tv-tight: -0.02em;
 
@@ -1079,47 +1085,6 @@
    gradient clipped to text cannot be moved by transforming the text — that would
    move the glyph. It repaints only the numeral's own box, three of them, for
    about a fifth of each cycle. */
-@keyframes tv-idle-1 {
-  0%, 4%   { transform: translateY(0) rotateY(0deg) rotate(0deg); }
-  9%       { transform: translateY(calc(var(--idle-amp) * -1px)); }
-  15%      { transform: translateY(0); }
-  20%      { transform: translateY(calc(var(--idle-amp) * -0.55px)); }
-  26%, 33% { transform: translateY(0); }
-  40%, 52% { transform: translateY(calc(var(--idle-amp) * -0.2px)) rotateY(calc(var(--idle-turn) * -1deg)); }
-  59%, 68% { transform: translateY(0) rotateY(0deg); }
-  76%      { transform: translateY(calc(var(--idle-amp) * -0.8px)) rotate(calc(var(--idle-tilt) * -1deg)); }
-  84%      { transform: translateY(0) rotate(calc(var(--idle-tilt) * -0.3deg)); }
-  92%, 100% { transform: translateY(0) rotate(0deg); }
-}
-
-@keyframes tv-idle-2 {
-  0%, 7%   { transform: translateY(0) rotateY(0deg) rotate(0deg); }
-  14%, 24% { transform: rotateY(calc(var(--idle-turn) * 1deg)) rotate(calc(var(--idle-tilt) * 0.25deg)); }
-  31%      { transform: rotateY(0deg) rotate(0deg); }
-  37%      { transform: translateY(calc(var(--idle-amp) * -1px)); }
-  43%, 49% { transform: translateY(0); }
-  /* The double-take: a glance, back, then commit to the look. */
-  54%      { transform: rotateY(calc(var(--idle-turn) * -0.45deg)); }
-  59%      { transform: rotateY(0deg); }
-  66%, 79% { transform: translateY(calc(var(--idle-amp) * -0.25px)) rotateY(calc(var(--idle-turn) * -1deg)) rotate(calc(var(--idle-tilt) * -0.3deg)); }
-  87%, 100% { transform: translateY(0) rotateY(0deg) rotate(0deg); }
-}
-
-@keyframes tv-idle-3 {
-  0%       { transform: translateY(0) rotateY(0deg) rotate(0deg); }
-  5%       { transform: translateY(calc(var(--idle-amp) * -0.75px)); }
-  10%      { transform: translateY(0); }
-  15%      { transform: translateY(calc(var(--idle-amp) * -0.9px)); }
-  20%      { transform: translateY(0); }
-  25%      { transform: translateY(calc(var(--idle-amp) * -0.5px)); }
-  31%, 38% { transform: translateY(0); }
-  /* The sweep: all the way left, across to right, then home. */
-  46%, 53% { transform: rotateY(calc(var(--idle-turn) * -1deg)); }
-  63%, 70% { transform: rotateY(calc(var(--idle-turn) * 1deg)); }
-  78%      { transform: rotate(calc(var(--idle-tilt) * 1deg)); }
-  86%, 100% { transform: rotateY(0deg) rotate(0deg); }
-}
-
 /* ── The crown's drop ──
 
    The brief pointed at a Lottie of a crown falling onto a mark and asked for
@@ -2141,28 +2106,19 @@
     white-space: nowrap;
   }
 
-  .tv-idle-1 { animation: tv-idle-1 17s ease-in-out infinite; }
-  .tv-idle-2 { animation: tv-idle-2 19s ease-in-out infinite -6s; }
-  .tv-idle-3 { animation: tv-idle-3 23s ease-in-out infinite -13s; }
 
   /* Someone will eventually drive this wall from a machine with the OS
      reduce-motion setting on, and a permanently moving mark is precisely what
      that setting exists to stop.
 
-     **Almost nothing is left for this to switch off.** The plinth sheens and
-     the numeral lustre went with the metals, and `/weekly`'s row-1 idle went
-     with the cards; what remains is `/podium`'s three marks, and even those are
-     idle only if `idleOf` is still handing out a timeline. The block stays
-     because the overtake sequence is not covered by it and should not be — a
-     rank changing hands is the one thing this wall exists to show, and
-     `docs/DESIGN.md` records the decision to ignore reduced motion for it. */
+     **Exactly one thing is left for this to switch off.** The plinth sheens and
+     the numeral lustre went with the metals, `/weekly`'s row-1 idle went with
+     the cards, and `/podium`'s three marks no longer idle either — so what
+     remains is the crown's drop. The block stays because the overtake sequence
+     is not covered by it and should not be: a rank changing hands is the one
+     thing this wall exists to show, and `docs/DESIGN.md` records the decision
+     to ignore reduced motion for it. */
   @media (prefers-reduced-motion: reduce) {
-    .tv-idle-1,
-    .tv-idle-2,
-    .tv-idle-3 {
-      animation: none;
-    }
-
     /* The crown stops falling and is simply there. **`animation: none` alone
        would be a bug here**, not a reduction: the drop's `0%` keyframe is
        `opacity: 0`, but that value lives in the keyframes rather than on the
