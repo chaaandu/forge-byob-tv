@@ -244,8 +244,29 @@ export const PROGRAMME_START_MS = Date.parse(PROGRAMME_START_ISO)
  * correct on any machine whose clock is right, including a laptop that came
  * back from a trip still set to another timezone.
  */
-export const GANESH_FROM_ISO = '2026-09-14T00:00:00+05:30'
-export const GANESH_UNTIL_ISO = '2026-09-17T00:00:00+05:30'
+/**
+ * ⚠️ **TEMPORARY TEST WINDOW — NOT THE FESTIVAL DATES.**
+ *
+ * Widened to 12–17 September 2026 so the ornament can be watched on the real
+ * wall before Ganesh Chaturthi. **Restore these two lines before the wall is
+ * left unattended:**
+ *
+ *     export const GANESH_FROM_ISO  = '2026-09-14T00:00:00+05:30'
+ *     export const GANESH_UNTIL_ISO = '2026-09-17T00:00:00+05:30'
+ *
+ * That is 14–16 September, the three days this was designed for. Everything in
+ * the docblock above — the half-open end, why `UNTIL` names the day *after* the
+ * last one — still applies; only the two instants moved.
+ *
+ * This comment is deliberately loud because of the failure it guards. The whole
+ * argument for the ornament is that its correct state is **absent** and absence
+ * is the state no polling loop arrives at on its own. A test window that is
+ * committed and forgotten does not fail, or warn, or look wrong: it just leaves
+ * a festival ornament on a leaderboard in the run-up to the Mesa Flea, looking
+ * exactly as deliberate as it does today.
+ */
+export const GANESH_FROM_ISO = '2026-09-12T00:00:00+05:30'
+export const GANESH_UNTIL_ISO = '2026-09-18T00:00:00+05:30'
 export const GANESH_FROM_MS = Date.parse(GANESH_FROM_ISO)
 export const GANESH_UNTIL_MS = Date.parse(GANESH_UNTIL_ISO)
 

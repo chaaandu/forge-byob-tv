@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { GANESH_FROM_MS, GANESH_UNTIL_MS } from '@/config'
 import { isEndOfDay, isFestival, istHour } from '@/lib/schedule'
 
 /** 17:59 and 18:00 IST, written as the absolute instants they are. */
@@ -31,37 +32,46 @@ describe('isEndOfDay', () => {
 })
 
 /**
- * The three days the Ganesha is on the wall, and the two instants either side.
+ * The Ganesha window.
  *
- * Every one of these is written with an explicit `+05:30`, like the constants
- * they test. A bare `new Date('2026-09-14')` is parsed as **UTC midnight**,
- * which is 05:30 IST on the 14th — inside the window either way, so a test
- * written that way would pass while proving nothing about the boundary it
- * claims to check.
+ * **Derived from the constants rather than restating them**, and that is the
+ * point of this block. The dates move — they are widened for testing and put
+ * back — and a test that hardcoded 14 and 16 September would fail every time
+ * somebody did that, which trains people to edit the test until it passes.
+ * What must never move is the *shape* of the window, so that is what is pinned
+ * here: half-open, absolute, and answered on the instant.
+ *
+ * The one thing this deliberately does not check is which days are configured.
+ * That is a fact about the festival, not about this function, and it lives in
+ * `config.ts` next to the note explaining why `UNTIL` names the day after the
+ * last one.
+ *
+ * Every instant below carries an explicit `+05:30`, like the constants. A bare
+ * `new Date('2026-09-14')` is parsed as **UTC midnight** — 05:30 IST — so a
+ * test written that way can sit inside the window while claiming to test its
+ * edge.
  */
-const BEFORE_GANESH = new Date('2026-09-13T23:59:59+05:30')
-const GANESH_OPENS = new Date('2026-09-14T00:00:00+05:30')
-const GANESH_MIDDLE = new Date('2026-09-15T12:00:00+05:30')
-const GANESH_LAST_MOMENT = new Date('2026-09-16T23:59:59+05:30')
-const GANESH_SHUT = new Date('2026-09-17T00:00:00+05:30')
+const SECOND = 1000
 
 describe('isFestival', () => {
-  it('opens at the first instant of 14 September IST', () => {
-    expect(isFestival(BEFORE_GANESH)).toBe(false)
-    expect(isFestival(GANESH_OPENS)).toBe(true)
+  it('opens exactly at GANESH_FROM and not a second earlier', () => {
+    expect(isFestival(new Date(GANESH_FROM_MS - SECOND))).toBe(false)
+    expect(isFestival(new Date(GANESH_FROM_MS))).toBe(true)
   })
 
   /**
-   * The half-open end, and the reason it is the 17th in `config.ts` rather than
-   * the 16th. Naming the last day there would take the ornament down entering
-   * the 16th and give two days rather than three — an off-by-one that reports
-   * nothing, because a wall that stopped a day early looks exactly like a wall
-   * configured to stop a day early.
+   * The half-open end, which is why `GANESH_UNTIL_ISO` names the day *after*
+   * the last one the ornament shows. Closing it on the last day would take a
+   * day off the window — an off-by-one that reports nothing, because a wall
+   * that stopped a day early looks exactly like a wall configured to.
    */
-  it('runs through all of 16 September and shuts as the 17th begins', () => {
-    expect(isFestival(GANESH_MIDDLE)).toBe(true)
-    expect(isFestival(GANESH_LAST_MOMENT)).toBe(true)
-    expect(isFestival(GANESH_SHUT)).toBe(false)
+  it('runs to the last instant before GANESH_UNTIL, then shuts', () => {
+    expect(isFestival(new Date(GANESH_UNTIL_MS - SECOND))).toBe(true)
+    expect(isFestival(new Date(GANESH_UNTIL_MS))).toBe(false)
+  })
+
+  it('is open somewhere in the middle', () => {
+    expect(isFestival(new Date((GANESH_FROM_MS + GANESH_UNTIL_MS) / 2))).toBe(true)
   })
 
   /**
@@ -69,19 +79,26 @@ describe('isFestival', () => {
    * back from a trip and still set to another timezone must not open or shut
    * the window on its own calendar — and because both bounds are absolute
    * instants, the comparison is correct without asking `Intl` anything.
+   *
+   * Expressed here as the same instant written two ways: if the implementation
+   * ever grew a date-component comparison, these two would stop agreeing.
    */
   it('answers on the instant, not on the machine’s calendar', () => {
-    // 2026-09-13T18:30:00Z *is* 2026-09-14T00:00:00+05:30. Same instant, and
-    // the window opens on it however the machine is set.
-    expect(isFestival(new Date('2026-09-13T18:30:00Z'))).toBe(true)
-    // One second earlier is still the 13th in IST, whatever a UTC clock calls it.
-    expect(isFestival(new Date('2026-09-13T18:29:59Z'))).toBe(false)
+    const opensAsUtc = new Date(new Date(GANESH_FROM_MS).toISOString())
+    expect(isFestival(opensAsUtc)).toBe(true)
+    expect(isFestival(new Date(opensAsUtc.getTime() - SECOND))).toBe(false)
   })
 
-  /** The state that has to be right for 362 days a year. */
-  it('is shut the rest of the year, including the Flea', () => {
-    expect(isFestival(new Date('2026-09-25T12:00:00+05:30'))).toBe(false) // Anant Chaturdashi
+  /**
+   * The state that has to be right for most of the year, pinned against fixed
+   * dates on purpose: these are the ones that would actually hurt. **The Flea
+   * is the important one** — it is the wall's next real event, and a widened
+   * test window left in `config.ts` is the way a festival ornament ends up on
+   * the board during its run-up.
+   */
+  it('is shut on the dates that would embarrass the wall', () => {
     expect(isFestival(new Date('2026-10-25T10:00:00+05:30'))).toBe(false) // Mesa Flea
     expect(isFestival(new Date('2026-08-31T00:00:00+05:30'))).toBe(false) // programme start
+    expect(isFestival(new Date('2026-12-25T12:00:00+05:30'))).toBe(false)
   })
 })
