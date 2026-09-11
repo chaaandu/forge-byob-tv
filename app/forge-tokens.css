@@ -177,11 +177,24 @@
      different material: Royal Purple, 10.01:1, a solid crown rather than a
      metal one. A crown that reads is worth more than a gold that does not.
 
-     Both slides are `.surface-dark` today, so the value below is drawn by
-     nothing — and it is declared anyway, because `.surface-light` is kept
+     Both slides are `.surface-dark` today, so the values below are drawn by
+     nothing — and they are declared anyway, because `.surface-light` is kept
      fully working on purpose and an undeclared token is how the light slide
-     comes back broken. */
+     comes back broken.
+
+     Six, not one, because the artwork is Noto's rather than a flat silhouette:
+     a metal ramp and a gem ramp, three steps each. On the light surface the
+     metal is the Royal Purple family and the gems are Vivid Violet, which
+     keeps the *value* structure that gives the crown its shape at six metres
+     while abandoning gold, which cannot survive here. Measured on Lavender
+     Mist: 11.98 / 10.01 / 5.54:1 and 5.54 / 3.42 / 2.79:1. The gem ramp runs
+     deliberately shallow — gems are interior shading, not ink. */
+  --crown-deep: var(--royal-700);
   --crown-ink: var(--royal-purple);
+  --crown-lit: var(--vivid-violet);
+  --crown-gem-deep: var(--vivid-violet);
+  --crown-gem: #c644e6;
+  --crown-gem-lit: var(--orchid);
 
   /* ── §2a · The mark tints ────────────────────────────────────────────────
 
@@ -284,8 +297,41 @@
      rather than a leftover, and on the condition that if gold returned it
      "should arrive as one decision in one place". This is that decision, and
      this is that place: one glyph, on one rank, on one slide. No plinth, no
-     lustre, no sweep. 8.59:1 on Deep Aubergine. */
+     lustre, no sweep.
+
+     ── Two ramps, because the artwork is Noto's ──
+
+     `components/Crown.tsx` is Google's Noto Emoji crown, which is modelled
+     rather than flat: five points, two side arcs, a banded base and five
+     stones. Its eight upstream hexes collapse to these six tokens.
+
+     **The metal steps are derived, not invented.** One hue, one saturation,
+     lightness moved — the identical derivation `--aubergine-900` uses, and the
+     half of the old colour rule that still binds. Forge gold sits at hue 41.7
+     against Noto's amber at 45.2, so re-pointing the metal barely moves the
+     artwork at all.
+
+     **The gems are the surface's accent, and there is one stone.** Upstream
+     alternates teal `#26a69a` and red `#f44336` around the band. Teal is the
+     *parent* Mesa brand this wall was deliberately re-skinned away from, and
+     red appears nowhere in Forge; both become Orchid, so the band reads as one
+     setting rather than as two materials.
+
+     They are not there to be read — at a third of the disc each stone is about
+     9px, well under the legibility floor. They are there so that 95px of flat
+     gold does not read as a gold blob: **interior value variation is what gives
+     a silhouette its shape at six metres**, which is why both ramps are chosen
+     for value separation rather than for hue.
+
+     Measured on Deep Aubergine — metal 6.25 / 8.59 / 11.08:1, gems 4.05 / 8.39
+     / 11.74:1. The gem floor is the only figure under 4.5 and it is interior
+     shading on a 9px shape, not ink. */
+  --crown-deep: #d1991b;
   --crown-ink: var(--forge-metal-gold);
+  --crown-lit: #f1d593;
+  --crown-gem-deep: #c644e6;
+  --crown-gem: var(--orchid);
+  --crown-gem-lit: #f2d4f9;
 
   /* The mark tints, for a dark page. All six are light fills, so the ink is
      Deep Aubergine for every one of them — the page colour, which is what makes

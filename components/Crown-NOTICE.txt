@@ -1,0 +1,30 @@
+The crown geometry in `Crown.tsx` is derived from Google's Noto Emoji.
+
+  Source:    https://github.com/googlefonts/noto-emoji
+  Copyright: Copyright 2013 Google, Inc.
+  Licence:   Apache License, Version 2.0
+             http://www.apache.org/licenses/LICENSE-2.0
+
+Kept beside the component for the same reason `app/fonts/` keeps an OFL file
+beside each face: the licence travels with the asset, so a licence question can
+be answered without a git archaeology session.
+
+── Statement of changes (Apache 2.0 §4(b)) ──
+
+The file has been modified. The path data is unaltered; every colour is not.
+
+1. All eight hard-coded fills were replaced with CSS custom properties. The
+   upstream values were #ffca28, #f19534 and #fff59d for the metal, and
+   #26a69a, #69f0ae, #00796b, #f44336 and #ffa8a4 for the gems.
+
+2. The metal now reads `--crown-deep` / `--crown-ink` / `--crown-lit`, a
+   lightness ramp on Forge gold. The gems read `--crown-gem-deep` / `--crown-gem`
+   / `--crown-gem-lit`, a ramp on the surface's accent — so the teal and red
+   stones upstream alternates become one stone.
+
+3. The SVG was converted to JSX: `stroke-width`, `stroke-linecap` and
+   `stroke-miterlimit` are camel-cased, and the wrapper's fixed 800x800 was
+   dropped so the caller sizes the crown off the mark it sits on.
+
+Nothing here is redistributed as a standalone asset; it is inlined into a
+display page. The notice is retained regardless, which is the point of §4.

@@ -880,11 +880,17 @@
 
      A share of the mark it sits on, not a fixed size, so it holds its
      proportion at every viewport the way everything else on this slide does.
-     34% of a 280px disc is 95px wide — a crown that still reads as a crown at
-     six metres rather than as a gold fleck. `scripts/logo-legibility.py`
-     measured 48px as the floor below which a *mark* stops being a mark; a
-     silhouette with five points and a band needs more than a monogram does,
-     which is why this is a third of the disc and not a tenth.
+     34% of a 280px disc is 95px — a crown that still reads as a crown at six
+     metres rather than as a gold fleck. `scripts/logo-legibility.py` measured
+     48px as the floor below which a *mark* stops being a mark; Noto's crown
+     carries five points, two arcs, a banded base and five stones, so it needs
+     more than a two-letter monogram does. A third of the disc, not a tenth.
+
+     **`--d-crown` is a width and the height follows the viewBox**, which is
+     square — so the crown is 95x95, not the 95x74 the first flat silhouette
+     was. That is where `--y-crown` comes from: the base band sits lower inside
+     a square box than inside a 100:78 one, so the box has to hang higher to put
+     the band on the same rim. Change the artwork and this number moves with it.
 
      All three are percentages of **the disc**, which is the containing block —
      `left` and `top` resolve against the positioned ancestor's box, not against
@@ -893,10 +899,16 @@
      in the same units as the thing it sits on, the crown holds its position at
      every width for free.
 
-     It rests on the disc's upper-left rim: far enough over to overhang the
-     circle and be read as a badge, not so far that it stops touching the mark
-     and becomes a second object. The numeral above is centred and the crown is
-     at the left, so the 6% of upward overhang has nothing to collide with. */
+     It rests on the disc's upper-left rim at about eleven o'clock, its base
+     band across the circle rather than touching it at one corner — which is
+     what it did at ten o'clock and 24 degrees, where it read as sliding off.
+     Far enough over to overhang and be a badge, not so far that it stops
+     touching the mark and becomes a second object.
+
+     The numeral above is centred and the crown is at the left, so they clear
+     each other **horizontally** — 20.4px at 1920 — while overlapping
+     vertically by design. `scripts/measure-crown.mjs` checks both axes for
+     that reason: a vertical gap on its own reports a collision every time. */
   --d-crown: 34%;
   --x-crown: 4%;
   --y-crown: -18%;
