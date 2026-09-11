@@ -35,8 +35,11 @@
 
      Every foreground token in the system was measured against Soft Mint. White
      is lighter, so each one gains contrast here rather than losing it. */
-  --bg: var(--white);
-  --bg-elevated: var(--soft-mint);
+  /* **No page surface is set here any more.** It used to be white for both
+     slides. Forge alternates — `/podium` dark, `/weekly` light — so the surface
+     is chosen by `.surface-dark` / `.surface-light` on each page's `<main>`,
+     and `app/forge-tokens.css` carries the defaults. Setting `--bg` here would
+     win over neither and confuse both. */
 
   /* ========= FONT STACKS =========
 
@@ -404,9 +407,22 @@
      on the pale fill, where the solid card's is near-white on the dark one.
 
      Every fill and ink here is an existing brand token; no new hue enters. */
-  --tv-card-fill: var(--deep-forest-green);
-  --tv-card-fill-quiet: var(--soft-mint);
-  --tv-card-stroke-quiet: var(--border-mint);
+  /* **A gradient, and it is consumed by `background` alone** — `--card-fill`
+     reaches exactly one declaration (`.tv-card { background: var(--card-fill) }`),
+     which is what makes a gradient safe here. Put it anywhere a `color-mix`
+     reads and it resolves to nothing, silently.
+     Flat was right when the page was white and the card's edge came from the
+     contrast with it. On lavender, twenty flat purple rectangles have tops and
+     bottoms that look the same, and the ramp down the board stops reading. */
+  --tv-card-fill: var(--grad-card-solid);
+  /* **White, not the page colour.** This was `--soft-mint`, which *is*
+     `--lavender-mist` and therefore exactly the page: nineteen cards whose only
+     edge was a 1.5px stroke, on a board whose whole bottom half they are.
+     White is 1.14:1 above the page — barely anything, deliberately, because the
+     quiet half must stay quiet — but it is a real surface, and with the stroke
+     on top of it the card has a body instead of only an outline. */
+  --tv-card-fill-quiet: var(--white);
+  --tv-card-stroke-quiet: var(--royal-100);
   --tv-card-sub-ink: var(--mint-300);
   /* **Not `--fg-muted`, and the reason is a measurement.** The secondary ink
      carries three small things on a pale card — today's figure, its TODAY tag
@@ -417,7 +433,7 @@
      Deep Forest at 75% against the card's own fill measures **5.04:1** and stays
      visibly lighter than the week's figure at 8.5:1, so the hierarchy the ink
      was carrying survives the fix. A mix of two existing tokens; no new hue. */
-  --tv-card-sub-ink-quiet: color-mix(in srgb, var(--deep-forest-green) 75%, var(--soft-mint));
+  --tv-card-sub-ink-quiet: color-mix(in srgb, var(--royal-purple) 75%, var(--lavender-mist));
   --tv-card-fig-ink: var(--white);
   --tv-card-fig-ink-quiet: var(--deep-forest-green);
   /* A strong day on a pale card.
@@ -592,16 +608,23 @@
      now and tangerine is a flat fill wherever it appears, so the two read as
      different *materials* before their hues are compared at all.
 
-     ── Three literals, and that is now the whole exemption ──
+     ── The exemption moved, and so did the values ──
 
-     There were six. Each metal also carried a dark "ink" for the numeral inside
-     its badge, and when the badges became numerals that break the card's edge —
-     Deep Teal above it, white inside — those three had nothing left to colour.
-     They are deleted rather than left in place: a token nobody reads is a
-     literal this file is claiming an exemption for and not using. */
-  --metal-gold: #D9A441;
-  --metal-silver: #A8AFB5;
-  --metal-bronze: #AF602C;
+     These three no longer live here. They are declared in
+     `app/forge-tokens.css`, which is now the project's only hex-bearing file,
+     and they are *aliased* below so the two hundred lines of ramp and lustre
+     arithmetic underneath keep reading the names they already read.
+
+     The values changed with the surface. Every metal used to sit on white, and
+     now sits on Deep Aubergine, where the old set went quiet: gold #D9A441 was
+     7.05:1 on aubergine and bronze #AF602C only 3.42:1 — a third place that
+     read as brown mud at six metres. The Forge set is a step brighter and
+     measures 8.59, 9.60 and 5.63:1. Bronze also moved toward copper rather
+     than being merely lightened, because darkening-then-lightening a
+     low-chroma brown just makes grey. */
+  --metal-gold: var(--forge-metal-gold);
+  --metal-silver: var(--forge-metal-silver);
+  --metal-bronze: var(--forge-metal-bronze);
 
   /* A signal red was added here and has been removed again. It encoded a day
      below the board's average, and that state no longer exists: a team either
@@ -1155,7 +1178,19 @@
      and the written position all at once, so a greyscale crop still ranks. */
   .tv-panel-forest {
     position: relative;
-    background: var(--deep-forest-green);
+    /* **A gradient along the band, not a flat fill.**
+       1920px of one purple reads as a printing error rather than as a material.
+       It runs dark at the lockup end and opens toward the countdown, so the
+       band has a direction and the Mesa mark sits on the deepest part of it —
+       which is also where the white wordmark has the most contrast (15.85:1 at
+       the left end against 13.68:1 at the right). Two steps on one hue: a
+       gradient between two *hues* reads as a third colour nobody chose. */
+    background: linear-gradient(
+      100deg,
+      var(--aubergine) 0%,
+      var(--royal-purple) 58%,
+      var(--royal-700) 100%
+    );
     color: var(--white);
     border-radius: var(--radius-lg);
   }
@@ -1825,7 +1860,19 @@
     height: var(--h-band);
     padding: 0 var(--s-12);
     position: relative;
-    background: var(--deep-forest-green);
+    /* **A gradient along the band, not a flat fill.**
+       1920px of one purple reads as a printing error rather than as a material.
+       It runs dark at the lockup end and opens toward the countdown, so the
+       band has a direction and the Mesa mark sits on the deepest part of it —
+       which is also where the white wordmark has the most contrast (15.85:1 at
+       the left end against 13.68:1 at the right). Two steps on one hue: a
+       gradient between two *hues* reads as a third colour nobody chose. */
+    background: linear-gradient(
+      100deg,
+      var(--aubergine) 0%,
+      var(--royal-purple) 58%,
+      var(--royal-700) 100%
+    );
     color: var(--white);
 
     /* The surface decides what its own tokens mean, exactly as the spine does.
@@ -2217,7 +2264,9 @@
     font: var(--t-pod-mover-name);
     letter-spacing: var(--track-pod-name-row);
     text-transform: uppercase;
-    color: var(--deep-teal);
+    /* Not `--deep-teal`. On a dark surface that token is the page itself, so
+       this name painted in the background colour. See §5 of forge-tokens.css. */
+    color: var(--pod-mover-ink);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -2230,14 +2279,19 @@
     white-space: nowrap;
   }
 
-  /* **Tangerine, never a metal.** Gold, silver and bronze encode first, second
+  /* **The accent, never a metal.** Gold, silver and bronze encode first, second
      and third on this slide and nothing else. A climb is not a podium position,
-     and lending one of the three to it would loosen the only exemption this
-     file's no-new-hue rule has. */
+     and lending one of the three to it would loosen the only colour exemption
+     this file has.
+
+     The colour is surface-aware and not `--tangerine-600` any more: that token
+     re-points to Orchid 700, which measured **2.79:1** on the pale panel at
+     56px — the biggest number on the panel and the hardest thing on the slide
+     to read. */
   .tv-pod-mover-gain {
     font: var(--t-pod-mover-gain);
     letter-spacing: var(--track-pod-fig);
-    color: var(--tangerine-600);
+    color: var(--pod-mover-gain-ink);
     text-align: right;
   }
 
@@ -2323,7 +2377,9 @@
     font: var(--t-pod-name-row);
     letter-spacing: var(--track-pod-name-row);
     text-transform: uppercase;
-    color: var(--deep-teal);
+    /* `--ink`, not `--deep-teal`. Measured at 1.00:1 — this name was painted in
+       the page colour on the dark surface and was simply not there. */
+    color: var(--ink);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

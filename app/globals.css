@@ -21,9 +21,28 @@
    by the layer. */
 @import "../.claude/skills/mesa-design/colors_and_type.css" layer(components);
 
-/* Viewing-distance type scale and the white page surface. Marked as an
+/* Viewing-distance type scale and the TV-specific geometry. Marked as an
    extension, not core brand — see the file header. */
 @import "./mesa-tv.css";
+
+/* ── Forge purple, and it must be LAST ──
+
+   Mesa's parent brand is green; Forge is its purple re-skin, and this file is
+   now the project's only source of hex values. It is imported last and
+   *unlayered* on purpose, and both halves of that matter:
+
+   - **Last**, because `mesa-tv.css` also writes `:root` — it sets `--bg` to
+     white, which was the old page surface. Two unlayered `:root` blocks are
+     resolved by document order, so whichever comes second wins.
+   - **Unlayered**, so it also beats `colors_and_type.css`, which is imported
+     into `layer(components)` above. Unlayered CSS beats layered CSS at any
+     specificity, which is the same rule the comment above relies on and the
+     one that has bitten this project's sibling three separate times.
+
+   Move this import above `mesa-tv.css` and the wall goes back to a white page
+   with purple parts on it — no error, no warning, and it looks like a
+   deliberate design. */
+@import "./forge-tokens.css";
 
 /* ── Tailwind v4 theme mapping ──
 

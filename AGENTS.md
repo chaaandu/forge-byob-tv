@@ -35,9 +35,29 @@ npm run build        # next build
   public published-CSV URLs, fetched from the browser. If a change needs a server, stop.
 - **This project never writes to `BYOB_MASTER`.** It reads two published CSVs over plain
   HTTP with no credentials. There is no token, no service account, no Apps Script here.
-- **Never hardcode a hex.** `.claude/skills/mesa-design/colors_and_type.css` is the only
-  file that may contain one. TV-specific additions go in `app/mesa-tv.css`, marked as an
-  extension, deriving from existing brand tokens — no new hues.
+- **Never hardcode a hex.** `app/forge-tokens.css` is the only file that may contain
+  one. It is imported **last and unlayered** from `globals.css`, and both halves of that
+  matter — move it above `mesa-tv.css` and the wall silently reverts to a white page with
+  purple parts on it.
+
+  This replaced the identical rule naming `.claude/skills/mesa-design/colors_and_type.css`,
+  which is Mesa's parent green brand. Forge C1 is its purple re-skin
+  (`mesa_forge_design_system/design_system.md`), so the palette changed and the
+  discipline did not: one file owns colour, everything else reads a token.
+  `colors_and_type.css` is still imported for type, spacing, radii and shadows.
+
+- **Two surfaces, and a component must not name a colour.** `/podium` is
+  `.surface-dark`, `/weekly` is `.surface-light`, and the rotation between them carries
+  the Forge deck's own dark/light rhythm. Read `--surface`, `--ink`, `--ink-muted`,
+  `--accent`, `--hairline` and let the surface decide what they mean.
+
+  This is not tidiness. Every light accent that carries on Deep Aubergine dies on
+  Lavender Mist and the deep purples do the exact reverse — gold goes 8.59:1 → 1.61:1,
+  royal purple 1.39:1 → 10.01:1. A shared accent palette is invisible on half the
+  rotation. Worse, a token that is a *surface* in one place and *ink* in another cannot
+  survive the flip at all: `--deep-teal` is "deepest brand surface", and three things
+  used it as ink. On the dark slide they painted text in the page colour and measured
+  **1.00:1**. Fixed in §5 of `forge-tokens.css`; do not reintroduce the pattern.
 - **No filler content.** Empty is a valid state. The wall being quiet is what makes it
   loud when something happens. No spinners, ever — first paint reads cached CSV.
 - **No trigger types beyond the 15 in the design.** The list was deliberately narrowed.

@@ -1,0 +1,336 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   MESA FORGE — the only file in this project that may contain a hex value.
+
+   This replaces `.claude/skills/mesa-design/colors_and_type.css` as the colour
+   authority. That file is Mesa's parent brand, which is green; Forge is a
+   deliberate purple re-skin of it, defined in
+   `mesa_forge_design_system/design_system.md`. Both are still imported —
+   colors_and_type.css for type, spacing, radii, shadows and its element rules,
+   this file for every colour on top.
+
+   AGENTS.md's rule used to read "never hardcode a hex, colors_and_type.css is
+   the only file that may contain one, no new hues". The *discipline* is intact
+   and this file is now the one place; what changed is the palette, because
+   Forge is a different brand. The rule in AGENTS.md was rewritten to point
+   here rather than quietly broken.
+
+   ── WHY THE GREEN TOKEN NAMES ARE STILL HERE ──
+
+   §1 re-points every Mesa token at its Forge equivalent. So `--deep-teal` now
+   holds a purple, which is a lie in the name, and that is the deliberate trade:
+   the alternative is renaming ~120 references across 2,400 lines of CSS and
+   fifteen components in the same change that introduces a new palette, which
+   is two risky things at once with nothing to bisect between them.
+
+   Components being written or touched from now on should read §2's semantic
+   tokens instead — `--surface`, `--ink`, `--accent` — which is the interface
+   that actually wants to exist. §1 shrinks as that spreads.
+
+   ── WHY THERE ARE TWO SURFACES AND NOT ONE PALETTE ──
+
+   Measured, not assumed. Every light accent that carries on Deep Aubergine
+   dies on Lavender Mist, and the deep purples do the exact reverse:
+
+     gold   #E8B84B    8.59:1 on aubergine    1.61:1 on lavender
+     orchid #E4A7F3    8.39:1 on aubergine    1.65:1 on lavender
+     silver #C6C9D6    9.60:1 on aubergine    1.44:1 on lavender
+     royal  #452A74    1.39:1 on aubergine   10.01:1 on lavender
+
+   An alternating dark/light wall therefore **cannot** share one accent
+   palette. That is why §2 exists: a component asks for `--accent` and the
+   surface it is sitting on decides what that means. Hardcode orchid as "the
+   accent" and it is invisible on half the rotation — at six metres, on a wall
+   nobody is checking.
+
+   Every value below is contrast-tested against the surface it is used on. The
+   bar is 7:1 for body ink and 4.5:1 for muted and accent ink, because this is
+   read at six metres rather than at arm's length.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── §0 · The Forge palette, verbatim from design_system.md ───────────── */
+
+  --aubergine: #2a1849; /* dark backgrounds, section dividers */
+  --royal-purple: #452a74; /* primary brand, headings on light */
+  --amethyst: #5a3a8e; /* secondary surfaces, fills */
+  --vivid-violet: #7c4dcc; /* CTAs, high-energy pop — ~5% of the design */
+  --orchid: #e4a7f3; /* soft accent, highlights */
+  --lavender-mist: #f5edfb; /* light page background */
+  --ink-black: #1d1c1d; /* body text on light */
+  --white: #ffffff;
+
+  /* Tint ramps, from colors/tints_shades.png. Only the steps this wall uses. */
+  --royal-900: #291945;
+  --royal-700: #37215c;
+  --royal-300: #8674a4;
+  --royal-100: #c7bfd5;
+  --violet-700: #633da3;
+  --violet-300: #a98bdd; /* the violet that may be *type* on dark — see below */
+  --violet-100: #d7c9ef;
+  --orchid-700: #b685c2;
+  --orchid-300: #edc5f7;
+  --orchid-100: #f6e4fb;
+
+  /* Two steps darker than Deep Aubergine, for the one surface that has to sit
+     *under* it. Not in the design system, derived from it by dropping
+     lightness on the same hue — no new hue, which is the part of the old rule
+     that still binds. */
+  --aubergine-900: #150b26;
+  --aubergine-800: #1a0f2e;
+  /* One step lighter, for a card that has to read as raised *on* aubergine.
+     1.22:1 against the page — deliberately almost nothing, because the
+     separation is carried by shadow and hairline. A card that differs from its
+     page by a lot is a second page. */
+  --aubergine-600: #3a2560;
+
+  /* Purple-cast neutrals. The greens they replace were green-cast for the same
+     reason: a truly neutral grey on a coloured field reads as dirty. */
+  --ink-3: #6b5a85;
+  --ink-muted-light: #736688; /* 4.61:1 on lavender; #7D6E94 was 4.06 and failed */
+  --ink-on-dark-2: #e6dcf5;
+
+  /* ── §1 · Mesa's green tokens, re-pointed. Matched by ROLE and relative
+        value, never by hue — see the file header for why these names stay. ── */
+
+  --midnight-charcoal: var(--aubergine-800); /* darkest neutral */
+  --soft-mint: var(--lavender-mist); /* primary light bg */
+  --bright-green: var(--vivid-violet); /* primary accent / CTA */
+  --tangerine-glow: var(--orchid); /* secondary accent / warmth */
+  --deep-forest-green: var(--royal-purple); /* logomark, deep surfaces */
+  --deep-teal: var(--aubergine); /* deepest brand surface */
+  --charcoal-900: var(--aubergine-900);
+  --charcoal-700: var(--aubergine-600); /* elevated dark surface */
+  --mint-300: #c7b5e8; /* muted, on dark — 8.45:1 on aubergine */
+  --green-600: var(--amethyst);
+  --green-200: var(--violet-100);
+  --tangerine-600: var(--orchid-700);
+  --tangerine-200: var(--orchid-300);
+
+  --bg: var(--lavender-mist);
+  --bg-elevated: #fbf7fd;
+  --bg-inverse: var(--aubergine);
+  --surface-glass: rgba(69, 42, 116, 0.08);
+  --surface-glass-strong: rgba(69, 42, 116, 0.14);
+
+  --fg1: var(--ink-black);
+  --fg2: var(--royal-purple);
+  --fg3: var(--ink-3);
+  --fg-muted: var(--ink-muted-light);
+  --fg-inverse: var(--white);
+
+  --accent-warm: var(--orchid);
+  --accent-fg: var(--white); /* was charcoal-on-green; violet needs white, 5.54:1 */
+
+  --border: rgba(42, 24, 73, 0.14);
+  --border-strong: rgba(42, 24, 73, 0.26);
+  --border-mint: var(--mint-300);
+
+  /* Shadows re-cast from green to aubergine. A green-tinted shadow under a
+     purple card is the single most obvious tell of an unfinished re-skin. */
+  --shadow-sm: 0 1px 2px rgba(26, 15, 46, 0.07), 0 1px 3px rgba(26, 15, 46, 0.05);
+  --shadow-md: 0 4px 12px rgba(26, 15, 46, 0.1), 0 2px 4px rgba(26, 15, 46, 0.05);
+  --shadow-lg: 0 12px 32px rgba(26, 15, 46, 0.16), 0 4px 8px rgba(26, 15, 46, 0.07);
+  --shadow-glass: 0 8px 24px rgba(26, 15, 46, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+
+  /* The three metals, the project's other long-standing colour exemption.
+     Moved here from `app/mesa-tv.css` so this file really is the only one with
+     a hex in it, and re-tuned for Deep Aubergine — the old set was mixed for a
+     white page and went quiet on a dark one (gold 7.05:1, bronze 3.42:1).
+     Measured on aubergine: 8.59, 9.60 and 5.63:1. */
+  --forge-metal-gold: #e8b84b;
+  --forge-metal-silver: #c6c9d6;
+  --forge-metal-bronze: #d08a5a;
+
+  /* ── §2 · The semantic surface interface ─────────────────────────────────
+        Defaults are the light surface, so a component that forgets to declare
+        one is legible rather than invisible. Failing toward "readable on the
+        page background" is the only safe default on a wall with no operator. */
+
+  --surface: var(--lavender-mist);
+  --surface-raised: var(--white);
+  --surface-solid: var(--royal-purple); /* a filled card ON the surface */
+  --ink: var(--ink-black);
+  --ink-2: var(--royal-purple);
+  --ink-muted: var(--ink-muted-light);
+  --accent: var(--vivid-violet);
+  --accent-quiet: var(--orchid-700);
+  --hairline: rgba(42, 24, 73, 0.14);
+  --hairline-strong: rgba(42, 24, 73, 0.26);
+  --ink-on-solid: var(--white);
+  --ink-on-solid-2: var(--orchid-300);
+
+  /* The podium's three card fills, as gradients rather than flat tokens. Flat
+     was right on white, where the card's edge came from the page. On a field
+     that is itself purple, a flat card is a rectangle of very slightly
+     different purple; the gradient is what gives it a top and a bottom. */
+  --pod-card-lead: var(--grad-card-leader);
+  --pod-card-rest: var(--grad-card-solid);
+}
+
+/* ── §3 · The two surfaces ─────────────────────────────────────────────────
+
+   Set on `<main>`. Everything inside reads the semantic tokens and therefore
+   flips with the surface rather than carrying a colour of its own.
+
+   The alternation is the Forge deck's own rhythm — dark "moment" slides
+   against light content slides — and this wall happens to have exactly two
+   slides rotating every thirty seconds, so the rotation *is* the rhythm. */
+
+.surface-dark {
+  --surface: var(--aubergine);
+  --surface-raised: var(--aubergine-600);
+  --surface-solid: var(--aubergine-600);
+  --ink: var(--white);
+  --ink-2: var(--ink-on-dark-2);
+  --ink-muted: var(--violet-300); /* 5.60:1. NOT --vivid-violet, which is 2.86:1 */
+  --accent: var(--orchid); /* 8.39:1 */
+  --accent-quiet: var(--violet-300);
+  --hairline: rgba(255, 255, 255, 0.14);
+  --hairline-strong: rgba(255, 255, 255, 0.28);
+  --ink-on-solid: var(--white);
+  --ink-on-solid-2: var(--orchid-300);
+
+  /* The green tokens that components still read, re-pointed for this surface.
+     Without this, a card asking for `--deep-forest-green` on a dark page draws
+     royal purple at 1.39:1 against aubergine — a card with no edge. */
+  --deep-forest-green: var(--aubergine-600);
+  --soft-mint: var(--aubergine);
+  --bg: var(--aubergine);
+  --fg1: var(--white);
+  --fg2: var(--ink-on-dark-2);
+  --fg3: var(--violet-300);
+  --fg-muted: var(--violet-300);
+  --border: rgba(255, 255, 255, 0.14);
+  --border-strong: rgba(255, 255, 255, 0.28);
+
+  color: var(--ink);
+  /* The gradient, not the flat token. `--surface` stays the flat value because
+     everything *inside* the page composites against it — a hairline mixed
+     against a gradient has no single answer. */
+  background: var(--grad-surface-dark);
+}
+
+.surface-light {
+  --surface: var(--lavender-mist);
+  --surface-raised: var(--white);
+  --surface-solid: var(--royal-purple);
+  --ink: var(--ink-black);
+  --ink-2: var(--royal-purple);
+  --ink-muted: var(--ink-muted-light);
+  --accent: var(--vivid-violet);
+  --accent-quiet: var(--orchid-700);
+  --hairline: rgba(42, 24, 73, 0.14);
+  --hairline-strong: rgba(42, 24, 73, 0.26);
+
+  color: var(--ink);
+  background: var(--grad-surface-light);
+}
+
+/* ── §4 · Structural gradients ─────────────────────────────────────────────
+
+   Used to give a surface depth and to say which end of a ramp a thing is at.
+   Never decorative: a gradient that does not encode something is noise at six
+   metres, where the eye reads value before it reads anything else.
+
+   Each is a *pair of steps on one hue*, not a hue rotation. Two hues in one
+   fill reads as a third colour nobody chose. */
+
+:root {
+  /* The dark page. Light source top-left, so the frame has a direction. */
+  --grad-surface-dark: radial-gradient(
+      120% 90% at 12% 0%,
+      var(--royal-700) 0%,
+      transparent 62%
+    ),
+    linear-gradient(168deg, var(--aubergine) 0%, var(--aubergine-900) 100%);
+
+  /* The light page. Barely there — 1.14:1 corner to corner — because its job
+     is to stop a 1920px flat fill reading as a printing error, not to be seen.
+
+     **Anchored bottom-right**, which is where the Forge system puts its texture
+     ("concentric Orchid → Lavender rings radiating from a bottom-right corner
+     anchor"). It was top-right for one pass and that was wrong twice over: it
+     put the warmest part of the page directly under the band, where it read as
+     a pink smudge against the band's hard edge rather than as a lit corner, and
+     it fought the band for the eye at the exact moment the band is trying to be
+     the first thing read. Bottom-right, it falls behind the quiet half of the
+     board and warms it. */
+  --grad-surface-light: radial-gradient(
+      120% 95% at 96% 104%,
+      var(--orchid-100) 0%,
+      transparent 62%
+    ),
+    linear-gradient(180deg, var(--white) 0%, var(--lavender-mist) 100%);
+
+  /* A filled card on the light page. */
+  --grad-card-solid: linear-gradient(158deg, var(--amethyst) 0%, var(--royal-700) 100%);
+  /* A raised card on the dark page. */
+  --grad-card-dark: linear-gradient(158deg, var(--aubergine-600) 0%, var(--royal-900) 100%);
+  /* Rank 1 only, and the one place Vivid Violet appears as a fill. ~5%. */
+  --grad-card-leader: linear-gradient(158deg, var(--violet-700) 0%, var(--royal-700) 100%);
+}
+
+/* ── §5 · Podium parts that were mixed for a white page ───────────────────────
+
+   Every token here already existed in `app/mesa-tv.css`, defined as a
+   `color-mix` of Mesa's tokens. Each was correct on white and **each inverted
+   when the page went dark**, because a mix that lands "two steps above the
+   page" lands two steps *below* a dark one. Measured on the running board
+   before this block existed:
+
+     list venture name    rgb(42,24,73) on rgb(42,24,73)   1.00:1  — invisible
+     list figure          rgb(42,24,73) on rgb(42,24,73)   1.00:1  — invisible
+     mover gain figure    #b685c2 on #fbf7fd               2.79:1  — 56px, failing
+     progress bar         track brighter than its own fill — the bar read backwards
+
+   The first two are the whole point of the surface layer: `--deep-teal` is
+   "deepest brand surface", `.surface-dark` correctly re-points it to the page
+   colour, and anything using it as *ink* then paints text in the background.
+   A token that is a surface in one place and ink in another cannot survive a
+   surface flip, and the fix is to stop asking it to.
+
+   These are overridden rather than edited in place because `mesa-tv.css` is
+   imported first: its `:root` still carries the reasoning for each value and
+   the arithmetic that depends on them, and this file is the one that gets to
+   have the last word. See the import note in `app/globals.css`. */
+
+:root {
+  --pod-track: color-mix(in srgb, var(--royal-purple) 14%, var(--white));
+  --pod-fill: var(--royal-300);
+  --pod-rank-ink: var(--ink-muted-light);
+  --pod-mover-fill: color-mix(in srgb, var(--lavender-mist) 42%, var(--white));
+  --pod-mover-ink: var(--royal-purple);
+  /* The gain figure. Orchid 700 measured 2.79:1 on the pale panel at 56px —
+     the largest number on that panel and the least readable thing on the
+     slide. Vivid Violet is the accent that belongs on light. */
+  --pod-mover-gain-ink: var(--vivid-violet);
+}
+
+.surface-dark {
+  /* Track barely above the page (1.30:1) and the fill well clear of both —
+     5.60:1 on the page, 4.31:1 against its own track. The empty part of a bar
+     must never be the loud part. */
+  --pod-track: color-mix(in srgb, var(--white) 10%, transparent);
+  --pod-fill: var(--violet-300);
+  /* Apparatus ink: the list's rank numerals, and the mover panel's label and
+     standing line. Violet 300 measured 4.60:1 on the raised card at 15px —
+     passing AA, and too thin for 15px read from a corridor. This step is
+     6.94:1 there and 8.45:1 on the page, and still sits well under the venture
+     name it must not compete with. */
+  --pod-rank-ink: var(--mint-300);
+  --pod-mover-fill: var(--aubergine-600);
+  --pod-mover-ink: var(--white); /* 13.02:1 on the raised card */
+  /* Orchid at 6.89:1 on the raised card. This is the one figure on the slide
+     the accent is spent on, which is what keeps it an accent. */
+  --pod-mover-gain-ink: var(--orchid);
+
+  /* The three podium cards. Rank 1 is the only place Vivid Violet appears as a
+     fill anywhere on the wall — the design system reserves it for ~5% and one
+     card out of thirty-nine is about right. Its lighter end still clears
+     7.70:1 for white and 7.42:1 for gold at the darker end.
+
+     Cards 2 and 3 must not be the page colour. `--deep-teal` on a dark surface
+     resolves to exactly that, so first place had no edge at all. */
+  --pod-card-lead: var(--grad-card-leader);
+  --pod-card-rest: var(--grad-card-dark);
+}

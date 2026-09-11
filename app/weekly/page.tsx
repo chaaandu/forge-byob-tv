@@ -72,8 +72,10 @@ export default function WeeklyPage() {
   )
 
   return (
+    // **`surface-light` — the light half of the rotation.** See the note in
+    // app/podium/page.tsx; these two classes are the pair.
     <main
-      className="tv-frame"
+      className="tv-frame surface-light"
       style={{
         display: 'grid',
         gridTemplateRows: 'auto minmax(0, 1fr)',

@@ -76,9 +76,16 @@ const PLACES = {
   // `markFoot` is air beneath the mark, and only third place asks for it: with
   // no riser, its band is exactly its mark and the logo lands on the pixel the
   // venture name starts on. The other two get theirs out of the riser already.
-  1: { fill: 'var(--deep-teal)', metal: 'var(--metal-gold)', riser: 2, markFoot: 0 },
-  2: { fill: 'var(--deep-forest-green)', metal: 'var(--metal-silver)', riser: 1, markFoot: 0 },
-  3: { fill: 'var(--deep-forest-green)', metal: 'var(--metal-bronze)', riser: 0, markFoot: 1 },
+  //
+  // **The fills are surface-aware gradients, not brand colours.** They were
+  // `--deep-teal` and `--deep-forest-green`, which on the dark slide resolve to
+  // the page colour and one step off it — so first place had no edge at all and
+  // the staircase was three barely-different purples. `--pod-card-lead` is the
+  // one place Vivid Violet is spent as a fill on this wall; `--pod-card-rest`
+  // is the quieter pair behind it.
+  1: { fill: 'var(--pod-card-lead)', metal: 'var(--metal-gold)', riser: 2, markFoot: 0 },
+  2: { fill: 'var(--pod-card-rest)', metal: 'var(--metal-silver)', riser: 1, markFoot: 0 },
+  3: { fill: 'var(--pod-card-rest)', metal: 'var(--metal-bronze)', riser: 0, markFoot: 1 },
 } as const
 
 type Place = keyof typeof PLACES
@@ -500,7 +507,12 @@ function Strip({
   const figureStyle: React.CSSProperties = {
     font: 'var(--t-pod-fig-row)',
     letterSpacing: 'var(--track-pod-fig)',
-    color: 'var(--deep-teal)',
+    // **`--ink`, which the surface defines, not a brand colour.** This was
+    // `--deep-teal` — "deepest brand surface" — which is exactly the page
+    // colour once the slide went dark: measured at 1.00:1, a figure painted in
+    // its own background. A token that is a surface in one place and ink in
+    // another cannot survive a surface flip.
+    color: 'var(--ink)',
     textAlign: 'right',
   }
 

@@ -58,7 +58,15 @@ export default function PodiumPage() {
   const teams = competingTeams(snapshot?.teams ?? [])
 
   return (
-    <main className="tv-frame" style={{ display: 'grid', gridTemplateColumns: 'auto 1fr' }}>
+    // **`surface-dark` — the dark half of the rotation.** Forge alternates dark
+    // "moment" surfaces with light content ones, and this wall has exactly two
+    // slides swapping every thirty seconds, so the rotation carries the
+    // brand's own rhythm. The class is what re-points `--ink`, `--accent` and
+    // the hairlines for a dark field; nothing inside this tree names a colour.
+    <main
+      className="tv-frame surface-dark"
+      style={{ display: 'grid', gridTemplateColumns: 'auto 1fr' }}
+    >
       <PodiumMasthead snapshot={snapshot} />
       <Podium ranked={rankTeams(teams)} kick={kick} onSettled={settled} />
 
