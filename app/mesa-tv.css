@@ -2544,7 +2544,23 @@
      scrolls. */
   .tv-ganesha {
     position: fixed;
-    left: var(--s-ganesha-x);
+
+    /* **This resolves negative, and that is the whole point.**
+       `--s-ganesha-x` is where the *idol* sits; `--ganesha-lead` is how far the
+       crop reaches left of it, so the box hangs that far off the left of the
+       screen and the **viewport** clips the mooshika on its way out instead of
+       the crop doing it at an invisible line 28px in from the bezel.
+
+       The two terms cancel. The box grows by `lead` on the left and moves left
+       by `lead`, so the idol and the box's right edge land exactly where they
+       did before the crop was widened — every clearance measured against card
+       31 still holds to the pixel. Verified at 1600, 1920, 2000, 2560 and 3840.
+
+       `--ganesha-lead` is unitless and multiplies the height, because the
+       height is the only dimension this file is told; `components/Ganesha.tsx`
+       derives both it and the aspect from the one `CROP` string. Nothing here
+       may restate either number. */
+    left: calc(var(--s-ganesha-x) - var(--ganesha-lead) * var(--h-ganesha));
     bottom: var(--s-safe-y);
     height: var(--h-ganesha);
     /* Width follows the measured crop. `--ganesha-aspect` is set inline by the

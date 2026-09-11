@@ -97,29 +97,58 @@ import { isFestival } from '@/lib/schedule'
  *   rat   x   0-1918, y 808-1064   (the full width — it enters at the right
  *                                   edge on f46 and exits at the left on f83)
  *
- * ── Why the crop is the idol's width and the rat's height ──
+ * ── The bottom edge holds the rat's band ──
  *
- * The rat crosses the *entire* composition, so a crop containing its whole path
- * would be 1920 wide — aspect 2.45, which at any usable height is far wider
- * than the 104px this corner has. But it does not need to contain the path. It
- * needs to contain the rat's **vertical band**, so the animal is never cut
- * through the middle; horizontally the rat is *supposed* to enter and leave at
- * the edges, which is what it does in the artist's own 1920 frame.
+ * The crop's height is the rat's, not the idol's: down to 1070, clearing the
+ * animal's lowest point at 1064, so it is never cut through the middle.
+ * **Raise it back towards 996 and the idol still looks perfect** — it is the
+ * rat, for 1.2s of every 7.3, that loses its feet.
  *
- * So: the idol's x range, extended down to clear the rat's lowest point at
- * 1064. Six units of air on every side. The rat now runs in at the right edge,
- * across the bottom, and out at the left, whole the entire way.
+ * ── The left edge is 0 so the rat leaves at the *screen* edge ──
  *
- * **The bottom edge is the load-bearing number here.** Raise it back towards
- * 996 and the idol still looks perfect — it is the rat, for 1.2s of every 7.3,
- * that loses its feet.
+ * This started at 470, six units left of the idol, and the rat vanished into
+ * thin air on its way out. The reason is worth stating exactly, because it is
+ * not a clipping bug — the crop was doing what it was told.
+ *
+ * A frame edge only reads as an edge when there is something at it. In the
+ * artist's 1920 composition the rat leaves at the boundary of the picture. Here
+ * the ornament is a 103px box floating in the middle of a large dark board, so
+ * its left edge was an **invisible line 28px in from the bezel**, and the rat
+ * dissolved as it crossed it. Entering does not have this problem nearly as
+ * badly — a thing appearing is read as arriving — but leaving does.
+ *
+ * So the crop now starts at the composition's own left edge, and
+ * `mesa-tv.css` shifts the box left by exactly the width that adds, using
+ * `--ganesha-lead`. The arithmetic cancels: the box grows by `LEAD` on the left
+ * and moves left by `LEAD`, so **the idol and the box's right edge do not move
+ * at any viewport** — every clearance measured against card 31 still holds, to
+ * the pixel. What changes is only that the box's left edge is now off-screen,
+ * so the *viewport* does the clipping. At 1920 the bezel cuts the composition
+ * at x≈217, and the rat is entirely left of that by frame 82, a frame before
+ * its layer ends. It runs off the television.
+ *
+ * **Zero rather than a negative number**, deliberately. The artist's frame
+ * clips at 0 too, and there are elements out there — the naive bbox reaches
+ * x -386 — that were never meant to be seen. Matching the composition's own
+ * clip shows the whole of the rat's exit and nothing that was hidden on purpose.
  */
-const CROP = '470 276 928 794'
+const CROP = '0 276 1398 794'
 
 /** The crop's aspect, so the CSS only has to be told a height. Kept here rather
     than restated as a number in `mesa-tv.css`: two places to change is one
     place to forget, and the symptom would be a squashed idol. */
-const CROP_ASPECT = 928 / 794
+const CROP_ASPECT = 1398 / 794
+
+/**
+ * How far the crop reaches left of the idol, as a multiple of the box's
+ * **height** — which is the only dimension `mesa-tv.css` is told, so it is the
+ * only one the offset can be derived from there.
+ *
+ * `left: calc(inset - lead * height)` is what keeps the idol still while the
+ * box grows leftward off the screen. Change `CROP`'s x or width without
+ * changing this and the ornament slides sideways.
+ */
+const CROP_LEAD = 470 / 794
 
 export function Ganesha() {
   const host = useRef<HTMLDivElement>(null)
@@ -296,6 +325,10 @@ function GaneshaFigure({
           // scan can see it: a `[x as string]` key reads as a token nothing
           // declares, and the test's report would be correct.
           '--ganesha-aspect': String(CROP_ASPECT),
+          // The leftward overrun, so the stylesheet can cancel it out of the
+          // inset. Unitless on purpose — `mesa-tv.css` multiplies it by
+          // `--h-ganesha`, and a length here would make that calc invalid.
+          '--ganesha-lead': String(CROP_LEAD),
         } as React.CSSProperties
       }
       // Presentational, for the same reason the crown is: this restates nothing
