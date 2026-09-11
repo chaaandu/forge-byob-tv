@@ -115,9 +115,11 @@ export function DevFlipTrigger({
         // Bottom-*right*: Next's dev overlay indicator owns the bottom-left
         // corner and its portal swallows clicks aimed at anything underneath it.
         //
-        // Lifted clear of the frame's footer row — see the same note in
-        // `DevPodiumTrigger`.
-        bottom: 'calc(var(--s-safe-y) + var(--h-foot) + var(--s-3))',
+        // **`--s-safe-y`, not a calc over `--h-foot`.** It cleared the frame's
+        // footer row, and there is no footer; with the token deleted the whole
+        // `calc()` went invalid and this bar jumped to the top of the frame,
+        // straight over the masthead.
+        bottom: 'var(--s-safe-y)',
         right: 8,
         display: 'flex',
         gap: 6,

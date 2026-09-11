@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react'
 
 import { DevPodiumTrigger } from '@/components/DevPodiumTrigger'
 import { FleaCountdown } from '@/components/FleaCountdown'
-import { MoverPanel } from '@/components/MoverPanel'
 import { Podium } from '@/components/Podium'
 import { WallHeader } from '@/components/WallHeader'
 import { WATCH_RANKS_PODIUM } from '@/config'
@@ -85,7 +84,9 @@ export default function PodiumPage() {
       className="tv-frame surface-dark"
       style={{
         display: 'grid',
-        gridTemplateRows: 'auto auto minmax(0, 1fr) auto auto',
+        // Three bands: masthead, rule, board — `/weekly`'s exactly. It was
+        // five until the footer line was removed; see the note there.
+        gridTemplateRows: 'auto auto minmax(0, 1fr)',
         padding: 'var(--s-safe-y) var(--s-safe-x)',
         rowGap: 0,
       }}
@@ -111,13 +112,18 @@ export default function PodiumPage() {
         <Podium ranked={rankTeams(teams)} kick={kick} onSettled={settled} />
       </div>
 
-      <div className="tv-rule" />
+      {/* ── The footer line is gone, and the biggest mover with it ──
 
-      {/* The biggest mover, as the frame's footer line — the same slot
-          `/weekly` gives its legend. It was a filled pale panel at the top of
-          the right-hand column, which is what pushed the list of seven down and
-          left 200px of empty page under the podium. */}
-      <MoverPanel snapshot={snapshot} ranked={teams} />
+          It read `HIGHEST EARNER THIS WEEK · venture · standing · figure`, with
+          the provenance stamp at the right. Removed by decision. `MoverPanel`
+          and `lib/climber.ts` — the whole biggest-mover computation, its three
+          states and its tests — are deleted rather than left unreachable; git
+          has them if the line ever returns.
+
+          The stamp's removal is the part worth recording: this wall shows no
+          error state, so a failed fetch renders perfectly healthy stale numbers
+          for days and that was the only tell. See the same note in
+          app/weekly/page.tsx. */}
 
       <DevPodiumTrigger
         teams={teams}

@@ -1,12 +1,10 @@
 // @vitest-environment jsdom
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { FleaDial } from '@/components/FleaDial'
-import { BoardLegend } from '@/components/BoardLegend'
-import { MoverPanel } from '@/components/MoverPanel'
 import { monogramFor } from '@/components/VentureLogo'
 import { Podium, podiumTeams } from '@/components/Podium'
 import { VentureCard } from '@/components/VentureCard'
@@ -180,24 +178,6 @@ describe('Podium', () => {
     host.remove()
   })
 
-  it('says nothing with a dash in the footer when nobody has traded', () => {
-    // **This used to be one line inside the test above**, reaching into
-    // `.tv-pod-mover-empty` on a rendered `<Podium>`. The mover is not inside
-    // `Podium` any more — it is the page's footer row — so the assertion had to
-    // move with it rather than be deleted, which is the only reason it is a
-    // test of its own.
-    //
-    // The claim is unchanged and still worth pinning: an em dash, never `₹0`.
-    // Zero is a figure, and a footer carrying one asserts that somebody traded
-    // and earned nothing. Before the cohort opens that is false for all of them.
-    const host = document.createElement('div')
-    document.body.append(host)
-    const root = createRoot(host)
-    act(() => root.render(<MoverPanel snapshot={null} ranked={[]} />))
-    expect(host.querySelector('.tv-pod-mover-empty')?.textContent).toBe('—')
-    act(() => root.unmount())
-    host.remove()
-  })
 
   it('draws three places and seven ruled rows, borrowing nothing from /weekly', () => {
     // `.tv-pill` is /weekly's language — rows that close around their own mark.
@@ -402,10 +382,8 @@ describe('WallHeader', () => {
     const text = render(<WallHeader snapshot={snapshotAt(...WINDOW)} label="2-Week Challenge" />)
     expect(text).toContain('2-Week Challenge')
     expect(text).not.toContain('Day')
-    // **Provenance is not in the masthead.** It moved to the footer on both
-    // slides; the two tests below are where it is now pinned. Asserted as an
-    // absence so the move cannot silently revert and leave the wall stamping
-    // itself twice.
+    // No provenance stamp — it is not in the masthead and it is no longer
+    // anywhere. See the dedicated test below for why that is pinned.
     expect(text).not.toContain('Updated')
   })
 
@@ -432,27 +410,97 @@ describe('WallHeader', () => {
   })
 
   /**
-   * ── Provenance, wherever it lives ──
+   * ── There is no provenance stamp anywhere on the wall ──
    *
-   * The wall shows no error state by design: a failed fetch keeps the last good
-   * data and goes on rendering perfectly healthy stale numbers for days. This
-   * stamp is the only thing that makes that visible, which is why it is
-   * asserted at all rather than left to a screenshot.
+   * There was, and this pinned that exactly one of the masthead or the footer
+   * carried it. The footers are gone and the stamp went with them, by decision.
    *
-   * It used to sit in the masthead and now sits in each slide's footer. What
-   * has to stay true is that **exactly one of the two carries it**, on both
-   * slides — a wall that stamps itself twice is as much a bug as one that does
-   * not stamp itself at all, and neither is visible from across a room.
+   * The assertion is kept, inverted, because **the thing it guards is now a
+   * silence rather than a presence.** This wall shows no error state: a failed
+   * fetch keeps the last good data and renders perfectly healthy stale numbers
+   * for days. The stamp was the only tell, and a future change that quietly
+   * reinstates it in one place and not the other would recreate the drift this
+   * test caught last time — a wall stamping itself twice is as much a bug as
+   * one that does not stamp at all, and neither is visible across a room.
    */
-  it('stamps each slide once, in the footer', () => {
-    const snap = snapshotAt(...WINDOW)
-    expect(render(<BoardLegend snapshot={snap} />)).toContain('Updated')
-    expect(render(<MoverPanel snapshot={snap} ranked={[]} />)).toContain('Updated')
-    // And nothing at all before the first fetch lands. A stamp with no figures
-    // beside it would be stating the provenance of nothing.
-    expect(render(<BoardLegend snapshot={null} />)).not.toContain('Updated')
-    expect(render(<MoverPanel snapshot={null} ranked={[]} />)).not.toContain('Updated')
+  it('carries no provenance stamp in the masthead', () => {
+    const text = render(<WallHeader snapshot={snapshotAt(...WINDOW)} label="Weekly Leaderboard" />)
+    expect(text).toContain('Weekly Leaderboard')
+    expect(text).not.toContain('Updated')
   })
+})
+
+/**
+ * ── EVERY `var()` IN THE PROJECT RESOLVES TO A DECLARED TOKEN ──
+ *
+ * A CSS custom property that is read but never declared is not an error. The
+ * `var()` yields nothing, the declaration it sits in becomes invalid at
+ * computed-value time, and that one property falls back to its initial value.
+ * Nothing logs. Nothing fails to build.
+ *
+ * **Measured, from a tidy-up that deleted `--d-card-logo-floor` by accident:**
+ * `--d-card-logo` is a `max()` of that floor and whatever the row has left, so
+ * the whole expression went invalid, `VentureDisc` laid out at `width: auto`,
+ * and all thirty-nine marks collapsed to zero — on a board that still rendered
+ * its cards, its rank numerals, its venture names and all thirty-nine figures.
+ * The same delete took `--t-pod-numeral`, and a `--h-foot` removed with the
+ * footers left the dev trigger bar's `bottom: calc(...)` invalid, which moved it
+ * to the top of the frame over the masthead.
+ *
+ * Three silent breakages in one commit, none of them caught by typecheck, lint,
+ * the other 170 tests or a build. This is the cheap check that would have.
+ */
+it('declares every custom property that anything reads', () => {
+  const files = [
+    'app/mesa-tv.css',
+    'app/forge-tokens.css',
+    'app/globals.css',
+    ...readdirSync('components').filter((f) => f.endsWith('.tsx')).map((f) => `components/${f}`),
+    'app/weekly/page.tsx',
+    'app/podium/page.tsx',
+  ]
+
+  // **Comments are stripped first, and that is not a detail.** These files
+  // explain past bugs by quoting the tokens involved — `--card-fill` and
+  // `--h-card` are both named in prose about properties that no longer exist or
+  // never should have. A scanner that reads prose reports the documentation as
+  // the defect.
+  const strip = (text: string) =>
+    text.replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/(^|[^:])\/\/.*$/gm, '$1')
+  const source = files.map((f) => strip(readFileSync(f, 'utf8'))).join('\n')
+
+  // Declarations come from the stylesheets *and* from inline styles that set a
+  // property on an element — `VentureCard` and `Podium` both do, and a token
+  // declared only there is still declared.
+  const declared = new Set(
+    [
+      ...source.matchAll(/(?:^[ \t]*|[;{][ \t]*)(--[a-z0-9-]+)[ \t]*:/gm),
+      ...source.matchAll(/'(--[a-z0-9-]+)':/g),
+    ].map((m) => m[1]),
+  )
+
+  // The design system's own tokens live in a file this does not otherwise scan.
+  const system = new Set(
+    [
+      ...readFileSync('.claude/skills/mesa-design/colors_and_type.css', 'utf8').matchAll(
+        /^\s*(--[a-z0-9-]+)\s*:/gm,
+      ),
+    ].map((m) => m[1]),
+  )
+
+  // `next/font` emits these into a class at build time, so they are declared in
+  // generated CSS no source file contains. See app/layout.tsx.
+  const external = new Set(['--font-mesa-body', '--font-mesa-serif'])
+
+  // `var(--x, fallback)` cannot fail — a missing token yields the fallback
+  // rather than an invalid declaration — so only bare reads are checked.
+  const missing = [
+    ...new Set([...source.matchAll(/var\(\s*(--[a-z0-9-]+)\s*\)/g)].map((m) => m[1])),
+  ]
+    .filter((t) => !declared.has(t) && !system.has(t) && !external.has(t))
+    .sort()
+
+  expect(missing).toEqual([])
 })
 
 describe('WeeklyGrid', () => {

@@ -73,7 +73,8 @@ export type Team = {
    * zero are separated only by the tie-break, so a team logging its first sale
    * would otherwise appear to climb fifteen places on ₹500 — noise wearing a
    * climb's clothes. A team with no standing to improve on did not improve on
-   * it. See `biggestMover` in lib/climber.ts.
+   * it. (It fed `biggestMover` in lib/climber.ts, which left the wall with the
+   * footer line; the field is still published and still read by the cards.)
    */
   prevWeekRank?: number
 }

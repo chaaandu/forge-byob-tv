@@ -2,14 +2,12 @@
 
 import { useEffect, useState } from 'react'
 
-import { BoardLegend } from '@/components/BoardLegend'
 import { DevFlipTrigger } from '@/components/DevFlipTrigger'
 import { WallHeader } from '@/components/WallHeader'
 import { WeeklyGrid } from '@/components/WeeklyGrid'
 import { WATCH_RANKS_WEEKLY } from '@/config'
 import { boardHeading, boardEarned, boardMode, boardPeriod, rankForMode } from '@/lib/board'
-import { baselineLabel } from '@/lib/challenge'
-import { cohortInstant, openWeek } from '@/lib/feed'
+import { openWeek } from '@/lib/feed'
 import { competingTeams } from '@/lib/ranking'
 import { useDevOvertakes } from '@/lib/devOvertake'
 import { useKick } from '@/lib/useKick'
@@ -114,7 +112,11 @@ export default function WeeklyPage() {
       className="tv-frame surface-dark"
       style={{
         display: 'grid',
-        gridTemplateRows: 'auto auto minmax(0, 1fr) auto auto',
+        // Three bands: masthead, rule, board. It was five — the board used to
+        // be followed by a second rule and a footer line, and both left with
+        // the legend. See `--h-board`, which subtracts exactly these terms and
+        // has to move in the same commit.
+        gridTemplateRows: 'auto auto minmax(0, 1fr)',
         padding: 'var(--s-safe-y) var(--s-safe-x)',
         rowGap: 0,
       }}
@@ -161,26 +163,16 @@ export default function WeeklyPage() {
         />
       </div>
 
-      <div className="tv-rule" />
+      {/* ── The footer line is gone ──
 
-      {/* **The legend is a row of the frame now, not an absolute in its margin.**
-          It used to be positioned against the board's padding box, which put its
-          baseline 4.3px above the frame's bottom edge — measured — where a
-          television's overscan crops it outright. A stated row cannot be
-          clipped by something it does not overlap.
-
-          **The baseline caption belongs to the challenge and leaves with it.**
-          In week mode the figure is the open week's own revenue, which has no
-          photographed baseline to be "since" — printing one would caption the
-          board with a date its numbers are not measured from. */}
-      <BoardLegend
-        snapshot={snapshot}
-        since={
-          snapshot === null || mode !== 'challenge'
-            ? null
-            : baselineLabel(cohortInstant(snapshot.cohort, 'challenge_start_iso'))
-        }
-      />
+          It carried the green mark's meaning, the baseline caption and the
+          provenance stamp. Removed by decision, and the stamp is the part worth
+          recording: **this wall shows no error state.** A failed fetch keeps the
+          last good data and goes on rendering perfectly healthy stale numbers
+          for days, and that stamp was the only thing that made it visible. A
+          board frozen on Tuesday's figures now looks exactly like a working
+          one. `docs/DESIGN.md` §2 added it for that reason; if it comes back,
+          the masthead is where it goes. */}
 
       <DevFlipTrigger
         teams={teams}

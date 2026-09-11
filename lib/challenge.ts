@@ -1,8 +1,10 @@
-import { IST_TIMEZONE } from '@/config'
-
 /**
- * Which day of the current challenge it is, and what the baseline day
- * was called. Two pure functions.
+ * Which day of the current challenge it is. One pure function.
+ *
+ * It was two: `baselineLabel` derived the day the baseline was photographed —
+ * `17 Aug` for a challenge opening on the 18th — for `/weekly`'s legend to
+ * caption the board with. The legend was removed and it went with it, along
+ * with the `Intl.DateTimeFormat` it was the only consumer of.
  *
  * ── Why there is no timezone arithmetic here ──
  *
@@ -20,18 +22,6 @@ import { IST_TIMEZONE } from '@/config'
  */
 
 const DAY_MS = 24 * 60 * 60 * 1000
-
-/**
- * `17 Aug`, in IST whatever the machine is set to.
- *
- * The one place this module touches a timezone, and it is a formatting concern
- * rather than an arithmetic one — the arithmetic above never needs it.
- */
-const DAY_MONTH = new Intl.DateTimeFormat('en-IN', {
-  day: 'numeric',
-  month: 'short',
-  timeZone: IST_TIMEZONE,
-})
 
 /**
  * `{ day, total }`, or `null` when the wall should say nothing.
@@ -61,22 +51,4 @@ export function challengeDay(
   // Clamped, so a window whose end is not a whole number of days past its start
   // cannot print "Day 15 of 14" in its final minutes.
   return { day: Math.min(day, total), total }
-}
-
-/**
- * The day the baseline was photographed — `17 Aug` for a challenge opening on
- * the 18th.
- *
- * **One millisecond before the start, deliberately.** The figure on the cards is
- * `total_revenue` minus a snapshot taken at the *close* of the previous day, so
- * "since 17 Aug" is what it measures rather than "since 18 Aug".
- *
- * Derived rather than typed, which is the whole point: on 1 September the
- * legend reads "since 31 Aug" because one sheet cell changed, with no deploy. A
- * date literal here would be the same trap as a column header called
- * `Revenue (17 Aug)`.
- */
-export function baselineLabel(start: Date | null): string | null {
-  if (start === null || !Number.isFinite(start.getTime())) return null
-  return DAY_MONTH.format(new Date(start.getTime() - 1))
 }

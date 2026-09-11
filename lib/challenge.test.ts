@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { baselineLabel, challengeDay } from '@/lib/challenge'
+import { challengeDay } from '@/lib/challenge'
 
 const start = new Date('2026-08-18T00:00:00+05:30')
 /** Challenge 1's real close: 09:00 IST on 31 August, not end of day. */
@@ -82,22 +82,5 @@ describe('challengeDay', () => {
       day: 1,
       total: 14,
     })
-  })
-})
-
-describe('baselineLabel', () => {
-  /**
-   * The day *before* the window opens, deliberately. The figure on the cards is
-   * the all-time total minus a snapshot taken at the close of the previous day,
-   * so "since 17 Aug" is what it measures — and derived rather than typed, so
-   * 1 September reads "since 31 Aug" with no deploy.
-   */
-  it('names the day the baseline was photographed, not the day trading opened', () => {
-    expect(baselineLabel(start)).toBe('17 Aug')
-    expect(baselineLabel(new Date('2026-09-01T00:00:00+05:30'))).toBe('31 Aug')
-  })
-
-  it('is null when the sheet has not said', () => {
-    expect(baselineLabel(null)).toBeNull()
   })
 })

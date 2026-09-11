@@ -83,7 +83,7 @@
   /* The Flea countdown. The single largest thing on the wall. */
   /* ══ THE TYPE SCALE ════════════════════════════════════════════════════════
 
-     Seven steps, and **every piece of type on both slides is one of them.**
+     Six steps, and **every piece of type on both slides is one of them.**
 
      ── What this replaced ──
 
@@ -110,7 +110,11 @@
        fs-4  22px   /weekly's figure, the list's rank, the mover's venture
        fs-5  18px   /weekly's rank and today line, the countdowns
        fs-6  15px   every label, caption and venture name on /weekly
-       fs-7  12px   the provenance stamp, and only that
+
+     There was an `fs-7` at 12px and it existed for one thing: the provenance
+     stamp. The footers went and the stamp went with them, so the step had one
+     consumer left — a dev-only button — and a scale step that only dev chrome
+     reaches is not a step, it is a leftover.
 
      Roughly a 1.3 ratio, tightening at the small end where the eye needs less
      difference to read a difference. Sizes are `vw` so the wall scales with the
@@ -129,7 +133,6 @@
   --fs-4: clamp(14px, 1.1458vw, 31px);
   --fs-5: clamp(12px, 0.9375vw, 25px);
   --fs-6: clamp(10px, 0.78125vw, 21px);
-  --fs-7: clamp(9px, 0.625vw, 17px);
 
 
   /* Podium figures, by rank. First place is the only one that gets display size. */
@@ -144,7 +147,6 @@
 
   /* Ambient chrome: the Flea countdown strip and the as-of stamp. Deliberately
      the smallest type on the wall — present, never competing. */
-  --t-tv-ticker: 500 var(--fs-7) / 1 var(--font-mono);
 
 
   /* ========= WEEKLY BOARD — the 4 x 10 card grid =========
@@ -284,13 +286,15 @@
      one end and the legibility floor at the other.
 
      **Every term in `--h-board` must match `app/weekly/page.tsx`'s grid.** They
-     are two statements of one layout; if a band is added to the frame it has to
-     be subtracted here in the same commit, or the board silently overflows the
-     one it was added for. */
+     are two statements of one layout, and they have to move together — in
+     either direction. The footer line and the second rule were removed from
+     both pages and subtracted from here in the same commit; had they been left
+     in this expression the board would simply have stopped 37px short of the
+     frame, which is the quiet half of the same failure. */
   --h-board: calc(
-    100vh - 2 * var(--s-safe-y) - var(--h-mast) - var(--s-mast-rule) - 2 *
+    100vh - 2 * var(--s-safe-y) - var(--h-mast) - var(--s-mast-rule) -
       var(--stroke-hair) - var(--s-rule-board) - var(--s-board-top) -
-      var(--s-board-bottom) - var(--h-foot)
+      var(--s-board-bottom)
   );
   --h-rows: calc(var(--h-board) - 3 * var(--s-row-gap));
   --h-row-1: calc(var(--h-rows) * 0.26625);
@@ -426,49 +430,6 @@
      nearer to it than to the board it introduces. */
   --s-mast-rule: 0.8333vw; /* 16px */
   --s-rule-board: 1.0417vw; /* 20px */
-  /* ── The footer line ──
-
-     The legend on `/weekly`, the mover on `/podium`. **Sized to the tallest
-     thing either of them puts in it**, which is `/podium`'s mark — at 1.45vw
-     the 1.75vw disc overflowed its own row and leaned into the frame's bottom
-     safe margin, exactly as the gain figure did when this was 1.15vw.
-
-     **It costs `/weekly` nothing to change.** The four row heights are shares
-     of `--h-board`, which subtracts this — so growing the footer shortens the
-     rows by 7px between them and the discs absorb it. That is the whole reason
-     the ramp stopped being a `vw` length; see the note there. */
-  --h-foot: 1.875vw; /* 36px */
-
-  /* ── The card's fixed rhythm: a strip, then three text lines ──
-
-     Every one of these includes the space that separates it from its
-     neighbour, so the card needs no grid gap. That is what lets a line
-     collapse cleanly: `--h-card-today` set to zero on a row where nobody has
-     traded today takes its separation with it, where a grid gap would have
-     stayed behind and left the mark 24px it could not use.
-
-     ── The rank strip is the fix for numerals touching artwork ──
-
-     **This is designed out, not tuned out.** The disc is nearly as wide as the
-     card and vertically centred, so there is no free corner to move a numeral
-     into: any horizontal offset still lands on artwork, and a two-digit rank
-     lands on more of it than a one-digit rank. The strip is height the mark is
-     not allowed to enter. The separation is therefore a constant of the card's
-     rhythm rather than a per-rank nudge, and it holds for `4` and for `40`
-     alike, at every row height, because the disc is sized from what the strip
-     leaves rather than the other way round.
-
-     Stated in `vw` rather than `em`: written as `em` they would resolve against
-     whatever font-size the *row* happens to carry rather than against the type
-     they reserve for, which is a silent 16px-per-line error on a page that
-     still renders.
-
-     The name reserves **two lines**. Five of forty do not fit on one at this
-     card width, and a card whose figure sits a line lower than its neighbours'
-     reads as a fault rather than as a long name. Which five, and by how much,
-     is measured in the report — the fix for it is not this file's to choose. */
-  --d-card-logo-floor: 48px;
-
   /* How long a card's details take to leave and to come back.
 
      260ms out at the start of the turn and 260ms in at the settle, which leaves
@@ -533,13 +494,14 @@
   --t-tv-card-today: 600 var(--fs-5) / 1 var(--font-sans);
   --t-tv-card-today-hot: 800 var(--fs-5) / 1 var(--font-sans);
 
-  /* The "TODAY" tag that rides the figure. Smaller than what it labels, so it
-     reads as apparatus rather than as a third number. */
-  --t-tv-card-label: 700 var(--fs-7) / 1 var(--font-sans);
+  /* **Dev chrome only** — `DevFlipTrigger`'s buttons, and nothing the wall
+     renders. It was the "TODAY" tag on a card, which no longer exists, and it
+     took `--fs-7` with it: that step's only remaining consumer was this, so the
+     scale is six live steps and this borrows the smallest. */
+  --t-tv-card-label: 700 var(--fs-6) / 1 var(--font-sans);
 
   /* The board's legend. Smaller than anything on a card, because it explains
      the board rather than belonging to it. */
-  --t-tv-legend: 700 var(--fs-6) / 1 var(--font-sans);
 
   /* ── Rank, in two treatments and never both on one card ──
 
@@ -569,6 +531,22 @@
   --t-tv-card-rank: 700 var(--fs-5) / 1 var(--font-sans);
   /* Ranks 1-3. The one step up, and it replaces the metals outright. */
   --t-tv-card-rank-lead: 800 var(--fs-4) / 1 var(--font-sans);
+
+  /* ── The mark's legibility floor ──
+
+     `scripts/logo-legibility.py` measured the size below which a logo stops
+     being a logo. `--d-card-logo` takes the `max()` of this and whatever the
+     row has left, so a row that runs short grows a few pixels into its gap
+     rather than shrinking its mark under it.
+
+     **It was deleted by accident and the failure was total and silent-ish.**
+     A `max()` with an undefined argument is invalid at computed-value time, so
+     `--d-card-logo` resolved to nothing, `VentureDisc` laid out at `width:
+     auto` and every one of the thirty-nine marks collapsed to zero — on a board
+     that still rendered its cards, its ranks, its names and all thirty-nine
+     figures. Exactly the shape of bug this project is built around, introduced
+     by a tidy-up. */
+  --d-card-logo-floor: 48px;
 
   /* ── Four tokens left with the metals ──
 
@@ -715,7 +693,6 @@
 
      The stamp goes the other way. It is the smallest tracked thing on the frame
      — provenance, present, never competing. */
-  --t-tv-band-stamp: 500 var(--fs-7) / 1 var(--font-mono);
 
   /* The thinnest line the wall draws, and now the wall's main structural
      device: four row separators on `/weekly`, the two frame rules on both
@@ -909,27 +886,11 @@
      at 12px and the disc at the same height as the venture name beside it,
      which is what makes it read as an inline mark rather than as a shrunken
      list row. */
-  --d-pod-mover-logo: 1.6667vw; /* 32px */
-
-  /* ── Type ──
-
-     One family, three jobs: the rank numerals, the venture names, the figures.
-
-     **Bebas Neue is gone from the venture names.** `--t-pod-name` and
-     `--t-pod-name-row` were set in the condensed face at weight 400, which was
-     right when a name had to fit inside a 233px card. Nothing is inside
-     anything now — a podium name has a third of the frame's width and a list
-     name has a `1fr` column — so the reason to condense went with the card, and
-     what is left is a second typeface on a slide whose numbers, labels,
-     masthead and every part of `/weekly` are Manrope.
-
-     A condensed face also loses more at distance than it saves in width: its
-     counters close first. These are Manrope at 700, tracked, uppercase. */
-  --t-pod-numeral: 800 var(--fs-2) / 1 var(--font-sans);
   /* **1.55vw, up from 1.32.** The podium's figure is 2.85vw, and at 1.32 the
      name beside it was less than half its size — which on three entries whose
      whole content is a mark, a name and a number reads as the name being a
      caption for the figure rather than the venture the figure belongs to. */
+  --t-pod-numeral: 800 var(--fs-2) / 1 var(--font-sans);
   --t-pod-name: 700 var(--fs-3) / 1.1 var(--font-sans);
   --t-pod-name-row: 700 var(--fs-3) / 1.1 var(--font-sans);
   --t-pod-label: 800 var(--fs-6) / 1.3 var(--font-sans);
@@ -953,7 +914,6 @@
      in a line of apparatus — see `--t-tv-mast-label` for why the right of the
      masthead is one size. */
   --t-pod-count: 800 var(--fs-5) / 1 var(--font-sans);
-  --t-pod-mover-label: 800 var(--fs-6) / 1 var(--font-sans);
   /* ── The venture, and it has to hold its own against the figure ──
 
      1.25vw is 24px, up from 0.94vw / 18px. The figure on this line is 27.8px,
@@ -965,12 +925,9 @@
 
      The standing stays a step down at 0.8vw — it is context, and it is tracked
      caps now so it groups with the label rather than with the name. */
-  --t-pod-mover-name: 700 var(--fs-4) / 1 var(--font-sans);
-  --t-pod-mover-line: 700 var(--fs-6) / 1 var(--font-sans);
   /* The footer's one loud thing, and the only figure on the slide wearing the
      accent. Down from 2.9vw — it was the headline of a filled panel and is now
      the last item on a caption line. */
-  --t-pod-mover-gain: 800 var(--fs-3) / 1 var(--font-sans);
 
   /* Tracking. Figures negative, names positive, and the smaller the name the
      wider it opens — a tracked line at 15px needs more air than the same
@@ -1141,12 +1098,6 @@
     height: 100vh;
     overflow: hidden;
     position: relative;
-  }
-
-  .tv-ticker {
-    font: var(--t-tv-ticker);
-    color: var(--fg-muted);
-    font-variant-numeric: tabular-nums;
   }
 
   /* Tabular figures everywhere a number can change in place, so digits do not
@@ -1594,91 +1545,6 @@
     color: var(--card-hot-ink);
   }
 
-  /* ── The legend, as a row of the frame ──
-
-     It was `position: absolute; bottom: calc(var(--s-board-bottom) * 0.18)`,
-     seated in a margin the grid left and did not use. Measured at 1920x1080 the
-     result was a caption whose box ran to y=1075.7 — **4.3px of clearance to the
-     frame's edge**, which a television's overscan crops outright and which read
-     as clipped even on a monitor that draws every pixel.
-
-     The old comment was explicit that if the ramp ever grew into that space the
-     legend is what gets clipped, "which is the right way round". It is the right
-     way round only while something is guaranteed to notice; on this wall nothing
-     is. A stated row of the frame's grid cannot be clipped by something it does
-     not overlap, and the grid above it shrinks to fit rather than the caption
-     being pushed off the bottom.
-
-     Three items on one line: the mark's meaning at the left where a reader
-     starts, what the board's big figure measures next to it, and the provenance
-     stamp hard against the right edge. `--s-8` groups the first two as the
-     legend proper and `margin-left: auto` on the stamp does the separating, so
-     the two halves cannot drift apart as the phrases change length. */
-  .tv-legend {
-    margin: 0;
-    display: flex;
-    align-items: center;
-    gap: var(--s-8);
-    height: var(--h-foot);
-    /* **No padding.** This carried `padding-top: var(--s-3)`, which pushed the
-       legend 6px down inside a row `/podium`'s footer centres its content in —
-       so the provenance stamp, which is the same element on both slides, sat at
-       y=1022.5 on one and y=1016.6 on the other. Measured. Nobody would catch
-       that in a rotation, and it is exactly the kind of drift a shared row
-       exists to prevent: both footers are `--h-foot` tall and both centre. */
-    font: var(--t-tv-legend);
-    letter-spacing: var(--track-overline);
-    text-transform: uppercase;
-    color: var(--ink-muted);
-    white-space: nowrap;
-  }
-
-  /* ── The legend's mark has to be the *same colour* as the marks it explains ──
-
-     This carried two declarations — `--bright-green` then `--green-600`, the
-     second winning — both left over from the green brand. Read back from the
-     running board: the legend's triangle was `rgb(90,58,142)` while every
-     triangle on the board was `rgb(228,167,243)`. **A legend drawn in a
-     different colour from the thing it describes.** Which is the failure
-     `components/BoardLegend.tsx` says it exists to prevent, in its own words:
-     two drawings of one symbol is how a legend starts lying about what it
-     explains. It shared the *shape* correctly, by reusing `.tv-day-mark`, and
-     then differed on the one other attribute the symbol has.
-
-     `--accent` is the value `.tv-card` resolves `--card-hot-ink` to, so this is
-     the same token rather than a copy of its answer. The legend is not inside a
-     card, so `--card-hot-ink` itself is not in scope here; one level up is as
-     close as the two can be bound. */
-  .tv-legend-mark {
-    color: var(--accent);
-  }
-
-  /* The legend's second phrase: what the board's big figure measures.
-     Separated by space rather than by a glyph — a bullet or a pipe would be one
-     more mark to explain, in a strip whose entire job is explaining marks.
-     `--s-4` against the row's own `--s-2` gap is enough to read as two
-     statements rather than one run-on.
-
-     It inherits everything else from `.tv-legend`, so it cannot drift out of
-     step with the phrase beside it. **`margin-left: auto`, not a fixed gap** —
-     the footer is a row of the frame now rather than a floating strip, so the
-     two statements go to the two ends of it and the space between them is
-     whatever the frame is wide. */
-  /* **`0`, not `auto`.** With `auto` this was pushed to the frame's right edge
-     and the legend's two phrases sat 1,400px apart reading as two unrelated
-     captions. They are both legend items — one explains the green mark, the
-     other explains what the board's big figure measures — so they group at the
-     left and `--s-8` from the row separates them. The stamp takes the right
-     end. */
-  .tv-legend-since {
-    margin-left: 0;
-  }
-
-  /* Provenance, hard against the frame's right edge. */
-  .tv-legend-stamp {
-    margin-left: auto;
-  }
-
   /* ── The direction mark ──
 
      **A shape, not a glyph.** `▲` and `▼` are drawn by whichever font in the
@@ -1866,26 +1732,6 @@
     width: 100%;
   }
 
-  /* ── Provenance recedes: the smallest tracked thing on either frame ──
-
-     **Scoped to the footers, not the masthead.** This was `.tv-mast .tv-ticker`
-     and the stamp has moved; left as it was, the rule matched nothing and the
-     stamp fell back to `.tv-ticker`'s bare mono — sentence case, untracked, on
-     a wall where every other label is tracked caps. A dead descendant selector
-     reports nothing, which is the same class of failure as the
-     `.tv-card-quiet .tv-card-badge` rule that never once matched.
-
-     Both footers, one rule, so the two slides cannot drift. */
-  .tv-legend .tv-ticker,
-  .tv-pod-mover .tv-ticker {
-    font: var(--t-tv-band-stamp);
-    letter-spacing: var(--track-overline);
-    text-transform: uppercase;
-    color: var(--ink-muted);
-  }
-
-  /* The footer line, shared: `/weekly`'s legend and `/podium`'s mover both sit
-     here, between the board's last row and the bottom safe margin. */
   /* ══ /PODIUM ═══════════════════════════════════════════════════════════════
 
      Three entries and a list of seven, inside the same editorial frame
@@ -2043,10 +1889,9 @@
      between a mark and the name under it measured **-4px** against the 24 it
      was told to be.
 
-     Four declarations present, correct-looking and doing nothing. Its two
-     siblings — `.tv-pod-row-name` and `.tv-pod-mover-name` — are flex children
-     and were blockified for free, which is why only this one drifted and why
-     nothing looked broken enough to check. */
+     Four declarations present, correct-looking and doing nothing. Its sibling
+     `.tv-pod-row-name` is a flex child and was blockified for free, which is
+     why only this one drifted and why nothing looked broken enough to check. */
   .tv-pod-name {
     display: block;
     font: var(--t-pod-name);
@@ -2123,141 +1968,6 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
-  /* ── The mover, as the frame's footer line ──
-
-     It was a filled pale panel sitting above the list in the right-hand column:
-     a label, a mark, a name, a standing and a 61px figure, in a rounded box.
-     The box was doing one job — saying "this is not fourth place" — and it did
-     it by being a different *kind* of object from the podium cards.
-
-     There are no cards to be a different kind of object from. It is a line in
-     the footer now, which is the same slot `/weekly` gives its legend, and it
-     cannot be mistaken for a rank because nothing around it carries one. That
-     also fixes the composition fault the panel caused: it took the top of the
-     right-hand column, which pushed the list of seven down and left the podium
-     bottoming out at y=881 against the list's y=1029 — measured — with 200px of
-     empty page under the podium and nothing to put in it. */
-  /* ── The footer line ──
-
-     `HIGHEST EARNER THIS WEEK · (mark) EMBER AND OAK · 25TH OVERALL · ₹15,000`
-     as one clump at the left, and the provenance stamp at the right.
-
-     ── The hole ──
-
-     The figure used to take `margin-left: auto` and sit against the frame's
-     right edge. Measured at 1920x1080 that left **1167px of nothing** between
-     `25th overall` and `₹15,000`, with 552px of content in an 1824px row. The
-     seven list rows above do the same left-name / right-figure trick and read
-     perfectly, because their column is 760px wide and the leader gap is ~290px;
-     at 1824px the same structure stops being a table row and becomes two
-     fragments at opposite ends of a wall.
-
-     So the statement groups and the stamp takes the right end. Two ends, both
-     real, which is exactly what `/weekly`'s legend does.
-
-     ── The gaps are a hierarchy ──
-
-     `--s-8` after the label, because the label is a heading for what follows
-     and has to be seen to end. `--s-4` inside the statement, close enough that
-     the mark, the venture, its standing and its figure read as one subject.
-     Every pair was `--s-5` before — the same 20px whether the pair was two
-     words of one statement or two separate statements — so nothing grouped, and
-     `EMBER AND OAK` ran into `25th overall`. */
-  .tv-pod-mover {
-    display: flex;
-    align-items: center;
-    gap: var(--s-8);
-    width: 100%;
-    min-width: 0;
-    height: var(--h-foot);
-  }
-
-  .tv-pod-mover-label {
-    font: var(--t-pod-mover-label);
-    letter-spacing: var(--track-overline);
-    text-transform: uppercase;
-    color: var(--ink-muted);
-    white-space: nowrap;
-    flex: none;
-  }
-
-  .tv-pod-mover-row {
-    display: flex;
-    /* **Baseline, not centre.** The venture, its standing and the figure are
-       type on one line; centring aligned three boxes of three heights by their
-       middles, which put three baselines within 4px of each other — close
-       enough to read as a misalignment rather than as a decision. The mark is
-       the one thing with no baseline of its own and takes an explicit nudge. */
-    align-items: baseline;
-    gap: var(--s-4);
-    min-width: 0;
-  }
-
-  .tv-pod-mover-mark {
-    width: var(--d-pod-mover-logo);
-    height: var(--d-pod-mover-logo);
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    flex: none;
-    /* A disc has no baseline, so in a baseline-aligned row it hangs from its own
-       bottom edge and sits high. This drops it onto the line the type is on —
-       the same trick `.tv-day-mark` uses on `/weekly`'s legend. */
-    align-self: center;
-  }
-
-  .tv-pod-mover-name {
-    font: var(--t-pod-mover-name);
-    letter-spacing: var(--track-pod-name-row);
-    text-transform: uppercase;
-    color: var(--ink);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 0;
-  }
-
-  /* Where the venture stands. **Tracked caps, like the label** — it was sentence
-     case at 16.5px between two uppercase elements, so one line carried three
-     casings and this read as a fragment somebody forgot to finish. Muted,
-     because the news on this line is the figure and this is its context. */
-  .tv-pod-mover-line {
-    font: var(--t-pod-mover-line);
-    letter-spacing: var(--track-overline);
-    text-transform: uppercase;
-    color: var(--ink-muted);
-    white-space: nowrap;
-    flex: none;
-  }
-
-  /* The one figure on this slide the accent is spent on, which is what keeps it
-     an accent. It is the largest thing on the line and the only accent-inked
-     one; it does not also need to be the furthest right. */
-  .tv-pod-mover-gain {
-    font: var(--t-pod-mover-gain);
-    letter-spacing: var(--track-pod-fig);
-    color: var(--accent);
-    white-space: nowrap;
-    flex: none;
-    /* A little more air than the `--s-4` inside the statement: this is the
-       payoff at the end of a sentence, not another clause in it. */
-    margin-left: var(--s-2);
-  }
-
-  /* Provenance, hard against the frame's right edge. */
-  .tv-pod-mover-stamp {
-    margin-left: auto;
-    flex: none;
-  }
-
-  /* Nobody has traded yet. An em dash — the same silence the podium's own
-     figures keep, rather than a sentence explaining that the week is young. */
-  .tv-pod-mover-empty {
-    font: var(--t-pod-mover-line);
-    color: var(--ink-muted);
-  }
-
 
   .tv-idle-1 { animation: tv-idle-1 17s ease-in-out infinite; }
   .tv-idle-2 { animation: tv-idle-2 19s ease-in-out infinite -6s; }

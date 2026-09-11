@@ -11,12 +11,20 @@ import type { BoardMode, Snapshot } from '@/lib/types'
  * then whatever apparatus the slide carries pushed hard against the right edge.
  * A rule underneath it, drawn by the page.
  *
- * **The provenance stamp is not here any more.** It moved to the footer on both
- * slides — a colophon is where a colophon goes, it gives each footer a second
- * end so a single left-aligned statement does not read as a row that failed to
- * fill, and it takes one item out of a masthead that was carrying a lockup, a
- * heading, a countdown *and* a timestamp. See `components/MoverPanel.tsx` and
- * `components/BoardLegend.tsx`.
+ * ── There is no provenance stamp on this wall ──
+ *
+ * It sat here, then moved to the footer on both slides, then left with the
+ * footers. Recorded rather than forgotten, because of what it was carrying:
+ * **this wall shows no error state by design.** A failed fetch keeps the last
+ * good data and goes on rendering perfectly healthy stale numbers for days, and
+ * the `as_of` stamp was the only thing that made that visible.
+ * `docs/DESIGN.md` §2 added it for exactly that reason and called it a
+ * deliberate exception to the brief's layout.
+ *
+ * So a board frozen on Tuesday's figures now looks identical to a working one.
+ * If it comes back, the right of this masthead is where it goes — one
+ * `<AsOf snapshot={snapshot} />` inside `.tv-mast-meta`, and `AsOf.tsx` is in
+ * git.
  *
  * ── What this replaced ──
  *

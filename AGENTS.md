@@ -98,6 +98,14 @@ npm run build        # next build
   second half is the one that is easy to lose.
 - **No filler content.** Empty is a valid state. The wall being quiet is what makes it
   loud when something happens. No spinners, ever — first paint reads cached CSV.
+- **There is no footer and no `as_of` stamp**, on either slide. Both were removed
+  by decision. The cost is recorded rather than argued: this wall shows no error
+  state, so a failed fetch keeps the last good data and renders perfectly healthy
+  stale numbers for days — and the stamp was the only thing that made that
+  visible. `docs/DESIGN.md` §2 added it for that reason and called it a
+  deliberate exception. **A board frozen on Tuesday now looks exactly like a
+  working one.** If it returns, it goes in the right of the masthead;
+  `components/AsOf.tsx` is in git.
 - **No trigger types beyond the 15 in the design.** The list was deliberately narrowed.
 - **The rotation between the two slides is ours, and it is the only rotation logic
   here.** `components/Rotator.tsx`, thirty seconds a slide, by soft navigation. That
