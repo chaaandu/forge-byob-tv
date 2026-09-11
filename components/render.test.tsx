@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { FleaDial } from '@/components/FleaDial'
 import { MoverPanel } from '@/components/MoverPanel'
+import { monogramFor } from '@/components/VentureLogo'
 import { Podium, podiumTeams } from '@/components/Podium'
 import { VentureCard } from '@/components/VentureCard'
 import { pagesOf } from '@/components/VentureName'
@@ -242,35 +243,88 @@ describe('Podium', () => {
     host.remove()
   })
 
-  it('idles the three marks, on three timelines, and nothing else', () => {
-    // Never in lockstep. Assigning these by hashing the team id put all three
-    // on the same timeline on the real feed — three ids into three buckets
-    // collide about one time in nine even with a good hash, and this one is
-    // worse than that. Place-based assignment cannot collide at all.
-    const host = document.createElement('div')
-    document.body.append(host)
-    const root = createRoot(host)
-    act(() => root.render(<Podium ranked={rankTeams(TRADING)} />))
-    const marks = [...host.querySelectorAll('.tv-pod-mark-band [class*="tv-idle-"]')]
-    expect(marks).toHaveLength(3)
-    expect(new Set(marks.map((el) => el.className)).size).toBe(3)
+  /**
+   * ── Every rule in the monogram is a decision, and none of them is visible ──
+   *
+   * A rendered disc shows two letters. Whether those are the *right* two is a
+   * question about a string transformation, and the failure mode is a venture
+   * carrying somebody's idea of its initials on a wall for a fortnight with
+   * nobody able to tell it was a bug. `ATC (All Things Camphor)` shipped to a
+   * screen as `A(` before this existed.
+   */
+  it('derives a venture\'s two letters', () => {
+    const of = (ventureName: string, teamId = 'VBC107') =>
+      monogramFor(team({ teamId, ventureName }))
 
-    // **And the three marks are the *only* things idling.** This is the half of
-    // the assertion that carries the motion trim: the rank numerals used to
-    // dance on the same repertoire, one timeline offset from the mark beneath
-    // them, which made an unscoped query return six. Three is now the whole of
-    // what moves at rest on this slide, and that is the property the overtake
-    // kick is spending — an interrupt only reads as one against a still frame.
+    // The shape the whole thing is for.
+    expect(of('Banana Chips')).toBe('BC')
+    expect(of('Apple')).toBe('AP')
+
+    // A parenthetical is an expansion, not the name. This is the one that
+    // reached a screen.
+    expect(of('ATC (All Things Camphor)')).toBe('AT')
+
+    // Punctuation is not a word, so the second letter is the second *venture*.
+    expect(of('Wake & Wyze')).toBe('WW')
+    expect(of("Nature's Nibbles")).toBe('NN')
+
+    // A leading article is grammar. Five of the current cohort start with
+    // `The`, and without this they collapse onto `T?`.
+    expect(of('The Nibble Co')).toBe('NC')
+    expect(of('The Ugly Mugling')).toBe('UM')
+    // ...but an article that is the *whole* name stays, because then it is the
+    // name. Nothing is called this; the rule just must not return empty.
+    expect(of('The')).toBe('TH')
+
+    // One letter stays one letter. Inventing a second would name a venture
+    // something it is not called.
+    expect(of('S')).toBe('S')
+
+    // Case and diacritics survive intact.
+    expect(of('snackerly')).toBe('SN')
+    expect(of('Yōki')).toBe('YŌ')
+
+    // No name yet: the team ID's last two, which agrees with the label printed
+    // under the mark, since `nameOf` gives that team its ID as its name.
+    expect(of('', 'VBC107')).toBe('07')
+    expect(of('   ', 'VBC139')).toBe('39')
+  })
+
+  it('idles nothing at all, on either slide', () => {
+    // ── This asserted the opposite, twice over ──
     //
-    // Unscoped on purpose. Scoping it to the mark band would pass just as
-    // happily with a numeral dancing again, which is the regression.
-    expect(host.querySelectorAll('[class*="tv-idle-"]')).toHaveLength(3)
-    // The wrapper existed only to hold the dance apart from the numeral's
-    // `background-position` sweep, since one element can carry `animation`
-    // once. With no dance there is nothing to separate.
-    expect(host.querySelectorAll('.tv-pod-numeral-dance')).toHaveLength(0)
-    act(() => root.unmount())
-    host.remove()
+    // It pinned that the three podium marks idle, that they are on three
+    // *different* timelines (hashing the team id put all three on the same one
+    // on the real feed — three ids into three buckets collide about one time in
+    // nine, and that hash is worse than that), and that they are the only
+    // things moving at rest, because the rank numerals used to dance too.
+    //
+    // Every one of those claims was about how to spend the wall's movement
+    // budget well. The budget is now spent on nothing: `/weekly`'s row-1 idle
+    // went with its cards, and the podium's three went with its plinths. The
+    // only animation either board runs is the overtake.
+    //
+    // Kept as a test rather than deleted because **this is the property the
+    // overtake is spending.** An interrupt only reads as one against a still
+    // frame, and "still" is not something a reader can verify by looking at a
+    // screenshot of a frame — the screenshot is always still. It is verifiable
+    // here.
+    const boards = [
+      <Podium key="podium" ranked={rankTeams(TRADING)} />,
+      <WeeklyGrid key="weekly" teams={TRADING} />,
+    ]
+    for (const board of boards) {
+      const host = document.createElement('div')
+      document.body.append(host)
+      const root = createRoot(host)
+      act(() => root.render(board))
+      // Unscoped on purpose. Scoping to the mark band would pass just as
+      // happily with a numeral dancing again, which is the regression.
+      expect(host.querySelectorAll('[class*="tv-idle-"]')).toHaveLength(0)
+      expect(host.querySelectorAll('[class*="tv-look-"]')).toHaveLength(0)
+      act(() => root.unmount())
+      host.remove()
+    }
   })
 })
 

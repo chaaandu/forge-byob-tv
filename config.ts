@@ -273,20 +273,27 @@ export const KICK_MS = 3_000
 /**
  * Team IDs that have a logo committed at `public/logos/<TEAM_ID>.png`.
  *
- * ── ⚠️ THESE ARE PLACEHOLDERS. THEY ARE COHORT 2026's ARTWORK. ──
+ * ── IT IS EMPTY, AND THAT IS THE CORRECT STATE TODAY ──
  *
- * All 39 files are the previous cohort's logos, renamed `SLE-C4NN.png` →
- * `VBC1NN.png` so the wall has something in every tile while Forge C1's layout
- * and design are being built. **`VBC101` is currently wearing Dosa Crisps'
- * mark.** Every one of these is a real venture's identity on a different
- * venture's card.
+ * It used to list all 39. Every one of those files is the *previous* cohort's
+ * artwork, renamed `SLE-C4NN.png` → `VBC1NN.png` so the wall had something in
+ * every tile while Forge C1's layout was being built — so `VBC101` was wearing
+ * Dosa Crisps' mark, `VBC102` was wearing ROOH's, and so on down the board.
+ * Thirty-nine real ventures' identities, each on a different venture's card.
  *
- * That is fine for measuring a frame and wrong for a campus TV, and it is
- * exactly the class of error this project is built around: it renders
- * convincingly, passes every check, and would run for weeks. **Empty this list
- * before the wall goes on a screen**, or replace the files. A team not in the
- * list gets the coloured initial disc, which is a first-class treatment, so an
- * empty list is a perfectly good state — not a degraded one.
+ * The warning that stood here said "**empty this list before the wall goes on a
+ * screen**". It went on a screen first. This is that.
+ *
+ * A team not in this list gets `VentureLogo`'s two-letter monogram, which is a
+ * first-class treatment and not a degraded one — see that component. An empty
+ * list is therefore a perfectly good wall, and the honest one: a monogram says
+ * "this venture has not drawn a mark yet", where borrowed artwork says
+ * something false about who a team is.
+ *
+ * The files are left in `public/logos/` rather than deleted. Nothing requests
+ * them while this list is empty — presence is read from the list, never the
+ * filesystem — and they are what `scripts/prepare-logos.py` was calibrated
+ * against.
  *
  * ── The list, not the filesystem, is what the wall reads ──
  *
@@ -308,45 +315,9 @@ export const KICK_MS = 3_000
  * filename there would be wiped; and the file itself arrives by commit anyway,
  * so listing it in the same commit is one action rather than two in two systems
  * that would drift.
+ *
+ * **Adding one team is safe.** The monogram and the logo draw at the same
+ * diameter in the same disc, so a board of thirty-eight monograms and one real
+ * mark is a board with one venture further along, not a broken grid.
  */
-export const LOGOS: readonly TeamId[] = [
-  'VBC101',
-  'VBC102',
-  'VBC103',
-  'VBC104',
-  'VBC105',
-  'VBC106',
-  'VBC107',
-  'VBC108',
-  'VBC109',
-  'VBC110',
-  'VBC111',
-  'VBC112',
-  'VBC113',
-  'VBC114',
-  'VBC115',
-  'VBC116',
-  'VBC117',
-  'VBC118',
-  'VBC119',
-  'VBC120',
-  'VBC121',
-  'VBC122',
-  'VBC123',
-  'VBC124',
-  'VBC125',
-  'VBC126',
-  'VBC127',
-  'VBC128',
-  'VBC129',
-  'VBC130',
-  'VBC131',
-  'VBC132',
-  'VBC133',
-  'VBC134',
-  'VBC135',
-  'VBC136',
-  'VBC137',
-  'VBC138',
-  'VBC139',
-]
+export const LOGOS: readonly TeamId[] = []

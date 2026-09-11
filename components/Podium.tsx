@@ -35,15 +35,12 @@ import type { OvertakeEvent, Team } from '@/lib/types'
  * bigger circle. The numerals are printed, but they are captions now rather than
  * a third encoding.
  *
- * ── What this deliberately spends ──
+ * ── Nothing on this slide moves until something happens ──
  *
- * This wall's rule is that movement means something happened. A permanently
- * idling mark spends that rule, and `/weekly` stopped spending it when its row-1
- * idle was removed. These three still idle: three marks on a slide whose only
- * other content is a list is a different proposition from ten marks on a board
- * of thirty-nine, and the idle is slow and small where an overtake is fast,
- * large and directional. If the podium ever reads as restless, `idleOf` is the
- * one place to switch it off.
+ * This wall's rule is that movement means something happened, and both slides
+ * now keep it completely: no idle here, none on `/weekly`, no lustre sweeps, no
+ * numeral dance. The only animation either board runs is the overtake, and it
+ * plays against a frame that is otherwise entirely still.
  *
  * **No `layout` prop**, here or anywhere in the board tree — there is a source
  * scan in render.test.tsx that fails the build on one. The idle is CSS keyframes
@@ -53,8 +50,6 @@ import type { OvertakeEvent, Team } from '@/lib/types'
 
 const TOP = 10
 const PODIUM_PLACES = 3
-
-const IDLE_TIMELINES = ['tv-idle-1', 'tv-idle-2', 'tv-idle-3'] as const
 
 /**
  * The ranks in the order the pillars are drawn: 2 · 1 · 3.
@@ -92,18 +87,18 @@ const PLACES = {
 type Place = keyof typeof PLACES
 
 /**
- * The mark's share of the white mount it sits in.
+ * ── `MARK_IN_DISC` moved into `VentureLogo` ──
  *
- * **93%, up from 82%.** The mount exists so a cream logo has an edge against a
- * dark card, and a thin ring does that as well as a thick one — at 82% the white
- * was reading as part of the mark rather than as a border around it, which made
- * every logo look like it had been shrunk inside its own circle.
+ * It was the mark's share of the white mount it sat in — 0.93, so a cream logo
+ * had a ring of white giving it an edge against the dark page. Correct for
+ * artwork, and wrong for the two-letter monogram that now draws every mark on
+ * this wall: a tinted disc is its own ground, so the inset put a white ring
+ * around thirty-nine of them.
  *
- * Still not 100%: every source logo is already a circle with its own ground, so
- * a mark drawn flush to the mount's edge hides the mount entirely and the
- * treatment would exist only for the teams without artwork.
+ * The mount and the inset are one decision and they belong together, on the
+ * side of the branch that knows which kind of mark it is drawing. The three
+ * call sites below pass the full diameter.
  */
-const MARK_IN_DISC = 0.93
 
 /**
  * Who is on the board. The top ten of whatever it is handed, and nothing else.
@@ -131,17 +126,28 @@ function revenueOf(team: Team | undefined): string {
 }
 
 /**
- * Which of the three idle timelines this mark runs.
+ * ── THE PODIUM NO LONGER IDLES ──
  *
- * **By podium place, not by team.** Three places and three timelines, so the
- * marks on screen can never fall into lockstep — the entire visible requirement,
- * and one a hash cannot promise: three ids into three buckets collide about one
- * time in nine even with a good hash, and `lib/seed.ts` documents a worse
- * failure on top of that.
+ * `idleOf(place)` handed each of the three marks one of three looping
+ * timelines, assigned by place rather than by team id so the three on screen
+ * could never fall into lockstep. It was the last moving thing on the wall that
+ * did not mean something had happened.
+ *
+ * `/weekly`'s row-1 idle went first, and the argument there is the argument
+ * here: **this board has exactly one thing it needs to be able to say — a rank
+ * changed hands — and it says it with a two-and-a-half-second interrupt. An
+ * interrupt only reads as one against a still frame.** The case for keeping
+ * these three was that three marks is a different proposition from ten; on a
+ * slide whose entire left half is those three marks, it is not.
+ *
+ * It also cost something measurable that a still frame does not: three
+ * permanently animating elements with `willChange: transform`, on a page that
+ * stays open for weeks without reloading.
+ *
+ * The `tv-idle-*` classes and their keyframes stay in `app/mesa-tv.css`,
+ * unreferenced. Nothing on the wall idles now, and the honest way to bring it
+ * back is to decide to, not to find a class still lying around.
  */
-function idleOf(place: number): string {
-  return IDLE_TIMELINES[(place - 1) % IDLE_TIMELINES.length]
-}
 
 /**
  * One place on the podium: a numeral, a mark, a name, a figure.
@@ -218,14 +224,10 @@ function PodiumCard({
             its size through the first paint rather than assembling itself on
             the wall. Empty rather than a placeholder mark — a grey circle is
             filler, and this wall carries none. */}
-        <div
-          className={team === undefined ? undefined : idleOf(place)}
-          style={{
-            width: '100%',
-            aspectRatio: 1,
-            ...(team === undefined ? {} : { willChange: 'transform' }),
-          }}
-        >
+        {/* No idle class and no `willChange` — see the note above. The box
+            stays, because the travelling disc during an overtake is measured
+            against it and the flip's 3D context is established here. */}
+        <div style={{ width: '100%', aspectRatio: 1 }}>
           {/* **Hidden rather than unmounted while it travels.** The travelling
               disc is measured against this element's box, and an unmounted
               element has no box — the path would be measured from nothing on
@@ -235,7 +237,7 @@ function PodiumCard({
             style={{ width: '100%', height: '100%', opacity: departing ? 0 : 1 }}
           >
             {team === undefined ? null : (
-              <VentureLogo team={team} size={`calc(${p.disc} * ${MARK_IN_DISC})`} />
+              <VentureLogo team={team} size={p.disc} />
             )}
           </div>
 
@@ -255,7 +257,7 @@ function PodiumCard({
                 ease: ['linear', 'easeOut', 'linear'],
               }}
             >
-              <VentureLogo team={arriving} size={`calc(${p.disc} * ${MARK_IN_DISC})`} />
+              <VentureLogo team={arriving} size={p.disc} />
             </motion.div>
           )}
         </div>

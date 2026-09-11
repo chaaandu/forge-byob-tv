@@ -159,6 +159,44 @@
   --ink-on-solid: var(--white);
   --ink-on-solid-2: var(--orchid-300);
 
+  /* ── §2a · The mark tints ────────────────────────────────────────────────
+
+     Six fills for `VentureLogo`'s monogram disc, and one ink for all six.
+
+     They lived in `components/VentureLogo.tsx` as six `var(--...)` strings, and
+     three of the six were *surfaces* rather than fills: `--deep-teal` is
+     "deepest brand surface", which `.surface-dark` correctly re-points to the
+     page colour — so one venture in six drew a disc that was exactly the page,
+     with a letter floating on nothing. The same failure §5 records for the
+     podium's ink, in a different component.
+
+     ── One ink, because the six are chosen to sit on one side of the page ──
+
+     The old set mixed light and dark fills and carried a `LIGHT_TINTS` set
+     naming which of them needed dark type. That is a rule a person has to
+     re-derive by hand every time a tint changes, and nothing fails loudly when
+     they get it wrong. Here all six are darker than the light page and all six
+     are lighter than the dark one, so the ink is a property of the surface and
+     the component needs no branch at all.
+
+     Light page (#f5edfb), white ink, measured:
+
+       royal-purple #452a74  10.01:1      violet-700 #633da3   6.45:1
+       amethyst     #5a3a8e   7.53:1      royal-700  #37215c  12.07:1
+       vivid-violet #7c4dcc   5.54:1      aubergine-600 #3a2560  11.66:1
+
+     Orchid 700 (#b685c2) is in neither set: 2.41:1 for white here and 1.89:1
+     for aubergine ink on the dark slide. It is the one Forge mid-tone that
+     fails on both sides, which is exactly what "mid-tone" means. */
+  --mark-1: var(--royal-purple);
+  --mark-2: var(--amethyst);
+  --mark-3: var(--vivid-violet);
+  --mark-4: var(--violet-700);
+  --mark-5: var(--royal-700);
+  --mark-6: var(--aubergine-600);
+  --mark-ink: var(--white);
+
+
   /* The podium's three card fills used to be declared here, as gradients
      rather than flat tokens — flat was right on white, where a card's edge came
      from the page, and on a field that is itself purple a flat card is a
@@ -189,6 +227,36 @@
   --hairline-strong: rgba(255, 255, 255, 0.28);
   --ink-on-solid: var(--white);
   --ink-on-solid-2: var(--orchid-300);
+
+  /* The mark tints, for a dark page. All six are light fills, so the ink is
+     Deep Aubergine for every one of them — the page colour, which is what makes
+     a monogram read as cut *out of* its disc rather than printed on it.
+
+     Read back from the running board at 1920x1080 — ink against its own fill,
+     and the fill against the card it sits on, which is `--surface-raised` and
+     not the page. Both matter: a monogram nobody can read and a disc with no
+     edge fail the same way.
+
+                             ink/fill   fill/card
+       violet-300 #a98bdd      5.60       4.60
+       orchid     #e4a7f3      8.39       6.89
+       mint-300   #c7b5e8      8.45       6.94
+       orchid-300 #edc5f7     10.51       8.63
+       violet-100 #d7c9ef     10.18       8.36
+       orchid-700 #b685c2      5.37       4.41
+
+     Orchid 700 is the floor of the set on both counts and earns its place on
+     this side only; on the light page it is 2.41:1 for white ink. The two dark
+     Forge steps are excluded here for the same reason in the other direction —
+     a fill needing the opposite surface's ink puts the branch back. */
+  --mark-1: var(--violet-300);
+  --mark-2: var(--orchid);
+  --mark-3: var(--mint-300);
+  --mark-4: var(--orchid-300);
+  --mark-5: var(--violet-100);
+  --mark-6: var(--orchid-700);
+  --mark-ink: var(--aubergine);
+
 
   /* The green tokens that components still read, re-pointed for this surface.
      Without this, a card asking for `--deep-forest-green` on a dark page draws

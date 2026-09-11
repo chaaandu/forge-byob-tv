@@ -46,10 +46,9 @@ npm run build        # next build
   discipline did not: one file owns colour, everything else reads a token.
   `colors_and_type.css` is still imported for type, spacing, radii and shadows.
 
-- **Two surfaces, and a component must not name a colour.** `/podium` is
-  `.surface-dark`, `/weekly` is `.surface-light`, and the rotation between them carries
-  the Forge deck's own dark/light rhythm. Read `--surface`, `--ink`, `--ink-muted`,
-  `--accent`, `--hairline` and let the surface decide what they mean.
+- **Two surfaces, and a component must not name a colour.** Read `--surface`,
+  `--ink`, `--ink-muted`, `--accent`, `--hairline` and let the surface decide what
+  they mean.
 
   This is not tidiness. Every light accent that carries on Deep Aubergine dies on
   Lavender Mist and the deep purples do the exact reverse — gold goes 8.59:1 → 1.61:1,
@@ -58,6 +57,34 @@ npm run build        # next build
   survive the flip at all: `--deep-teal` is "deepest brand surface", and three things
   used it as ink. On the dark slide they painted text in the page colour and measured
   **1.00:1**. Fixed in §5 of `forge-tokens.css`; do not reintroduce the pattern.
+  `VentureLogo`'s six mark tints were the same bug in a component, fixed the same
+  way in §2a.
+
+  **Both slides are `.surface-dark` today**, and this rule used to add that
+  `/weekly` is `.surface-light` and that the rotation carries the Forge deck's own
+  dark/light rhythm. That half was a brand argument rather than a correctness one
+  and it was overruled deliberately: on Lavender Mist every one of thirty-nine
+  venture marks needed a white ground to have an edge, and the venture names
+  measured 4.61:1 against the page. On Deep Aubergine the marks *are* the light
+  and the names measure 12.01:1. What it costs is the flip — two dark slides
+  thirty seconds apart do not announce the rotation the way a dark-to-light cut
+  did, and the layouts have to carry that now.
+
+  **The machinery above stays, and stays exercised.** `.surface-light` is fully
+  defined, every token still resolves on it, and nothing in either page tree
+  names a colour — which is what keeps this one line to change back, and what
+  makes the paragraph above still binding rather than historical.
+- **No borrowed artwork.** `LOGOS` in `config.ts` is empty, so every mark on the
+  wall is `VentureLogo`'s two-letter monogram on a tinted disc. It listed all 39
+  for a while and every one of those files was the *previous* cohort's logo,
+  renamed — `VBC101` wearing Dosa Crisps' mark. A monogram says "this venture has
+  not drawn a mark yet"; borrowed artwork says something false about who a team
+  is. Adding a real logo is one commit: the file in `public/logos/` and the id in
+  that list, together.
+- **Nothing on either slide moves until something happens.** No idle, no sweeps,
+  no dance. The only animation the wall runs is the overtake, and it plays
+  against a frame that is otherwise entirely still — an interrupt only reads as
+  one against a still frame. `render.test.tsx` pins this.
 - **No filler content.** Empty is a valid state. The wall being quiet is what makes it
   loud when something happens. No spinners, ever — first paint reads cached CSV.
 - **No trigger types beyond the 15 in the design.** The list was deliberately narrowed.

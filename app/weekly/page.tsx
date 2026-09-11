@@ -81,8 +81,21 @@ export default function WeeklyPage() {
   )
 
   return (
-    // **`surface-light` — the light half of the rotation.** See the note in
-    // app/podium/page.tsx; these two classes are the pair.
+    // ── `surface-dark`, and this used to be the light half of the rotation ──
+    //
+    // Both slides are dark now. `AGENTS.md` pinned this one as `.surface-light`
+    // on the grounds that alternating dark and light every thirty seconds is
+    // the Forge deck's own rhythm, and that rule has been rewritten rather than
+    // quietly broken — see the note there.
+    //
+    // The argument for the change is that this board is thirty-nine marks and
+    // seventy-eight figures, and on Lavender Mist every one of those marks had
+    // to carry its own white ground to have an edge. On Deep Aubergine the
+    // marks *are* the light, so the board reads as content on a field rather
+    // than as ink on paper. What it costs is the flip: two dark slides thirty
+    // seconds apart do not announce the rotation the way a dark-to-light cut
+    // did. The layouts are what has to carry that now, and they are about as
+    // different as two leaderboards can be.
     //
     // ── The editorial frame ──
     //
@@ -98,7 +111,7 @@ export default function WeeklyPage() {
     // television is type the panel's overscan crops before the wall ever sees
     // it — see `--s-safe-y`.
     <main
-      className="tv-frame surface-light"
+      className="tv-frame surface-dark"
       style={{
         display: 'grid',
         gridTemplateRows: 'auto auto minmax(0, 1fr) auto auto',
@@ -124,7 +137,7 @@ export default function WeeklyPage() {
 
           `openWeek` is still read: it is what the dev trigger stamps into an
           event id, whichever contest is on. */}
-      <WallHeader snapshot={snapshot} label={boardHeading(mode)} mode={mode} tone="light" />
+      <WallHeader snapshot={snapshot} label={boardHeading(mode)} mode={mode} tone="dark" />
 
       <div className="tv-rule" style={{ marginTop: 'var(--s-mast-rule)' }} />
 

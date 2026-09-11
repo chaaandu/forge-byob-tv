@@ -264,18 +264,11 @@ export function WeeklyGrid({
           // fell apart, `VentureDisc` computed `width: 0px`, and forty marks
           // vanished from a board that still rendered its cards, its badges and
           // all forty figures. Measured, not reasoned about.
-          // **The rule between rows is drawn by the row above it**, as a
-          // pseudo-element seated in the middle of the row gap — see
-          // `.tv-row-rule` in app/mesa-tv.css. Not a `border-bottom`, which
-          // would hug the row's own edge and read as that row being underlined
-          // rather than as the two rows being separated; and not a grid item of
-          // its own, which would mean the row template no longer describes the
-          // ramp.
-          //
-          // The last row does not draw one. The frame's own rule above the
-          // footer is the board's bottom edge, and two lines 22px apart is a
-          // box nobody asked for.
-          className={i < rows.length - 1 ? 'tv-card-row tv-row-rule' : 'tv-card-row'}
+          // **No rule between rows.** The cards carry their own edges now —
+          // see the note at `.tv-row-rule` in app/mesa-tv.css for why a
+          // hairline 11px under a row of bounded cells reads as a line drawn
+          // through the gap rather than as a separator.
+          className="tv-card-row"
           style={
             {
               display: 'grid',

@@ -275,7 +275,11 @@
 
      It is also the *row* gap, so the three vertical gaps shrink by 4px each —
      12px the board does not need, which lands in the bottom clearance. */
-  --s-card-gap: var(--s-2);
+  /* 0.62vw — 12px at 1920, up from 8. The cards have visible edges now, and
+     two edges 8px apart read as a seam rather than as two cards. `--w-card`
+     below derives from this, so the cards narrow to 171.6px and the grid still
+     ends exactly on the frame's margin. */
+  --s-card-gap: 0.62vw;
 
   /* The gap *between rows*, separate from the one between columns since the
      cards came down 5%. Shorter cards freed 51px of frame, and left at the
@@ -289,24 +293,31 @@
   --s-row-gap: 1.15vw;
   --s-card-pad: var(--s-2);
 
-  /* ── Zero, because there is no card for the mark to be inside ──
+  /* The card's horizontal padding. It went to zero while the cells were
+     unbounded — with no card, all it did was push the rank numeral 8px in from
+     a box nobody could see, which put the board's left column of ranks at x=56
+     while the masthead and both frame rules start at x=48.
 
-     It was 8px of horizontal padding keeping a mark clear of a filled card's
-     left and right edges. With the fills gone, all it did was inset the rank
-     numeral 8px from the cell — which put the board's left-hand column of ranks
-     at x=56 while the masthead's lockup and both frame rules start at x=48.
-     Measured, and visible: the one vertical line the eye can actually check on
-     this layout was the only thing not on it.
+     The card is back, so the numeral has an inside to sit in and the padding is
+     what puts it there. 0.4vw is 7.7px, which is what it was; the alignment
+     that mattered when the box was invisible does not, now that the box is the
+     thing the eye reads the numeral against. */
+  --s-card-inset: 0.4vw;
 
-     What separates two cells is the 8px column gap, which is still there. A
-     cell that also pads itself is paying for the same separation twice, and it
-     is the venture names — centred in whatever width the cell has — that pay. */
-  --s-card-inset: 0px;
+  /* The card's corner. Small — 8px at 1920 — because thirty-nine of them are on
+     screen at once and a radius that reads individually at that count reads as
+     a field of lozenges together. Enough to say "bounded", not enough to have a
+     shape of its own. */
+  --r-card: 0.42vw;
 
   /* The card's own padding. **There is no grid gap between the card's parts**:
      each reserved line below includes its own separation, so a line that
      collapses to zero takes its gap with it instead of leaving one behind. */
-  --s-card-pad-y: 0.25vw;
+  /* The card's vertical padding. 0.45vw rather than the 0.25 the unbounded
+     cell used: a visible edge needs clearance from its contents, where an
+     invisible one only needed to not collide with the row gap. It costs each
+     row ~7.7px of mark. */
+  --s-card-pad-y: 0.45vw;
 
   /* How far the card's contents sit above where the padding alone would put
      them. 0.31vw is 6px at 1920 and 5px at 1600 — inside the 7.7px and 6.4px of
@@ -441,12 +452,20 @@
   /* The venture name, in tracked uppercase, sized to survive the corridor
      rather than to fit the longest name — the fit question is answered in the
      report and by the sheet, not by shrinking type until everything fits. */
-  /* **0.8vw, up from 0.72.** The cell's inset went to zero when the cards did,
-     which gave every name the full 175px of its column instead of 159px — so
-     the size that was chosen to fit the longest name on two lines now has 10%
-     more room than it was chosen against. Two lines at 15.4px come to 35.4px
-     inside the 36.5px `--h-card-name` reserves. */
-  --t-tv-card-name: 700 clamp(10px, 0.8vw, 17px) / 1.15 var(--font-sans);
+  /* ── 0.74vw, and the number follows the card's width ──
+
+     It was 0.72 when a card was 159px of usable width, 0.8 when the cards went
+     away and a cell had its full 175px, and back down now that the card is a
+     card again with a 12px column gap and its own padding — 156px. Each time,
+     the constraint is the same one: the longest name in the cohort has to reach
+     the end of its second line and stop.
+
+     At 0.8vw "In Between Sips by Kaappitalism" measured 46px of content in the
+     36.5px `--h-card-name` reserves — a third line, growing down through the
+     figure. At 0.74 it breaks as two lines and clears. `.tv-card-name` carries
+     a two-line clamp underneath this, because the sheet can rename a venture on
+     any given Tuesday and a type size is not a guarantee. */
+  --t-tv-card-name: 700 clamp(9px, 0.74vw, 16px) / 1.15 var(--font-sans);
   /* Reduced 20% from clamp(15px, 1.45vw, 30px). Still the largest thing on the
      card, and still the figure the board exists to show. */
   --t-tv-card-week: 700 clamp(12px, 1.16vw, 24px) / 1 var(--font-sans);
@@ -1235,16 +1254,13 @@
     backface-visibility: hidden;
     display: grid;
     place-items: center;
-    /* **Opaque white under every mark, unconditionally.** The pale card used to
-       outline its mount instead of filling it, on the argument that a white disc
-       in a mint box is the brightest thing on a card whose job is to be quiet.
-       True, and it cost more than it bought: six of the forty logos are drawn
-       dark on transparency — Pitlane, Sortd, Olfiq, Kaappitalism, Blunnt,
-       Stackin — and with no fill under them they were black artwork on a dark
-       card, which is not a quiet mark but an absent one. The card is quiet by
-       its fill and its ink; the mount is what makes the artwork exist. */
-    background: var(--white);
-    box-shadow: 0 3px 6px color-mix(in srgb, var(--midnight-charcoal) 20%, transparent);
+    /* **No ground here.** This painted opaque white under every mark, because
+       six of the placeholder logos are drawn dark on transparency and without a
+       fill they were black artwork on a dark card — not a quiet mark but an
+       absent one. That reasoning is intact and it has moved into
+       `VentureLogo`, which is the only thing that knows whether it is drawing
+       artwork (needs a ground) or a tinted monogram (is one). A mount painting
+       it unconditionally put a white ring around every monogram on the wall. */
   }
 
   /* Mesa's own mark on the logomark green.
@@ -1258,7 +1274,9 @@
      disappears" looks like. The rim traces the circle on both surfaces without
      making the back brighter than the front. */
   .tv-disc-back {
-    background: var(--deep-forest-green);
+    /* Unlike the front, the back keeps its fill: it carries the Mesa lockup and
+       nothing else, so with no ground it is a white wordmark on the page. */
+    background: var(--surface-solid);
     box-shadow: inset 0 0 0 var(--stroke-thin) color-mix(in srgb, var(--white) 72%, transparent);
     transform: rotateY(180deg);
   }
@@ -1281,56 +1299,59 @@
      what lets a card crossing rank `SOLID_RANKS` mid-flip change its *whole*
      surface — box, mount, name, figure — in one step, from one animation, at
      one instant. Toggling a class cannot be scheduled; a variable can. */
-  /* ── There is no card ──
+  /* ── The card came back, flat ──
+     ── and the row rules went with it ──
 
-     This rule used to paint a gradient-filled block with three box-shadows — a
-     lit top edge, a shaded right face and a drop shadow — and `.tv-card-quiet`
-     painted a white one with an outline. Thirty-nine of them, in four rows, in
-     two fills.
+     Three versions of this board exist in the history and it is worth being
+     precise about which parts of each survived, because two of them were right
+     about different things.
 
-     **All of it is gone, and the cell is what remains.** What separates one
-     entry from the next is space; what separates one row from the next is a
-     hairline in the row gap. The reasoning the fills were built on is still
-     sound and still recorded above — a board of marks floating on nothing did
-     read as a sticker sheet — but the answer to that is structure, and a ruled
-     matrix is structure. A card is only one way to draw an edge, and it is the
-     expensive way: thirty-nine edges is thirty-nine objects competing with
-     thirty-nine pieces of a venture's own artwork.
+     **Before:** a gradient-filled block with a lit top edge, a shaded right
+     face and a drop shadow, plus a second white outlined variant for ranks past
+     `SOLID_RANKS`. Thirty-nine objects in two fills, competing with thirty-nine
+     pieces of a venture's own artwork.
 
-     The ink tokens stay, because the marks and figures still need to know what
-     to be. They resolve off the *surface* now rather than off a card fill,
-     which is why `--card-fig-ink` reads `--ink` and not a card-local value:
-     there is no card-local anything left to read. */
+     **Then: nothing.** Cells sat directly on the surface, separated by space
+     across and a hairline in the row gap. That fixed the competing, and it
+     broke something the fills had been carrying: with no container, the rank
+     numeral had no seat — it floated at the top-left of an invisible box — and
+     ten cells across a 1824px row read as one continuous band of marks rather
+     than as ten entries.
+
+     **Now:** a flat card. One fill, one hairline, one radius; no gradient, no
+     shadow, no second variant. It bounds the cell so the rank has an inside to
+     sit in and the ten entries in a row are ten objects — and it does that with
+     a single value of contrast against the page rather than with lighting.
+     `--surface-raised` is 1.22:1 against Deep Aubergine, which the token's own
+     note calls "deliberately almost nothing": enough to bound, not enough to
+     compete.
+
+     The row rules are gone with it. A card already has a bottom edge, and a
+     hairline 11px below one is a second edge saying the same thing. */
   .tv-card {
-    /* The venture name. **`--ink-2`, not `--ink-muted`** — measured, muted ink
-       on the light surface is 4.61:1, which passes AA for small text and is
-       thin at 13.8px read from a corridor. This is the only thing on a cell
-       that names the venture, so it is content rather than apparatus and it
-       takes the surface's secondary ink. */
     --card-sub-ink: var(--ink-2);
     --card-hot-ink: var(--accent);
     --card-fig-ink: var(--ink);
 
-    background: none;
-    border-radius: 0;
-    box-shadow: none;
+    background: var(--surface-raised);
+    border-radius: var(--r-card);
+    box-shadow: inset 0 0 0 var(--stroke-hair) var(--hairline);
     padding: var(--s-card-pad-y) var(--s-card-inset);
   }
 
   /* ── The bottom half of the board is quieter, and it is the ink that says so ──
 
      It used to be the fill: ranks above `SOLID_RANKS` got a white card with an
-     outline instead of a filled purple one. With no card there is no fill to
-     turn down, so the distinction moves to where it was always more honest —
-     the figure and the name recede one step, and the rank numeral with them.
+     outline instead of a filled purple one, so the boundary was visible across
+     the room as two blocks of colour.
 
-     **Which is a real reduction in what the board says.** The old split was
-     visible across the room as two blocks of colour; this one is only visible
-     once you are reading. That is the trade the editorial pass makes
-     deliberately: the board's job at six metres is *order*, which reading
-     position already carries, and shouting the boundary between rank 20 and
-     rank 21 was spending the loudest device on the page to draw a line the
-     ranking does not actually have. */
+     **One fill now, for all thirty-nine.** Two card surfaces on a board whose
+     ordering is already carried by reading position was the loudest device on
+     the page drawing a line the ranking does not actually have — rank 21 is not
+     a different kind of thing from rank 20. The figure and the venture name
+     step back an ink instead, which is visible once you are reading and invisible
+     from the corridor, and that is the right way round for a distinction that
+     only matters once you have found your own card. */
   .tv-card-quiet {
     --card-sub-ink: var(--ink-muted);
     --card-hot-ink: var(--accent-quiet);
@@ -1426,7 +1447,10 @@
      content. */
   .tv-card-rank {
     position: absolute;
-    top: 0;
+    /* The card's padding box, not the cell's top edge. While the cells were
+       unbounded these were the same line; with a card the numeral has to sit
+       inside its own padding or it rides the card's top edge. */
+    top: var(--s-card-pad-y);
     left: var(--s-card-inset);
     z-index: 2;
     font: var(--t-tv-card-rank);
@@ -1475,36 +1499,18 @@
     opacity: 1;
   }
 
-  /* ── The rule between two rows ──
+  /* ── The rule between two rows has gone ──
 
-     Drawn by the row above it, as a pseudo-element seated in the *middle* of the
-     row gap rather than on either row's edge. A `border-bottom` would hug the
-     row above and read as that row being underlined; centred, it reads as the
-     two rows being separated, which is what it is.
+     `.tv-row-rule` drew a hairline seated in the middle of the row gap, which
+     was the right device for a board of unbounded cells: with nothing else
+     marking where one row ended, the rule was the structure.
 
-     `left`/`right` are pulled out to the frame's content edge rather than the
-     row's, so the four rules and the two frame rules are one column of lines.
-     They are already the same width — the row fills the content box — but row 4
-     is centred and narrower when the cohort is 39, and a rule that followed
-     *that* row's box would be short. Stating it removes the coincidence.
+     The cards are the structure now, and a card has four edges of its own. A
+     hairline 11px under a row of cards is a second horizontal edge 11px from
+     thirty-nine first ones — it reads as a rule drawn *through* the gap rather
+     than as a separator, because there is nothing left for it to separate.
 
-     `overflow: visible` is implied and must stay so: a mark travels out of its
-     row during an overtake, and clipping here would cut it in half the moment
-     it crossed a row boundary. */
-  .tv-row-rule {
-    position: relative;
-  }
-
-  .tv-row-rule::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    bottom: calc(-0.5 * var(--s-row-gap) - 0.5 * var(--stroke-hair));
-    height: var(--stroke-hair);
-    background: var(--hairline);
-    pointer-events: none;
-  }
+     `WeeklyGrid` no longer applies the class. */
 
   /* ── The three text lines under the mark ──
 
@@ -1517,6 +1523,9 @@
      lines tall and no name needs three, so nothing is cut; it is there so that a
      name which one day did need three could not push the figure out of the card
      without anyone noticing. */
+  /* The box: a fixed two-line height that the name is centred in, so a
+     one-line name and a two-line name put their block in the same place and the
+     figures below them stay on one line across the row. */
   .tv-card-name {
     font: var(--t-tv-card-name);
     letter-spacing: var(--track-overline);
@@ -1530,6 +1539,26 @@
     display: flex;
     align-items: center;
     justify-content: center;
+  }
+
+  /* ── The two-line clamp, and it is a guarantee rather than a fallback ──
+
+     `--t-tv-card-name` is chosen so the longest name in the *current* cohort
+     breaks on two lines, and that is a fact about thirty-nine strings in a
+     spreadsheet, not a property of the layout. A venture can be renamed from
+     that spreadsheet on any Tuesday. Without this, the next long name grows a
+     third line down through the figure — and on a board where `overflow:
+     hidden` on the box above would clip it top *and* bottom, the result is a
+     name with its middle showing, which reads as a rendering fault.
+
+     Clamped, the worst case is an ellipsis: a name that is too long says so, in
+     the one way a passer-by already understands. */
+  .tv-card-name > span {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
   }
 
   .tv-card-week {
@@ -1940,19 +1969,13 @@
     perspective: 900px;
   }
 
+  /* A plain round holder. The ground and the ring belong to `VentureLogo`,
+     which is the only thing that knows whether the mark inside is artwork on a
+     white disc or a monogram that is its own disc. */
   .tv-pod-disc {
     border-radius: 50%;
-    background: var(--white);
     display: grid;
     place-items: center;
-    overflow: hidden;
-    /* A hairline rather than a 1.2vw shadow. Every mark on this slide sits on
-       its own white disc, and on aubergine that disc already has all the edge
-       it needs; the shadow was lifting an object off a page that has no other
-       objects on it. The ring is there for the two or three ventures whose
-       artwork is white to the edge, which would otherwise bleed into the disc
-       and lose their shape. */
-    box-shadow: inset 0 0 0 var(--stroke-hair) var(--hairline-strong);
   }
 
   /* The travelling disc's two faces, during an overtake. Circles in their own
@@ -1963,7 +1986,6 @@
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: var(--white);
     display: grid;
     place-items: center;
     overflow: hidden;
@@ -1975,7 +1997,6 @@
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: var(--white);
     backface-visibility: hidden;
     transform: rotateY(180deg);
     box-shadow: inset 0 0 0 var(--stroke-hair) var(--hairline-strong);
@@ -2016,9 +2037,10 @@
   }
 
   /* The rule between two list rows, seated in the middle of the row gap — the
-     same device `.tv-row-rule` uses on `/weekly`, for the same reason a
-     `border-bottom` is wrong: a border hugs the row above and reads as that row
-     being underlined rather than as two rows being separated. */
+     same reason a `border-bottom` would be wrong: a border hugs the row above
+     and reads as that row being underlined rather than as two rows being
+     separated. (`/weekly` used the identical device until its cells became
+     bounded cards and stopped needing one — see `.tv-row-rule` there.) */
   .tv-pod-row-rule::after {
     content: '';
     position: absolute;
@@ -2034,11 +2056,8 @@
     width: var(--d-pod-row-logo);
     height: var(--d-pod-row-logo);
     border-radius: 50%;
-    background: var(--white);
     display: grid;
     place-items: center;
-    overflow: hidden;
-    box-shadow: inset 0 0 0 var(--stroke-hair) var(--hairline-strong);
   }
 
   /* ── The name in a list row ──
@@ -2075,10 +2094,23 @@
      right-hand column, which pushed the list of seven down and left the podium
      bottoming out at y=881 against the list's y=1029 — measured — with 200px of
      empty page under the podium and nothing to put in it. */
+  /* ── The footer line, and its spacing is the whole of it ──
+
+     Four things on one line — a label, a mark, a venture, where they stand —
+     and a figure hard against the right edge. It read as `EMBER AND OAK25th
+     overall` with the label crowding both: `--s-5` between every pair is the
+     same 20px whether the pair is two words of one statement or two separate
+     statements, so nothing grouped.
+
+     The gaps are a hierarchy now. `--s-8` after the label, because the label is
+     a heading for everything to its right and needs to be seen to end.
+     `--s-4` inside the group, which is close enough that the mark, the name and
+     the standing read as one subject. The figure takes `margin-left: auto` and
+     is not in this rhythm at all. */
   .tv-pod-mover {
     display: flex;
-    align-items: center;
-    gap: var(--s-5);
+    align-items: baseline;
+    gap: var(--s-8);
     width: 100%;
     min-width: 0;
     height: var(--h-foot);
@@ -2094,7 +2126,13 @@
 
   .tv-pod-mover-row {
     display: flex;
-    align-items: center;
+    /* **Baseline, not centre.** The name and the standing are type on one line
+       and the figure is type on the same line; centring aligned three boxes of
+       three heights by their middles, which put three different baselines
+       within 4px of each other — close enough to read as a misalignment rather
+       than as a decision. The mark is the one thing with no baseline of its
+       own, so it takes an explicit nudge below. */
+    align-items: baseline;
     gap: var(--s-4);
     flex: 1;
     min-width: 0;
@@ -2104,17 +2142,18 @@
     width: var(--d-pod-mover-logo);
     height: var(--d-pod-mover-logo);
     border-radius: 50%;
-    background: var(--white);
     display: grid;
     place-items: center;
-    overflow: hidden;
     flex: none;
-    box-shadow: inset 0 0 0 var(--stroke-hair) var(--hairline-strong);
+    /* A disc has no baseline, so in a baseline-aligned row it hangs from its
+       own bottom edge and sits high. This drops it onto the line the type is
+       on — the same trick `.tv-day-mark` uses on `/weekly`'s legend. */
+    align-self: center;
   }
 
   .tv-pod-mover-name {
     font: var(--t-pod-mover-name);
-    letter-spacing: var(--track-overline);
+    letter-spacing: var(--track-pod-name-row);
     text-transform: uppercase;
     color: var(--ink);
     white-space: nowrap;

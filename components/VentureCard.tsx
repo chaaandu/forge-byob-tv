@@ -319,7 +319,13 @@ export function VentureCard({
             wall names every card it draws. Two lines are reserved for it: five
             of forty do not fit on one at this width, and the fix for that is
             the report's to propose, not this component's to pick. */}
-        <div className="tv-card-name tv-card-detail">{nameOf(team)}</div>
+        {/* The inner span is what carries the two-line clamp — see
+            `.tv-card-name > span`. The box outside it is what centres the block
+            in the height the rhythm reserves, and a `-webkit-box` cannot do
+            both. */}
+        <div className="tv-card-name tv-card-detail">
+          <span>{nameOf(team)}</span>
+        </div>
 
         {/* The figure the board exists to show, **on every card, including a
             challenge of zero and a challenge below zero**.
