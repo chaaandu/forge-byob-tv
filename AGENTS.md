@@ -178,8 +178,21 @@ npm run build        # next build
   about a team; a festival illustration is not claiming to be anyone's mark.
   `public/lottie/ganesha-NOTICE.txt` carries the author and licence beside the
   file, the way `Crown-NOTICE.txt` does. The JSON is the untouched download so
-  it can go back into the LottieFiles editor; the maroon background layer and
-  the two baked-in text layers are stripped at runtime, not in the file.
+  it can go back into the LottieFiles editor; the maroon background layer, the
+  two baked-in text layers and the mooshika are stripped at runtime, not in the
+  file.
+
+  **The rat is the one that had to be measured, and it is a warning about
+  cropping.** The ornament is a crop, because the idol occupies only part of a
+  1920x1080 composition — and the first crop was taken from six sampled frames,
+  none of which the rat is on screen for. It runs in from off-frame right at
+  frame 46 and is gone by 83, so for 1.2 seconds of every loop the corner
+  showed a rat sliced through by the crop's bottom edge: rendering
+  convincingly, reporting nothing, exactly this wall's stated failure mode. It
+  cannot be kept — measured over all 218 frames its path takes the live area to
+  the full **1920 x 783**, so an 80px-tall ornament containing it would be
+  **196px wide** and `/weekly`'s fourth row leaves 92px. **Anything that
+  re-crops this must scan every frame, not a sample.**
 
   **If it should stop looping, that is one word** — `loop: false` on the
   `loadAnimation` call — and what remains is a figure that arrives once and

@@ -43,9 +43,16 @@ half hour discovering that the obvious route is blocked.
 Nothing has been changed in this JSON. That is deliberate: it can go straight
 back into the LottieFiles editor, be edited there, and be dropped back in place.
 
-Three things are therefore stripped at runtime, in `components/Ganesha.tsx`
+Four things are therefore stripped at runtime, in `components/Ganesha.tsx`
 rather than here — the full-frame maroon background layer, the two baked-in text
-layers, and nothing else. See that file for why each.
+layers, the mooshika, and nothing else. See that file for why each.
+
+The mooshika is the one that will look like a mistake. Ganesha's vahana runs in
+from off-frame right at frame 46 and is gone by frame 83, and it is removed
+because it does not fit rather than because it is unwanted: measured over all
+218 frames, the idol alone occupies 917x708 but the rat's path takes the live
+area to the full 1920x783. The wall renders this 80px tall in a corner gutter
+92px wide, and including the rat would make it 196px wide.
 
 ── One trap, for whoever edits this next ──
 

@@ -49,7 +49,27 @@ import { isFestival } from '@/lib/schedule'
  *    they would be illegible smears, and copy on this wall belongs in Forge
  *    type where it can be read and changed.
  *
- * 3. **Nothing else.** The `loopOut()` expression on one rotation is left in,
+ * 3. **The mooshika.** Ganesha's vahana runs in from off-frame right at frame
+ *    46, crosses the bottom of the composition and is gone by frame 83 — about
+ *    1.2 seconds of the 7.3. It is stripped **because it does not fit, and the
+ *    arithmetic is not close.** Measured over all 218 frames: the idol alone
+ *    occupies 917x709, but the rat's path takes the composition's live area to
+ *    the full 1920 x 783. That is aspect 2.45 against the idol's 1.29 — so an
+ *    80px-tall ornament that contained the rat would be **196px wide**, in a
+ *    gutter that is 92px. There is no 196x80 clear rectangle in either slide's
+ *    bottom corner; `/weekly`'s fourth row leaves 92px on the left and about
+ *    the same on the right.
+ *
+ *    It had to be found by measuring, and the way it was missed is worth
+ *    keeping. The first crop came from six sampled frames — 0, 40, 90, 140, 190
+ *    and 217 — and the rat is on screen for none of them. It sat between two
+ *    samples. So for 1.2 seconds of every loop the corner showed a rat sliced
+ *    through the middle by the crop's bottom edge, which is precisely this
+ *    wall's stated failure mode: it rendered convincingly and nothing reported
+ *    it. **Anything that re-crops this must scan every frame**, not a sample —
+ *    `noRat` in the scan that produced `CROP` is the union over all 218.
+ *
+ * 4. **Nothing else.** The `loopOut()` expression on one rotation is left in,
  *    which is why this imports the full `lottie.min.js` rather than
  *    `lottie_light` — the light build silently drops expressions, and the
  *    symptom would be one sub-animation quietly stopping partway through.
@@ -168,10 +188,21 @@ export function Ganesha() {
         data.layers = data.layers.filter((layer: { nm?: string }) => layer.nm !== 'bg')
         const figure = data.assets.find((asset: { id?: string }) => asset.id === 'comp_0')
         // Defensive rather than decorative: if the artist's file is ever
-        // replaced with a re-export whose comp ids differ, the text strip
+        // replaced with a re-export whose comp ids differ, the strip below
         // should no-op rather than throw and take the slide down with it.
         if (figure !== undefined) {
-          figure.layers = figure.layers.filter((layer: { ty?: number }) => layer.ty !== 5)
+          figure.layers = figure.layers.filter(
+            (layer: { ty?: number; nm?: string }) =>
+              // The two text layers, by type.
+              layer.ty !== 5 &&
+              // The mooshika, by name — `rat Comp 1`. **Matched on the name
+              // rather than on its `refId` of `comp_1`**, because a re-export
+              // renumbers comps freely while the artist's layer name usually
+              // survives; matching the id would silently stop stripping and put
+              // the sliced rat back. Anchored at the start so it cannot catch a
+              // name that merely contains the letters.
+              !/^rat\b/i.test(layer.nm ?? ''),
+          )
         }
 
         // **The only thing that can still this.** lottie-web's SVG renderer
