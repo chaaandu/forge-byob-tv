@@ -48,6 +48,36 @@ looked perfect at 1920.
 you care about; under ~5px is a heading waiting to be overlapped by a font that
 loads a step heavier.
 
+## `measure-figures.mjs` — does the widest rupee figure still fit?
+
+```bash
+node scripts/measure-figures.mjs [url]
+```
+
+Writes the widest figure the wall is sized for into every figure element,
+measures what the string genuinely needs against the box that has to hold it,
+and puts the original text back. No stress fixture required — it measures the
+running layout at whatever data happens to be live.
+
+**Reach for it after changing any figure's type size, any column width, or
+`formatRupees`.**
+
+The trap it exists for: `en-IN` groups by lakh and crore, so a figure gains
+separators faster than it gains digits — `₹2,42,546` is 9 glyphs, `₹10,00,000`
+is 10, `₹1,00,00,000` is 12. The board is tuned against a cohort whose leader is
+on ₹2.4L, so **a third of the width a figure can eventually need is never
+exercised on screen**. Measured before this existed: `/podium`'s leader figure
+at 56px needed 350px in a 312px column and overflowed 38px into the gaps either
+side of first place, at every viewport, with nothing reporting it.
+
+Two things it does *not* do, both deliberate. It does not measure
+`scrollWidth` — that returns `max(clientWidth, content width)`, so an element
+already as wide as its container reports the container's width whatever is in
+it, and every figure comes back with exactly zero slack, which reads as "fits
+perfectly" and means "measured nothing". And it does not claim an unbounded
+guarantee: twelve glyphs is the bound, ten crore is the first thirteen-glyph
+figure, and `lib/format.test.ts` pins where that line is.
+
 ## `measure-frame.mjs` — the full report for one slide
 
 ```bash

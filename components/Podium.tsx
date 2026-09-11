@@ -919,11 +919,25 @@ function PodiumBoard({
         // element's own box but painted against another's.
         position: 'relative',
         display: 'grid',
-        // **Not two equal halves.** They were `1fr 1fr`, which gave the list the
-        // same width as three podium columns and left its names and figures in a
-        // 912px row with a 400px hole between them. The podium needs the width
-        // because three marks and three figures sit side by side in it; a list
-        // of seven single lines does not.
+        // ── **Not two equal halves, and 1.32 is measured twice over** ──
+        //
+        // They were `1fr 1fr`, which gave the list the same width as three
+        // podium columns and left its names and figures in a 912px row with a
+        // 400px hole between them. The podium needs the width because three
+        // marks and three figures sit side by side in it; a list of seven
+        // single lines does not.
+        //
+        // **It went to 1.45 for one commit and came back.** The reason for
+        // widening was real — `scripts/measure-figures.mjs` showed a
+        // twelve-glyph figure with only 3px of slack in first place's column at
+        // 1366x768 — and the fix was wrong, because the width came out of the
+        // list and `ATC (All Things Camphor)` started ellipsising at 1920,
+        // where it had fitted. That trades a name a passer-by can read today
+        // for headroom against ₹1,00,00,000, which thirty-nine student ventures
+        // will not reach this programme.
+        //
+        // The slack came out of the two gaps instead — see `--w-pod-half-gap`
+        // and `--s-pod-gap` — which is space neither column was reading.
         gridTemplateColumns: 'minmax(0, 1.32fr) minmax(0, 1fr)',
         gridTemplateRows: 'minmax(0, 1fr)',
         columnGap: 'var(--w-pod-half-gap)',

@@ -127,7 +127,19 @@
      they sit in one row and a two-pixel difference between them would read as a
      mistake rather than as a hierarchy. Where two things need to differ, they
      differ by a whole step or by weight — never by 1.2px. */
-  --fs-1: clamp(34px, 2.9167vw, 78px);
+  /* **48px, and the number is derived rather than chosen.** It was 56, which
+     was the largest the composition wanted. Measured with a stress fixture: at
+     56px a 12-glyph figure — `₹1,00,00,000`, which is what `formatRupees`
+     produces at one crore — needs 350px in a 312px podium column and overflows
+     by 38px into the gaps either side of first place. At 48px it needs 300px
+     and fits with 12 to spare, so **the widest figure this formatter can print
+     is bounded by the column by construction** rather than by nobody having
+     earned it yet.
+
+     What it costs is 8px on the single biggest number on the wall, which at six
+     metres is nothing. What it buys is that the leader's figure cannot be the
+     thing that breaks the slide on the day a team has a very good quarter. */
+  --fs-1: clamp(30px, 2.5vw, 67px);
   --fs-2: clamp(24px, 2.0833vw, 56px);
   --fs-3: clamp(17px, 1.4583vw, 39px);
   --fs-4: clamp(14px, 1.1458vw, 31px);
@@ -823,11 +835,21 @@
      separating two groups that are both left-aligned columns of similar-sized
      marks, and at anything under ~3vw they read as one seven-wide arrangement
      that has been interrupted. */
-  --w-pod-half-gap: 3.3333vw; /* 64px */
+  /* **48px, down from 64.** The gap was generous because the podium and the
+     list are both left-aligned columns of similar-sized marks and under ~3vw
+     they read as one seven-wide arrangement. 2.5vw still clears that, and the
+     16px it returns goes to both columns — which is where first place's figure
+     found the headroom it needed for a twelve-glyph number without taking it
+     out of the list's names. See `gridTemplateColumns` in components/Podium.tsx. */
+  --w-pod-half-gap: 2.5vw; /* 48px */
 
   /* Between the three places. Tighter than the half gap by a factor of two, so
      the three read as one group before they read as three columns. */
-  --s-pod-gap: 1.6667vw; /* 32px */
+  /* **24px, down from 32.** Between the three places, and tighter than the
+     half gap by a factor of two so the three read as one group before they read
+     as three columns — which 24 against 48 still does. The 8px each returns is
+     the other half of first place's figure headroom. */
+  --s-pod-gap: 1.25vw; /* 24px */
 
   /* The board's own inset inside the frame. The frame already carries
      `--s-safe-x`, so these are only the air between the rule above and the
@@ -1506,6 +1528,14 @@
      Clamped, the worst case is an ellipsis: a name that is too long says so, in
      the one way a passer-by already understands. */
   .tv-card-name > span {
+    /* **A word with no break opportunity has to break anyway.** Measured with a
+       stress fixture: `Averylongsinglewordwithnobreaks` needs 359px in a 156px
+       card and the `overflow: hidden` below clipped it mid-glyph, with no
+       ellipsis — `line-clamp` only ellipsises at the *line* limit, so a single
+       long word is cut with nothing to say it was cut. `anywhere` breaks it
+       across the two reserved lines instead, and the clamp then ellipsises what
+       is left. A venture can be named anything from a spreadsheet. */
+    overflow-wrap: anywhere;
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
@@ -1886,6 +1916,21 @@
      Four declarations present, correct-looking and doing nothing. Its sibling
      `.tv-pod-row-name` is a flex child and was blockified for free, which is
      why only this one drifted and why nothing looked broken enough to check. */
+  /* ── A podium figure never wraps ──
+
+     The three places share one text baseline, and that shared line is the whole
+     composition — it is what turns three marks of two sizes into a staircase. A
+     figure that wrapped to two lines would drop its own baseline below the other
+     two and the podium would stop being one.
+
+     `--fs-1` is sized so the widest figure `formatRupees` can produce fits the
+     column, so this should never be reached. It is here because "should never
+     be reached" is a property of today's type scale, and the failure if it is
+     wrong is the composition rather than one number. */
+  .tv-pod-slot .tv-figure {
+    white-space: nowrap;
+  }
+
   .tv-pod-name {
     display: block;
     font: var(--t-pod-name);
