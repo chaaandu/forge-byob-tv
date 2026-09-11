@@ -476,11 +476,61 @@
 
      The two paddings shrank for the same reason. They were sized to keep a
      mark clear of a card's edge; there is no card, so what they keep it clear
-     of is the row gap's hairline, which needs far less. */
-  --h-card-rank: 1.25vw; /* 24px */
-  --h-card-name: 1.875vw; /* 36px */
+     of is the row gap's hairline, which needs far less.
+
+     ── THE FOUR RESERVATIONS WERE THE FOUR CONTENTS, EXACTLY ──
+
+     Measured at 1920x1080, before this: `8 + 24 + 98.6 + 36 + 28 + 24 + 8` came
+     to 226.6 against a row of 226.6, and the gaps between the rank and the
+     mark, the mark and the name, the name and the figure and the figure and the
+     capsule were **0.0, 0.0, 0.0 and 0.0**. Nothing was wrong with any one
+     line; what was missing was the space between them, and a rhythm with no
+     separation in it has no grouping either — four things evenly stacked, all
+     claiming the same relationship to each other.
+
+     It only *showed* on a two-line name, which is why it survived: the name box
+     was 36px against two 17.25px lines, so a one-line name got 9.35px of air on
+     each side and looked deliberate, and the eight cards whose names wrapped
+     had 0.75px and read as a collision with the figure under them. The fix is
+     not a bigger box for the name — it is separation that both cases get, and a
+     first line that starts in the same place whichever case a card is. See
+     `.tv-card-name`, which stops centring for that reason.
+
+     ── WHERE THE SPACE CAME FROM ──
+
+     The frame has none: the board fills it to 4px at 1920, and every band above
+     it is either overscan margin or masthead. So it comes from the marks, which
+     is what `--d-card-logo` is for — it takes the row's remainder — and the
+     trade is stated rather than hidden. Row 1's disc goes 98.6 → 90.6 and row
+     4's 74.2 → 66.2, an 8% mark against a floor of 48px.
+
+     Twelve of the twenty came back off the rank strip instead. **That strip is
+     not the numeral's height, and it never was** — the numeral is
+     `position: absolute`, so what this token reserves is only *how far down the
+     mark starts*. The two were the same number by coincidence. They are
+     separate now: `--h-rank-line` keeps the numeral's box at exactly the 24px
+     it had, so no rank moves by a pixel, and the strip under it shrinks to 12.
+     The disc rises into the numeral's band and cannot reach it — a circle
+     centred in 155.6px of card leaves its top-left corner empty, and at the
+     numeral's lowest pixel the nearest disc edge is 48px out against a numeral
+     26.6px wide. Verified in the browser at all four rows, not reasoned about:
+     the clearance is 21px at the tightest row. */
+  /* How tall the rank numeral's own line box is. Unchanged at 24px, and
+     deliberately no longer the same token as the strip below — see above. */
+  --h-rank-line: 1.25vw; /* 24px */
+  --h-card-rank: 0.625vw; /* 12px */
+  --h-card-name: 2.3958vw; /* 46px — 6px of air, two 17.25px lines, 6px of air */
   --h-card-fig: 1.4583vw; /* 28px */
-  --h-card-today: 1.25vw; /* 24px */
+  /* The capsule's row is taller than the capsule now: 34px holding a 24px pill
+     leaves 5px above it and 5px below, where `height: 100%` left the pill
+     touching the figure's box at the top and sitting 8px off the card's bottom
+     edge at the other end. A tag pressed against a figure reads as part of it. */
+  --h-card-today: 1.7708vw; /* 34px */
+  --h-day-pill: 1.25vw; /* 24px */
+  /* How far a name's first line sits under the mark. Inside `--h-card-name`,
+     not a grid gap — the card's parts each carry their own separation, which is
+     the rule that keeps a line's spacing leaving with the line. */
+  --s-card-name-top: 0.3125vw; /* 6px */
 
   /* The card's own width, spelled out because the mark needs it as a *length*
      and the grid only ever expresses it as a fraction. Ten columns and nine
@@ -1707,7 +1757,7 @@
     font: var(--t-tv-card-rank);
     letter-spacing: var(--track-overline);
     font-variant-numeric: tabular-nums;
-    line-height: var(--h-card-rank);
+    line-height: var(--h-rank-line);
     color: var(--ink-muted);
   }
 
@@ -1745,7 +1795,7 @@
        4 topped at the same y with a 24px one, which on a ruled matrix is three
        numerals visibly off the line the other thirty-six are on. Restating it
        here puts every rank on the cell's own rhythm whatever its size. */
-    line-height: var(--h-card-rank);
+    line-height: var(--h-rank-line);
     color: var(--accent);
     opacity: 1;
   }
@@ -1774,21 +1824,50 @@
      lines tall and no name needs three, so nothing is cut; it is there so that a
      name which one day did need three could not push the figure out of the card
      without anyone noticing. */
-  /* The box: a fixed two-line height that the name is centred in, so a
-     one-line name and a two-line name put their block in the same place and the
-     figures below them stay on one line across the row. */
+  /* ── The name starts under the mark, it is not centred under it ──
+
+     The box was two lines tall and centred its content, and the comment here
+     claimed that put a one-line name and a two-line name "in the same place".
+     It does the opposite, and the board said so: measured across row 1, `DOSA
+     CRISPS` began at y=172 and `THE UGLY MUGLING` at y=163. On a ruled matrix
+     of thirty-nine cards that is a row of names on no line at all — every
+     wrapped name starts half a line higher than its neighbours, and eight of
+     thirty-nine wrap.
+
+     Centring also spends the box's spare height on whichever side it likes.
+     With two lines reserved and one line in them it gave 9.35px above and
+     below; with two lines in them, 0.75px — so the one case that needed
+     separation from the figure was the one case that had none.
+
+     `flex-start` and a stated `padding-top` instead. **Every name's first line
+     now begins exactly `--s-card-name-top` under the mark**, wrapped or not,
+     and the spare line on a one-line card falls below the name where it reads
+     as the gap between the venture and its figure rather than as a name
+     floating loose of the mark it labels. That gap is doing real work: the card
+     says two things — who this is, and what they made — and nothing else on it
+     groups them.
+
+     `box-sizing` is stated rather than inherited. The padding is load-bearing
+     for the rhythm, `--h-card-name` is subtracted from the mark's height in
+     `.tv-card-row`, and under `content-box` that subtraction would be 6px short
+     with the card overflowing its row to make up the difference — which is a
+     row of marks quietly 6px smaller than the ramp says, reported by nothing.
+     Tailwind's preflight happens to set it globally; this does not depend on
+     that staying true. */
   .tv-card-name {
     font: var(--t-tv-card-name);
     letter-spacing: var(--track-overline);
     text-transform: uppercase;
     color: var(--card-sub-ink);
     text-align: center;
+    box-sizing: border-box;
     height: var(--h-card-name);
+    padding-top: var(--s-card-name-top);
     width: 100%;
     min-width: 0;
     overflow: hidden;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
   }
 
@@ -1881,7 +1960,10 @@
     align-items: center;
     justify-content: center;
     gap: var(--s-day-pill-gap);
-    height: 100%;
+    /* **A stated height, not `100%`.** The row it sits in is taller than the
+       capsule on purpose — see `--h-card-today` — and a capsule that fills its
+       row is a capsule with nothing between it and the figure above it. */
+    height: var(--h-day-pill);
     padding-inline: var(--s-day-pill-x);
     border-radius: var(--r-pill);
     background: color-mix(in srgb, var(--card-hot-ink) 18%, transparent);
