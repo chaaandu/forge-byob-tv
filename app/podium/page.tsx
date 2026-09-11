@@ -117,7 +117,7 @@ export default function PodiumPage() {
           `/weekly` gives its legend. It was a filled pale panel at the top of
           the right-hand column, which is what pushed the list of seven down and
           left 200px of empty page under the podium. */}
-      <MoverPanel ranked={teams} />
+      <MoverPanel snapshot={snapshot} ranked={teams} />
 
       <DevPodiumTrigger
         teams={teams}

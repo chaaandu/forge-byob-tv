@@ -1,9 +1,10 @@
 'use client'
 
+import { AsOf } from '@/components/AsOf'
 import { VentureLogo } from '@/components/VentureLogo'
 import { biggestMover } from '@/lib/climber'
 import { formatRupees, ordinal } from '@/lib/format'
-import type { Team } from '@/lib/types'
+import type { Snapshot, Team } from '@/lib/types'
 
 /**
  * Who has moved the most this week, as the frame's footer line.
@@ -34,11 +35,24 @@ import type { Team } from '@/lib/types'
  * figure on the slide. A climb is not a podium position. Spending the accent
  * once is what keeps it an accent.
  */
-export function MoverPanel({ ranked }: { ranked: readonly Team[] }) {
+export function MoverPanel({ snapshot, ranked }: { snapshot: Snapshot | null; ranked: readonly Team[] }) {
   const mover = biggestMover(ranked)
 
   return (
     <aside className="tv-pod-mover">
+      {/* ── One sentence, and it stays together ──
+
+          Label, venture, standing, figure — read in that order, grouped as one
+          clump at the frame's left. The figure used to be pushed to the frame's
+          right edge by `margin-left: auto`, which left a **1167px hole** in the
+          middle of the line: 552px of content in an 1824px row, measured. Two
+          fragments at opposite ends of a wall read as two unrelated things, not
+          as "this venture earned this much".
+
+          The figure is still the emphasis. It is the largest thing on the line
+          and the only accent-inked one — it does not also need to be the
+          furthest right, and being at the end of its own sentence is where the
+          payoff of a sentence belongs. */}
       <span className="tv-pod-mover-label">
         {mover?.kind === 'climb' ? 'Biggest climber this week' : 'Highest earner this week'}
       </span>
@@ -54,16 +68,15 @@ export function MoverPanel({ ranked }: { ranked: readonly Team[] }) {
             <VentureLogo team={mover.team} size="var(--d-pod-mover-logo)" />
           </span>
 
-          {/* **Name and standing are two items on one line, not a stacked
-              pair.** They were a two-line block inside the panel, which on a
-              single-row footer rendered as `DOSA CRISPS1st overall` — two
-              inline spans in a wrapper with no gap of its own, run together
-              with nothing between them. The wrapper is gone; both are direct
-              children of the flex row, which is what spaces them. */}
           <span className="tv-pod-mover-name">
             {mover.team.ventureName || mover.team.teamId}
           </span>
-          <span className="tv-pod-mover-line tv-figure">
+
+          {/* Where the venture stands, in the same tracked caps as the label.
+              It was sentence case at 16.5px between two uppercase elements,
+              which made one line carry three casings and read as a fragment
+              somebody forgot to finish. */}
+          <span className="tv-pod-mover-line">
             {mover.kind === 'climb'
               ? `${ordinal(mover.fromRank)} to ${ordinal(mover.toRank)} on ${formatRupees(mover.weekRevenue)}`
               : `${ordinal(mover.toRank)} overall`}
@@ -74,16 +87,32 @@ export function MoverPanel({ ranked }: { ranked: readonly Team[] }) {
               nobody did. Showing "+0" in the second state would be a climb of
               zero dressed as news.
 
-              Which is also why the line beside it does *not* repeat the money in
-              the earner state — the first render printed ₹25,870 twice, once as
-              the headline and once in its own sub-line. Each element says one
-              thing: the standing places them on the board, the figure is the
-              news. */}
+              Which is also why the standing beside it does *not* repeat the
+              money in the earner state — the first render printed ₹25,870
+              twice, once as the headline and once in its own sub-line. Each
+              element says one thing: the standing places them on the board, the
+              figure is the news. */}
           <span className="tv-pod-mover-gain tv-figure">
             {mover.kind === 'climb' ? `+${mover.gained}` : formatRupees(mover.weekRevenue)}
           </span>
         </div>
       )}
+
+      {/* ── Provenance moved down here, from the masthead ──
+
+          It gives this line a second end, which is what stops a single
+          left-aligned statement looking like a row that failed to fill. It is
+          also simply where a colophon goes, and it takes one item out of a
+          masthead that was carrying a lockup, a heading, a countdown and a
+          timestamp.
+
+          `/weekly`'s footer does the same, so the two slides carry provenance
+          in one place. It stays load-bearing wherever it sits: the wall shows
+          no error state, so a failed fetch renders perfectly healthy stale
+          numbers for days and this is the only tell. */}
+      <span className="tv-pod-mover-stamp">
+        <AsOf snapshot={snapshot} />
+      </span>
     </aside>
   )
 }

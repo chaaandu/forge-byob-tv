@@ -1,3 +1,6 @@
+import { AsOf } from '@/components/AsOf'
+import type { Snapshot } from '@/lib/types'
+
 /**
  * What the green mark on a card means, in the corner of the board.
  *
@@ -22,7 +25,13 @@
  * triangle's shape or size reaches the legend automatically. Two drawings of
  * one symbol is how a legend starts lying about what it explains.
  */
-export function BoardLegend({ since }: { since?: string | null }) {
+export function BoardLegend({
+  snapshot,
+  since,
+}: {
+  snapshot: Snapshot | null
+  since?: string | null
+}) {
   return (
     <p className="tv-legend">
       {/* **The mark and its phrase are one flex item, not two.** The footer is
@@ -45,6 +54,15 @@ export function BoardLegend({ since }: { since?: string | null }) {
           appears — the wall says nothing rather than naming a date it is
           guessing at. */}
       {since ? <span className="tv-legend-since">Revenue since {since}</span> : null}
+
+      {/* Provenance, moved down from the masthead so both slides carry it in
+          one place — see `components/WallHeader.tsx`. It stays load-bearing
+          wherever it sits: the wall shows no error state, so a failed fetch
+          renders perfectly healthy stale numbers for days and this is the only
+          tell. */}
+      <span className="tv-legend-stamp">
+        <AsOf snapshot={snapshot} />
+      </span>
     </p>
   )
 }

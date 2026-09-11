@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { FleaDial } from '@/components/FleaDial'
+import { BoardLegend } from '@/components/BoardLegend'
 import { MoverPanel } from '@/components/MoverPanel'
 import { monogramFor } from '@/components/VentureLogo'
 import { Podium, podiumTeams } from '@/components/Podium'
@@ -192,7 +193,7 @@ describe('Podium', () => {
     const host = document.createElement('div')
     document.body.append(host)
     const root = createRoot(host)
-    act(() => root.render(<MoverPanel ranked={[]} />))
+    act(() => root.render(<MoverPanel snapshot={null} ranked={[]} />))
     expect(host.querySelector('.tv-pod-mover-empty')?.textContent).toBe('—')
     act(() => root.unmount())
     host.remove()
@@ -401,8 +402,11 @@ describe('WallHeader', () => {
     const text = render(<WallHeader snapshot={snapshotAt(...WINDOW)} label="2-Week Challenge" />)
     expect(text).toContain('2-Week Challenge')
     expect(text).not.toContain('Day')
-    // Provenance survives, so a frozen results board still says when it last read.
-    expect(text).toContain('Updated')
+    // **Provenance is not in the masthead.** It moved to the footer on both
+    // slides; the two tests below are where it is now pinned. Asserted as an
+    // absence so the move cannot silently revert and leave the wall stamping
+    // itself twice.
+    expect(text).not.toContain('Updated')
   })
 
   /**
@@ -424,7 +428,30 @@ describe('WallHeader', () => {
     )
     expect(text).toContain('Weekly Leaderboard')
     expect(text).not.toContain('Day')
-    expect(text).toContain('Updated')
+    expect(text).not.toContain('Updated')
+  })
+
+  /**
+   * ── Provenance, wherever it lives ──
+   *
+   * The wall shows no error state by design: a failed fetch keeps the last good
+   * data and goes on rendering perfectly healthy stale numbers for days. This
+   * stamp is the only thing that makes that visible, which is why it is
+   * asserted at all rather than left to a screenshot.
+   *
+   * It used to sit in the masthead and now sits in each slide's footer. What
+   * has to stay true is that **exactly one of the two carries it**, on both
+   * slides — a wall that stamps itself twice is as much a bug as one that does
+   * not stamp itself at all, and neither is visible from across a room.
+   */
+  it('stamps each slide once, in the footer', () => {
+    const snap = snapshotAt(...WINDOW)
+    expect(render(<BoardLegend snapshot={snap} />)).toContain('Updated')
+    expect(render(<MoverPanel snapshot={snap} ranked={[]} />)).toContain('Updated')
+    // And nothing at all before the first fetch lands. A stamp with no figures
+    // beside it would be stating the provenance of nothing.
+    expect(render(<BoardLegend snapshot={null} />)).not.toContain('Updated')
+    expect(render(<MoverPanel snapshot={null} ranked={[]} />)).not.toContain('Updated')
   })
 })
 

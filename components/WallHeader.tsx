@@ -1,6 +1,5 @@
 import Image from 'next/image'
 
-import { AsOf } from '@/components/AsOf'
 import { ChallengeDay } from '@/components/ChallengeDay'
 import { cohortInstant } from '@/lib/feed'
 import type { BoardMode, Snapshot } from '@/lib/types'
@@ -9,8 +8,15 @@ import type { BoardMode, Snapshot } from '@/lib/types'
  * The masthead, and **both slides use it**.
  *
  * One row, left to right: the Mesa lockup, a hairline tick, the board's name,
- * then whatever apparatus the slide carries pushed hard against the right edge
- * with the provenance stamp last. A rule underneath it, drawn by the page.
+ * then whatever apparatus the slide carries pushed hard against the right edge.
+ * A rule underneath it, drawn by the page.
+ *
+ * **The provenance stamp is not here any more.** It moved to the footer on both
+ * slides — a colophon is where a colophon goes, it gives each footer a second
+ * end so a single left-aligned statement does not read as a row that failed to
+ * fill, and it takes one item out of a masthead that was carrying a lockup, a
+ * heading, a countdown *and* a timestamp. See `components/MoverPanel.tsx` and
+ * `components/BoardLegend.tsx`.
  *
  * ── What this replaced ──
  *
@@ -96,7 +102,6 @@ export function WallHeader({
             end={snapshot === null ? null : cohortInstant(snapshot.cohort, 'challenge_end_iso')}
           />
         ) : null}
-        <AsOf snapshot={snapshot} />
       </div>
     </header>
   )

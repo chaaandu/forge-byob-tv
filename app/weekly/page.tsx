@@ -174,6 +174,7 @@ export default function WeeklyPage() {
           photographed baseline to be "since" — printing one would caption the
           board with a date its numbers are not measured from. */}
       <BoardLegend
+        snapshot={snapshot}
         since={
           snapshot === null || mode !== 'challenge'
             ? null
