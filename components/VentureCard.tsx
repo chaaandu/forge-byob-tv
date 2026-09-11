@@ -308,25 +308,104 @@ export function VentureCard({
           position: 'absolute',
           inset: 0,
           display: 'grid',
-          // **The rank's strip is the first row, and it is empty.** The numeral
-          // that fills it belongs to the cell, not to this card — see the note
-          // on the rank above — so what the card contributes is the *height*
-          // the mark is not allowed to enter. Reserved on ranks 1-3 as well,
-          // whose numeral is outside the card entirely: without it their discs
-          // would sit a strip higher than row 1's other seven and the row would
-          // read as broken rather than as three cards being special.
+          // **Four rows, and the first one is the head band.** It used to be
+          // five: a strip for the rank, the mark, the name, the figure and a
+          // fifth row at the bottom holding the day capsule. That fifth row was
+          // reserved on all thirty-nine cards and drawn on six, which is the
+          // empty band that sat under every `₹0`, and it cost every mark on the
+          // board 34px it could not spare — measured, the mark was 40% of its
+          // own card.
           //
-          // No `gap`. Every one of these tracks carries its own separation, so a
-          // figure line that collapses to zero on a row where nobody traded
-          // takes its space with it instead of leaving a gap behind.
+          // The capsule sits in the head band now, at the right-hand end. The
+          // rank is absolutely positioned over the left of that same band and
+          // belongs to the *cell* rather than to this card (see the note on the
+          // rank above), so the band was 155.6px wide and spending 26.6px of
+          // it. Sharing it costs nothing and returns the whole fifth row to the
+          // marks: 90.6 → 113.1px on row 1, 66.2 → 88.7 on row 4.
+          //
+          // The band is still reserved on ranks 1-3, whose numeral is outside
+          // the card entirely — without it their discs would sit a strip higher
+          // than row 1's other seven and the row would read as broken.
+          //
+          // No `gap`. Every one of these tracks carries its own separation, so
+          // nothing leaves a gap behind if it ever stops being drawn.
           gridTemplateRows:
-            'var(--h-card-rank) auto var(--h-card-name) var(--h-card-fig) var(--h-card-today)',
+            'var(--h-card-head) auto var(--h-card-name) var(--h-card-fig)',
           justifyItems: 'center',
           alignContent: 'start',
           minWidth: 0,
         }}
       >
-        <span aria-hidden="true" />
+        {/* ── THE HEAD BAND ──
+
+            The rank at the left, the day capsule at the right, in a band that
+            was reserved for the rank alone and spending 26.6px of 155.6. The
+            capsule was a fifth row at the foot of the card until this: 34px
+            held open on all thirty-nine cards and drawn on six, which is the
+            empty band that sat under every `₹0`. Moving it up returns the whole
+            row to the mark and leaves every card ending on its week figure —
+            the one line that is always drawn.
+
+            **It reads better here than it did there**, which is the part that
+            was not obvious. At the foot of the card the capsule was a footnote
+            under a figure; in the band the eye already scans for the rank it is
+            a flag, and finding today's movers across thirty-nine cards is one
+            sweep of a single line rather than thirty-nine separate looks. */}
+        {/* ── Today, back on the card ──
+
+            The line the venture name occupied is today's again. The name went
+            because the mark already identifies the venture at this size — forty
+            logos and forty names is the same fact printed twice — and what the
+            board lost when today went was the only thing on it that said who is
+            moving *right now*. A wall glanced at on a busy Friday answers that
+            question or it is a weekly summary that happens to be on a screen.
+
+            **The tag rides the figure and appears only with it.** Two bare rupee
+            amounts on a card with no room for column headings leave a passer-by
+            no way to tell the week from the day; a permanent caption over an
+            empty line would be apparatus describing absence, on all forty cards
+            every morning before the first sale. */}
+        {/* ── The capsule ──
+
+            Today used to be a bare line: an accent-ink figure with a triangle
+            beside it, sitting directly under the week's figure in the same
+            type. Two centred rupee amounts, one under the other, differing only
+            in size and ink — which is the hardest pair of things to tell apart
+            at six metres, because both of those attributes are also doing other
+            jobs on this card.
+
+            **The capsule separates them by form instead**, which is the one
+            channel nothing else here is using. A pill is not a figure; it reads
+            as a tag before it reads as a number, so the eye sorts the card
+            without having to compare two amounts. And because only a team that
+            traded today draws one, a glance across thirty-nine cards finds
+            today's movers by shape alone. */}
+        {/* **No `tv-card-today-traded` any more.** It switched the line to a
+            heavier weight and the accent ink, and it was applied on exactly the
+            condition that also decides whether anything is rendered here at
+            all — so it was a modifier that could never appear on the thing it
+            modified being absent. The capsule's existence is the state now.
+            One condition, one element. */}
+        <div className="tv-card-today tv-card-detail">
+          {traded ? (
+            <span className="tv-day-pill">
+              {/* A shape, not a glyph: `▲` comes from whatever font in the
+                  stack answers for it, at whatever weight and height that font
+                  drew it. This is a box with a triangle clipped out of it, so it
+                  is the same mark on every machine. */}
+              <span className="tv-day-mark" aria-hidden="true" />
+              {/* **The figure is its own element, and that is not cosmetic.**
+                  As a bare text node it was an *anonymous* flex item, which
+                  `text-overflow` does not apply to — measured with a crore-scale
+                  day, the figure drew straight out through the capsule's ground
+                  and past the card, with the ellipsis the CSS asks for never
+                  appearing. A real element can shrink, clip and ellipsise. */}
+              <span className="tv-day-figure">{formatRupees(team.todayRevenue)}</span>
+            </span>
+          ) : (
+            ''
+          )}
+        </div>
         <motion.div
           {...travel}
           // The travel is the longest-running property in the sequence, so its
@@ -409,55 +488,6 @@ export function VentureCard({
           {formatRupees(boardEarned(mode, team))}
         </div>
 
-        {/* ── Today, back on the card ──
-
-            The line the venture name occupied is today's again. The name went
-            because the mark already identifies the venture at this size — forty
-            logos and forty names is the same fact printed twice — and what the
-            board lost when today went was the only thing on it that said who is
-            moving *right now*. A wall glanced at on a busy Friday answers that
-            question or it is a weekly summary that happens to be on a screen.
-
-            **The tag rides the figure and appears only with it.** Two bare rupee
-            amounts on a card with no room for column headings leave a passer-by
-            no way to tell the week from the day; a permanent caption over an
-            empty line would be apparatus describing absence, on all forty cards
-            every morning before the first sale. */}
-        {/* ── The capsule ──
-
-            Today used to be a bare line: an accent-ink figure with a triangle
-            beside it, sitting directly under the week's figure in the same
-            type. Two centred rupee amounts, one under the other, differing only
-            in size and ink — which is the hardest pair of things to tell apart
-            at six metres, because both of those attributes are also doing other
-            jobs on this card.
-
-            **The capsule separates them by form instead**, which is the one
-            channel nothing else here is using. A pill is not a figure; it reads
-            as a tag before it reads as a number, so the eye sorts the card
-            without having to compare two amounts. And because only a team that
-            traded today draws one, a glance across thirty-nine cards finds
-            today's movers by shape alone. */}
-        {/* **No `tv-card-today-traded` any more.** It switched the line to a
-            heavier weight and the accent ink, and it was applied on exactly the
-            condition that also decides whether anything is rendered here at
-            all — so it was a modifier that could never appear on the thing it
-            modified being absent. The capsule's existence is the state now.
-            One condition, one element. */}
-        <div className="tv-card-today tv-card-detail">
-          {traded ? (
-            <span className="tv-day-pill">
-              {/* A shape, not a glyph: `▲` comes from whatever font in the
-                  stack answers for it, at whatever weight and height that font
-                  drew it. This is a box with a triangle clipped out of it, so it
-                  is the same mark on every machine. */}
-              <span className="tv-day-mark" aria-hidden="true" />
-              {formatRupees(team.todayRevenue)}
-            </span>
-          ) : (
-            ''
-          )}
-        </div>
       </motion.div>
     </div>
   )

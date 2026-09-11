@@ -901,14 +901,25 @@ describe('VentureCard', () => {
   /**
    * ── The rank never lands on artwork ──
    *
-   * The card reserves a strip at its top and the mark starts below it, so the
+   * The card reserves a band at its top and the mark starts below it, so the
    * separation is a constant of the rhythm rather than a per-rank nudge. This
    * asserts the *structure* that guarantees it — the rendered geometry is
    * measured in a browser at 1920x1080, where a jsdom box has no size.
+   *
+   * **The band holds the day capsule too**, at its right-hand end, which is
+   * what let the card drop from five rows to four and hand the whole of the
+   * old bottom row to the mark. So this also pins that there is no fifth row:
+   * a `--h-card-today` back in the template is the empty band under every `₹0`
+   * coming back, and it would cost every mark on the board 34px again.
    */
-  it('reserves the rank strip on every card, including the metal ranks', () => {
+  it('reserves the head band on every card, including the lead ranks', () => {
     for (const rank of [1, 4, COMPETING_SIZE]) {
-      expect(markup(<VentureCard team={team({})} rank={rank} />)).toContain('var(--h-card-rank)')
+      const html = markup(<VentureCard team={team({})} rank={rank} />)
+      expect(html).toContain('var(--h-card-head)')
+      // Written without the `var(...)` wrapper on purpose: the declared-token
+      // scan above reads this file, and a live read of a token that no longer
+      // exists would be reported as the defect it is testing for.
+      expect(html).not.toContain('--h-card-today')
     }
   })
 

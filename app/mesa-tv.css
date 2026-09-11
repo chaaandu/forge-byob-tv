@@ -496,37 +496,67 @@
      first line that starts in the same place whichever case a card is. See
      `.tv-card-name`, which stops centring for that reason.
 
-     ── WHERE THE SPACE CAME FROM ──
+     ── WHERE THE SPACE CAME FROM, AND WHY TRIMMING IT WAS THE WRONG MOVE ──
 
      The frame has none: the board fills it to 4px at 1920, and every band above
-     it is either overscan margin or masthead. So it comes from the marks, which
-     is what `--d-card-logo` is for — it takes the row's remainder — and the
-     trade is stated rather than hidden. Row 1's disc goes 98.6 → 90.6 and row
-     4's 74.2 → 66.2, an 8% mark against a floor of 48px.
+     it is either overscan margin or masthead. So the separation came off the
+     marks, which is what `--d-card-logo` is for — and that is the trade that
+     was wrong. **Measured after it: 136px of a 226.6px card was fixed
+     furniture and the mark was 40% of the card**, on a board whose marks are
+     the only light on Deep Aubergine. The card did not need a few pixels moved
+     between its lines. It needed one fewer line.
 
-     Twelve of the twenty came back off the rank strip instead. **That strip is
-     not the numeral's height, and it never was** — the numeral is
-     `position: absolute`, so what this token reserves is only *how far down the
-     mark starts*. The two were the same number by coincidence. They are
-     separate now: `--h-rank-line` keeps the numeral's box at exactly the 24px
-     it had, so no rank moves by a pixel, and the strip under it shrinks to 12.
-     The disc rises into the numeral's band and cannot reach it — a circle
-     centred in 155.6px of card leaves its top-left corner empty, and at the
-     numeral's lowest pixel the nearest disc edge is 48px out against a numeral
-     26.6px wide. Verified in the browser at all four rows, not reasoned about:
-     the clearance is 21px at the tightest row. */
-  /* How tall the rank numeral's own line box is. Unchanged at 24px, and
-     deliberately no longer the same token as the strip below — see above. */
+     ── THE CAPSULE MOVED INTO THE RANK'S BAND, AND THAT IS THE WHOLE FIX ──
+
+     The bottom row reserved 34px for the day capsule on all thirty-nine cards
+     and **thirty-three of them drew nothing in it** — that is the empty band
+     under every `₹0`, and it could not be shortened away, because a
+     reservation that collapses per card would give one card in a row a bigger
+     mark than its neighbours, and one that collapses per row would give the
+     quiet bottom rows bigger marks than the busy top ones. That inversion is
+     measured and recorded in `WeeklyGrid`; it is the reason the row was
+     reserved in the first place.
+
+     So the capsule goes where a reservation already exists. The rank numeral is
+     `position: absolute` and sits at the card's top-left, which means the band
+     it reserves — `--h-card-head` — is 155.6px wide and spends 26.6px of it.
+     The capsule takes the right-hand end. **The band costs nothing it was not
+     already costing**, the bottom row goes, and all 34px land on the mark:
+     row 1's disc 90.6 → 113.1 and row 4's 66.2 → 88.7, a **25% mark** on every
+     card on the board. The mark is 50% of the card rather than 40%.
+
+     It also fixes what the empty band actually was. Every card now ends on its
+     week figure — the one line that is always drawn — so a card that has not
+     traded is not a card with a hole in the bottom of it, it is a shorter
+     stack of the same four things. And a capsule at the top-right is a *flag*
+     rather than a footnote: a glance across thirty-nine cards finds today's
+     movers in the band the eye already scans for the rank.
+
+     `--h-rank-line` stays separate from the band, so no numeral moves a pixel
+     whatever the band does. */
+  /* How tall the rank numeral's own line box is — not the band it sits in. */
   --h-rank-line: 1.25vw; /* 24px */
-  --h-card-rank: 0.625vw; /* 12px */
-  --h-card-name: 2.3958vw; /* 46px — 6px of air, two 17.25px lines, 6px of air */
+  /* The card's head band: rank at the left, the day capsule at the right, and
+     24px is what the taller of the two needs. */
+  --h-card-head: 1.25vw; /* 24px */
+  /* 52px: 6px under the mark, two 17.25px lines, and **11.5px before the
+     figure**. The last number is the one this box exists for. At 36px the two
+     reserved lines had 0.75px under them, so the eight names in thirty-nine
+     that wrap ran into the figure; at 46 they had 5.5px, which was survivable
+     and still read as a collision from the corridor. The 6px it costs the mark
+     came out of the row the capsule vacated and is the best-spent 6px on the
+     card — a wrapped name is the only case on this board where two different
+     things are printed one under the other with nothing between them. */
+  --h-card-name: 2.7083vw; /* 52px */
   --h-card-fig: 1.4583vw; /* 28px */
-  /* The capsule's row is taller than the capsule now: 34px holding a 24px pill
-     leaves 5px above it and 5px below, where `height: 100%` left the pill
-     touching the figure's box at the top and sitting 8px off the card's bottom
-     edge at the other end. A tag pressed against a figure reads as part of it. */
-  --h-card-today: 1.7708vw; /* 34px */
   --h-day-pill: 1.25vw; /* 24px */
+  /* How much of the head band the capsule may take. The rank is 26.6px at two
+     digits and needs its own air, so the capsule stops 46px short of the card's
+     left edge — 109.6px at 1920, against a measured 107px for `₹1,04,500`.
+     Past roughly ₹11,00,000 **in a single day** the capsule ellipsises rather
+     than clipping, which is a figure this cohort will not reach and a failure
+     that says so rather than dropping a digit in silence. */
+  --w-day-pill-max: calc(100% - 2.3958vw);
   /* How far a name's first line sits under the mark. Inside `--h-card-name`,
      not a grid gap — the card's parts each carry their own separation, which is
      the rule that keeps a line's spacing leaving with the line. */
@@ -1512,8 +1542,8 @@
       min(
         calc(
           (
-              var(--h-row) - 2 * var(--s-card-pad-y) - var(--h-card-rank) -
-                var(--h-card-name) - var(--h-card-fig) - var(--h-card-today)
+              var(--h-row) - 2 * var(--s-card-pad-y) - var(--h-card-head) -
+                var(--h-card-name) - var(--h-card-fig)
             ) * var(--k-mark, 1)
         ),
         calc(var(--w-card) - 2 * var(--s-card-inset))
@@ -1914,15 +1944,26 @@
      for, and a deepened mix on the pale one, where bright green measures 2.41:1
      against soft mint. Quiet by default, so an ordinary day sits under the
      week's figure rather than beside it in weight. */
-  /* The row the capsule is centred in. It reserves its height whether or not
-     anything is drawn in it, so a card that has not traded today keeps the same
-     internal rhythm as one that has — thirty-nine cards whose figures sit on
-     one line, rather than a board that jitters as the day's first sales land. */
+  /* ── The capsule's slot: the right-hand end of the head band ──
+
+     It was a fifth row at the bottom of the card, 34px tall, reserved on all
+     thirty-nine cards and drawn on six — the empty band under every `₹0`. The
+     reservation could not be shortened away (see `--h-card-head` for the two
+     ways collapsing it inverts the mark ramp), so it moved into a band that was
+     already reserved for the rank and was spending 26.6px of 155.6.
+
+     `justify-content: flex-end`, because the rank is absolutely positioned over
+     the left of this same band. The two share it and never touch: the capsule
+     stops `--w-day-pill-max` short of the card's left edge.
+
+     Still reserved, still drawn only when a team has traded — the height is the
+     band's whether or not anything is in it, so nothing on the card moves as
+     the day's first sales land. */
   .tv-card-today {
-    height: var(--h-card-today);
+    height: var(--h-card-head);
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-end;
     width: 100%;
     min-width: 0;
     overflow: hidden;
@@ -1960,9 +2001,6 @@
     align-items: center;
     justify-content: center;
     gap: var(--s-day-pill-gap);
-    /* **A stated height, not `100%`.** The row it sits in is taller than the
-       capsule on purpose — see `--h-card-today` — and a capsule that fills its
-       row is a capsule with nothing between it and the figure above it. */
     height: var(--h-day-pill);
     padding-inline: var(--s-day-pill-x);
     border-radius: var(--r-pill);
@@ -1974,7 +2012,30 @@
        full width on a flex parent and stop being a capsule at all — a tinted
        band across the card, which is a different element entirely. */
     flex: none;
-    max-width: 100%;
+    /* Not `100%`: the rank shares this band. See `--w-day-pill-max`. */
+    max-width: var(--w-day-pill-max);
+    white-space: nowrap;
+    overflow: hidden;
+  }
+
+  /* ── The figure inside the capsule ──
+
+     **An ellipsis, not a clip.** `overflow: hidden` alone cuts a rupee figure
+     mid-glyph, which on this wall is a smaller number rendered perfectly —
+     `₹11,00,000` clipped at the last digit reads as `₹11,00,00`, and nothing
+     reports it. The ellipsis is the one failure a passer-by can see.
+
+     It has to live on an element of its own. The figure used to be a bare text
+     node in the capsule, which makes it an *anonymous flex item*, and
+     `text-overflow` does not apply to one: measured with a crore-scale day, the
+     figure drew out through the capsule's ground and past the card's edge with
+     no ellipsis at all. `min-width: 0` is the other half — a flex item's
+     automatic minimum size is its content, so without it the item simply
+     refuses to shrink and there is nothing to ellipsise. */
+  .tv-day-figure {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
   }
 
