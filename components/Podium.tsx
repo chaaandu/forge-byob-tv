@@ -936,27 +936,25 @@ function PodiumBoard({
         minWidth: 0,
       }}
     >
-      {/* ── The left column: a caption, then the podium ──
+      {/* ── The caption is gone ──
 
-          **The caption is `PodiumMasthead`'s "Total revenue" line, restored.**
-          That component's own docblock recorded its removal as a real loss —
-          "the one line telling a passer-by that these figures are all-time where
+          It read `TOTAL REVENUE, ALL TIME` above this column, and it was
+          `PodiumMasthead`'s own "Total revenue" line restored — that
+          component's docblock had recorded its removal as a real loss, "the one
+          line telling a passer-by that these figures are all-time where
           `/weekly`'s are the week's, on two slides that rotate on one screen
-          minutes apart ... if a figure is ever misread between the two boards,
-          this is the line that went."
+          minutes apart."
 
-          It comes back for that reason first and a compositional one second.
-          The podium group is 419px tall in an 852px column, so centring it
-          leaves 200px of empty aubergine above — at the top left of the frame,
-          which is where the eye enters. A caption on the column's own top edge
-          gives that half a top, so the air below it reads as a field the group
-          sits in rather than as a corner nothing was put in.
+          **Removed by decision, and the ambiguity it covered is uncovered
+          again.** The same venture shows ₹2,42,546 here and ₹1,06,630 on
+          `/weekly` thirty seconds later, and nothing on either slide now says
+          why. The judgement is that the audience is thirty-nine teams who live
+          this programme daily and already read the two boards as what they are;
+          that is a call about the audience rather than about the layout, and it
+          is not this file's to make.
 
-          It is not filler by the wall's own test: it says something true that
-          nothing else on the slide says, and removing it was recorded as a
-          cost rather than a tidy-up. */}
-      <div style={{ display: 'grid', gridTemplateRows: 'auto minmax(0, 1fr)', minHeight: 0 }}>
-        <p className="tv-pod-caption">Total revenue, all time</p>
+          It also gave the column a top edge, which is why the podium below is
+          centred rather than bottom-aligned — see `alignSelf`. */}
 
       {/* `flex-end`, so three places of three sizes share one text baseline.
           That shared floor is the whole idea: without it they are three marks of
@@ -1015,7 +1013,6 @@ function PodiumBoard({
           departing={podiumEntry && kick?.toRank === 3}
           arriving={kick?.toRank === 3 ? arriving : undefined}
         />
-      </div>
       </div>
 
       {/* **The list is the whole right-hand column now.** It shared it with the

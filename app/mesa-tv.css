@@ -893,6 +893,9 @@
   --t-pod-numeral: 800 var(--fs-2) / 1 var(--font-sans);
   --t-pod-name: 700 var(--fs-3) / 1.1 var(--font-sans);
   --t-pod-name-row: 700 var(--fs-3) / 1.1 var(--font-sans);
+  /* **Dev chrome only** — `DevPodiumTrigger`'s buttons. It was the left
+     column's `TOTAL REVENUE, ALL TIME` caption, which is gone; this is the one
+     read left. */
   --t-pod-label: 800 var(--fs-6) / 1.3 var(--font-sans);
 
   /* ── The figures ──
@@ -931,11 +934,13 @@
 
   /* Tracking. Figures negative, names positive, and the smaller the name the
      wider it opens — a tracked line at 15px needs more air than the same
-     treatment at 31px to read as tracked at all rather than as loose. */
+     treatment at 31px to read as tracked at all rather than as loose.
+
+     `--track-pod-label` was here and went with the column caption, its only
+     reader. */
   --track-pod-fig: -0.025em;
   --track-pod-name: 0.09em;
   --track-pod-name-row: 0.06em;
-  --track-pod-label: 0.2em;
 
   /* ── The list's own colours ──
 
@@ -1766,17 +1771,6 @@
      is larger and its text sits on the same line as the other two, its mark
      rises above theirs by exactly the difference. That is a podium, drawn by
      arithmetic rather than by furniture. */
-
-  /* The left column's caption. Left-aligned on the frame's own margin, so it
-     lines up with the lockup above it and with `/weekly`'s rank numerals — the
-     one vertical the eye can check across the whole rotation. */
-  .tv-pod-caption {
-    margin: 0;
-    font: var(--t-pod-label);
-    letter-spacing: var(--track-pod-label);
-    text-transform: uppercase;
-    color: var(--ink-muted);
-  }
 
   /* ── One place on the podium ──
 
