@@ -33,26 +33,29 @@ export const ROW_LENGTH = 10
 export const ROWS = 4
 
 /**
- * The three look timelines, and the phase step between neighbours.
+ * ── ROW 1'S IDLE IS GONE, AND THE BOARD IS STILL AT REST ──
  *
- * **Row 1 only.** The other thirty cards hold still, and that is what makes the
- * top row read as the live one — an idle everywhere would be wallpaper, and it
- * would also spend the wall's "movement means something happened" rule forty
- * times over rather than ten.
+ * Ten marks on the top row carried one of three looping timelines each, offset
+ * by a 2.3s phase step so they never fell into unison. It was well built. It is
+ * removed for the same reason `/podium` removed its numeral dance, recorded in
+ * `components/Podium.tsx`: the board has exactly one thing it needs to be able
+ * to say — a rank changed hands — and it says it with a two-and-a-half-second
+ * interrupt. **An interrupt only reads as one against a still frame.** Ten
+ * permanently bobbing marks left the kick nothing to rise above.
  *
- * Assigned by *column*, not by team id. The hash is right for a tint, which must
- * follow a venture wherever it goes, and wrong here: ten marks side by side have
- * to differ from **each other**, and a hash cheerfully gives three neighbours
- * the same answer. `/podium` assigns by place for exactly this reason, and
- * `lib/seed.ts` carries the warning.
+ * The old argument was that an idle on row 1 is what makes it read as the live
+ * row. That was true when row 1 also had its own fill, its own shadow and a
+ * numeral in gold — it was one signal among four. With the board reduced to a
+ * ruled matrix it would be the *only* moving thing on either slide that does
+ * not mean something happened, which is precisely the rule this wall is built
+ * on.
  *
- * The phase step is what stops the three-timeline cycle from showing: with ten
- * marks and three timelines, columns 0, 3, 6 and 9 share a timeline, and without
- * an offset they would bob in unison across the row. 2.3s is deliberately not a
- * factor of any of the three durations.
+ * The `tv-look-*` and `tv-idle-*` classes still exist in app/mesa-tv.css with
+ * their `animation` declarations removed rather than the rules deleted, because
+ * `/podium` still hands `idleOf(place)` to its three discs. One place decides
+ * whether the wall idles.
  */
-const LOOK_TIMELINES = ['tv-look-1', 'tv-look-2', 'tv-look-3'] as const
-const PHASE_STEP_S = 2.3
+
 
 /**
  * Four rows, four heights, descending.
@@ -238,18 +241,15 @@ export function WeeklyGrid({
         rowGap: 'var(--s-row-gap)',
         columnGap: 'var(--s-card-gap)',
         height: '100%',
-        // **Headroom for the metal numerals over ranks 1-3, which break above
-        // their cards' top edge and are painted outside row 1 entirely.**
+        // **No headroom above row 1 any more.** It reserved `--h-card-headroom`
+        // for the metal numerals over ranks 1-3, which broke above their cards'
+        // top edge and were painted outside row 1 entirely. There are no metal
+        // numerals; the rank sits inside its cell like every other, so the
+        // board starts where the grid starts.
         //
-        // Padding rather than a taller row: the numerals overflow the cell, so
-        // giving row 1 more height would only add air *inside* three cards and
-        // leave the glyphs exactly as clipped as before. `--h-card-headroom` is
-        // the numeral's cap height, not its font size — see the token.
-        //
-        // `start`, not `center`: centring splits the leftover height half above
-        // and half below, so half of any gap opened here would be spent under
-        // row 4 where nothing needs it.
-        paddingTop: 'var(--h-card-headroom)',
+        // `start`, not `center`: centring splits any leftover height half above
+        // and half below, so half of it would be spent under row 4 where
+        // nothing needs it.
         alignContent: 'start',
       }}
     >
@@ -264,7 +264,18 @@ export function WeeklyGrid({
           // fell apart, `VentureDisc` computed `width: 0px`, and forty marks
           // vanished from a board that still rendered its cards, its badges and
           // all forty figures. Measured, not reasoned about.
-          className="tv-card-row"
+          // **The rule between rows is drawn by the row above it**, as a
+          // pseudo-element seated in the middle of the row gap — see
+          // `.tv-row-rule` in app/mesa-tv.css. Not a `border-bottom`, which
+          // would hug the row's own edge and read as that row being underlined
+          // rather than as the two rows being separated; and not a grid item of
+          // its own, which would mean the row template no longer describes the
+          // ramp.
+          //
+          // The last row does not draw one. The frame's own rule above the
+          // footer is the board's bottom edge, and two lines 22px apart is a
+          // box nobody asked for.
+          className={i < rows.length - 1 ? 'tv-card-row tv-row-rule' : 'tv-card-row'}
           style={
             {
               display: 'grid',
@@ -306,14 +317,19 @@ export function WeeklyGrid({
               // cards, its ranks and all forty figures. Measured, not reasoned
               // about — and the reason these two names differ.
               '--h-row': ROW_HEIGHTS[i],
-              // Rows 3 and 4 take a bigger mark, paid for out of the slack the
-              // card's contents leave below the figures — so the row's height,
-              // and with it the ramp, does not move. 5% was not visible on marks
-              // this small (3px on row 3), so each row takes what its own card
-              // can actually spare, leaving ~5px of breathing room under the
-              // figures rather than running the contents to the card's edge.
-              ...(i === 2 ? { '--k-mark': '1.12' } : {}),
-              ...(i === 3 ? { '--k-mark': '1.16' } : {}),
+              // **The row-3 and row-4 mark bonuses are gone, and they had to
+              // go with the ramp.** They were 1.12 and 1.16, added because
+              // those rows' marks were the smallest on a board whose heights
+              // ran 12.64 → 9.86vw. Against the flat ramp they *invert* it:
+              // measured at 1920 the discs came out 98.9 / 87.0 / 90.7 / 87.5,
+              // so row 3's mark was larger than row 2's and the board grew
+              // towards the bottom. Exactly the failure the old comment on the
+              // collapsing figure lines describes, reintroduced by a constant
+              // that outlived the ramp it was compensating for.
+              //
+              // Without them the four fall 98.9 / 87.0 / 81.1 / 75.5, which
+              // descends, and row 4 still clears the ~50px legibility floor by
+              // 25px. Nothing needs a bonus when the ramp itself is gentle.
               // **Both figure lines are reserved on every row, always.** They
               // used to collapse on a row where nobody had traded, which gave
               // row 4 its height back and was measurably wrong twice over. It
@@ -344,12 +360,9 @@ export function WeeklyGrid({
                 arriving={arriving.has(team.teamId)}
                 cue={cue}
                 onSettled={cue?.role === 'attacker' ? onSettled : undefined}
-                {...(i === 0
-                  ? {
-                      idle: LOOK_TIMELINES[j % LOOK_TIMELINES.length],
-                      delaySeconds: j * PHASE_STEP_S,
-                    }
-                  : {})}
+                // **Row 1 no longer idles**, so no card is handed a timeline.
+                // The argument is at the top of this file; it is the same one
+                // `/podium` used to retire its numeral dance.
               />
             )
           })}

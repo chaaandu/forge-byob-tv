@@ -69,12 +69,20 @@ import type { BoardMode, Team } from '@/lib/types'
  */
 
 /**
- * The three metals, by rank. **The podium's tokens, not copies of them** — the
- * two boards are in one rotation and a wall that says gold two ways is a wall
- * with a bug in it. Bronze is the settled `--metal-bronze`; the redder value it
- * replaced read as orange against `--tangerine-600`.
+ * ── THE METALS ARE GONE FROM THIS BOARD ──
+ *
+ * Ranks 1-3 carried a gold, silver or bronze numeral straddling the card's top
+ * corner with a lustre sweep travelling inside the glyph, and a matching metal
+ * foot under the card with a second sweep. Four ornaments, all saying a number
+ * that was already printed.
+ *
+ * `LEAD_RANKS` is what says it now: the top three take a larger numeral in the
+ * surface's accent and nothing else. `/podium` makes the identical move, so the
+ * two boards still say "first" one way — which was the whole reason the metals
+ * were shared between them, and the reason dropping them had to be done on both
+ * at once.
  */
-const METALS = ['var(--metal-gold)', 'var(--metal-silver)', 'var(--metal-bronze)'] as const
+const LEAD_RANKS = 3
 
 /**
  * **The mark crosses to the other slot. The card does not move at all.**
@@ -213,26 +221,29 @@ export function VentureCard({
         // The marks are lifted instead; see the travelling wrapper below.
       }}
     >
-      {/* Board apparatus, not the team's — see the header note. */}
-      {rank <= 3 ? (
-        <span
-          className="tv-card-numeral"
-          style={{ '--pod-metal': METALS[rank - 1] } as React.CSSProperties}
-        >
-          {/* `/podium`'s class, carrying the face, the cap trim, the metal and
-              the lustre. This board contributes only the size. */}
-          <span className="tv-pod-numeral" role="img" aria-label={`Rank ${rank}`}>
-            {rank}
-          </span>
-        </span>
-      ) : (
-        // Ranks 4-40, as type. The ink is chosen here rather than by a CSS
-        // descendant selector because this is a child of the *cell* and the card
-        // is its sibling — the rule this replaced was `.tv-card-quiet
-        // .tv-card-badge`, a descendant selector with no descendant, which never
-        // once matched and left every pale card wearing a dark chip.
-        <span className={quiet ? 'tv-card-rank tv-card-rank-quiet' : 'tv-card-rank'}>{rank}</span>
-      )}
+      {/* ── The rank ──
+          Board apparatus, not the team's — see the header note. **One element
+          for all thirty-nine now.** It used to branch: ranks 1-3 got
+          `/podium`'s metal numeral in a positioned wrapper, ranks 4-40 got
+          plain type. Two treatments for one fact, and the branch is what made
+          the top three cards need their own vertical lift and the whole grid
+          need headroom above row 1.
+
+          The class does the differing instead. `tv-card-rank-lead` is one step
+          of size and the surface's accent; everything else about the numeral —
+          where it sits, how it tracks, that it is tabular — is shared by
+          construction and cannot drift. */}
+      <span
+        className={[
+          'tv-card-rank',
+          rank <= LEAD_RANKS ? 'tv-card-rank-lead' : undefined,
+          rank > LEAD_RANKS && quiet ? 'tv-card-rank-quiet' : undefined,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+      >
+        {rank}
+      </span>
 
       <motion.div
 
@@ -245,18 +256,10 @@ export function VentureCard({
           // agree about when the middle is.
           cue === undefined ? undefined : 'tv-card-away',
           arriving === true ? 'tv-card-arriving' : undefined,
-          // The three cards carrying a metal numeral sit 3% higher inside
-          // themselves, so the mark closes some of the gap the numeral opens
-          // above it. The card box does not move; only what is in it does.
-          rank <= 3 ? 'tv-card-lifted' : undefined,
         ]
           .filter(Boolean)
           .join(' ')}
         style={{
-          // The metal the foot below is cut from, on the card so both the foot
-          // and its sweep can read it. Ranks 4-40 never set it and never render
-          // a foot.
-          ...(rank <= 3 ? ({ '--pod-metal': METALS[rank - 1] } as React.CSSProperties) : {}),
           position: 'absolute',
           inset: 0,
           display: 'grid',
@@ -388,14 +391,6 @@ export function VentureCard({
             ''
           )}
         </div>
-        {/* ── The metal foot, ranks 1-3 ──
-
-            `/podium`'s plinth at card scale: the same gradient cut from the same
-            `--pod-metal`, and the same travelling sweep, so one board's gold is
-            the other's. It sits in the bottom padding the 3% lift opened on
-            these three cards, which is why it needs no room from the rhythm and
-            the mark does not pay for it. */}
-        {rank <= 3 ? <span className="tv-card-foot" aria-hidden="true" /> : null}
       </motion.div>
     </div>
   )

@@ -83,15 +83,27 @@ export default function WeeklyPage() {
   return (
     // **`surface-light` — the light half of the rotation.** See the note in
     // app/podium/page.tsx; these two classes are the pair.
+    //
+    // ── The editorial frame ──
+    //
+    // Five stacked bands: masthead, rule, board, rule, footer — inside a safe
+    // margin on all four sides. Both slides are built this way now; `/podium`'s
+    // `<main>` is the same five rows with different things in them.
+    //
+    // **The frame has padding again, and the masthead no longer bleeds.** It
+    // used to be `gridTemplateRows: 'auto minmax(0,1fr)'` with no padding at
+    // all, because `.tv-band` was a full-bleed material and a material that
+    // stops short of the edge reads as a wide dark card. There is no material.
+    // What is at the top of the frame now is type, and type at y=0 on a
+    // television is type the panel's overscan crops before the wall ever sees
+    // it — see `--s-safe-y`.
     <main
       className="tv-frame surface-light"
       style={{
         display: 'grid',
-        gridTemplateRows: 'auto minmax(0, 1fr)',
-        // **No padding on the frame.** The band is full-bleed — a material that
-        // stopped short of the frame edge would read as a wide dark card rather
-        // than as the board's masthead — so the padding belongs to the grid
-        // underneath it, which is the only thing that still wants a margin.
+        gridTemplateRows: 'auto auto minmax(0, 1fr) auto auto',
+        padding: 'var(--s-safe-y) var(--s-safe-x)',
+        rowGap: 0,
       }}
     >
       {/* **The heading no longer carries the week number**, so it no longer
@@ -112,16 +124,15 @@ export default function WeeklyPage() {
 
           `openWeek` is still read: it is what the dev trigger stamps into an
           event id, whichever contest is on. */}
-      <WallHeader snapshot={snapshot} label={boardHeading(mode)} mode={mode} />
+      <WallHeader snapshot={snapshot} label={boardHeading(mode)} mode={mode} tone="light" />
+
+      <div className="tv-rule" style={{ marginTop: 'var(--s-mast-rule)' }} />
 
       <div
         style={{
           display: 'grid',
           minHeight: 0,
-          // The legend is positioned against this box, so it sits in the
-          // board's own bottom margin rather than taking height from the rows.
-          position: 'relative',
-          padding: 'var(--s-board-top) var(--s-12) var(--s-board-bottom)',
+          padding: 'calc(var(--s-rule-board) + var(--s-board-top)) 0 var(--s-board-bottom)',
         }}
       >
         <WeeklyGrid
@@ -135,18 +146,27 @@ export default function WeeklyPage() {
             settled()
           }}
         />
-        {/* **The baseline caption belongs to the challenge and leaves with
-            it.** In week mode the figure is the open week's own revenue, which
-            has no photographed baseline to be "since" — printing one would
-            caption the board with a date its numbers are not measured from. */}
-        <BoardLegend
-          since={
-            snapshot === null || mode !== 'challenge'
-              ? null
-              : baselineLabel(cohortInstant(snapshot.cohort, 'challenge_start_iso'))
-          }
-        />
       </div>
+
+      <div className="tv-rule" />
+
+      {/* **The legend is a row of the frame now, not an absolute in its margin.**
+          It used to be positioned against the board's padding box, which put its
+          baseline 4.3px above the frame's bottom edge — measured — where a
+          television's overscan crops it outright. A stated row cannot be
+          clipped by something it does not overlap.
+
+          **The baseline caption belongs to the challenge and leaves with it.**
+          In week mode the figure is the open week's own revenue, which has no
+          photographed baseline to be "since" — printing one would caption the
+          board with a date its numbers are not measured from. */}
+      <BoardLegend
+        since={
+          snapshot === null || mode !== 'challenge'
+            ? null
+            : baselineLabel(cohortInstant(snapshot.cohort, 'challenge_start_iso'))
+        }
+      />
 
       <DevFlipTrigger
         teams={teams}

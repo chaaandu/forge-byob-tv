@@ -49,16 +49,26 @@ export function ChallengeDay({ start, end }: { start: Date | null; end: Date | n
   // same silence the Flea countdown keeps once its event is over.
   if (state === null) return null
 
-  // Styled inline from the band's own tokens, as `FleaDial` is and for the same
-  // reason: `.tv-band` redefines `--fg1` and `--t-tv-cal-figure` on itself, so
-  // the surface decides the scale and the ink rather than the root. Tangerine
-  // Glow rather than Tangerine 600 — the 600 was picked to survive a white
-  // ground and goes muddy on Deep Forest at six metres.
+  // ── One tracked line, in the masthead's own ink ──
+  //
+  // This used to be three parts at two scales: a 39px tangerine figure between
+  // two 22px labels, sized by `--t-tv-cal-figure` which `.tv-band` redefined on
+  // itself so the band could make it loud. The band is gone, and with it the
+  // argument for making it loud — the old comment called the day count "the
+  // second-loudest thing on the board", which on a frame whose loudest thing is
+  // now a 39px heading would make a chip of apparatus compete with the
+  // masthead.
+  //
+  // It is one line of tracked caps at label size, with the *figure* carrying
+  // the emphasis and nothing else: the same size as the words around it, one
+  // weight up, in the surface's accent. `--accent` rather than Tangerine Glow,
+  // because this component draws on both surfaces now and a fixed hue would
+  // die on one of them.
   const label: React.CSSProperties = {
-    font: 'var(--t-tv-strip-label)',
+    font: 'var(--t-tv-mast-label)',
     letterSpacing: 'var(--track-overline)',
     textTransform: 'uppercase',
-    color: 'var(--fg1)',
+    color: 'var(--ink-muted)',
   }
 
   return (
@@ -72,7 +82,10 @@ export function ChallengeDay({ start, end }: { start: Date | null; end: Date | n
       }}
     >
       <span style={label}>Day</span>
-      <span style={{ font: 'var(--t-tv-cal-figure)', color: 'var(--tangerine-glow)' }}>
+      <span
+        className="tv-figure"
+        style={{ ...label, font: 'var(--t-tv-mast-figure)', color: 'var(--accent)' }}
+      >
         {state.day}
       </span>
       <span style={label}>of {state.total}</span>

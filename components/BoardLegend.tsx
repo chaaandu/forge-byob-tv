@@ -10,13 +10,13 @@
  * corner is cheaper than the alternative, which is a passer-by deciding it must
  * mean something it does not.
  *
- * ── It sits in the frame's own margin, not in the grid ──
+ * ── It is a row of the frame, under the board's own rule ──
  *
- * Absolutely positioned against the board's padding box, so it takes no height
- * from the four rows and cannot move a card. That margin is 25.8px at 1920 and
- * the legend is set well inside it; if the grid ever grows to claim that space,
- * this is the thing that gets clipped rather than the thing that pushes the
- * board off the frame.
+ * It used to be absolutely positioned in the board's bottom margin, which put
+ * its box 4.3px above the frame's edge — measured — where a television's
+ * overscan crops it. It is a stated grid row now: the board above shrinks to
+ * make room for it rather than the legend being pushed off the bottom, which is
+ * the right way round on a wall with nobody watching to notice.
  *
  * The mark is `VentureCard`'s own class, not a copy of it, so a change to the
  * triangle's shape or size reaches the legend automatically. Two drawings of
@@ -25,8 +25,14 @@
 export function BoardLegend({ since }: { since?: string | null }) {
   return (
     <p className="tv-legend">
-      <span className="tv-day-mark tv-legend-mark" aria-hidden="true" />
-      Today&rsquo;s revenue
+      {/* **The mark and its phrase are one flex item, not two.** The footer is
+          `space-between` now, and left loose the triangle would be pushed to the
+          frame's left edge with its own explanation 1,400px away at the other
+          end — a legend that separates a symbol from what it means. */}
+      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 'var(--s-2)' }}>
+        <span className="tv-day-mark tv-legend-mark" aria-hidden="true" />
+        Today&rsquo;s revenue
+      </span>
       {/* **What the big figure now measures.** It changed meaning from "this
           week" to "since the baseline", and nothing else on the board says so —
           which is the same argument that put the green triangle's explanation
