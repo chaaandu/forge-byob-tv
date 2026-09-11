@@ -159,12 +159,12 @@
   --ink-on-solid: var(--white);
   --ink-on-solid-2: var(--orchid-300);
 
-  /* The podium's three card fills, as gradients rather than flat tokens. Flat
-     was right on white, where the card's edge came from the page. On a field
-     that is itself purple, a flat card is a rectangle of very slightly
-     different purple; the gradient is what gives it a top and a bottom. */
-  --pod-card-lead: var(--grad-card-leader);
-  --pod-card-rest: var(--grad-card-solid);
+  /* The podium's three card fills used to be declared here, as gradients
+     rather than flat tokens — flat was right on white, where a card's edge came
+     from the page, and on a field that is itself purple a flat card is a
+     rectangle of very slightly different purple. They are gone with the cards;
+     see §5. `--grad-card-leader` and `--grad-card-solid` stay in §4, which is
+     the structural-gradient vocabulary rather than a podium detail. */
 }
 
 /* ── §3 · The two surfaces ─────────────────────────────────────────────────
@@ -270,67 +270,50 @@
   --grad-card-leader: linear-gradient(158deg, var(--violet-700) 0%, var(--royal-700) 100%);
 }
 
-/* ── §5 · Podium parts that were mixed for a white page ───────────────────────
+/* ── §5 · What the podium's own colour tokens were, and why there are none ────
 
-   Every token here already existed in `app/mesa-tv.css`, defined as a
-   `color-mix` of Mesa's tokens. Each was correct on white and **each inverted
-   when the page went dark**, because a mix that lands "two steps above the
-   page" lands two steps *below* a dark one. Measured on the running board
-   before this block existed:
+   Eleven tokens stood here: `--pod-track` and `--pod-fill` for the list's
+   progress bars, `--pod-mover-fill` / `--pod-mover-ink` / `--pod-mover-gain-ink`
+   for the biggest-mover panel, `--pod-rank-ink` for the list's numerals, and
+   `--pod-card-lead` / `--pod-card-rest` for the three podium card fills. Each
+   was declared twice, once for each surface.
+
+   **Every one of them belonged to an element the editorial pass removed.** The
+   bars, the panel and the cards are all gone — `app/mesa-tv.css`'s podium block
+   has the argument for each — and the list's rank numerals now read `--ink-muted`,
+   the same token `/weekly` inks its own rank numerals with.
+
+   ── Why this block is a comment rather than a deletion ──
+
+   What it recorded is the single most expensive lesson in this project's
+   history, and the elements it was attached to are gone while the lesson is
+   not. Measured on the running board before it existed:
 
      list venture name    rgb(42,24,73) on rgb(42,24,73)   1.00:1  — invisible
      list figure          rgb(42,24,73) on rgb(42,24,73)   1.00:1  — invisible
      mover gain figure    #b685c2 on #fbf7fd               2.79:1  — 56px, failing
      progress bar         track brighter than its own fill — the bar read backwards
 
-   The first two are the whole point of the surface layer: `--deep-teal` is
-   "deepest brand surface", `.surface-dark` correctly re-points it to the page
-   colour, and anything using it as *ink* then paints text in the background.
-   A token that is a surface in one place and ink in another cannot survive a
-   surface flip, and the fix is to stop asking it to.
+   The first two are the whole point of §2's surface layer. `--deep-teal` is
+   "deepest brand surface"; `.surface-dark` correctly re-points it to the page
+   colour, and three things were using it as *ink*, so they painted text in the
+   background. **A token that is a surface in one place and ink in another
+   cannot survive a surface flip**, and the fix is to stop asking it to.
 
-   These are overridden rather than edited in place because `mesa-tv.css` is
-   imported first: its `:root` still carries the reasoning for each value and
-   the arithmetic that depends on them, and this file is the one that gets to
-   have the last word. See the import note in `app/globals.css`. */
+   Anything new on either slide reads §2's semantic tokens — `--surface`,
+   `--ink`, `--ink-muted`, `--accent`, `--hairline` — and lets the surface decide
+   what they mean. A component-specific colour token declared twice is how this
+   block came to exist in the first place.
 
-:root {
-  --pod-track: color-mix(in srgb, var(--royal-purple) 14%, var(--white));
-  --pod-fill: var(--royal-300);
-  --pod-rank-ink: var(--ink-muted-light);
-  --pod-mover-fill: color-mix(in srgb, var(--lavender-mist) 42%, var(--white));
-  --pod-mover-ink: var(--royal-purple);
-  /* The gain figure. Orchid 700 measured 2.79:1 on the pale panel at 56px —
-     the largest number on that panel and the least readable thing on the
-     slide. Vivid Violet is the accent that belongs on light. */
-  --pod-mover-gain-ink: var(--vivid-violet);
-}
+   ── The metals ──
 
-.surface-dark {
-  /* Track barely above the page (1.30:1) and the fill well clear of both —
-     5.60:1 on the page, 4.31:1 against its own track. The empty part of a bar
-     must never be the loud part. */
-  --pod-track: color-mix(in srgb, var(--white) 10%, transparent);
-  --pod-fill: var(--violet-300);
-  /* Apparatus ink: the list's rank numerals, and the mover panel's label and
-     standing line. Violet 300 measured 4.60:1 on the raised card at 15px —
-     passing AA, and too thin for 15px read from a corridor. This step is
-     6.94:1 there and 8.45:1 on the page, and still sits well under the venture
-     name it must not compete with. */
-  --pod-rank-ink: var(--mint-300);
-  --pod-mover-fill: var(--aubergine-600);
-  --pod-mover-ink: var(--white); /* 13.02:1 on the raised card */
-  /* Orchid at 6.89:1 on the raised card. This is the one figure on the slide
-     the accent is spent on, which is what keeps it an accent. */
-  --pod-mover-gain-ink: var(--orchid);
+   `--forge-metal-gold`, `--forge-metal-silver` and `--forge-metal-bronze` are
+   still declared in §1 and are the project's one documented colour exemption.
+   Nothing reads them at present: the podium's plinths and numerals and
+   `/weekly`'s rank 1-3 treatment all carried them, and all three are gone.
 
-  /* The three podium cards. Rank 1 is the only place Vivid Violet appears as a
-     fill anywhere on the wall — the design system reserves it for ~5% and one
-     card out of thirty-nine is about right. Its lighter end still clears
-     7.70:1 for white and 7.42:1 for gold at the darker end.
-
-     Cards 2 and 3 must not be the page colour. `--deep-teal` on a dark surface
-     resolves to exactly that, so first place had no edge at all. */
-  --pod-card-lead: var(--grad-card-leader);
-  --pod-card-rest: var(--grad-card-dark);
-}
+   They are kept rather than deleted because the exemption is a standing
+   decision about what this wall is allowed to say, not a leftover. If gold ever
+   comes back it should arrive as one decision in one place — see the note at
+   `.tv-card-rank-lead` in `app/mesa-tv.css` for what it replaced, which was a
+   plinth, a sweep, a glyph fill and a second sweep. */

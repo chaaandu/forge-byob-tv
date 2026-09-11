@@ -233,15 +233,7 @@ export function VentureCard({
           of size and the surface's accent; everything else about the numeral —
           where it sits, how it tracks, that it is tabular — is shared by
           construction and cannot drift. */}
-      <span
-        className={[
-          'tv-card-rank',
-          rank <= LEAD_RANKS ? 'tv-card-rank-lead' : undefined,
-          rank > LEAD_RANKS && quiet ? 'tv-card-rank-quiet' : undefined,
-        ]
-          .filter(Boolean)
-          .join(' ')}
-      >
+      <span className={rank <= LEAD_RANKS ? 'tv-card-rank tv-card-rank-lead' : 'tv-card-rank'}>
         {rank}
       </span>
 

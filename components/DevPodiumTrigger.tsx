@@ -103,8 +103,14 @@ export function DevPodiumTrigger({
         position: 'fixed',
         // Bottom-right, because the Next dev overlay lives bottom-left and
         // swallows clicks aimed at anything under it.
+        //
+        // **Clear of the frame's own footer.** The editorial frame put a real
+        // content row across the bottom of both slides — the legend on
+        // `/weekly`, the mover on `/podium` — and this bar was drawn straight
+        // over it, which made the one line of the design hardest to check the
+        // one line permanently hidden while checking it.
         right: 'var(--s-4)',
-        bottom: 'var(--s-4)',
+        bottom: 'calc(var(--s-safe-y) + var(--h-foot) + var(--s-3))',
         display: 'flex',
         gap: 'var(--s-2)',
         zIndex: 50,

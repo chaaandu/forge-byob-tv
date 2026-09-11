@@ -114,7 +114,10 @@ export function DevFlipTrigger({
         position: 'fixed',
         // Bottom-*right*: Next's dev overlay indicator owns the bottom-left
         // corner and its portal swallows clicks aimed at anything underneath it.
-        bottom: 8,
+        //
+        // Lifted clear of the frame's footer row — see the same note in
+        // `DevPodiumTrigger`.
+        bottom: 'calc(var(--s-safe-y) + var(--h-foot) + var(--s-3))',
         right: 8,
         display: 'flex',
         gap: 6,

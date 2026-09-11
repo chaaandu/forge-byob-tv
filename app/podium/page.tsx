@@ -3,9 +3,12 @@
 import { useEffect, useState } from 'react'
 
 import { DevPodiumTrigger } from '@/components/DevPodiumTrigger'
+import { FleaCountdown } from '@/components/FleaCountdown'
+import { MoverPanel } from '@/components/MoverPanel'
 import { Podium } from '@/components/Podium'
-import { PodiumMasthead } from '@/components/PodiumMasthead'
+import { WallHeader } from '@/components/WallHeader'
 import { WATCH_RANKS_PODIUM } from '@/config'
+import { fleaInstant } from '@/lib/feed'
 import { competingTeams, rankTeams } from '@/lib/ranking'
 import { useKick } from '@/lib/useKick'
 import { useWallData, type BoardSpec } from '@/lib/useWallData'
@@ -13,14 +16,26 @@ import { useWallData, type BoardSpec } from '@/lib/useWallData'
 /**
  * Slide 1 — the absolute leaderboard.
  *
- * A full-height masthead at the left and the board beside it. **No
- * `WallHeader`** — `/weekly` keeps the shared strip across the top, and this
- * slide replaced it with the spine. What the two boards must still share is the
- * data rather than the furniture: the same lockup, the same provenance stamp and
- * the same countdown brain all appear on both, arranged differently.
+ * **The same five-row editorial frame `/weekly` uses**: masthead, rule, board,
+ * rule, footer, inside a safe margin on all four sides. This slide had a
+ * 240px-wide full-height spine down its left edge instead — `PodiumMasthead`,
+ * now deleted — carrying the lockup, BYOB as four stacked 187px letters, a rule
+ * and an 88px Flea countdown.
  *
- * The page has no padding of its own. The spine is full-bleed to three edges by
- * design, so the frame's margins belong to the board and are declared there.
+ * That component's own docblock made the case for the split: a vertical band
+ * anchors the frame at one edge and gives the countdown somewhere to be large,
+ * and what the two slides must share is the *data* rather than the furniture —
+ * "the same lockup, the same provenance stamp, the same countdown brain ... in a
+ * different arrangement rather than a different system."
+ *
+ * **Two slides rotating on one screen every thirty seconds is one wall**, and
+ * the furniture is most of what a passer-by sees of it. Sharing the data and not
+ * the arrangement is how the rotation came to read as two designs. The lockup,
+ * the countdown and the stamp are all still here; they are on one line across
+ * the top, in the order `/weekly` puts them, at the sizes `/weekly` uses.
+ *
+ * The cost is stated in `components/WallHeader.tsx`: the Flea countdown is a
+ * line of apparatus now rather than an 88px figure.
  */
 const BOARD: BoardSpec = {
   // The spares are filtered *here*, not in the component, so the detector and
@@ -63,12 +78,46 @@ export default function PodiumPage() {
     // slides swapping every thirty seconds, so the rotation carries the
     // brand's own rhythm. The class is what re-points `--ink`, `--accent` and
     // the hairlines for a dark field; nothing inside this tree names a colour.
+    //
+    // The five rows are `/weekly`'s, exactly — see the note there on why the
+    // masthead no longer bleeds to the frame's edge.
     <main
       className="tv-frame surface-dark"
-      style={{ display: 'grid', gridTemplateColumns: 'auto 1fr' }}
+      style={{
+        display: 'grid',
+        gridTemplateRows: 'auto auto minmax(0, 1fr) auto auto',
+        padding: 'var(--s-safe-y) var(--s-safe-x)',
+        rowGap: 0,
+      }}
     >
-      <PodiumMasthead snapshot={snapshot} />
-      <Podium ranked={rankTeams(teams)} kick={kick} onSettled={settled} />
+      {/* **No day chip on this slide**, which is what `mode="week"` buys: the
+          10-day challenge is `/weekly`'s contest and these figures are all-time.
+          A `Day 7 of 10` chip over a board of cumulative revenue is precisely
+          the plausible-and-unreported failure this project is built around.
+
+          The Flea countdown takes that slot instead, as `trailing`. It is the
+          one piece of apparatus this slide has that `/weekly` does not. */}
+      <WallHeader
+        snapshot={snapshot}
+        label="BYOB Leaderboard"
+        mode="week"
+        tone="dark"
+        trailing={<FleaCountdown at={snapshot === null ? null : fleaInstant(snapshot.cohort)} />}
+      />
+
+      <div className="tv-rule" style={{ marginTop: 'var(--s-mast-rule)' }} />
+
+      <div style={{ display: 'grid', minHeight: 0, paddingTop: 'var(--s-rule-board)' }}>
+        <Podium ranked={rankTeams(teams)} kick={kick} onSettled={settled} />
+      </div>
+
+      <div className="tv-rule" />
+
+      {/* The biggest mover, as the frame's footer line — the same slot
+          `/weekly` gives its legend. It was a filled pale panel at the top of
+          the right-hand column, which is what pushed the list of seven down and
+          left 200px of empty page under the podium. */}
+      <MoverPanel ranked={teams} />
 
       <DevPodiumTrigger
         teams={teams}

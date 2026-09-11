@@ -5,6 +5,7 @@ import { createRoot } from 'react-dom/client'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { FleaDial } from '@/components/FleaDial'
+import { MoverPanel } from '@/components/MoverPanel'
 import { Podium, podiumTeams } from '@/components/Podium'
 import { VentureCard } from '@/components/VentureCard'
 import { pagesOf } from '@/components/VentureName'
@@ -170,44 +171,73 @@ describe('Podium', () => {
     document.body.append(host)
     const root = createRoot(host)
     act(() => root.render(<Podium ranked={[]} />))
-    const figures = [...host.querySelectorAll('.tv-pod-card .tv-figure')]
+    const figures = [...host.querySelectorAll('.tv-pod-slot .tv-figure')]
     expect(figures).toHaveLength(3)
     expect(figures.every((el) => el.textContent === '—')).toBe(true)
-    // The panel has nothing to report either, and says so the same way.
+    act(() => root.unmount())
+    host.remove()
+  })
+
+  it('says nothing with a dash in the footer when nobody has traded', () => {
+    // **This used to be one line inside the test above**, reaching into
+    // `.tv-pod-mover-empty` on a rendered `<Podium>`. The mover is not inside
+    // `Podium` any more — it is the page's footer row — so the assertion had to
+    // move with it rather than be deleted, which is the only reason it is a
+    // test of its own.
+    //
+    // The claim is unchanged and still worth pinning: an em dash, never `₹0`.
+    // Zero is a figure, and a footer carrying one asserts that somebody traded
+    // and earned nothing. Before the cohort opens that is false for all of them.
+    const host = document.createElement('div')
+    document.body.append(host)
+    const root = createRoot(host)
+    act(() => root.render(<MoverPanel ranked={[]} />))
     expect(host.querySelector('.tv-pod-mover-empty')?.textContent).toBe('—')
     act(() => root.unmount())
     host.remove()
   })
 
-  it('draws three cards on plinths and seven pills, borrowing nothing from /weekly', () => {
+  it('draws three places and seven ruled rows, borrowing nothing from /weekly', () => {
     // `.tv-pill` is /weekly's language — rows that close around their own mark.
     // Borrowing it here made slide 1 look like a shorter slide 2. This is the
     // executable form of "do not borrow it back".
     //
-    // The counts are the shape of the slide: three floating cards for the
-    // podium places and one bar per rank 4-10. They replace an assertion on the
-    // pillars' shafts and slabs, which is the same claim about the design that
-    // preceded this one.
+    // The counts are the shape of the slide: three places and one row per rank
+    // 4-10. They replace an assertion on cards, plinths and bars, which is the
+    // same claim about the design that preceded this one, which in turn
+    // replaced one about the pillars' shafts and slabs.
     const all = teams().map((row, index) => ({ ...row, totalRevenue: 1_000 * (42 - index) }))
     const host = document.createElement('div')
     document.body.append(host)
     const root = createRoot(host)
     act(() => root.render(<Podium ranked={rankTeams(competingTeams(all))} />))
     expect(host.querySelectorAll('.tv-pill')).toHaveLength(0)
-    expect(host.querySelectorAll('.tv-pod-card')).toHaveLength(3)
-    // One numeral per pillar, and one metal foot under each. The numeral used to
-    // be drawn twice and split by the card's edge; it floats clear of the card
-    // now, so three is the right count and six would mean the split came back.
-    expect(host.querySelectorAll('.tv-pod-numeral')).toHaveLength(3)
-    expect(host.querySelectorAll('.tv-pod-foot')).toHaveLength(3)
-    // One row and one bar per rank 4-10. The pill that used to be both is gone:
-    // a shape doing two jobs is what this list was rejected for.
-    expect(host.querySelectorAll('.tv-pod-stack')).toHaveLength(7)
-    expect(host.querySelectorAll('.tv-pod-underbar')).toHaveLength(7)
-    // Each card stands on its own metal. Three plinths and three cards, never
-    // three cards and one plinth — the plinth is where the metal is declared,
-    // and a shared one would give second place first place's gold.
     expect(host.querySelectorAll('.tv-pod-slot')).toHaveLength(3)
+    // One numeral per place. The numeral used to be drawn twice and split by a
+    // card's edge; three is the right count and six would mean the split came
+    // back.
+    expect(host.querySelectorAll('.tv-pod-numeral')).toHaveLength(3)
+
+    // ── The ornaments stay gone ──
+    //
+    // Each of these classes was a real element on this slide and each was
+    // removed in the editorial pass: a filled card with three inset shadows, a
+    // metal plinth with a travelling sheen, and a share bar under every list
+    // row whose reference the frame never named. Asserting zero is the cheap
+    // half of that decision — the expensive half is that reintroducing any of
+    // them is a design argument someone has to make, not a CSS rule that can
+    // drift back in.
+    expect(host.querySelectorAll('.tv-pod-card')).toHaveLength(0)
+    expect(host.querySelectorAll('.tv-pod-foot')).toHaveLength(0)
+    expect(host.querySelectorAll('.tv-pod-underbar')).toHaveLength(0)
+
+    // One row per rank 4-10. `.tv-pod-row` is also the class `measurePath`
+    // queries to find where a promoted venture's mark starts from, so a rename
+    // here silently breaks an overtake into the podium — see `PodiumBoard`.
+    expect(host.querySelectorAll('.tv-pod-row')).toHaveLength(7)
+    // Six rules, not seven: the last row does not draw one, because the frame's
+    // own rule above the footer is the board's bottom edge.
+    expect(host.querySelectorAll('.tv-pod-row-rule')).toHaveLength(6)
     act(() => root.unmount())
     host.remove()
   })
@@ -531,19 +561,41 @@ describe('VentureCard', () => {
   })
 
   /**
-   * The rank's ink follows the card it sits on. Asserted because the rule that
-   * used to do this — `.tv-card-quiet .tv-card-badge` — was a descendant
-   * selector matching a *sibling*, so it never applied and every pale card wore
-   * a dark chip. A dead CSS rule reports nothing; this does.
+   * ── One rank numeral for ranks 4-39, and one for the top three ──
+   *
+   * This asserted the opposite: that a pale card's rank took its own
+   * `tv-card-rank-quiet` ink. The claim behind it was real — the rule that
+   * *originally* did this was `.tv-card-quiet .tv-card-badge`, a descendant
+   * selector matching a sibling, so it never once applied and every pale card
+   * wore a dark chip. A dead CSS rule reports nothing.
+   *
+   * The quiet class is gone, and for a reason worth pinning rather than
+   * quietly dropping: it layered `opacity: 0.72` over `--ink-muted`, which put
+   * those numerals near 3.2:1 on the light surface. That fails AA at 17px and
+   * no contrast probe would ever have caught it, because a probe reads `color`
+   * and not the opacity composited over it.
+   *
+   * What replaced it is the absence — the quiet half of the board is said by
+   * the venture name and the figure stepping back an ink, which the test above
+   * pins through `tv-card-quiet` on the card itself. Three statements of one
+   * fact, in the element that is pure apparatus, is what got removed.
    */
-  it('inks a pale card\'s rank for the pale surface', () => {
+  it('gives every rank below the top three the same numeral', () => {
     const earner = team({ challengeRevenue: 6_440 })
-    expect(markup(<VentureCard team={earner} rank={SOLID_RANKS + 1} />)).toContain(
-      'tv-card-rank-quiet',
-    )
-    expect(markup(<VentureCard team={earner} rank={SOLID_RANKS} />)).not.toContain(
-      'tv-card-rank-quiet',
-    )
+    for (const rank of [4, SOLID_RANKS, SOLID_RANKS + 1, COMPETING_SIZE]) {
+      const html = markup(<VentureCard team={earner} rank={rank} />)
+      expect(html).toContain('tv-card-rank')
+      expect(html).not.toContain('tv-card-rank-lead')
+      expect(html).not.toContain('tv-card-rank-quiet')
+    }
+  })
+
+  it('gives the top three the lead numeral, and nobody else', () => {
+    const earner = team({ challengeRevenue: 6_440 })
+    for (const rank of [1, 2, 3]) {
+      expect(markup(<VentureCard team={earner} rank={rank} />)).toContain('tv-card-rank-lead')
+    }
+    expect(markup(<VentureCard team={earner} rank={4} />)).not.toContain('tv-card-rank-lead')
   })
 
   /**
