@@ -4,7 +4,7 @@ Turn the circular source logos into discs the wall can render.
     python3 scripts/prepare-logos.py
 
 Reads `public/assets/Circle logos/Team <N>.(jpg|png)` and writes
-`public/logos/SLE-C4NN.png` at 512x512 RGBA, the artwork masked to a circle
+`public/logos/VBC1NN.png` at 512x512 RGBA, the artwork masked to a circle
 with everything outside it transparent. Paste the printed list into `LOGOS` in
 config.ts.
 
@@ -40,7 +40,7 @@ edge. The mask is drawn at 4x and downsampled, because a hard-edged circle at
 ── The team-number mapping is CONFIRMED ──
 
 Sources are named `Team 17`, not `SLE-C417`, and this script assumes team *N* is
-workbook `SLE-C4NN`. That assumption was unverified for a long time and is
+workbook `VBC1NN` (Forge C1; it was `SLE-C4NN` for Cohort 2026). That assumption was unverified for a long time and is
 recorded as open item 1 in scripts/README.md.
 
 **It has now been checked, and it holds.** All 24 numbered logos were read
@@ -151,7 +151,7 @@ def main():
             skipped.append(name)
             continue
 
-        team_id = f"SLE-C4{int(match.group(1)):02d}"
+        team_id = f"VBC1{int(match.group(1)):02d}"
         im = Image.open(path).convert("RGBA")
         disc(squared(im, content_box(im))).save(os.path.join(OUT, f"{team_id}.png"))
         done.append(team_id)

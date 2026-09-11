@@ -3,10 +3,10 @@
  *
  * Changed by commit, not by an admin UI — there is nobody at the wall to click.
  *
- * **No dates live here.** The Mesa Flea instant and the current challenge week
- * both arrive in `TV_Cohort`, so correcting either is one sheet edit rather than
- * a commit and a redeploy — which matters for a 10:00 opening time that is still
- * unconfirmed weeks out.
+ * **Almost no dates live here.** The Mesa Flea instant, the open week and the
+ * challenge window all arrive in `TV_Cohort`, so correcting any of them is one
+ * sheet edit rather than a commit and a redeploy. The single exception is
+ * `PROGRAMME_START_ISO`, and the reason is written at its declaration.
  */
 
 import type { TeamId } from '@/lib/types'
@@ -64,21 +64,29 @@ function feedUrl(override: string | undefined, published: string): string {
 
 export const FEED_CSV_URL: string = feedUrl(
   process.env.NEXT_PUBLIC_FEED_CSV_URL,
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vTZTHFUyVPNGcV0rsFtd45y9KxvT2Yh2Bj8qs6qMqIFrY8rTtqc9sqb_fKOUyi_Us1hnJWZhHN0n-_z/pub?gid=917272830&single=true&output=csv',
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIPEG2OyaUG4epSSXmvtiHClz9jUwDKuHIUy1de4gw6AevZMBM2oODC5W8DwqbRDQspTqqM34DalBd/pub?gid=1357679077&single=true&output=csv',
 )
 export const COHORT_CSV_URL: string = feedUrl(
   process.env.NEXT_PUBLIC_COHORT_CSV_URL,
-  'https://docs.google.com/spreadsheets/d/e/2PACX-1vTZTHFUyVPNGcV0rsFtd45y9KxvT2Yh2Bj8qs6qMqIFrY8rTtqc9sqb_fKOUyi_Us1hnJWZhHN0n-_z/pub?gid=359094552&single=true&output=csv',
+  'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIPEG2OyaUG4epSSXmvtiHClz9jUwDKuHIUy1de4gw6AevZMBM2oODC5W8DwqbRDQspTqqM34DalBd/pub?gid=160306272&single=true&output=csv',
 )
 
 /**
  * The fewest usable rows a fetch may carry and still be trusted.
  *
- * 40, not 42: `SLE-C441` and `SLE-C442` are spares and the wall does not compete
- * them, so forty is the real cohort. The gate checks *short*, never exact — see
+ * **39 — the competing cohort, `VBC101`–`VBC139`.** `TV_Feed` publishes more
+ * than that today, because `VBC140` and `VBC141` are test workbooks still
+ * sitting in `Team Links`; the gate checks *short*, never exact, so it passes
+ * either way and keeps passing the day those two are deleted. See
  * `passesRowGate` in lib/feed.ts.
+ *
+ * **This number is the single most dangerous constant in the project.** Set it
+ * one above the real cohort and every poll is rejected, forever, silently: no
+ * spinner, no error state, nothing on screen but the empty structure and one
+ * line in a console nobody is reading. Whenever the cohort size changes, this
+ * changes with it.
  */
-export const MIN_TEAM_ROWS = 40
+export const MIN_TEAM_ROWS = 39
 
 /** The consolidator writes every 10 minutes and Google caches the CSV ~5 min; polling faster only burns cycles. */
 export const POLL_INTERVAL_MS = 60_000
@@ -86,11 +94,16 @@ export const POLL_INTERVAL_MS = 60_000
 /**
  * Workbooks that exist but do not compete.
  *
- * `TV_Feed` publishes all 42 because it reads `Team Links`; these two are spares
- * and are filtered out for display. They still count toward `MIN_TEAM_ROWS`,
- * which asks whether a whole fetch arrived, not who is racing.
+ * `TV_Feed` publishes whatever is in `Team Links`, and these two are the test
+ * workbooks the cohort was built against — every row in `Daily Dump` today
+ * belongs to `VBC141` and says "Test Tote". They are filtered out for display.
+ *
+ * They still count toward `MIN_TEAM_ROWS`, which asks whether a whole fetch
+ * arrived rather than who is racing. Listing them here is also what makes the
+ * wall correct *before* they are deleted from the sheet and *after*: a spare
+ * that no longer exists simply never matches.
  */
-export const SPARE_TEAM_IDS: readonly TeamId[] = ['SLE-C441', 'SLE-C442']
+export const SPARE_TEAM_IDS: readonly TeamId[] = ['VBC140', 'VBC141']
 
 // ── Weekly board ────────────────────────────────────────────────────────────
 
@@ -132,7 +145,7 @@ export const SOLID_RANKS = 20
  * The team-workbook template's placeholder venture name, lowercased.
  *
  * Treated as no name at all. Compared in lowercase because it is typed by hand
- * in 42 separate workbooks and the capitalisation drifts.
+ * in 39 separate workbooks and the capitalisation drifts.
  */
 export const UNNAMED_VENTURE = 'type your venture name'
 
@@ -174,18 +187,20 @@ export const PODIUM_CLOCK_UNDER_MS = 3 * 24 * 60 * 60 * 1000
 export const FLEA_EVENT_DURATION_MS = 8 * 60 * 60 * 1000
 
 /**
- * When the programme started — 20 July 2026, 00:00 IST.
+ * When the programme started — **1 September 2026, 00:00 IST** (Forge C1).
  *
- * **This is a third copy of a date that already lives in two sheet cells**
- * (`TV_Feed!D2` — see docs/SHEET_SETUP.md) and in docs/DESIGN.md. It is here
- * only because the Flea dial measures progress *from* somewhere, and the sheet
- * publishes the Flea instant but not the programme's start. If the anchor ever
- * moves, it moves here too.
+ * The one date in this system that is not in the sheet, so moving it costs a
+ * commit and a redeploy. That is a deliberate, eyes-open trade: it does not
+ * move, and publishing it as a cohort key would change the sheet contract for
+ * one arc.
  *
- * Publishing it as a cohort key would remove the duplication, and was
- * deliberately not done: it changes the sheet contract for one decorative arc.
+ * It is not decorative, though — it is one end of `/podium`'s progress ring,
+ * with `flea_datetime_iso` as the other. Left at Cohort 2026's 20 July anchor
+ * the ring read **52% complete** on 11 September against a true **17%**: a
+ * three-fold error, correctly rendered, in a large element. `current_open_week`
+ * in `TV_Cohort` is anchored to this same date and must move with it.
  */
-export const PROGRAMME_START_ISO = '2026-07-20T00:00:00+05:30'
+export const PROGRAMME_START_ISO = '2026-09-01T00:00:00+05:30'
 export const PROGRAMME_START_MS = Date.parse(PROGRAMME_START_ISO)
 
 /** Once a second while the live timer shows seconds; once a minute before that. */
@@ -248,80 +263,80 @@ export const KICK_MS = 3_000
 /**
  * Team IDs that have a logo committed at `public/logos/<TEAM_ID>.png`.
  *
- * The list lives here rather than in a sheet column for two reasons. `Team
- * Links` columns C:I are rewritten by the consolidator every 10 minutes, so a
- * filename put there would be wiped; and the file itself arrives by commit
- * anyway, so listing it in the same commit is one action rather than two in two
- * systems that would drift.
+ * ── ⚠️ THESE ARE PLACEHOLDERS. THEY ARE COHORT 2026's ARTWORK. ──
  *
- * Because presence is known ahead of the render, no broken image is ever
- * requested and there is no error-handler flash. A team not in this list gets
- * the coloured initial, which is a first-class treatment — **32 of 42 logos
- * exist**, so it now carries three quarters of the wall.
+ * All 39 files are the previous cohort's logos, renamed `SLE-C4NN.png` →
+ * `VBC1NN.png` so the wall has something in every tile while Forge C1's layout
+ * and design are being built. **`VBC101` is currently wearing Dosa Crisps'
+ * mark.** Every one of these is a real venture's identity on a different
+ * venture's card.
  *
- * These files are generated, not dropped in by hand: `scripts/prepare-logos.py`
- * masks every circular source logo to a disc with transparent corners, so it
- * sits on `/weekly`'s green panel and in `/podium`'s frame without a baked-in
- * background square behind it. Re-run it when the source folder changes, and
- * paste its output here.
+ * That is fine for measuring a frame and wrong for a campus TV, and it is
+ * exactly the class of error this project is built around: it renders
+ * convincingly, passes every check, and would run for weeks. **Empty this list
+ * before the wall goes on a screen**, or replace the files. A team not in the
+ * list gets the coloured initial disc, which is a first-class treatment, so an
+ * empty list is a perfectly good state — not a degraded one.
  *
- * **The team-number mapping is confirmed.** The source files are named "Team
- * 17", not "SLE-C417", and this assumption went unverified for a long time. On
- * 12 August 2026 all 24 numbered logos were read against the live `TV_Feed`
- * venture names and every one agrees — Team 1 is Dosa Crisps, Team 15 is
- * CHAKHA NA?, Team 34 is In Between Sips by Kaappitalism, and so on.
+ * ── The list, not the filesystem, is what the wall reads ──
  *
- * ROLLIN and UNHINGED were the two that could not be placed from the feed — no
- * such venture names are published — and they are now assigned by hand to
- * `SLE-C422` and `SLE-C435` respectively, by the person who knows. `Team 30` and
- * `Team 7` arrived in the same batch, and both re-confirm the mapping
- * independently: 30 is The Chips n Dip Story against `SLE-C430`'s "The Chips n
- * Dips Story", and 7 is Wake & Wyze against `SLE-C407`'s.
+ * Presence is known ahead of the render, so no broken image is ever requested
+ * and there is no error-handler flash. A file on disk that is missing from this
+ * list is invisible; an id here with no file is a broken image on a TV. They
+ * arrive together, in one commit.
  *
- * Teams 11, 12, 13 and 21 arrived later and confirm it four more times over,
- * with no interpretation needed: Moh, XOCO, Honest Sweet and SoleMate are the
- * published `venture_name` of `SLE-C411`, `SLE-C412`, `SLE-C413` and
- * `SLE-C421` exactly. Twelve independent confirmations and no contradiction.
+ * ── The spec for real artwork ──
+ *
+ * **512×512 PNG, RGBA, content inside the inscribed circle.**
+ * `components/VentureLogo.tsx` clips every mark with `border-radius: 50%`, so a
+ * square design that fills its frame loses its four corners — silently.
+ * `scripts/prepare-logos.py` masks circular sources to exactly this and prints
+ * a list to paste here; its `team_id` line needs the `VBC1NN` pattern.
+ *
+ * The list stays here rather than in a sheet column for two reasons that both
+ * still hold: the consolidator rewrites `Team Links` C:I every 10 minutes, so a
+ * filename there would be wiped; and the file itself arrives by commit anyway,
+ * so listing it in the same commit is one action rather than two in two systems
+ * that would drift.
  */
 export const LOGOS: readonly TeamId[] = [
-  'SLE-C401',
-  'SLE-C402',
-  'SLE-C403',
-  'SLE-C404',
-  'SLE-C405',
-  'SLE-C406',
-  'SLE-C407',
-  'SLE-C408',
-  'SLE-C409',
-  'SLE-C410',
-  'SLE-C411',
-  'SLE-C412',
-  'SLE-C413',
-  'SLE-C414',
-  'SLE-C415',
-  'SLE-C416',
-  'SLE-C417',
-  'SLE-C418',
-  'SLE-C419',
-  'SLE-C420',
-  'SLE-C421',
-  'SLE-C422',
-  'SLE-C423',
-  'SLE-C424',
-  'SLE-C425',
-  'SLE-C426',
-  'SLE-C427',
-  'SLE-C428',
-  'SLE-C429',
-  'SLE-C430',
-  'SLE-C431',
-  'SLE-C432',
-  'SLE-C433',
-  'SLE-C434',
-  'SLE-C435',
-  'SLE-C436',
-  'SLE-C437',
-  'SLE-C438',
-  'SLE-C439',
-  'SLE-C440',
+  'VBC101',
+  'VBC102',
+  'VBC103',
+  'VBC104',
+  'VBC105',
+  'VBC106',
+  'VBC107',
+  'VBC108',
+  'VBC109',
+  'VBC110',
+  'VBC111',
+  'VBC112',
+  'VBC113',
+  'VBC114',
+  'VBC115',
+  'VBC116',
+  'VBC117',
+  'VBC118',
+  'VBC119',
+  'VBC120',
+  'VBC121',
+  'VBC122',
+  'VBC123',
+  'VBC124',
+  'VBC125',
+  'VBC126',
+  'VBC127',
+  'VBC128',
+  'VBC129',
+  'VBC130',
+  'VBC131',
+  'VBC132',
+  'VBC133',
+  'VBC134',
+  'VBC135',
+  'VBC136',
+  'VBC137',
+  'VBC138',
+  'VBC139',
 ]
