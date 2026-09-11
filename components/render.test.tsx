@@ -212,7 +212,7 @@ describe('Podium', () => {
     host.remove()
   })
 
-  it('gives the three marks three different idle timelines', () => {
+  it('idles the three marks, on three timelines, and nothing else', () => {
     // Never in lockstep. Assigning these by hashing the team id put all three
     // on the same timeline on the real feed — three ids into three buckets
     // collide about one time in nine even with a good hash, and this one is
@@ -221,27 +221,24 @@ describe('Podium', () => {
     document.body.append(host)
     const root = createRoot(host)
     act(() => root.render(<Podium ranked={rankTeams(TRADING)} />))
-    // **Scoped to the mark band.** The rank numerals dance on the same
-    // repertoire now, so an unscoped query returns six elements and this
-    // assertion would fail on a board that is behaving correctly.
     const marks = [...host.querySelectorAll('.tv-pod-mark-band [class*="tv-idle-"]')]
     expect(marks).toHaveLength(3)
     expect(new Set(marks.map((el) => el.className)).size).toBe(3)
 
-    // And each numeral runs a *different* timeline from the mark beneath it, or
-    // the pair would bob as one rigid object rather than as two things that
-    // happen to be near each other.
-    const slots = [...host.querySelectorAll('.tv-pod-slot')]
-    expect(slots).toHaveLength(3)
-    for (const slot of slots) {
-      // The idle lives on the numeral's *wrapper*, not on the glyph: the glyph
-      // carries the travelling shine, and one element cannot hold both
-      // animations — the class that came second simply won.
-      const numeral = slot.querySelector('.tv-pod-numeral-dance')?.className ?? ''
-      const mark = slot.querySelector('.tv-pod-mark-band [class*="tv-idle-"]')?.className ?? ''
-      expect(numeral).toMatch(/tv-idle-/)
-      expect(numeral.replace('tv-pod-numeral-dance ', '')).not.toBe(mark)
-    }
+    // **And the three marks are the *only* things idling.** This is the half of
+    // the assertion that carries the motion trim: the rank numerals used to
+    // dance on the same repertoire, one timeline offset from the mark beneath
+    // them, which made an unscoped query return six. Three is now the whole of
+    // what moves at rest on this slide, and that is the property the overtake
+    // kick is spending — an interrupt only reads as one against a still frame.
+    //
+    // Unscoped on purpose. Scoping it to the mark band would pass just as
+    // happily with a numeral dancing again, which is the regression.
+    expect(host.querySelectorAll('[class*="tv-idle-"]')).toHaveLength(3)
+    // The wrapper existed only to hold the dance apart from the numeral's
+    // `background-position` sweep, since one element can carry `animation`
+    // once. With no dance there is nothing to separate.
+    expect(host.querySelectorAll('.tv-pod-numeral-dance')).toHaveLength(0)
     act(() => root.unmount())
     host.remove()
   })

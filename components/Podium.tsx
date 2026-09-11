@@ -172,19 +172,32 @@ function PodiumCard({
         } as React.CSSProperties
       }
     >
-      {/* Above the card, not on it. It dances on the same repertoire the marks
-          use, so the numeral reads as belonging to the venture underneath rather
-          than as a label printed on the frame — and on a *different* timeline
-          from its own mark, or the pair would move as one rigid object. */}
+      {/* Above the card, not on it — and **still**. It used to dance on the
+          same repertoire the marks use, one timeline offset from its own mark so
+          the pair did not move as one rigid object.
+
+          ── Why the dance went ──
+
+          Not because a moving numeral is ugly; measured, it was the largest
+          moving object on the slide, the `2` swinging 13.8px sideways and its
+          box stretching 29.7px. The cost is that this board has exactly one
+          thing it needs to be able to say — a rank changed hands — and it says
+          it with a three-second interrupt. An interrupt only reads as one
+          against a still frame. Nineteen elements moving at rest left the kick
+          nothing to rise above, and the three biggest were these.
+
+          What the numeral keeps is `tv-metal-sweep`, which travels a highlight
+          *inside* the glyph via `background-position`. It changes what the
+          numeral is made of without moving where it is, so it costs the
+          interrupt nothing. That is the line this trim draws: a sweep that
+          describes a material stays, an object that displaces does not.
+
+          The wrapper went with it. It existed only because the dance and the
+          sweep both wanted `animation` and one element can hold that property
+          once — with no dance there is nothing to separate, and a span named
+          `-dance` that does not is worse than no span. */}
       <span className="tv-pod-numeral-slot">
-        {/* **The dance and the shine are on two elements, deliberately.** Both
-            want the `animation` property, and a single element can only be given
-            it once — measured, the idle class won and the numeral never swept.
-            The wrapper bobs; the glyph inside it carries the travelling
-            highlight. */}
-        <span className={`tv-pod-numeral-dance ${idleOf(place + 1)}`}>
-          <span className="tv-pod-numeral">{place}</span>
-        </span>
+        <span className="tv-pod-numeral">{place}</span>
       </span>
 
       <div
@@ -544,11 +557,6 @@ function Strip({
       </span>
     )
 
-  // Staggered, so seven sheens do not cross the board in unison — which reads as
-  // the whole strip blinking rather than as light moving over each bar.
-  const delay = (index: number) =>
-    ({ ['--d-pod-shine-delay' as string]: `${(index * 0.9).toFixed(2)}s` }) as React.CSSProperties
-
   return (
     <div
       ref={stripRef}
@@ -717,9 +725,14 @@ function Strip({
             {figure(team, rowRank)}
           </div>
           <div className="tv-pod-underbar">
-            <span className="tv-pod-underbar-fill" style={{ width: `${share(team)}%` }}>
-              <span className="tv-pod-underbar-shine" style={delay(index)} />
-            </span>
+            {/* **No sheen on this bar.** A highlight travelling along a filled
+                length reads as the length changing, which on a board whose one
+                interrupt is a real rank change spends that meaning seven times a
+                cycle for nothing. The bar states a share; it does not perform
+                it. Sweeps that describe a *material* — the plinth feet, the
+                metal poured into the numerals — stay, because they say what a
+                surface is rather than that a figure moved. */}
+            <span className="tv-pod-underbar-fill" style={{ width: `${share(team)}%` }} />
           </div>
         </motion.div>
         )

@@ -2023,10 +2023,13 @@
      without one it renders as a flat horizontal squash — the numeral being
      crushed rather than turning. It applies to an element's own children and
      nothing deeper, so it has to sit exactly one level above the animated box. */
+  /* No `perspective` here any more. It existed to project the numeral's glance
+     — a `rotateY` — so it read as a turn rather than a horizontal squash. The
+     glance is gone and nothing below this element carries a 3D transform, so the
+     property would describe a projection that never happens. */
   .tv-pod-numeral-slot {
     display: grid;
     place-items: center;
-    perspective: 900px;
     padding-bottom: var(--s-pod-num-gap);
   }
 
@@ -2145,13 +2148,6 @@
       var(--pod-metal) 100%
     );
     border-radius: 0 0 var(--r-pod-card) var(--r-pod-card);
-  }
-
-  /* The box the idle moves. `perspective` is on its parent, one level up, so the
-     glance reads as a turn rather than a horizontal squash. */
-  .tv-pod-numeral-dance {
-    display: block;
-    will-change: transform;
   }
 
   .tv-pod-numeral {
@@ -2344,23 +2340,6 @@
     overflow: hidden;
   }
 
-  /* The sheen follows the bar here rather than staying on the pill that used to
-     hold it. It runs on the *filled* length, not the track: light travelling
-     along an empty part of the bar would read as progress that is not there. */
-  .tv-pod-underbar-shine {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      100deg,
-      transparent 38%,
-      color-mix(in srgb, var(--white) 55%, transparent) 50%,
-      transparent 62%
-    );
-    animation: tv-shine var(--t-pod-shine) cubic-bezier(0.5, 0, 0.5, 1) infinite;
-    animation-delay: var(--d-pod-shine-delay, 0s);
-    pointer-events: none;
-  }
-
   /* **The figure has its own grid track, so a long name cannot reach it.** The
      approved design shows rank 10's name running straight through its figure;
      that is the collision its own risk list asks to prevent, so it is prevented
@@ -2408,13 +2387,16 @@
       animation: none;
     }
 
-    .tv-pod-underbar-shine,
-    .tv-pod-foot::after {
+    .tv-pod-foot::after,
+    .tv-card-foot::after {
       display: none;
     }
 
-    .tv-pod-numeral,
-    .tv-pod-numeral-dance {
+    /* Only the sweep is left to stop, and `animation: none` is right for it
+       where it is wrong for the foot sheens above: it resets
+       `background-position` to the declared `130% 0`, which is off the glyph, so
+       the numeral is left as flat metal rather than frozen mid-highlight. */
+    .tv-pod-numeral {
       animation: none;
     }
   }
