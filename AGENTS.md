@@ -81,10 +81,21 @@ npm run build        # next build
   not drawn a mark yet"; borrowed artwork says something false about who a team
   is. Adding a real logo is one commit: the file in `public/logos/` and the id in
   that list, together.
-- **Nothing on either slide moves until something happens.** No idle, no sweeps,
-  no dance. The only animation the wall runs is the overtake, and it plays
-  against a frame that is otherwise entirely still — an interrupt only reads as
-  one against a still frame. `render.test.tsx` pins this.
+- **Exactly three things move at rest: `/podium`'s ranks 1, 2 and 3.** Their
+  marks idle, on three timelines assigned by place so they can never fall into
+  lockstep. Everything else on both slides holds still — the other thirty-six
+  cards, the list of seven, both mastheads, every numeral. No sweeps, no dance;
+  those went with the metals.
+
+  The wall's rule is that movement means something happened, and this is the one
+  deliberate exception to it. What makes it survivable is the scope: movement
+  confined to the three ventures the slide exists to celebrate reads as those
+  three being alive, where ten idling marks on a board of thirty-nine reads as
+  the page being busy. The idle is also unlike the kick by design — slow, small
+  and non-directional against fast, large and travelling.
+
+  `/weekly` does not get this. `render.test.tsx` pins both halves, and the
+  second half is the one that is easy to lose.
 - **No filler content.** Empty is a valid state. The wall being quiet is what makes it
   loud when something happens. No spinners, ever — first paint reads cached CSV.
 - **No trigger types beyond the 15 in the design.** The list was deliberately narrowed.

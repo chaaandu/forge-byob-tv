@@ -35,12 +35,14 @@ import type { OvertakeEvent, Team } from '@/lib/types'
  * bigger circle. The numerals are printed, but they are captions now rather than
  * a third encoding.
  *
- * ── Nothing on this slide moves until something happens ──
+ * ── What moves at rest, and it is three things ──
  *
- * This wall's rule is that movement means something happened, and both slides
- * now keep it completely: no idle here, none on `/weekly`, no lustre sweeps, no
- * numeral dance. The only animation either board runs is the overtake, and it
- * plays against a frame that is otherwise entirely still.
+ * This wall's rule is that movement means something happened. The only things
+ * spending it are the three podium marks, which idle — see `idleOf` for why
+ * that is scoped to exactly the top three and why `/weekly` does not get it.
+ * Everything else on both slides holds completely still: the other thirty-six
+ * cards, the list of seven, both mastheads, the numerals. No lustre sweeps, no
+ * numeral dance, no plinth sheens — all of those went with the metals.
  *
  * **No `layout` prop**, here or anywhere in the board tree — there is a source
  * scan in render.test.tsx that fails the build on one. The idle is CSS keyframes
@@ -50,6 +52,8 @@ import type { OvertakeEvent, Team } from '@/lib/types'
 
 const TOP = 10
 const PODIUM_PLACES = 3
+
+const IDLE_TIMELINES = ['tv-idle-1', 'tv-idle-2', 'tv-idle-3'] as const
 
 /**
  * The ranks in the order the pillars are drawn: 2 · 1 · 3.
@@ -126,28 +130,40 @@ function revenueOf(team: Team | undefined): string {
 }
 
 /**
- * ── THE PODIUM NO LONGER IDLES ──
+ * Which of the three idle timelines this mark runs.
  *
- * `idleOf(place)` handed each of the three marks one of three looping
- * timelines, assigned by place rather than by team id so the three on screen
- * could never fall into lockstep. It was the last moving thing on the wall that
- * did not mean something had happened.
+ * **By podium place, not by team.** Three places and three timelines, so the
+ * marks on screen can never fall into lockstep — the entire visible
+ * requirement, and one a hash cannot promise: three ids into three buckets
+ * collide about one time in nine even with a good hash, and `lib/seed.ts`
+ * documents a worse failure on top of that.
  *
- * `/weekly`'s row-1 idle went first, and the argument there is the argument
- * here: **this board has exactly one thing it needs to be able to say — a rank
- * changed hands — and it says it with a two-and-a-half-second interrupt. An
- * interrupt only reads as one against a still frame.** The case for keeping
- * these three was that three marks is a different proposition from ten; on a
- * slide whose entire left half is those three marks, it is not.
+ * ── This was removed and then asked for back ──
  *
- * It also cost something measurable that a still frame does not: three
- * permanently animating elements with `willChange: transform`, on a page that
- * stays open for weeks without reloading.
+ * The argument for removing it was `/weekly`'s: this board has one thing it
+ * needs to be able to say — a rank changed hands — and it says it with a
+ * two-and-a-half-second interrupt, which reads as an interrupt only against a
+ * still frame. That argument is sound and it is **overruled here on purpose**,
+ * for the top three and nowhere else.
  *
- * The `tv-idle-*` classes and their keyframes stay in `app/mesa-tv.css`,
- * unreferenced. Nothing on the wall idles now, and the honest way to bring it
- * back is to decide to, not to find a class still lying around.
+ * What makes it survivable is the scope. Three marks idling is not the same
+ * proposition as forty: the wall's rule is that movement *means* something, and
+ * on this slide the movement is confined to exactly the three ventures the
+ * slide exists to celebrate, so it reads as those three being alive rather than
+ * as the page being busy. Everything else on both boards — the other
+ * thirty-six cards, the list of seven, both mastheads — holds completely still,
+ * which is what the overtake still has to rise above.
+ *
+ * The idle is also deliberately unlike the kick: slow, small, and
+ * non-directional, where an overtake is fast, large and travels across the
+ * frame. `app/mesa-tv.css` has the keyframes and the amplitudes.
+ *
+ * `/weekly` does **not** get this back. Ten idling marks on a board of
+ * thirty-nine is the case the rule was written for.
  */
+function idleOf(place: number): string {
+  return IDLE_TIMELINES[(place - 1) % IDLE_TIMELINES.length]!
+}
 
 /**
  * One place on the podium: a numeral, a mark, a name, a figure.
@@ -224,10 +240,23 @@ function PodiumCard({
             its size through the first paint rather than assembling itself on
             the wall. Empty rather than a placeholder mark — a grey circle is
             filler, and this wall carries none. */}
-        {/* No idle class and no `willChange` — see the note above. The box
-            stays, because the travelling disc during an overtake is measured
-            against it and the flip's 3D context is established here. */}
-        <div style={{ width: '100%', aspectRatio: 1 }}>
+        {/* The idle rides this box, not the disc inside it: a CSS animation
+            beats an inline style, so sharing an element with the flip's
+            `transform` would let the idle simply win and the mark would never
+            turn over during an overtake. `VentureDisc` carries the same
+            three-layer split on `/weekly` and says so at length.
+
+            An empty seat does not idle. A place with no team yet is holding its
+            size through the first paint, and a placeholder that bobs reads as
+            content rather than as absence. */}
+        <div
+          className={team === undefined ? undefined : idleOf(place)}
+          style={{
+            width: '100%',
+            aspectRatio: 1,
+            ...(team === undefined ? {} : { willChange: 'transform' }),
+          }}
+        >
           {/* **Hidden rather than unmounted while it travels.** The travelling
               disc is measured against this element's box, and an unmounted
               element has no box — the path would be measured from nothing on

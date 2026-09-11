@@ -290,41 +290,53 @@ describe('Podium', () => {
     expect(of('   ', 'VBC139')).toBe('39')
   })
 
-  it('idles nothing at all, on either slide', () => {
-    // ── This asserted the opposite, twice over ──
+  it('idles the three podium marks, on three timelines, and nothing else', () => {
+    // ── This has been asserted three ways, and the history is the point ──
     //
-    // It pinned that the three podium marks idle, that they are on three
-    // *different* timelines (hashing the team id put all three on the same one
-    // on the real feed — three ids into three buckets collide about one time in
-    // nine, and that hash is worse than that), and that they are the only
-    // things moving at rest, because the rank numerals used to dance too.
+    // It pinned that the three marks idle on three *different* timelines
+    // (hashing the team id put all three on the same one on the real feed —
+    // three ids into three buckets collide about one time in nine, and that
+    // hash is worse than that). Then it pinned that nothing idles at all, when
+    // both boards were stilled. It pins the three again now, by decision.
     //
-    // Every one of those claims was about how to spend the wall's movement
-    // budget well. The budget is now spent on nothing: `/weekly`'s row-1 idle
-    // went with its cards, and the podium's three went with its plinths. The
-    // only animation either board runs is the overtake.
-    //
-    // Kept as a test rather than deleted because **this is the property the
-    // overtake is spending.** An interrupt only reads as one against a still
-    // frame, and "still" is not something a reader can verify by looking at a
-    // screenshot of a frame — the screenshot is always still. It is verifiable
-    // here.
-    const boards = [
-      <Podium key="podium" ranked={rankTeams(TRADING)} />,
-      <WeeklyGrid key="weekly" teams={TRADING} />,
-    ]
-    for (const board of boards) {
-      const host = document.createElement('div')
-      document.body.append(host)
-      const root = createRoot(host)
-      act(() => root.render(board))
-      // Unscoped on purpose. Scoping to the mark band would pass just as
-      // happily with a numeral dancing again, which is the regression.
-      expect(host.querySelectorAll('[class*="tv-idle-"]')).toHaveLength(0)
-      expect(host.querySelectorAll('[class*="tv-look-"]')).toHaveLength(0)
-      act(() => root.unmount())
-      host.remove()
-    }
+    // Every version has asserted the same underlying property: **exactly which
+    // elements are allowed to move at rest.** That is what the overtake is
+    // spending, and it is not something a reader can check from a screenshot,
+    // because a screenshot of a moving frame and a still one are the same
+    // picture.
+    const host = document.createElement('div')
+    document.body.append(host)
+    const root = createRoot(host)
+    act(() => root.render(<Podium ranked={rankTeams(TRADING)} />))
+
+    const marks = [...host.querySelectorAll('.tv-pod-mark-band [class*="tv-idle-"]')]
+    expect(marks).toHaveLength(3)
+    // Never in lockstep. Place-based assignment cannot collide; a hash can.
+    expect(new Set(marks.map((el) => el.className)).size).toBe(3)
+
+    // **And the three marks are the *only* things idling on this slide.**
+    // Unscoped on purpose: scoping to the mark band would pass just as happily
+    // with a numeral dancing again, which is the regression this half catches.
+    expect(host.querySelectorAll('[class*="tv-idle-"]')).toHaveLength(3)
+    expect(host.querySelectorAll('[class*="tv-look-"]')).toHaveLength(0)
+    act(() => root.unmount())
+    host.remove()
+  })
+
+  it('idles nothing at all on /weekly', () => {
+    // The other half of the scope, and the half that is easy to lose. Ten
+    // idling marks on a board of thirty-nine is the case the wall's
+    // movement rule was written for; three on a slide that exists to celebrate
+    // three is the deliberate exception. A change that puts the idle back on
+    // this board has to fail here.
+    const host = document.createElement('div')
+    document.body.append(host)
+    const root = createRoot(host)
+    act(() => root.render(<WeeklyGrid teams={TRADING} />))
+    expect(host.querySelectorAll('[class*="tv-idle-"]')).toHaveLength(0)
+    expect(host.querySelectorAll('[class*="tv-look-"]')).toHaveLength(0)
+    act(() => root.unmount())
+    host.remove()
   })
 })
 
