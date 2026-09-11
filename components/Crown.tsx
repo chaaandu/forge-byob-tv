@@ -30,22 +30,30 @@
  *   metal → `--crown-deep` · `--crown-ink` · `--crown-lit`
  *   gems  → `--crown-gem-deep` · `--crown-gem` · `--crown-gem-lit`
  *
- * The metal ramp is Forge gold with its lightness moved and its hue untouched,
- * which is the same derivation `--aubergine-900` uses — no new hue, which is
- * the half of the old colour rule that still binds. It barely changes the
- * artwork: Noto's amber sits at hue 45.2 and `--forge-metal-gold` at 41.7.
+ * The metal ramp is Forge gold, rotated a little as well as lightened: warm in
+ * shadow, pale in the specular, which is the difference between a metal and a
+ * tint ramp. It was a single hue at three lightnesses once, and the crown read
+ * as flat yellow for exactly that reason — three steps of one hue are three
+ * steps of one paint. §3 of `forge-tokens.css` has the numbers and the argument.
+ *
+ * **The three steps are painted as a gradient, not as regions.** Every body
+ * path below is filled `url(#tv-crown-metal)`, one `linearGradient` laid across
+ * the shared viewBox from upper-left to lower-right, so the whole object has a
+ * lit side and a shadowed side under one light. The stops read the same tokens,
+ * so the light surface gets the identical modelling in Royal Purple.
  *
  * The gems become one stone rather than two. Upstream alternates teal and red
  * around the band; both map onto the surface's `--accent`, so a crown carries a
  * single gemstone instead of a colour scheme. Measured on Deep Aubergine:
- * 6.25 / 8.59 / 11.08:1 for the metal, 4.05 / 8.39 / 11.74:1 for the gems.
+ * 5.18 / 7.17 / 12.47:1 for the metal, 4.05 / 8.39 / 11.74:1 for the gems.
  *
  * ── What is deliberately *not* simplified ──
  *
  * The gems are about 9px across at the wall's own scale, which is below the
  * size at which anything is legible at six metres. They are not there to be
- * read. They are what stops 95px of flat gold reading as a gold blob — interior
- * value variation is what gives a silhouette its shape at distance, and the
+ * read. They are part of what stops 95px of gold reading as a gold blob — the
+ * gradient above is the rest of it. Interior value variation is what gives a
+ * silhouette its shape at distance, and the
  * `--crown-gem` ramp is chosen for value separation rather than for hue. If the
  * crown ever has to shrink much below a third of the disc, drop the gems and
  * the highlight paths rather than shrinking them: detail below the legibility
@@ -63,6 +71,44 @@ export function Crown({ className }: { className?: string }) {
       aria-hidden="true"
       focusable="false"
     >
+      {/* ── The metal, as one light source rather than three fills ──
+
+          Every body path below is painted with this rather than with a flat
+          `--crown-ink`, because three flat steps of one ramp are three flat
+          shapes and a metal is the interpolation between them. Upper-left to
+          lower-right: pale specular on the points, the metal itself across the
+          face, burnished shadow into the base. One light, one object.
+
+          **`userSpaceOnUse`, not the `objectBoundingBox` default**, and that is
+          the trap this would otherwise walk into. Object-bounding-box units
+          resolve per *path*, so the tiny 13x4 fragment at the right arc's foot
+          would get the entire ramp compressed into thirteen pixels and flare
+          white beside a neighbour painted mid-gold. In user space all nine
+          paths read one gradient laid across the shared 128x128 viewBox, which
+          is what makes them one surface. The crown is scaled by CSS width and
+          the viewBox scales with it, so this holds at any size.
+
+          The line runs from outside the artwork on both ends, so nothing on the
+          crown reaches a pure stop, and the metal holds flat from 32% to 72% —
+          the face is gold rather than a wash, and only the corners go pale and
+          deep. The colours are the surface's, so Lavender Mist gets the same
+          modelling in Royal Purple without a second declaration. */}
+      <defs>
+        <linearGradient
+          id="tv-crown-metal"
+          gradientUnits="userSpaceOnUse"
+          x1="-8"
+          y1="-12"
+          x2="136"
+          y2="146"
+        >
+          <stop offset="0%" stopColor="var(--crown-lit)" />
+          <stop offset="32%" stopColor="var(--crown-ink)" />
+          <stop offset="72%" stopColor="var(--crown-ink)" />
+          <stop offset="100%" stopColor="var(--crown-deep)" />
+        </linearGradient>
+      </defs>
+
       {/* The two side arcs, and the shadow under the base. */}
       <path
         fill="var(--crown-deep)"
@@ -75,11 +121,11 @@ export function Crown({ className }: { className?: string }) {
 
       {/* The body: five points, the sweep between them, and the base band. */}
       <path
-        fill="var(--crown-ink)"
+        fill="url(#tv-crown-metal)"
         d="M89.43 73.69c.09 0 .18.01.27.01c5.71 0 10-1.67 13.22-4.08l-13.49 4.07z"
       />
       <path
-        fill="var(--crown-ink)"
+        fill="url(#tv-crown-metal)"
         d="M119.24 16.86c-3.33-.45-6.51 2.72-7.09 7.06c-.36 2.71.37 5.24 1.78 6.87l-2.4 9.95s-3.67 23.51-22.21 28.15C74.5 72.6 69.13 45.47 67.83 37.09c2.82-1.4 4.77-4.3 4.77-7.67c0-4.73-3.83-8.56-8.56-8.56s-8.56 3.83-8.56 8.56c0 3.39 1.98 6.32 4.85 7.7c-1.03 8.27-5.57 34.5-21.57 31.76c-16.24-2.79-23.33-30.14-24.97-37.58c1.95-1.6 3.04-4.42 2.64-7.45c-.58-4.35-4.02-7.47-7.68-6.98c-3.66.49-6.15 4.41-5.57 8.75c.42 3.16 2.36 5.67 4.79 6.62l12.72 79.03s11.1 8.77 43.35 8.77s43.35-8.77 43.35-8.77l12.75-79.24c2.06-1.08 3.68-3.51 4.08-6.49c.59-4.35-1.64-8.23-4.98-8.68z"
       />
 
@@ -134,7 +180,7 @@ export function Crown({ className }: { className?: string }) {
 
       {/* The base band, its highlight, and the rule between band and body. */}
       <path
-        fill="var(--crown-ink)"
+        fill="url(#tv-crown-metal)"
         d="M109.15 98.21c-5.99 3-19.73 10.99-45.1 10.99s-39.11-7.99-45.1-10.99c0 0-2.15 1.15-2.15 2.35v9.21c0 1.23.65 2.36 1.71 2.99c4.68 2.76 18.94 9.28 45.55 9.28s40.87-6.52 45.55-9.28a3.475 3.475 0 0 0 1.71-2.99v-9.21c-.02-1.2-2.17-2.35-2.17-2.35z"
       />
       <path
@@ -153,19 +199,19 @@ export function Crown({ className }: { className?: string }) {
       {/* Inner edges on the two arcs, and the specular highlights. These are
           what keep the silhouette from flattening at distance. */}
       <path
-        fill="var(--crown-ink)"
+        fill="url(#tv-crown-metal)"
         d="M26.97 49.57c5.32-3.8 8.18-10.61 8.43-21.45c.02-.98.3-1.27.83-1.33c.85-.09.99.68.98 1.23c-.24 11.7-1.73 19.01-7.63 23.13c-.29.2-2.36 1.46-3.24.59c-1.05-1.02.29-1.93.63-2.17z"
       />
       <path
-        fill="var(--crown-ink)"
+        fill="url(#tv-crown-metal)"
         d="M31.84 15.54c-.17-1.81.25-5.07 5-6.55c1.39-.43 2.25.25 2.41.78c.4 1.32-.76 1.84-1.29 2.01c-3.65 1.18-3.83 3-4.58 4.16s-1.48.15-1.54-.4z"
       />
       <path
-        fill="var(--crown-ink)"
+        fill="url(#tv-crown-metal)"
         d="M78.22 47.17c4.81-4.27 8-9.04 10.1-19.9c.19-.96.47-1.22.99-1.2c.85.02.89.81.8 1.35c-1.78 11.58-3.47 14.88-9.4 21.45c-.67.74-2.3 1.41-3.22.64c-.83-.69.13-1.8.73-2.34z"
       />
       <path
-        fill="var(--crown-ink)"
+        fill="url(#tv-crown-metal)"
         d="M85.3 15.63c-.17-1.81.25-5.07 5-6.55c1.39-.43 2.25.25 2.41.78c.4 1.32-.76 1.84-1.29 2.01c-3.65 1.18-3.83 3-4.58 4.16c-.74 1.16-1.48.15-1.54-.4z"
       />
       <path

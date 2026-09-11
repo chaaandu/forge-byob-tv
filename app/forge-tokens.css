@@ -136,8 +136,19 @@
      Moved here from `app/mesa-tv.css` so this file really is the only one with
      a hex in it, and re-tuned for Deep Aubergine — the old set was mixed for a
      white page and went quiet on a dark one (gold 7.05:1, bronze 3.42:1).
-     Measured on aubergine: 8.59, 9.60 and 5.63:1. */
-  --forge-metal-gold: #e8b84b;
+     Measured on aubergine: 7.17, 9.60 and 5.63:1.
+
+     **Gold was re-tuned a second time, and the brief was "this reads yellow".**
+     It did. `#e8b84b` is HSL 41.7 / 77% / **60%**, and lightness is what
+     separates gold from mustard: at L60 a warm hue is a *yellow* with gold's
+     hue, which is why the crown read as painted rather than as metal. The new
+     value is the same hue family one notch warmer and seven points darker —
+     40.7 / 72% / 53% — which is where the eye stops calling it yellow. The cost
+     is 8.59:1 → 7.17:1 against the page, still comfortably over the 7:1 body
+     bar, and the crown gets the brightness back at the top of its ramp
+     (`--crown-lit`, 12.47:1) rather than across its whole face. See the crown
+     block in §3 for the other half of that argument, which is the gradient. */
+  --forge-metal-gold: #dda52f;
   --forge-metal-silver: #c6c9d6;
   --forge-metal-bronze: #d08a5a;
 
@@ -305,11 +316,41 @@
      rather than flat: five points, two side arcs, a banded base and five
      stones. Its eight upstream hexes collapse to these six tokens.
 
-     **The metal steps are derived, not invented.** One hue, one saturation,
-     lightness moved — the identical derivation `--aubergine-900` uses, and the
-     half of the old colour rule that still binds. Forge gold sits at hue 41.7
-     against Noto's amber at 45.2, so re-pointing the metal barely moves the
-     artwork at all.
+     **The metal steps rotate hue as well as lightness, and that is the whole
+     reason it reads as gold.** They used to be one hue at one saturation with
+     only lightness moved — `--aubergine-900`'s derivation, and the half of the
+     old colour rule that still binds. It is the correct way to build a *tint
+     ramp* and the wrong way to build a *metal*, and the crown was the evidence:
+     three steps of one hue is three steps of one paint, and 95px of it read as
+     a flat yellow shape no matter which three steps they were.
+
+     Metal does not behave like paint. Its shadows run warm and its highlights
+     run pale, because the bounce is coloured and the specular is not — so the
+     ramp is a short rotation rather than a column:
+
+       deep  #c3881c   H 38.8  S 75%  L 44%    5.18:1   burnished, the shadow
+       ink   gold      H 40.7  S 72%  L 53%    7.17:1   the metal itself
+       lit   #f7e3ab   H 44.2  S 83%  L 82%   12.47:1   pale, the specular
+
+     Five and a half degrees across the ramp, which is small enough that no new
+     hue enters the palette — the rule was never "one hue per object", it was
+     "do not invent a hue" — and large enough that the shadows read as burnished
+     gold rather than as dark yellow. **Deep was tried eight degrees out, at
+     #c07c1a / H 35.4, and it was too far**: the two side arcs are filled flat
+     with it, and at that hue they stopped being the crown's shadow and started
+     being bronze — a second metal on an object the whole rule says is one. The
+     value range widens at both ends regardless: 44→82 against the old 46→76,
+     because a metal is mostly the distance between its darkest and lightest
+     point.
+
+     **And the three are a gradient rather than three regions.** `Crown.tsx`
+     paints every body path with one `linearGradient` running the ramp from the
+     upper-left down to the lower-right — one light source, across the whole
+     object, so the crown has a lit side and a shadowed side instead of a fill.
+     Three flat steps are three flat shapes; the same three interpolated are a
+     curved surface. The gradient reads the tokens, so the light slide gets the
+     identical treatment in Royal Purple for free, and no component names a
+     colour to do it.
 
      **The gems are the surface's accent, and there is one stone.** Upstream
      alternates teal `#26a69a` and red `#f44336` around the band. Teal is the
@@ -323,12 +364,12 @@
      a silhouette its shape at six metres**, which is why both ramps are chosen
      for value separation rather than for hue.
 
-     Measured on Deep Aubergine — metal 6.25 / 8.59 / 11.08:1, gems 4.05 / 8.39
+     Measured on Deep Aubergine — metal 5.18 / 7.17 / 12.47:1, gems 4.05 / 8.39
      / 11.74:1. The gem floor is the only figure under 4.5 and it is interior
      shading on a 9px shape, not ink. */
-  --crown-deep: #d1991b;
+  --crown-deep: #c3881c;
   --crown-ink: var(--forge-metal-gold);
-  --crown-lit: #f1d593;
+  --crown-lit: #f7e3ab;
   --crown-gem-deep: #c644e6;
   --crown-gem: var(--orchid);
   --crown-gem-lit: #f2d4f9;
