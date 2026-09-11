@@ -81,35 +81,71 @@
      per step where the size lives. */
 
   /* The Flea countdown. The single largest thing on the wall. */
-  --t-tv-countdown: 700 clamp(96px, 19vw, 420px) / 0.9 var(--font-serif);
-  --t-tv-countdown-unit: 600 clamp(16px, 2.2vw, 48px) / 1 var(--font-sans);
+  /* ══ THE TYPE SCALE ════════════════════════════════════════════════════════
+
+     Seven steps, and **every piece of type on both slides is one of them.**
+
+     ── What this replaced ──
+
+     Twenty-two live tokens, each with its own hand-picked `clamp()`. Read back
+     from the running board at 1920x1080, that produced fourteen distinct sizes
+     on `/weekly` and fourteen on `/podium`, and several of them were
+     accidentally almost identical:
+
+       /weekly   16.9  16.1  15.9   — the rank, the legend and the day chip,
+                                      three sizes inside one pixel
+       /podium   15.9  15.4  15.0   — three more
+                 29.8  28.8  27.8   — the podium name, a list figure, a list name
+
+     None of those differences was a decision. Each was the residue of a token
+     tuned in isolation against whatever was next to it that week, and together
+     they are what a frame looks like when it has no scale: not *wrong*
+     anywhere, and never quite resolved.
+
+     ── The steps ──
+
+       fs-1  56px   the podium leader's figure — the largest number on the wall
+       fs-2  40px   masthead heading, podium numerals, 2nd/3rd figures
+       fs-3  28px   venture names on /podium, its list figures, the mover's
+       fs-4  22px   /weekly's figure, the list's rank, the mover's venture
+       fs-5  18px   /weekly's rank and today line, the countdowns
+       fs-6  15px   every label, caption and venture name on /weekly
+       fs-7  12px   the provenance stamp, and only that
+
+     Roughly a 1.3 ratio, tightening at the small end where the eye needs less
+     difference to read a difference. Sizes are `vw` so the wall scales with the
+     frame; the clamps are floors and ceilings for viewports outside the range
+     this is driven at, and at every size in `scripts/measure-fit.mjs` none of
+     them binds.
+
+     **Weight is the other axis and it is free.** `fs-3` at 700 is a venture
+     name and at 800 is a figure; they are the same size on purpose, because
+     they sit in one row and a two-pixel difference between them would read as a
+     mistake rather than as a hierarchy. Where two things need to differ, they
+     differ by a whole step or by weight — never by 1.2px. */
+  --fs-1: clamp(34px, 2.9167vw, 78px);
+  --fs-2: clamp(24px, 2.0833vw, 56px);
+  --fs-3: clamp(17px, 1.4583vw, 39px);
+  --fs-4: clamp(14px, 1.1458vw, 31px);
+  --fs-5: clamp(12px, 0.9375vw, 25px);
+  --fs-6: clamp(10px, 0.78125vw, 21px);
+  --fs-7: clamp(9px, 0.625vw, 17px);
+
 
   /* Podium figures, by rank. First place is the only one that gets display size. */
-  --t-tv-figure-1: 700 clamp(40px, 5.6vw, 120px) / 1 var(--font-serif);
-  --t-tv-figure-2: 700 clamp(28px, 3.4vw, 72px) / 1 var(--font-serif);
   /* Ranks 4-10. Sized so seven tiles divide 1792px without the row overflowing
      — the figure is the widest thing in each tile, so it sets the floor. */
-  --t-tv-figure-3: 600 clamp(16px, 1.6vw, 32px) / 1 var(--font-sans);
 
   /* Venture names. */
-  --t-tv-name-1: 600 clamp(24px, 3.1vw, 66px) / 1.1 var(--font-serif);
-  --t-tv-name-2: 600 clamp(16px, 1.9vw, 40px) / 1.15 var(--font-serif);
 
   /* Rank, written in words ("1st"), and the team ID beneath a name. */
-  --t-tv-rank: 700 clamp(14px, 1.5vw, 32px) / 1 var(--font-sans);
-  --t-tv-teamid: 500 clamp(11px, 1vw, 21px) / 1.2 var(--font-mono);
 
   /* Notification cards. */
-  --t-tv-hero-headline: 700 clamp(32px, 4.4vw, 94px) / 1.05 var(--font-serif);
-  --t-tv-hero-value: 700 clamp(28px, 3.6vw, 78px) / 1 var(--font-serif);
-  --t-tv-card-context: 700 clamp(11px, 1vw, 21px) / 1.2 var(--font-sans);
-  --t-tv-card-name: 600 clamp(16px, 1.8vw, 38px) / 1.15 var(--font-sans);
 
   /* Ambient chrome: the Flea countdown strip and the as-of stamp. Deliberately
      the smallest type on the wall — present, never competing. */
-  --t-tv-ticker: 500 clamp(11px, 0.95vw, 20px) / 1 var(--font-mono);
+  --t-tv-ticker: 500 var(--fs-7) / 1 var(--font-mono);
 
-  --h-header: 3.4vw;
 
   /* ========= WEEKLY BOARD — the 4 x 10 card grid =========
 
@@ -279,7 +315,7 @@
      two edges 8px apart read as a seam rather than as two cards. `--w-card`
      below derives from this, so the cards narrow to 171.6px and the grid still
      ends exactly on the frame's margin. */
-  --s-card-gap: 0.62vw;
+  --s-card-gap: 0.625vw; /* 12px */
 
   /* The gap *between rows*, separate from the one between columns since the
      cards came down 5%. Shorter cards freed 51px of frame, and left at the
@@ -290,8 +326,7 @@
      just air. 22px with a 1px rule centred in it gives each row 10px of
      clearance, which is what keeps the rule reading as a separator rather than
      as an underline belonging to the row above it. */
-  --s-row-gap: 1.15vw;
-  --s-card-pad: var(--s-2);
+  --s-row-gap: 1.0417vw; /* 20px */
 
   /* The card's horizontal padding. It went to zero while the cells were
      unbounded — with no card, all it did was push the rank numeral 8px in from
@@ -302,13 +337,13 @@
      what puts it there. 0.4vw is 7.7px, which is what it was; the alignment
      that mattered when the box was invisible does not, now that the box is the
      thing the eye reads the numeral against. */
-  --s-card-inset: 0.4vw;
+  --s-card-inset: 0.4167vw; /* 8px */
 
   /* The card's corner. Small — 8px at 1920 — because thirty-nine of them are on
      screen at once and a radius that reads individually at that count reads as
      a field of lozenges together. Enough to say "bounded", not enough to have a
      shape of its own. */
-  --r-card: 0.42vw;
+  --r-card: 0.4167vw; /* 8px */
 
   /* The card's own padding. **There is no grid gap between the card's parts**:
      each reserved line below includes its own separation, so a line that
@@ -317,7 +352,7 @@
      cell used: a visible edge needs clearance from its contents, where an
      invisible one only needed to not collide with the row gap. It costs each
      row ~7.7px of mark. */
-  --s-card-pad-y: 0.45vw;
+  --s-card-pad-y: 0.4167vw; /* 8px */
 
   /* How far the card's contents sit above where the padding alone would put
      them. 0.31vw is 6px at 1920 and 5px at 1600 — inside the 7.7px and 6.4px of
@@ -354,18 +389,43 @@
 
      The sides keep the 48px the grid already used, so column 1 still lines up
      under the lockup. */
-  --s-safe-y: 2.08vw; /* 40px at 1920x1080 */
+  /* ══ THE SPACING RHYTHM ════════════════════════════════════════════════════
+
+     One scale, in two units, and **the two have to agree at 1920.**
+
+     The design system's `--s-*` steps are fixed pixels on a 4px baseline: 4, 8,
+     12, 16, 20, 24, 32, 48. Everything that has to hold its proportion to the
+     *type* is `vw`, because the type is. Both are correct and the mix is the
+     trap `scripts/measure-fit.mjs` was written for.
+
+     What was wrong is subtler than the mix. Read back from the running board,
+     the `vw` values landed on 11.904, 22.048, 23.04, 34.56, 69.12, 8.64, 9.81,
+     18.048 — none of them a step of anything, each the residue of a token
+     nudged until it looked right against whatever was beside it. Two spacing
+     systems on one frame, one of them arbitrary.
+
+     Every `vw` length below is now chosen so that **at 1920 it is exactly a
+     step of the same 4px scale**, and each carries its pixel value in a
+     comment. 1vw is 19.2px there, so a step of N px is N/19.2 vw — which is why
+     these read as 0.4167 and 1.0417 rather than as round numbers. The round
+     number is the pixel it produces.
+
+     Off 1920 they drift apart, which is the whole reason one of them is `vw`.
+     The point is not that the two units track each other everywhere; it is that
+     at the size this wall is actually driven at, there is one rhythm and
+     nothing on the frame is off it. */
+  --s-safe-y: 2.0833vw; /* 40px */
   --s-safe-x: var(--s-12); /* 48px — unchanged, so the columns do not move */
 
   /* The masthead's own height: the lockup's cap plus the title's, whichever is
      taller. Stated rather than derived so the hairline under it cannot move
      when a heading changes length. */
-  --h-mast: 2.29vw;
+  --h-mast: 2.2917vw; /* 44px */
   /* Air between the masthead's baseline and its rule, and between that rule and
      row 1. Deliberately unequal — the rule belongs to the masthead, so it sits
      nearer to it than to the board it introduces. */
-  --s-mast-rule: 0.73vw;
-  --s-rule-board: 0.94vw;
+  --s-mast-rule: 0.8333vw; /* 16px */
+  --s-rule-board: 1.0417vw; /* 20px */
   /* ── The footer line ──
 
      The legend on `/weekly`, the mover on `/podium`. **Sized to the tallest
@@ -377,7 +437,7 @@
      of `--h-board`, which subtracts this — so growing the footer shortens the
      rows by 7px between them and the discs absorb it. That is the whole reason
      the ramp stopped being a `vw` length; see the note there. */
-  --h-foot: 1.8vw;
+  --h-foot: 1.875vw; /* 36px */
 
   /* ── The card's fixed rhythm: a strip, then three text lines ──
 
@@ -428,10 +488,10 @@
      The two paddings shrank for the same reason. They were sized to keep a
      mark clear of a card's edge; there is no card, so what they keep it clear
      of is the row gap's hairline, which needs far less. */
-  --h-card-rank: 1.25vw;
-  --h-card-name: 1.9vw;
-  --h-card-fig: 1.4vw;
-  --h-card-today: 1.15vw;
+  --h-card-rank: 1.25vw; /* 24px */
+  --h-card-name: 1.875vw; /* 36px */
+  --h-card-fig: 1.4583vw; /* 28px */
+  --h-card-today: 1.25vw; /* 24px */
 
   /* The card's own width, spelled out because the mark needs it as a *length*
      and the grid only ever expresses it as a fraction. Ten columns and nine
@@ -452,33 +512,34 @@
   /* The venture name, in tracked uppercase, sized to survive the corridor
      rather than to fit the longest name — the fit question is answered in the
      report and by the sheet, not by shrinking type until everything fits. */
-  /* ── 0.74vw, and the number follows the card's width ──
+  /* ── The venture name, and it was defined twice ──
 
-     It was 0.72 when a card was 159px of usable width, 0.8 when the cards went
-     away and a cell had its full 175px, and back down now that the card is a
-     card again with a 12px column gap and its own padding — 156px. Each time,
-     the constraint is the same one: the longest name in the cohort has to reach
-     the end of its second line and stop.
+     There were two `--t-tv-card-name` declarations in this file, 362 lines
+     apart: an early `600 1.8vw` from a layout that no longer exists, and this
+     one. The later won by document order, so the first was dead — and dead in
+     the way that matters, because it *looked* live. A pass that retuned the
+     type scale patched the first occurrence and the board did not move.
 
-     At 0.8vw "In Between Sips by Kaappitalism" measured 46px of content in the
-     36.5px `--h-card-name` reserves — a third line, growing down through the
-     figure. At 0.74 it breaks as two lines and clears. `.tv-card-name` carries
-     a two-line clamp underneath this, because the sheet can rename a venture on
-     any given Tuesday and a type size is not a guarantee. */
-  --t-tv-card-name: 700 clamp(9px, 0.74vw, 16px) / 1.15 var(--font-sans);
+     One declaration now. The size is `--fs-6`, which is the step every label
+     and caption on both slides uses; it went from 0.74vw to 0.78 in the process
+     and the two-line clamp on `.tv-card-name` is what makes that safe. The
+     clamp is not a fallback: a type size chosen against the thirty-nine strings
+     currently in a spreadsheet is a fact about the spreadsheet, and a venture
+     can be renamed from it on any given Tuesday. */
+  --t-tv-card-name: 700 var(--fs-6) / 1.15 var(--font-sans);
   /* Reduced 20% from clamp(15px, 1.45vw, 30px). Still the largest thing on the
      card, and still the figure the board exists to show. */
-  --t-tv-card-week: 700 clamp(12px, 1.16vw, 24px) / 1 var(--font-sans);
-  --t-tv-card-today: 600 clamp(11px, 1vw, 21px) / 1 var(--font-sans);
-  --t-tv-card-today-hot: 700 clamp(11px, 1vw, 21px) / 1 var(--font-sans);
+  --t-tv-card-week: 700 var(--fs-4) / 1 var(--font-sans);
+  --t-tv-card-today: 600 var(--fs-5) / 1 var(--font-sans);
+  --t-tv-card-today-hot: 800 var(--fs-5) / 1 var(--font-sans);
 
   /* The "TODAY" tag that rides the figure. Smaller than what it labels, so it
      reads as apparatus rather than as a third number. */
-  --t-tv-card-label: 700 clamp(8px, 0.62vw, 13px) / 1 var(--font-sans);
+  --t-tv-card-label: 700 var(--fs-7) / 1 var(--font-sans);
 
   /* The board's legend. Smaller than anything on a card, because it explains
      the board rather than belonging to it. */
-  --t-tv-legend: 700 clamp(10px, 0.837vw, 18px) / 1 var(--font-sans);
+  --t-tv-legend: 700 var(--fs-6) / 1 var(--font-sans);
 
   /* ── Rank, in two treatments and never both on one card ──
 
@@ -505,9 +566,9 @@
 
      Serif went with the size. One face on the frame, at three sizes, is the
      whole type system on these two slides now. */
-  --t-tv-card-rank: 700 clamp(10px, 0.88vw, 19px) / 1 var(--font-sans);
+  --t-tv-card-rank: 700 var(--fs-5) / 1 var(--font-sans);
   /* Ranks 1-3. The one step up, and it replaces the metals outright. */
-  --t-tv-card-rank-lead: 800 clamp(12px, 1.15vw, 24px) / 1 var(--font-sans);
+  --t-tv-card-rank-lead: 800 var(--fs-4) / 1 var(--font-sans);
 
   /* ── Four tokens left with the metals ──
 
@@ -571,8 +632,6 @@
      and is still visibly the green one beside the card's grey-green secondary
      ink. The solid card keeps `--bright-green`, which was drawn for exactly that
      surface and measures 6.14:1 on it. */
-  --tv-card-badge-fill: var(--deep-teal);
-  --tv-card-badge-ink: var(--mint-300);
 
   /* ── The slide heading ──
 
@@ -595,7 +654,7 @@
 
      Tracking drops with it: 0.22em was there to *fill* a band, and there is no
      band to fill. 0.06em is the amount a heavy sans wants at display size. */
-  --t-tv-heading: 800 clamp(20px, 2.05vw, 42px) / 1 var(--font-sans);
+  --t-tv-heading: 800 var(--fs-2) / 1 var(--font-sans);
   --track-tv-heading: 0.06em;
   /* ── The Mesa lockup, sized to the masthead's cap height ──
 
@@ -631,13 +690,13 @@
      The figure is a step heavier and takes the accent; the words around it are
      muted. That is the whole emphasis, and it is deliberately much less than
      the 39px tangerine numeral the band used to give the day count. */
-  --t-tv-mast-label: 700 clamp(10px, 0.83vw, 18px) / 1 var(--font-sans);
-  --t-tv-mast-figure: 800 clamp(11px, 0.94vw, 20px) / 1 var(--font-sans);
+  --t-tv-mast-label: 700 var(--fs-6) / 1 var(--font-sans);
+  --t-tv-mast-figure: 800 var(--fs-5) / 1 var(--font-sans);
 
-  --t-tv-strip-label: 800 clamp(12px, 1.05vw, 22px) / 1 var(--font-sans);
+  --t-tv-strip-label: 800 var(--fs-6) / 1 var(--font-sans);
   --h-tv-cal: clamp(26px, 2.3vw, 48px);
   --w-tv-cal-stroke: 5;
-  --t-tv-cal-figure: 800 clamp(11px, 1vw, 21px) / 1 var(--font-sans);
+  --t-tv-cal-figure: 800 var(--fs-5) / 1 var(--font-sans);
 
   /* ── `/weekly`'s band, and what it makes loud ──
 
@@ -656,7 +715,7 @@
 
      The stamp goes the other way. It is the smallest tracked thing on the frame
      — provenance, present, never competing. */
-  --t-tv-band-stamp: 500 clamp(9px, 0.66vw, 14px) / 1 var(--font-mono);
+  --t-tv-band-stamp: 500 var(--fs-7) / 1 var(--font-mono);
 
   /* The thinnest line the wall draws, and now the wall's main structural
      device: four row separators on `/weekly`, the two frame rules on both
@@ -787,11 +846,11 @@
      separating two groups that are both left-aligned columns of similar-sized
      marks, and at anything under ~3vw they read as one seven-wide arrangement
      that has been interrupted. */
-  --w-pod-half-gap: 3.6vw;
+  --w-pod-half-gap: 3.3333vw; /* 64px */
 
   /* Between the three places. Tighter than the half gap by a factor of two, so
      the three read as one group before they read as three columns. */
-  --s-pod-gap: 1.8vw;
+  --s-pod-gap: 1.6667vw; /* 32px */
 
   /* The board's own inset inside the frame. The frame already carries
      `--s-safe-x`, so these are only the air between the rule above and the
@@ -815,16 +874,16 @@
      of the column — which leaves a little over 200px of air above and below it.
      Air a group is centred in reads as a field; air a group has fallen to the
      bottom of reads as a fault. See `alignSelf` in components/Podium.tsx. */
-  --d-pod-disc: 14.6vw;
-  --d-pod-disc-rest: 11.1vw;
+  --d-pod-disc: 14.5833vw; /* 280px */
+  --d-pod-disc-rest: 11.25vw; /* 216px */
 
   /* Air between a rank numeral and the mark under it, and between the mark and
      the name under that. The numeral sits closer to its mark than the mark does
      to its name, so a place reads top-down as one object rather than as a
      numeral over a card. */
-  --s-pod-num-gap: 0.9vw;
-  --s-pod-mark-gap: 1.4vw;
-  --s-pod-name-gap: 0.45vw;
+  --s-pod-num-gap: 0.8333vw; /* 16px */
+  --s-pod-mark-gap: 1.25vw; /* 24px */
+  --s-pod-name-gap: 0.4167vw; /* 8px */
 
   /* ── The list of seven ──
 
@@ -833,10 +892,10 @@
      column has left, distributed evenly, so the first row's top edge and the
      last row's bottom edge are the column's own — which is what puts the list's
      floor on the same line as the podium's. */
-  --s-pod-row-gap: 1.5vw;
-  --w-pod-rank: 2.2vw;
-  --d-pod-row-logo: 3.1vw;
-  --s-pod-row-mark-gap: 1.2vw;
+  --s-pod-row-gap: 1.6667vw; /* 32px */
+  --w-pod-rank: 2.0833vw; /* 40px */
+  --d-pod-row-logo: 3.125vw; /* 60px */
+  --s-pod-row-mark-gap: 1.25vw; /* 24px */
 
   /* ── The mover's mark ──
 
@@ -850,7 +909,7 @@
      at 12px and the disc at the same height as the venture name beside it,
      which is what makes it read as an inline mark rather than as a shrunken
      list row. */
-  --d-pod-mover-logo: 1.75vw;
+  --d-pod-mover-logo: 1.6667vw; /* 32px */
 
   /* ── Type ──
 
@@ -866,14 +925,14 @@
 
      A condensed face also loses more at distance than it saves in width: its
      counters close first. These are Manrope at 700, tracked, uppercase. */
-  --t-pod-numeral: 800 clamp(20px, 2.3vw, 48px) / 1 var(--font-sans);
+  --t-pod-numeral: 800 var(--fs-2) / 1 var(--font-sans);
   /* **1.55vw, up from 1.32.** The podium's figure is 2.85vw, and at 1.32 the
      name beside it was less than half its size — which on three entries whose
      whole content is a mark, a name and a number reads as the name being a
      caption for the figure rather than the venture the figure belongs to. */
-  --t-pod-name: 700 clamp(13px, 1.55vw, 32px) / 1.1 var(--font-sans);
-  --t-pod-name-row: 700 clamp(13px, 1.45vw, 30px) / 1.1 var(--font-sans);
-  --t-pod-label: 800 clamp(8px, 0.72vw, 15px) / 1.3 var(--font-sans);
+  --t-pod-name: 700 var(--fs-3) / 1.1 var(--font-sans);
+  --t-pod-name-row: 700 var(--fs-3) / 1.1 var(--font-sans);
+  --t-pod-label: 800 var(--fs-6) / 1.3 var(--font-sans);
 
   /* ── The figures ──
 
@@ -885,16 +944,16 @@
 
      `--t-pod-fig-row` is the list's, and it sits deliberately under the
      podium's smallest so the two groups cannot be confused for one ranking. */
-  --t-pod-fig: 800 clamp(22px, 2.85vw, 60px) / 1 var(--font-sans);
-  --t-pod-fig-rest: 800 clamp(18px, 2.2vw, 46px) / 1 var(--font-sans);
-  --t-pod-fig-row: 800 clamp(13px, 1.5vw, 31px) / 1 var(--font-sans);
-  --t-pod-rank-row: 700 clamp(11px, 1.2vw, 25px) / 1 var(--font-sans);
+  --t-pod-fig: 800 var(--fs-1) / 1 var(--font-sans);
+  --t-pod-fig-rest: 800 var(--fs-2) / 1 var(--font-sans);
+  --t-pod-fig-row: 800 var(--fs-3) / 1 var(--font-sans);
+  --t-pod-rank-row: 700 var(--fs-4) / 1 var(--font-sans);
 
   /* The masthead's Flea countdown, and the footer's mover. Both are apparatus
      in a line of apparatus — see `--t-tv-mast-label` for why the right of the
      masthead is one size. */
-  --t-pod-count: 800 clamp(11px, 0.94vw, 20px) / 1 var(--font-sans);
-  --t-pod-mover-label: 800 clamp(9px, 0.78vw, 16px) / 1 var(--font-sans);
+  --t-pod-count: 800 var(--fs-5) / 1 var(--font-sans);
+  --t-pod-mover-label: 800 var(--fs-6) / 1 var(--font-sans);
   /* ── The venture, and it has to hold its own against the figure ──
 
      1.25vw is 24px, up from 0.94vw / 18px. The figure on this line is 27.8px,
@@ -906,12 +965,12 @@
 
      The standing stays a step down at 0.8vw — it is context, and it is tracked
      caps now so it groups with the label rather than with the name. */
-  --t-pod-mover-name: 700 clamp(13px, 1.25vw, 26px) / 1 var(--font-sans);
-  --t-pod-mover-line: 700 clamp(9px, 0.8vw, 17px) / 1 var(--font-sans);
+  --t-pod-mover-name: 700 var(--fs-4) / 1 var(--font-sans);
+  --t-pod-mover-line: 700 var(--fs-6) / 1 var(--font-sans);
   /* The footer's one loud thing, and the only figure on the slide wearing the
      accent. Down from 2.9vw — it was the headline of a filled panel and is now
      the last item on a caption line. */
-  --t-pod-mover-gain: 800 clamp(13px, 1.45vw, 30px) / 1 var(--font-sans);
+  --t-pod-mover-gain: 800 var(--fs-3) / 1 var(--font-sans);
 
   /* Tracking. Figures negative, names positive, and the smaller the name the
      wider it opens — a tracked line at 15px needs more air than the same
@@ -929,14 +988,12 @@
      here as mixes of existing brand tokens, which lands within a couple of
      values of the specified `#EDF4EE` / `#CFE0D5` and keeps the no-new-hue rule
      intact everywhere except the metals above. */
-  --pod-fill: color-mix(in srgb, var(--soft-mint) 72%, var(--mint-300));
 
   /* The rank numeral inside a pill: apparatus, so muted — but measured rather
      than assumed. The design's `#5F7B75` clears only 3.34:1 on the filled
      portion, which is AA-large with nothing spare. One step deeper takes it to
      4.6:1 and it still sits well below the venture name it must not compete
      with. */
-  --pod-rank-ink: color-mix(in srgb, var(--deep-teal) 72%, var(--mint-300));
 
   /* The muted mint a venture name is set in on a card. Quieter than the figure
      on purpose: it is a label, not the headline. */
@@ -950,7 +1007,6 @@
   --idle-tilt: 9;
   /* The look-down, in degrees. A `rotateX` under the same perspective the
      glance uses, so the mark drops its *face* rather than sliding down. */
-  --idle-down: 30;
 
   --track-tv-tight: -0.02em;
 
@@ -983,11 +1039,6 @@
    runs forever, unrelated to any state change, and handing a permanent loop to
    a JS animation loop would keep the main thread busy for the life of a page
    that never reloads. Everything event-driven is still Motion's. */
-@keyframes tv-breathe {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.55; }
-}
-
 /* ── The podium idle ──
 
    Three timelines built from one repertoire — bob, glance left, glance right,
@@ -1018,16 +1069,6 @@
    gradient clipped to text cannot be moved by transforming the text — that would
    move the glyph. It repaints only the numeral's own box, three of them, for
    about a fifth of each cycle. */
-@keyframes tv-metal-sweep {
-  0% { background-position: 130% 0, 0 0; }
-  30%, 100% { background-position: -30% 0, 0 0; }
-}
-
-@keyframes tv-shine {
-  0% { transform: translateX(-115%); }
-  23%, 100% { transform: translateX(115%); }
-}
-
 @keyframes tv-idle-1 {
   0%, 4%   { transform: translateY(0) rotateY(0deg) rotate(0deg); }
   9%       { transform: translateY(calc(var(--idle-amp) * -1px)); }
@@ -1090,43 +1131,6 @@
 
    Transform only, so this is compositor work rather than layout. */
 
-@keyframes tv-look-1 {
-  0%, 6%    { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
-  10%       { transform: translateY(calc(var(--idle-amp) * -1px)); }
-  16%       { transform: translateY(0); }
-  22%, 38%  { transform: rotateX(calc(var(--idle-down) * 1deg)); }
-  44%, 50%  { transform: rotateX(0deg); }
-  56%, 68%  { transform: translateY(calc(var(--idle-amp) * -0.2px)) rotateX(calc(var(--idle-down) * 0.8deg)); }
-  74%, 86%  { transform: rotateY(calc(var(--idle-turn) * 1deg)) rotate(calc(var(--idle-tilt) * 0.25deg)); }
-  92%, 100% { transform: translateY(0) rotateX(0deg) rotateY(0deg) rotate(0deg); }
-}
-
-@keyframes tv-look-2 {
-  0%, 5%    { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
-  8%, 28%   { transform: rotateX(calc(var(--idle-down) * 1deg)); }
-  34%       { transform: translateY(calc(var(--idle-amp) * -1px)) rotateX(0deg); }
-  40%       { transform: translateY(0); }
-  /* The double-take, downward: drop, back up, then commit to the look. */
-  44%, 52%  { transform: rotateX(calc(var(--idle-down) * 0.65deg)); }
-  58%       { transform: rotateX(0deg); }
-  64%, 70%  { transform: rotateY(calc(var(--idle-turn) * -1deg)); }
-  76%, 82%  { transform: rotateY(calc(var(--idle-turn) * 0.7deg)); }
-  88%, 100% { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
-}
-
-@keyframes tv-look-3 {
-  0%        { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
-  6%        { transform: translateY(calc(var(--idle-amp) * -0.8px)); }
-  11%       { transform: translateY(0); }
-  16%       { transform: translateY(calc(var(--idle-amp) * -0.5px)); }
-  21%       { transform: translateY(0); }
-  28%, 46%  { transform: rotateX(calc(var(--idle-down) * 1deg)) rotate(calc(var(--idle-tilt) * -0.3deg)); }
-  52%, 58%  { transform: rotateX(0deg) rotate(0deg); }
-  62%, 72%  { transform: translateY(calc(var(--idle-amp) * -0.25px)) rotateX(calc(var(--idle-down) * 0.9deg)); }
-  78%, 90%  { transform: rotateY(calc(var(--idle-turn) * -1deg)); }
-  95%, 100% { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
-}
-
 @layer components {
   /* Class rules live here, not at the top level, so Tailwind utilities can
      still override them. See the `.overline` note in globals.css for what
@@ -1156,35 +1160,8 @@
      Full-bleed flat brand colour is the design system's own hero treatment, and
      Deep Forest Green is the logomark colour. Rank is carried by surface, size
      and the written position all at once, so a greyscale crop still ranks. */
-  .tv-panel-forest {
-    position: relative;
-    /* **A gradient along the band, not a flat fill.**
-       1920px of one purple reads as a printing error rather than as a material.
-       It runs dark at the lockup end and opens toward the countdown, so the
-       band has a direction and the Mesa mark sits on the deepest part of it —
-       which is also where the white wordmark has the most contrast (15.85:1 at
-       the left end against 13.68:1 at the right). Two steps on one hue: a
-       gradient between two *hues* reads as a third colour nobody chose. */
-    background: linear-gradient(
-      100deg,
-      var(--aubergine) 0%,
-      var(--royal-purple) 58%,
-      var(--royal-700) 100%
-    );
-    color: var(--white);
-    border-radius: var(--radius-lg);
-  }
-
   /* Second and third. Frosted glass rather than a solid fill — the system calls
      this a brand signature — so they read as one step down without competing. */
-  .tv-card-glass {
-    background: var(--surface-glass);
-    -webkit-backdrop-filter: blur(var(--blur-glass)) saturate(1.1);
-    backdrop-filter: blur(var(--blur-glass)) saturate(1.1);
-    border: var(--stroke-thin) solid var(--border);
-    border-radius: var(--radius-lg);
-  }
-
   /* ── One grid row, and the mark size it implies ──
 
      **This must live on the row, not in `:root`.** `--h-card` is set per row by
@@ -1643,7 +1620,12 @@
     align-items: center;
     gap: var(--s-8);
     height: var(--h-foot);
-    padding-top: var(--s-3);
+    /* **No padding.** This carried `padding-top: var(--s-3)`, which pushed the
+       legend 6px down inside a row `/podium`'s footer centres its content in —
+       so the provenance stamp, which is the same element on both slides, sat at
+       y=1022.5 on one and y=1016.6 on the other. Measured. Nobody would catch
+       that in a rotation, and it is exactly the kind of drift a shared row
+       exists to prevent: both footers are `--h-foot` tall and both centre. */
     font: var(--t-tv-legend);
     letter-spacing: var(--track-overline);
     text-transform: uppercase;
@@ -1651,9 +1633,24 @@
     white-space: nowrap;
   }
 
+  /* ── The legend's mark has to be the *same colour* as the marks it explains ──
+
+     This carried two declarations — `--bright-green` then `--green-600`, the
+     second winning — both left over from the green brand. Read back from the
+     running board: the legend's triangle was `rgb(90,58,142)` while every
+     triangle on the board was `rgb(228,167,243)`. **A legend drawn in a
+     different colour from the thing it describes.** Which is the failure
+     `components/BoardLegend.tsx` says it exists to prevent, in its own words:
+     two drawings of one symbol is how a legend starts lying about what it
+     explains. It shared the *shape* correctly, by reusing `.tv-day-mark`, and
+     then differed on the one other attribute the symbol has.
+
+     `--accent` is the value `.tv-card` resolves `--card-hot-ink` to, so this is
+     the same token rather than a copy of its answer. The legend is not inside a
+     card, so `--card-hot-ink` itself is not in scope here; one level up is as
+     close as the two can be bound. */
   .tv-legend-mark {
-    color: var(--bright-green);
-    color: var(--green-600);
+    color: var(--accent);
   }
 
   /* The legend's second phrase: what the board's big figure measures.
@@ -1889,14 +1886,6 @@
 
   /* The footer line, shared: `/weekly`'s legend and `/podium`'s mover both sit
      here, between the board's last row and the bottom safe margin. */
-  .tv-foot {
-    display: flex;
-    align-items: baseline;
-    gap: var(--s-8);
-    height: var(--h-foot);
-    min-width: 0;
-  }
-
   /* ══ /PODIUM ═══════════════════════════════════════════════════════════════
 
      Three entries and a list of seven, inside the same editorial frame
@@ -2044,7 +2033,22 @@
 
   /* The venture's name and its figure, under the mark. One block so the three
      places can share a baseline by sharing a bottom edge. */
+  /* ── `display: block`, and its absence made four declarations dead ──
+
+     This is a `<span>` inside a `motion.div`, so it was `inline` — and an
+     inline box ignores `width`, ignores vertical margins for layout, and gives
+     `overflow` and `text-overflow` nothing to act on. Read back from the
+     running board: `width: 100%` computed to `100%` and laid out as shrink-to-
+     fit, `margin-top: 24px` computed to `24px` and moved nothing, and the gap
+     between a mark and the name under it measured **-4px** against the 24 it
+     was told to be.
+
+     Four declarations present, correct-looking and doing nothing. Its two
+     siblings — `.tv-pod-row-name` and `.tv-pod-mover-name` — are flex children
+     and were blockified for free, which is why only this one drifted and why
+     nothing looked broken enough to check. */
   .tv-pod-name {
+    display: block;
     font: var(--t-pod-name);
     letter-spacing: var(--track-pod-name);
     text-transform: uppercase;
@@ -2254,9 +2258,6 @@
     color: var(--ink-muted);
   }
 
-  .tv-look-1 { animation: tv-look-1 17s ease-in-out infinite; }
-  .tv-look-2 { animation: tv-look-2 19s ease-in-out infinite; }
-  .tv-look-3 { animation: tv-look-3 23s ease-in-out infinite; }
 
   .tv-idle-1 { animation: tv-idle-1 17s ease-in-out infinite; }
   .tv-idle-2 { animation: tv-idle-2 19s ease-in-out infinite -6s; }
@@ -2274,9 +2275,6 @@
      rank changing hands is the one thing this wall exists to show, and
      `docs/DESIGN.md` records the decision to ignore reduced motion for it. */
   @media (prefers-reduced-motion: reduce) {
-    .tv-look-1,
-    .tv-look-2,
-    .tv-look-3,
     .tv-idle-1,
     .tv-idle-2,
     .tv-idle-3 {

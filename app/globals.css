@@ -95,8 +95,13 @@
 html,
 body {
   height: 100%;
-  background: var(--bg);
-  color: var(--fg1);
+  /* **`--page-ground`, not `--bg`.** `--bg` is the *light* surface's page at
+     `:root`, and the surface classes that re-point it live on `<main>` — so the
+     document behind the wall was painted Lavender Mist with an aubergine
+     `<main>` drawn over it. Measured. See §2b of forge-tokens.css for why a
+     ground that is only ever covered is still worth getting right. */
+  background: var(--page-ground);
+  color: var(--page-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }

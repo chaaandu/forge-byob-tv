@@ -455,7 +455,17 @@ function Strip({
         // measurably too thin for it. At 23px Violet 300 is 5.6:1 and
         // comfortable, and the two boards now say "rank" in one ink.
         color: 'var(--ink-muted)',
-        textAlign: 'center',
+        // **Right, not centre.** These are tabular figures in a vertical column
+        // of ranks, and centring them puts the unit digit of `10` at a
+        // different x from the unit digit of `4` — measured, the `10` hangs
+        // 13px left of the single digits above it. Right-aligned, the units
+        // line up and the gap to the mark beside them is constant, which is the
+        // whole reason a list of numbers is set in tabular figures at all.
+        //
+        // `/weekly`'s ranks stay left-aligned: there they are a label on a
+        // card's own top-left corner rather than a column of numbers, and they
+        // align with the card's edge instead of with each other.
+        textAlign: 'right',
       }}
     >
       {fromRank + index}

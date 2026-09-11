@@ -50,10 +50,10 @@ export const ROWS = 4
  * not mean something happened, which is precisely the rule this wall is built
  * on.
  *
- * The `tv-look-*` and `tv-idle-*` classes still exist in app/mesa-tv.css with
- * their `animation` declarations removed rather than the rules deleted, because
- * `/podium` still hands `idleOf(place)` to its three discs. One place decides
- * whether the wall idles.
+ * `/podium` still idles its top three marks, by decision — see `idleOf` there
+ * for the scope and the argument. This board does not, and the `tv-look-*`
+ * classes it used are deleted rather than left lying around: an unreferenced
+ * animation class is an invitation, not a record.
  */
 
 

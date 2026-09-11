@@ -205,6 +205,32 @@
      the structural-gradient vocabulary rather than a podium detail. */
 }
 
+/* ── §2b · The ground behind everything ────────────────────────────────────
+
+   `html` and `body` are painted before `<main>` is, and `<main>` is what
+   carries `.surface-dark`. Measured on the running wall, both documents were
+   painted `--bg` — Lavender Mist, the *light* page — with an aubergine `<main>`
+   drawn over the top of it.
+
+   Harmless while `<main>` is exactly 100vw x 100vh, and that is the whole
+   problem: it is harmless until it is not. A paint before hydration, a layout
+   that slips by a pixel, an overscrolling panel — any of them shows a band of
+   near-white on a dark wall, on a display that never reloads and has nobody
+   watching it. The failure is a flash nobody is present for.
+
+   So the document's ground is stated, and it is the surface the wall actually
+   uses. **If a light slide ever returns to the rotation this is the line to
+   reconsider** — not `globals.css`, which only reads it.
+   ───────────────────────────────────────────────────────────────────────── */
+:root {
+  --page-ground: var(--aubergine);
+  /* And the ink to match. Nothing outside `<main>` renders text today, so this
+     is read by nothing — but `--fg1` is near-black, and leaving near-black
+     declared as the default ink on a near-black ground is a contradiction
+     waiting for the first element that escapes the surface. */
+  --page-ink: var(--white);
+}
+
 /* ── §3 · The two surfaces ─────────────────────────────────────────────────
 
    Set on `<main>`. Everything inside reads the semantic tokens and therefore
