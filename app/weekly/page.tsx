@@ -8,6 +8,7 @@ import { WeeklyGrid } from '@/components/WeeklyGrid'
 import { WATCH_RANKS_WEEKLY } from '@/config'
 import { boardHeading, boardEarned, boardMode, boardPeriod, rankForMode } from '@/lib/board'
 import { openWeek } from '@/lib/feed'
+import { matchesBoard } from '@/lib/overtake'
 import { competingTeams } from '@/lib/ranking'
 import { useDevOvertakes } from '@/lib/devOvertake'
 import { useKick } from '@/lib/useKick'
@@ -58,12 +59,6 @@ export default function WeeklyPage() {
   // counter is only the nudge that tells `useKick` to look, exactly as
   // `queueVersion` does. Adding to it keeps one drain and one reader.
   const [devTicks, setDevTicks] = useState(0)
-  const { playing: kick, settled } = useKick(BOARD.name, queueVersion + devTicks)
-
-  useEffect(() => {
-    if (kick !== null) freeze()
-    else thaw()
-  }, [kick, freeze, thaw])
 
   const week = snapshot === null ? null : openWeek(snapshot.cohort)
   // **Week mode until the sheet says otherwise**, including before the first
@@ -75,8 +70,40 @@ export default function WeeklyPage() {
   // flip settles onto a board that has actually re-sorted rather than onto the
   // one it started from.
   const { teams, commit: devCommit, reset: devReset } = useDevOvertakes(
+    mode,
     competingTeams(snapshot?.teams ?? []),
   )
+  // The order the grid is about to render — `WeeklyGrid` sorts the same list the
+  // same way. What the gate compares an event against is the board a passer-by
+  // can see, so it has to be this list and not the freshest fetch.
+  const ranked = rankForMode(mode, teams)
+  const { playing: kick, waiting, settled } = useKick(
+    BOARD.name,
+    queueVersion + devTicks,
+    (event) => matchesBoard(ranked, event),
+  )
+
+  /**
+   * ── The freeze spans the whole batch, not one animation ──
+   *
+   * `waiting` is the difference. One poll routinely detects three rank changes,
+   * and all three describe transitions out of the ordering currently on screen;
+   * thawing after the first would re-sort the board under the other two, which
+   * then animate whichever cards happen to be standing in those slots. So the
+   * snapshot lands when the queue is *empty*, which is the first moment the
+   * board is allowed to move.
+   *
+   * `devCommit` rides the same edge, for the same reason and not merely for
+   * symmetry: it is the development stand-in for the snapshot, and applying it
+   * one event early re-sorts the board just as visibly.
+   */
+  useEffect(() => {
+    if (kick !== null || waiting) freeze()
+    else {
+      thaw()
+      devCommit()
+    }
+  }, [kick, waiting, freeze, thaw, devCommit])
 
   return (
     // ── `surface-dark`, and this used to be the light half of the rotation ──
@@ -154,12 +181,14 @@ export default function WeeklyPage() {
           teams={teams}
           mode={mode}
           kick={kick}
-          // One commit: the standings move and the kick clears together, so the
-          // board is never seen reordering under a mark that has landed.
-          onSettled={() => {
-            devCommit()
-            settled()
-          }}
+          // **`settled` and nothing else.** This used to be an inline arrow
+          // that also ran `devCommit`, and a new function identity every render
+          // was enough to make `VentureCard`'s unmount guard fire its cleanup —
+          // so every click of a dev button, and every poll that queued an
+          // event, cut the running flip off wherever it had got to. The data
+          // commit moved to the thaw above, where it belongs; what is left is
+          // a callback that is stable by construction.
+          onSettled={settled}
         />
       </div>
 
@@ -182,6 +211,7 @@ export default function WeeklyPage() {
         onReset={() => {
           devReset()
           settled()
+          setDevTicks((n) => n + 1)
         }}
       />
     </main>

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { motion, type Easing } from 'motion/react'
 
 import { VentureDisc } from '@/components/VentureDisc'
@@ -199,12 +199,59 @@ export function VentureCard({
    * nothing would ever report the flip finished and `playing` would pin forever.
    * The cleanup reports it instead. Idempotent by construction, so the normal
    * path calling both is harmless.
+   *
+   * ── The callback is held in a ref, and that is the whole point ──
+   *
+   * `onSettled` used to be a dependency, which turned an unmount guard into a
+   * **re-render** guard: React runs an effect's cleanup before re-running it, so
+   * any new function identity from the page fired the settle at whatever frame
+   * the flip had reached. The page handed down an inline arrow, so *every* one
+   * of its renders did it — a dev button pressed during a flip, a poll bumping
+   * `queueVersion`, anything. The flip stopped dead and the next one started
+   * over the top of it, which is what "the animations pause when overtakes
+   * arrive together" was.
+   *
+   * Depending on the role alone is what makes the effect mean what it says: it
+   * arms when this card becomes the attacker and disarms when it stops being
+   * one, and unmount is the only other way out.
    */
   const attacker = cue?.role === 'attacker'
+  const settle = useRef(onSettled)
+  // Declared before the guard so the ref is current by the time any cleanup can
+  // read it. Written in an effect rather than during render, which is the rule
+  // that keeps a ref from disagreeing with a discarded render.
+  useEffect(() => {
+    settle.current = onSettled
+  })
+  /**
+   * **And it has to be an unmount, not merely the end of a cue.**
+   *
+   * React runs this cleanup whenever `attacker` goes false, which includes the
+   * ordinary, healthy ending: the flip completes, `playing` clears, the cue goes
+   * with it. By then the queue has already handed the board the *next* event in
+   * the very same commit — so the cleanup's settle cancelled a kick that had
+   * just started, one render into its own life. Every overtake after the first
+   * was taken out of the queue and thrown away with nothing on screen, and the
+   * board stood still while the wall worked through a batch of three.
+   *
+   * That is the whole of "the animations pause when I fire two or three". The
+   * ref below is what distinguishes the two cases: cleanups run in declaration
+   * order, so on a real unmount this one has already been marked and the guard
+   * fires; on a cue simply clearing it has not, and the guard stays quiet.
+   */
+  const mounted = useRef(true)
+  useEffect(() => {
+    mounted.current = true
+    return () => {
+      mounted.current = false
+    }
+  }, [])
   useEffect(() => {
     if (!attacker) return
-    return () => onSettled?.()
-  }, [attacker, onSettled])
+    return () => {
+      if (!mounted.current) settle.current?.()
+    }
+  }, [attacker])
 
   return (
     <div
@@ -326,9 +373,11 @@ export function VentureCard({
             of forty do not fit on one at this width, and the fix for that is
             the report's to propose, not this component's to pick. */}
         {/* The inner span is what carries the two-line clamp — see
-            `.tv-card-name > span`. The box outside it is what centres the block
-            in the height the rhythm reserves, and a `-webkit-box` cannot do
-            both. */}
+            `.tv-card-name > span`. The box outside it is what seats the block
+            at a stated distance under the mark inside the height the rhythm
+            reserves, and a `-webkit-box` cannot do both. It used to *centre*
+            the block, which put every wrapped name half a line above its
+            neighbours' — measured at 9px across row 1. */}
         <div className="tv-card-name tv-card-detail">
           <span>{nameOf(team)}</span>
         </div>

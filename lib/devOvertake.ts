@@ -2,7 +2,8 @@
 
 import { useCallback, useMemo, useState } from 'react'
 
-import type { Team, TeamId } from '@/lib/types'
+import { boardEarned } from '@/lib/board'
+import type { BoardMode, Team, TeamId } from '@/lib/types'
 
 /**
  * Development only: makes a triggered overtake change the board, not just
@@ -38,7 +39,7 @@ import type { Team, TeamId } from '@/lib/types'
 const DEV = process.env.NODE_ENV === 'development'
 
 /** Queued by the trigger on click, drained by the board on settle. */
-let pending: { teamId: TeamId; challengeRevenue: number }[] = []
+let pending: { teamId: TeamId; earned: number }[] = []
 
 /**
  * What the climb is worth, in revenue.
@@ -47,17 +48,33 @@ let pending: { teamId: TeamId; challengeRevenue: number }[] = []
  * room, and one rupee above the defender where there is not — so the attacker
  * lands strictly between them and the sort has an unambiguous answer rather than
  * a tie broken by units or team id.
+ *
+ * **It moves the figure the board is actually ranking on.** This wrote
+ * `challengeRevenue` unconditionally, which was silently a no-op for the whole
+ * of `challenge_mode` being anything but `Yes` — the default, and what every
+ * local fixture boots into. The flip played, the settle landed, and the board
+ * re-sorted itself to precisely the order it started in, which is the exact bug
+ * this module's docblock exists to describe. `boardEarned` is the one place that
+ * says which figure a mode ranks; this reads it rather than guessing.
  */
-export function devQueueClimb(attacker: Team, defender: Team, above: Team | undefined): void {
+export function devQueueClimb(
+  mode: BoardMode,
+  attacker: Team,
+  defender: Team,
+  above: Team | undefined,
+): void {
   if (!DEV) return
-  const ceiling = above?.challengeRevenue ?? defender.challengeRevenue + 2
-  const gap = ceiling - defender.challengeRevenue
-  const challengeRevenue =
-    gap > 2 ? defender.challengeRevenue + Math.floor(gap / 2) : defender.challengeRevenue + 1
-  pending.push({ teamId: attacker.teamId, challengeRevenue })
+  const held = boardEarned(mode, defender)
+  const ceiling = above === undefined ? held + 2 : boardEarned(mode, above)
+  const gap = ceiling - held
+  const earned = gap > 2 ? held + Math.floor(gap / 2) : held + 1
+  pending.push({ teamId: attacker.teamId, earned })
 }
 
-export function useDevOvertakes(teams: readonly Team[]): {
+export function useDevOvertakes(
+  mode: BoardMode,
+  teams: readonly Team[],
+): {
   teams: readonly Team[]
   commit: () => void
   reset: () => void
@@ -73,7 +90,7 @@ export function useDevOvertakes(teams: readonly Team[]): {
     pending = []
     setApplied((prev) => {
       const next = new Map(prev)
-      for (const p of taken) next.set(p.teamId, p.challengeRevenue)
+      for (const p of taken) next.set(p.teamId, p.earned)
       return next
     })
   }, [])
@@ -87,7 +104,12 @@ export function useDevOvertakes(teams: readonly Team[]): {
     if (!DEV || applied.size === 0) return teams
     return teams.map((t) => {
       const figure = applied.get(t.teamId)
-      return figure === undefined ? t : { ...t, challengeRevenue: figure }
+      if (figure === undefined) return t
+      // Both, deliberately: the card prints one of these and the comparator
+      // sorts the same one, and which is which is the mode's business. Writing
+      // only the mode's figure would leave a triggered climb behind the moment
+      // `challenge_mode` was edited mid-session.
+      return { ...t, challengeRevenue: figure, weekRevenue: figure }
     })
   }, [teams, applied])
 

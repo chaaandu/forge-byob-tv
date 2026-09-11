@@ -22,19 +22,19 @@ import type { BoardMode, OvertakeEvent, Team } from '@/lib/types'
  * here touches `WeeklyGrid` or the cues. What you watch is what live data
  * produces.
  *
- * ── The board snaps back at the end. That is expected ──
+ * ── The board does re-sort at the end, and that is the point ──
  *
- * The cards in a flip are the real cards, and they end the sequence in their new
- * positions. What puts them there permanently is the *data* re-sorting, and this
- * trigger fabricates an event without fabricating the data behind it — so when
- * the held snapshot thaws there is nothing new to apply, and the two cards
- * return to where they started.
+ * It used to snap back, and this note used to defend it: a fabricated event with
+ * no data behind it settles onto the board it started from. `lib/devOvertake.ts`
+ * is what changed the answer — the climb records what it is *worth*, and the
+ * page applies it on the same edge the held snapshot thaws on. So a triggered
+ * flip lands on a board that has genuinely re-ordered, which is the only version
+ * of this affordance that shows what live data does.
  *
- * That is not a bug to chase. Giving the trigger a client-side ordering override
- * would make it lie convincingly, and a second source of card order is the exact
- * thing the grid-is-the-brain design exists to remove. End-to-end verification
- * runs on `scripts/dev-churn.mjs`, which changes the published feed and
- * therefore produces a real reorder; these buttons are for watching a beat.
+ * What that note was right about still holds: there is no client-side ordering
+ * override anywhere, and a second source of card order is the exact thing the
+ * grid-is-the-brain design exists to remove. The climb moves a *figure*, and the
+ * one comparator sorts it. End-to-end verification still runs on the feed.
  */
 
 /**
@@ -91,7 +91,7 @@ export function DevFlipTrigger({
     // then settles onto the board it started from; this records what the climb
     // is worth so the settle has somewhere to arrive. Applied on settle, not
     // here — see lib/devOvertake.ts.
-    devQueueClimb(attacker, defender, ranked[to - 2])
+    devQueueClimb(mode, attacker, defender, ranked[to - 2])
     enqueueKicks('weekly', [event])
     onQueued()
   }

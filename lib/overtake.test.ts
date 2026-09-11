@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 import { WATCH_RANKS_WEEKLY } from '@/config'
-import { detect } from '@/lib/overtake'
+import { detect, matchesBoard } from '@/lib/overtake'
 import { rankByChallenge, rankByWeek } from '@/lib/ranking'
 import { teams } from '@/test/fixtures'
 import type { BoardState, Team } from '@/lib/types'
@@ -235,6 +235,72 @@ describe('the floor and the rollover', () => {
     const before: BoardState = { week: 4, ranks: { 'VBC101': 1 }, earned: { 'VBC101': 41_000 } }
     const { events } = run(before, board())
     expect(events).toEqual([])
+  })
+})
+
+/**
+ * The gate between a queued event and the pixels. Every one of these failures
+ * renders convincingly — the wall shows a well-timed overtake between two teams
+ * that never met, at full confidence, for as long as nobody happens to know the
+ * standings by heart.
+ */
+describe('matchesBoard', () => {
+  const ranked = rankByWeek(board())
+
+  it('accepts an event whose two slots still hold its two ventures', () => {
+    const event = {
+      id: 'e',
+      attacker: ranked[5].teamId,
+      attackerName: '',
+      defender: ranked[4].teamId,
+      defenderName: '',
+      fromRank: 6,
+      toRank: 5,
+    }
+    expect(matchesBoard(ranked, event)).toBe(true)
+  })
+
+  it('rejects an event whose attacker has already been moved there', () => {
+    // What a thawed snapshot does to the rest of a batch: the climb landed, so
+    // the card at `fromRank` is somebody else entirely.
+    const event = {
+      id: 'e',
+      attacker: ranked[4].teamId,
+      attackerName: '',
+      defender: ranked[3].teamId,
+      defenderName: '',
+      fromRank: 6,
+      toRank: 5,
+    }
+    expect(matchesBoard(ranked, event)).toBe(false)
+  })
+
+  it('rejects an event whose defender has left the seat', () => {
+    // Both ends matter: the choreography moves the defender too, so a wrong
+    // card at `toRank` is the same lie as a wrong one at `fromRank`.
+    const event = {
+      id: 'e',
+      attacker: ranked[5].teamId,
+      attackerName: '',
+      defender: ranked[9].teamId,
+      defenderName: '',
+      fromRank: 6,
+      toRank: 5,
+    }
+    expect(matchesBoard(ranked, event)).toBe(false)
+  })
+
+  it('rejects everything against a board that has not rendered yet', () => {
+    const event = {
+      id: 'e',
+      attacker: 'VBC106',
+      attackerName: '',
+      defender: 'VBC105',
+      defenderName: '',
+      fromRank: 6,
+      toRank: 5,
+    }
+    expect(matchesBoard([], event)).toBe(false)
   })
 })
 

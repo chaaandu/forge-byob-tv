@@ -8,6 +8,7 @@ import { Podium } from '@/components/Podium'
 import { WallHeader } from '@/components/WallHeader'
 import { WATCH_RANKS_PODIUM } from '@/config'
 import { fleaInstant } from '@/lib/feed'
+import { matchesBoard } from '@/lib/overtake'
 import { competingTeams, rankTeams } from '@/lib/ranking'
 import { useKick } from '@/lib/useKick'
 import { useWallData, type BoardSpec } from '@/lib/useWallData'
@@ -59,17 +60,34 @@ export default function PodiumPage() {
   // counter is only the nudge that tells `useKick` to look, exactly as
   // `queueVersion` does. Adding to it keeps one drain and one reader.
   const [devTicks, setDevTicks] = useState(0)
-  const { playing: kick, settled } = useKick(BOARD.name, queueVersion + devTicks)
-
-  // **The freeze rides the sequence exactly.** A snapshot applied mid-flight
-  // would re-slot the pillars under an animation that has already measured where
-  // they are, and the travelling disc would land on a row that had moved.
-  useEffect(() => {
-    if (kick !== null) freeze()
-    else thaw()
-  }, [kick, freeze, thaw])
 
   const teams = competingTeams(snapshot?.teams ?? [])
+  // The order the board is about to render, which is what an event has to match
+  // — not the freshest fetch. `Podium` is handed this same list below.
+  const ranked = rankTeams(teams)
+  const { playing: kick, waiting, settled } = useKick(
+    BOARD.name,
+    queueVersion + devTicks,
+    (event) => matchesBoard(ranked, event),
+  )
+
+  /**
+   * **The freeze rides the sequence exactly.** A snapshot applied mid-flight
+   * would re-slot the pillars under an animation that has already measured where
+   * they are, and the travelling disc would land on a row that had moved.
+   *
+   * **And it spans the whole batch, not one animation** — that is what `waiting`
+   * buys. One fetch commonly detects several rank changes, and every one of them
+   * describes a transition out of the ordering currently on screen; thawing
+   * after the first would re-sort the board under the rest, which would then
+   * animate whichever ventures happened to be standing in those slots. The
+   * snapshot lands when the queue is empty, which is the first moment the board
+   * is allowed to move. `matchesBoard` is the check behind the intent.
+   */
+  useEffect(() => {
+    if (kick !== null || waiting) freeze()
+    else thaw()
+  }, [kick, waiting, freeze, thaw])
 
   return (
     // **`surface-dark` — the dark half of the rotation.** Forge alternates dark
@@ -109,7 +127,7 @@ export default function PodiumPage() {
       <div className="tv-rule" style={{ marginTop: 'var(--s-mast-rule)' }} />
 
       <div style={{ display: 'grid', minHeight: 0, paddingTop: 'var(--s-rule-board)' }}>
-        <Podium ranked={rankTeams(teams)} kick={kick} onSettled={settled} />
+        <Podium ranked={ranked} kick={kick} onSettled={settled} />
       </div>
 
       {/* ── The footer line is gone, and the biggest mover with it ──

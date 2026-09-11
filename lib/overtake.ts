@@ -119,3 +119,29 @@ export function detect(prev: BoardState | null, input: DetectInput): DetectResul
   events.sort((a, b) => b.fromRank - b.toRank - (a.fromRank - a.toRank))
   return { state, events }
 }
+
+/**
+ * Does this event still describe the board on screen?
+ *
+ * An event is a transition *out of* one particular ordering: `fromRank` is where
+ * the attacker was standing and `toRank` is the seat it took off the defender.
+ * `cuesFor` and `Podium` both pick the elements to animate **by board position**,
+ * so an event played against any other ordering moves whichever two ventures now
+ * occupy those slots — and the wall shows a confident, well-timed overtake
+ * between two teams that did not overtake anyone. Nothing reports it and it
+ * renders perfectly, which is the whole class of bug this project is built
+ * around.
+ *
+ * Checked against the rendered list immediately before play, so the answer is
+ * about the *pixels*, not about the freshest data. Both ends are checked: the
+ * attacker must still be at `fromRank` and the defender still at `toRank`,
+ * because the choreography moves both and either one being wrong is the same
+ * lie. An event that fails this is dropped, never deferred — the board it
+ * described is gone, and it will not come back.
+ */
+export function matchesBoard(ranked: readonly Team[], event: OvertakeEvent): boolean {
+  return (
+    ranked[event.fromRank - 1]?.teamId === event.attacker &&
+    ranked[event.toRank - 1]?.teamId === event.defender
+  )
+}

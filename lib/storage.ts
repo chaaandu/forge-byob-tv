@@ -132,12 +132,20 @@ export function writeBoard(board: string, state: BoardState): void {
  * Dropping from the *front* is the whole policy: when more overtakes arrive than
  * the wall can show, the ones worth showing are the recent ones. An animation of
  * a rank change that has since been superseded is a lie told slowly.
+ *
+ * **A single batch is trimmed from its tail instead, and that is not the same
+ * rule.** `detect` sorts one fetch's events biggest climb first precisely so the
+ * cap keeps the ones most worth watching — and then the front-drop threw those
+ * away, because within one batch the front *is* the best of it. Six events with
+ * a cap of four left the wall showing the four smallest moves on the board. The
+ * two rules do not conflict once they are applied to the right thing: staleness
+ * is about older polls, and importance is about this one.
  */
 export function enqueueKicks(board: string, events: readonly OvertakeEvent[]): void {
   if (events.length === 0) return
   const queued = readJson(KEYS.queue(board), isEventArray) ?? []
   const fresh = [...queued]
-  for (const event of events) {
+  for (const event of events.slice(0, KICK_QUEUE_CAP)) {
     const at = fresh.findIndex((existing) => existing.id === event.id)
     if (at === -1) fresh.push(event)
     else fresh[at] = event
@@ -155,6 +163,21 @@ export function enqueueKicks(board: string, events: readonly OvertakeEvent[]): v
  */
 export function clearKicks(board: string): void {
   writeJson(KEYS.queue(board), [])
+}
+
+/**
+ * Is anything still waiting behind what is playing?
+ *
+ * Read by `useKick` and nowhere else, which keeps the one-reader rule intact —
+ * this does not consume, so it is not a second drain. It exists because the
+ * freeze has to span a whole *batch*: every event in one poll describes a
+ * transition out of the board that is currently on screen, so applying the
+ * re-sorted snapshot after the first of three would leave the other two
+ * describing a board that no longer exists. See the note on `waiting` in
+ * `lib/useKick.ts`.
+ */
+export function hasKicks(board: string): boolean {
+  return (readJson(KEYS.queue(board), isEventArray) ?? []).length > 0
 }
 
 /**

@@ -657,6 +657,58 @@ describe('WeeklyGrid', () => {
   it('renders an empty board without inventing anything to put in it', () => {
     expect(render(<WeeklyGrid teams={[]} />)).toBe('')
   })
+
+  /**
+   * ── The flip must survive the page re-rendering under it ──
+   *
+   * `onSettled` is the only thing that ends a flip and releases the queue, and
+   * `VentureCard` arms it as an unmount guard. It used to list the callback in
+   * that effect's dependencies, which quietly turned the guard into a
+   * *re-render* guard: React runs a cleanup before re-running an effect, so a
+   * new function identity from the page reported the flip finished wherever it
+   * had got to.
+   *
+   * The page handed down an inline arrow, so every one of its renders did it —
+   * and the renders that matter are exactly the ones that happen when overtakes
+   * arrive together. A poll that queues an event bumps `queueVersion`; a dev
+   * button does the same. So pressing two or three in a row cut each animation
+   * off part-way and started the next over the top of it, which is what the
+   * board looked like it was doing: stalling.
+   *
+   * Nothing about this is visible in a screenshot, and nothing reports it.
+   */
+  it('does not end a flip just because the page re-rendered', () => {
+    const host = document.createElement('div')
+    document.body.append(host)
+    const root = createRoot(host)
+    const ranked = rankByChallenge(board())
+    const kick = {
+      id: 'k',
+      attacker: ranked[5].teamId,
+      attackerName: ranked[5].ventureName,
+      defender: ranked[4].teamId,
+      defenderName: ranked[4].ventureName,
+      fromRank: 6,
+      toRank: 5,
+    }
+    const first = vi.fn()
+    act(() => root.render(<WeeklyGrid teams={board()} kick={kick} onSettled={first} />))
+    expect(first).not.toHaveBeenCalled()
+
+    // Same flip, new callback identity — a page re-render, and nothing else.
+    const second = vi.fn()
+    act(() => root.render(<WeeklyGrid teams={board()} kick={kick} onSettled={second} />))
+    expect(first).not.toHaveBeenCalled()
+    expect(second).not.toHaveBeenCalled()
+
+    // The guard itself still has to work, and it has to fire the *current*
+    // callback: leaving the board mid-flip reports the settle, or the queue
+    // wedges forever with nothing on screen moving.
+    act(() => root.unmount())
+    expect(second).toHaveBeenCalledTimes(1)
+    expect(first).not.toHaveBeenCalled()
+    host.remove()
+  })
 })
 
 describe('VentureCard', () => {
