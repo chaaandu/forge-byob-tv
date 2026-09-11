@@ -304,6 +304,55 @@ describe('Podium', () => {
     host.remove()
   })
 
+  it('crowns first place, once, and nobody else', () => {
+    const host = document.createElement('div')
+    document.body.append(host)
+    const root = createRoot(host)
+    act(() => root.render(<Podium ranked={rankTeams(TRADING)} />))
+
+    // One crown on the whole slide. The count is the assertion: a crown on
+    // every podium place renders perfectly well and says nothing.
+    const crowns = [...host.querySelectorAll('.tv-crown')]
+    expect(crowns).toHaveLength(1)
+
+    // And it is on the place the board draws first, which is **not** the first
+    // slot in the DOM — the pillars are ordered 2 · 1 · 3, so a crown that had
+    // drifted onto rank 2 would still be "the only crown" and would still be at
+    // the left of the frame. Anchor it to the leading venture's own mark.
+    const slot = crowns[0]!.closest('.tv-pod-slot')
+    expect(slot?.textContent).toContain('Aurora Bakes')
+    expect(slot?.textContent).toContain('1')
+  })
+
+  it('does not crown a board where nobody has traded', () => {
+    // Rank 1 on an untraded board is whoever the tie-break put first — lowest
+    // team id, on zero, against thirty-eight other ventures on zero. Crowning
+    // that is a lie that renders perfectly, for however many days it takes the
+    // first sale to land.
+    const host = document.createElement('div')
+    document.body.append(host)
+    const root = createRoot(host)
+    const nobody = teams([
+      { teamId: 'VBC101', ventureName: 'Aurora Bakes', totalRevenue: 0, totalUnits: 0 },
+      { teamId: 'VBC102', ventureName: 'Kite Coffee', totalRevenue: 0, totalUnits: 0 },
+    ])
+    act(() => root.render(<Podium ranked={rankTeams(nobody)} />))
+    expect(host.querySelectorAll('.tv-crown')).toHaveLength(0)
+  })
+
+  it('puts no crown on /weekly', () => {
+    // **The half that is easy to lose**, and the reason is that it is not a
+    // tidiness rule. `/podium` ranks all-time revenue and `/weekly` ranks the
+    // week or the challenge, so the two boards' rank 1 is usually a *different
+    // venture*. Crowning both means the wall crowns two teams thirty seconds
+    // apart, which a passer-by reads as a fault rather than as two contests.
+    const host = document.createElement('div')
+    document.body.append(host)
+    const root = createRoot(host)
+    act(() => root.render(<WeeklyGrid teams={TRADING} />))
+    expect(host.querySelectorAll('.tv-crown')).toHaveLength(0)
+  })
+
   it('idles nothing at all on /weekly', () => {
     // The other half of the scope, and the half that is easy to lose. Ten
     // idling marks on a board of thirty-nine is the case the wall's

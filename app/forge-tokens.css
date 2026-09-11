@@ -159,6 +159,30 @@
   --ink-on-solid: var(--white);
   --ink-on-solid-2: var(--orchid-300);
 
+  /* ── The crown's fill, and it is declared per surface for a measured reason ──
+
+     `components/Crown.tsx` draws first place's crown. The obvious thing is to
+     fill it `--forge-metal-gold` and be done, and on the dark slide that is
+     exactly right — 8.59:1 on Deep Aubergine, the brightest object on the page,
+     which is what a crown should be.
+
+     **On Lavender Mist the same gold measures 1.61:1.** A gold crown on the
+     light surface is a crown-shaped hole in the page: present in the DOM,
+     passing every test, invisible from the corridor. That is the §5 failure
+     exactly, one component later, and the fix is the same one — the component
+     asks for `--crown-ink` and the surface decides what gold means.
+
+     Forge has no light-surface gold; there is no step on that hue that carries
+     on Lavender Mist. So the light answer is not a duller gold, it is a
+     different material: Royal Purple, 10.01:1, a solid crown rather than a
+     metal one. A crown that reads is worth more than a gold that does not.
+
+     Both slides are `.surface-dark` today, so the value below is drawn by
+     nothing — and it is declared anyway, because `.surface-light` is kept
+     fully working on purpose and an undeclared token is how the light slide
+     comes back broken. */
+  --crown-ink: var(--royal-purple);
+
   /* ── §2a · The mark tints ────────────────────────────────────────────────
 
      Six fills for `VentureLogo`'s monogram disc, and one ink for all six.
@@ -253,6 +277,15 @@
   --hairline-strong: rgba(255, 255, 255, 0.28);
   --ink-on-solid: var(--white);
   --ink-on-solid-2: var(--orchid-300);
+
+  /* **The metals come back, as one object.** `--forge-metal-gold` has sat in §1
+     read by nothing since the plinths, the numerals and their two sweeps were
+     deleted — kept, as §5 says, because the exemption is a standing decision
+     rather than a leftover, and on the condition that if gold returned it
+     "should arrive as one decision in one place". This is that decision, and
+     this is that place: one glyph, on one rank, on one slide. No plinth, no
+     lustre, no sweep. 8.59:1 on Deep Aubergine. */
+  --crown-ink: var(--forge-metal-gold);
 
   /* The mark tints, for a dark page. All six are light fills, so the ink is
      Deep Aubergine for every one of them — the page colour, which is what makes
@@ -410,4 +443,17 @@
    decision about what this wall is allowed to say, not a leftover. If gold ever
    comes back it should arrive as one decision in one place — see the note at
    `.tv-card-rank-lead` in `app/mesa-tv.css` for what it replaced, which was a
-   plinth, a sweep, a glyph fill and a second sweep. */
+   plinth, a sweep, a glyph fill and a second sweep.
+
+   ── Gold came back, and the condition above was the shape of it ──
+
+   `--forge-metal-gold` is read by exactly one thing: `--crown-ink` on the dark
+   surface, which fills `components/Crown.tsx`. One glyph, on rank 1, on
+   `/podium`. Silver and bronze are still read by nothing and stay declared on
+   the same terms — ranks 2 and 3 are said by the size of their marks, and
+   putting a metal back on them would restore the redundancy the editorial pass
+   removed rather than the one thing it left out.
+
+   **The exemption is now spent rather than open.** A second gold object on this
+   wall is a new argument to be made from scratch, not a precedent this one
+   grants. */

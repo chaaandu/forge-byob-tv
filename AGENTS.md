@@ -96,6 +96,24 @@ npm run build        # next build
 
   `/weekly` does not get this. `render.test.tsx` pins both halves, and the
   second half is the one that is easy to lose.
+
+  **The crown is a fourth moving thing and it is not a fourth exception**, which
+  is a distinction worth being exact about because the next ornament will claim
+  it too. `components/Crown.tsx` drops onto rank 1 and *stops* — one run, on
+  mount, `animation: … both` with no iteration count. What the rule above bans
+  is motion **at rest**, and a thing that is over 1.4 seconds after the slide
+  arrives is not at rest, it is an entrance. The board is still three idling
+  marks and nothing else thirty seconds later, which is the property that
+  matters and the one the tests pin. An ornament that loops — a twinkle, a
+  sheen, a pulse — is a fourth exception and does not get in on this precedent.
+- **Gold is back, as exactly one object.** `--forge-metal-gold` sat unread from
+  the deletion of the plinths until the crown, kept on §5's stated condition
+  that if it returned it would "arrive as one decision in one place". The crown
+  is that decision: one glyph, one rank, one slide, no plinth and no sweep. The
+  budget is spent — a second gold thing is a new argument, not an extension of
+  this one. Components read `--crown-ink`, never the metal token, because gold
+  measures 8.59:1 on Deep Aubergine and **1.61:1 on Lavender Mist**, so the
+  light surface answers with Royal Purple instead.
 - **No filler content.** Empty is a valid state. The wall being quiet is what makes it
   loud when something happens. No spinners, ever — first paint reads cached CSV.
 - **There is no footer and no `as_of` stamp**, on either slide. Both were removed

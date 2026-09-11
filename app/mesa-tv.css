@@ -876,6 +876,32 @@
   --d-pod-disc: 14.5833vw; /* 280px */
   --d-pod-disc-rest: 11.25vw; /* 216px */
 
+  /* ── The crown ──
+
+     A share of the mark it sits on, not a fixed size, so it holds its
+     proportion at every viewport the way everything else on this slide does.
+     34% of a 280px disc is 95px wide — a crown that still reads as a crown at
+     six metres rather than as a gold fleck. `scripts/logo-legibility.py`
+     measured 48px as the floor below which a *mark* stops being a mark; a
+     silhouette with five points and a band needs more than a monogram does,
+     which is why this is a third of the disc and not a tenth.
+
+     All three are percentages of **the disc**, which is the containing block —
+     `left` and `top` resolve against the positioned ancestor's box, not against
+     the element's own, and getting that backwards is how a crown ends up
+     hanging in space at one viewport and correct at another. Sized and placed
+     in the same units as the thing it sits on, the crown holds its position at
+     every width for free.
+
+     It rests on the disc's upper-left rim: far enough over to overhang the
+     circle and be read as a badge, not so far that it stops touching the mark
+     and becomes a second object. The numeral above is centred and the crown is
+     at the left, so the 6% of upward overhang has nothing to collide with. */
+  --d-crown: 34%;
+  --x-crown: -8%;
+  --y-crown: -6%;
+  --r-crown: -24deg;
+
   /* Air between a rank numeral and the mark under it, and between the mark and
      the name under that. The numeral sits closer to its mark than the mark does
      to its name, so a place reads top-down as one object rather than as a
@@ -1092,6 +1118,64 @@
   63%, 70% { transform: rotateY(calc(var(--idle-turn) * 1deg)); }
   78%      { transform: rotate(calc(var(--idle-tilt) * 1deg)); }
   86%, 100% { transform: rotateY(0deg) rotate(0deg); }
+}
+
+/* ── The crown's drop ──
+
+   The brief pointed at a Lottie of a crown falling onto a mark and asked for
+   that motion. **It is CSS, and taking the Lottie player for this would have
+   been the wrong trade**: `lottie-web` is ~70KB gzipped running a
+   requestAnimationFrame loop that mutates SVG every frame, on a page that stays
+   open for weeks. Six keyframes on `transform` and `opacity` is the same motion
+   as compositor work, with no dependency and nothing to leak. The player earns
+   its place for artwork nobody can draw in keyframes — an idol, a firework —
+   and not for a thing that falls down and bounces once.
+
+   ── The timing functions are per-keyframe, and that is the whole animation ──
+
+   A drop eased uniformly reads as a slide. Gravity accelerates *into* the
+   impact and decelerates *out* of the rebound, so the fall segments carry an
+   ease-in and the rebounds an ease-out. Written on the keyframe that *starts*
+   each segment, which is how `animation-timing-function` inside `@keyframes`
+   works — put it on the landing frame instead and it governs the bounce after
+   it rather than the fall before, which is the one mistake that makes this read
+   backwards while still animating.
+
+   Two bounces, the second an eighth of the first, then still. It runs **once**
+   — `both`, no `infinite`. A crown that bobbed forever would be a fourth moving
+   thing at rest, and this wall allows three. */
+@keyframes tv-crown-drop {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -180%, 0) rotate(16deg);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  }
+  26% {
+    opacity: 1;
+  }
+  /* Impact. Overshot past the resting angle, so the crown arrives as a weight
+     landing rather than as a shape appearing in position. */
+  46% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(-6deg);
+    animation-timing-function: cubic-bezier(0.16, 0.84, 0.44, 1);
+  }
+  60% {
+    transform: translate3d(0, -26%, 0) rotate(3deg);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  }
+  74% {
+    transform: translate3d(0, 0, 0) rotate(-1.5deg);
+    animation-timing-function: cubic-bezier(0.16, 0.84, 0.44, 1);
+  }
+  85% {
+    transform: translate3d(0, -7%, 0) rotate(0.5deg);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
 }
 
 /* ── The weekly board's row-1 look ──
@@ -1877,6 +1961,55 @@
     place-items: center;
   }
 
+  /* ── The crown, in two elements, and the split is load-bearing ──
+
+     `.tv-crown` places it and holds its resting tilt; `.tv-crown-glyph` carries
+     the drop. They cannot be one element: `transform` is a single property, so
+     a drop animation on the placed element would overwrite the tilt for the
+     length of the animation and then snap it back on the last frame — the crown
+     would land upright and then jerk 24 degrees. Splitting them composes the
+     two transforms instead, parent then child, and the resting tilt is true on
+     every frame of the fall.
+
+     The crown is a child of the mark's **idle box**, not of the band. That is
+     what keeps it welded to the mark: first place bobs 16px and glances 34
+     degrees, and a crown positioned against the still band would slide in and
+     out of contact with the head it is sitting on — a gap opening and closing
+     once every seventeen seconds, which reads as a rendering fault rather than
+     as motion. Riding the idle, it foreshortens with the mark's turn, which is
+     what a crown on a head actually does. */
+  .tv-crown {
+    position: absolute;
+    left: var(--x-crown);
+    top: var(--y-crown);
+    width: var(--d-crown);
+    transform: rotate(var(--r-crown));
+    /* The lower-right of the crown — the corner resting on the disc. Tilting
+       about the box centre lifts that corner off the rim as the angle changes,
+       so a later tweak to `--r-crown` would silently detach it. */
+    transform-origin: 78% 92%;
+    pointer-events: none;
+  }
+
+  .tv-crown-glyph {
+    display: block;
+    width: 100%;
+    /* `auto`, so the viewBox's 100:78 decides the height. A crown given both
+       dimensions is a crown one viewport away from being squashed. */
+    height: auto;
+    /* The band, so the crown pivots on the rim it lands on rather than about
+       its own middle. */
+    transform-origin: 50% 92%;
+    /* **`both`, and no iteration count.** It runs once per mount — which on
+       this wall is once per rotation, every thirty seconds, because `/podium`
+       remounts on each soft navigation. `forwards` alone would leave the crown
+       at its `0%` opacity of zero for the delay; `both` applies the first
+       keyframe during it, so the crown is invisible until it falls rather than
+       sitting fully drawn for 280ms and then dropping from nowhere. */
+    animation: tv-crown-drop 1.15s both 0.28s;
+    will-change: transform, opacity;
+  }
+
   /* The travelling disc's two faces, during an overtake. Circles in their own
      right, so the ring traces the disc rather than a square box — and drawn
      with `box-shadow` rather than a filter, which would flatten the 3D context
@@ -2028,6 +2161,19 @@
     .tv-idle-2,
     .tv-idle-3 {
       animation: none;
+    }
+
+    /* The crown stops falling and is simply there. **`animation: none` alone
+       would be a bug here**, not a reduction: the drop's `0%` keyframe is
+       `opacity: 0`, but that value lives in the keyframes rather than on the
+       element, so cancelling the animation returns the crown to its own
+       computed style — which is opaque. It happens to be correct, and it is
+       correct by accident, so the opacity is restated. A crown that vanished on
+       a machine with one OS setting flipped is precisely the failure this wall
+       cannot report. */
+    .tv-crown-glyph {
+      animation: none;
+      opacity: 1;
     }
   }
 

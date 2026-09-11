@@ -237,3 +237,35 @@ heading.
 
 Both readings are defensible and the question was raised but never answered.
 Decide it before the next typography pass, or the two boards will drift.
+
+---
+
+## `measure-crown.mjs` — is the crown there, gold, and unclipped?
+
+```bash
+node scripts/measure-crown.mjs [url]
+```
+
+Reports the crown's layout box, its painted box, the fill it actually resolved
+to, every clipping ancestor between it and the frame, and whether it collides
+with the rank numeral. Writes `/tmp/crown-lead.png` and `/tmp/crown-slide.png`.
+
+Three traps behind it. An `<svg>` with `height: auto` can lay out at
+`95x0` and still pass every DOM assertion. `fill: var(--crown-ink)` falls back
+to **black** — not to an error — if the token is undeclared on the surface in
+play, which on Deep Aubergine is a crown-shaped hole. And
+`getBoundingClientRect` returns the *axis-aligned* box of a rotated element, so
+a 95x74 crown at −24° reports 117x106; read that as the width and every
+clearance below it is wrong by 23%. The script prints `offsetWidth` beside the
+rect for exactly that reason.
+
+## `measure-crown-fit.mjs` — is it still attached to the right venture?
+
+```bash
+node scripts/measure-crown-fit.mjs [url]
+```
+
+The crown overhangs its disc to the **left**, and the place to its left is rank
+2. Everything on this slide is `vw`, so the question at 1366 is not whether the
+crown fits but whether it has reached into the silver mark. Prints the clear air
+between the two at four viewports; it must never go negative.

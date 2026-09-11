@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 
+import { Crown } from '@/components/Crown'
 import { PodiumTravel, type TravelPath } from '@/components/PodiumTravel'
 import { VentureLogo } from '@/components/VentureLogo'
 import { formatRupees } from '@/lib/format'
@@ -188,6 +189,31 @@ function PodiumCard({
 }) {
   const p = PLACES[place]
 
+  /* ── Who wears the crown ──
+   *
+   * **The crown belongs to the seat, not to the venture.** It is mounted on
+   * place 1's mark band and stays there through an overtake, so the head under
+   * it changes while it holds still — which is the thing a crown actually
+   * means. Handing it to the team would mean animating it across the board
+   * alongside the travelling disc, for no gain: the wall is not saying "this
+   * venture acquired a crown", it is saying "this seat is first".
+   *
+   * `arriving ?? team` is what makes that true during the two seconds a
+   * handover takes. The board's data is frozen for the sequence, so `team` is
+   * still the *departing* venture right up to the last beat; reading it alone
+   * would strip the crown at the moment a new leader appeared under it.
+   *
+   * **The zero gate is not defensive, it is the difference between a fact and a
+   * lie.** Before anyone has traded, rank 1 is whoever the tie-break put first
+   * — lowest team ID, on ₹0, against thirty-eight other ventures on ₹0. There
+   * is no leader yet, and a crown on `SLE-C401` for being alphabetically early
+   * is the exact class of bug this project is built around: it renders
+   * perfectly and it is false. An uncrowned podium says "nobody is ahead yet",
+   * which is true, and empty is a valid state on this wall.
+   */
+  const holder = arriving ?? team
+  const crowned = place === 1 && holder !== undefined && holder.totalRevenue > 0
+
   /* The name and figure, as one block. Both states of a place being handed over
      render this, stacked and cross-faded, so the arriving venture's details
      cannot appear over the departing venture's — see the note below. */
@@ -254,9 +280,27 @@ function PodiumCard({
           style={{
             width: '100%',
             aspectRatio: 1,
+            // **Stated, not inherited from the transform.** A transformed
+            // element is already a containing block for absolute descendants,
+            // so the crown would position correctly here without this — until
+            // the day `idleOf` hands a place no timeline, at which point the
+            // crown silently re-parents to the band and moves. Declaring it
+            // costs nothing and makes the crown's frame of reference a fact
+            // rather than a side effect of an animation being present.
+            position: 'relative',
             ...(team === undefined ? {} : { willChange: 'transform' }),
           }}
         >
+          {/* Drawn before the disc so it sits *under* the mark in paint order.
+              A crown overlapping the monogram's edge would cover the one thing
+              on the card that identifies the venture; behind it, the mark stays
+              whole and the crown reads as resting against the rim. */}
+          {crowned ? (
+            <span className="tv-crown">
+              <Crown className="tv-crown-glyph" />
+            </span>
+          ) : null}
+
           {/* **Hidden rather than unmounted while it travels.** The travelling
               disc is measured against this element's box, and an unmounted
               element has no box — the path would be measured from nothing on
