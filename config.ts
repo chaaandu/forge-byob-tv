@@ -187,7 +187,7 @@ export const PODIUM_CLOCK_UNDER_MS = 3 * 24 * 60 * 60 * 1000
 export const FLEA_EVENT_DURATION_MS = 8 * 60 * 60 * 1000
 
 /**
- * When the programme started — **1 September 2026, 00:00 IST** (Forge C1).
+ * When the programme started — **31 August 2026, 00:00 IST** (Forge C1).
  *
  * The one date in this system that is not in the sheet, so moving it costs a
  * commit and a redeploy. That is a deliberate, eyes-open trade: it does not
@@ -199,8 +199,18 @@ export const FLEA_EVENT_DURATION_MS = 8 * 60 * 60 * 1000
  * the ring read **52% complete** on 11 September against a true **17%**: a
  * three-fold error, correctly rendered, in a large element. `current_open_week`
  * in `TV_Cohort` is anchored to this same date and must move with it.
+ *
+ * ── Why the 31st and not the 1st ──
+ *
+ * **31 August 2026 is a Monday; 1 September is a Tuesday.** Programme weeks run
+ * Monday→Sunday, so the anchor has to land on a Monday or every week boundary
+ * this system computes is a day out — and a Tuesday anchor is wrong in the one
+ * way nothing reports: `INT((TODAY()-anchor)/7)+1` still returns a plausible
+ * small integer, it just rolls to the next week on the wrong day. It agreed with
+ * the Monday anchor on 11 September, which is exactly how a date like this
+ * survives a spot-check and is wrong the following Monday.
  */
-export const PROGRAMME_START_ISO = '2026-09-01T00:00:00+05:30'
+export const PROGRAMME_START_ISO = '2026-08-31T00:00:00+05:30'
 export const PROGRAMME_START_MS = Date.parse(PROGRAMME_START_ISO)
 
 /** Once a second while the live timer shows seconds; once a minute before that. */

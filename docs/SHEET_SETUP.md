@@ -134,7 +134,7 @@ B2  =ARRAYFORMULA(IF(A2:A43="","",IFERROR(TRIM('Team Links'!E6:E47),"")))
 
 C2  =ARRAYFORMULA(IF(A2:A43="","",IFERROR(VLOOKUP(A2:A43,'Daily Team Summary'!$A$2:$D$43,2,FALSE),0)))
 
-D2  =BYROW(A2:A43,LAMBDA(t,IF(t="","",SUMIFS('Daily Dump'!$N:$N,'Daily Dump'!$A:$A,t,'Daily Dump'!$D:$D,"Sale",'Daily Dump'!$B:$B,">="&(TODAY()-MOD(TODAY()-DATE(2026,7,20),7)),'Daily Dump'!$B:$B,"<="&TODAY()))))
+D2  =BYROW(A2:A43,LAMBDA(t,IF(t="","",SUMIFS('Daily Dump'!$N:$N,'Daily Dump'!$A:$A,t,'Daily Dump'!$D:$D,"Sale",'Daily Dump'!$B:$B,">="&(TODAY()-MOD(TODAY()-DATE(2026,8,31),7)),'Daily Dump'!$B:$B,"<="&TODAY()))))
 
 E2  =BYROW(A2:A43,LAMBDA(t,IF(t="","",SUMIFS('Daily Dump'!$N:$N,'Daily Dump'!$A:$A,t,'Daily Dump'!$D:$D,"Sale",'Daily Dump'!$B:$B,TODAY()))))
 
@@ -188,18 +188,32 @@ show no climb, which is correct — they did not go up.
 
 ### The week window
 
-`TODAY() - MOD(TODAY() - DATE(2026,7,20), 7)` is the Monday that opened the current
+`TODAY() - MOD(TODAY() - DATE(2026,8,31), 7)` is the Monday that opened the current
 challenge week. The programme starts on a Monday, so this lands on a Monday for the
-rest of it. On 11 Aug 2026 it resolves to **10 Aug**, and `week_revenue` is that
+rest of it. On 11 Sep 2026 it resolves to **7 Sep**, and `week_revenue` is that
 team's Monday-to-today total.
 
 The upper bound is `TODAY()`, not `week_start + 6`. A sale mis-dated into the future
 would otherwise inflate the current week and put a team on the weekly podium for
 days.
 
-> **The 20 July 2026 anchor is written in exactly two cells:** `TV_Feed!D2` here, and
-> `current_open_week` on `TV_Cohort`. If the programme start ever moves, change both.
-> Checklist item 6 is the cross-check that they still agree.
+> **The 31 August 2026 anchor is written in exactly three places:** `TV_Feed!D2`
+> here, `current_open_week` on `TV_Cohort`, and `PROGRAMME_START_ISO` in `config.ts`.
+> If the programme start ever moves, change all three. Checklist item 6 is the
+> cross-check that the two sheet copies still agree.
+>
+> **It must be a Monday.** Programme weeks run Monday→Sunday, and an anchor on any
+> other weekday is wrong in the one way nothing reports: the formula still returns a
+> plausible small integer, it just rolls to the next week on the wrong day.
+> 31 August 2026 is a Monday; 1 September, which this was briefly set to, is a
+> Tuesday — and the two agreed on 11 September, which is exactly how a date like
+> this survives a spot-check and is wrong the following Monday.
+>
+> **The two sheet copies matter more than the constant.** `TV_Feed!D2` decides the
+> day `week_revenue` drops to zero for all 39 teams, and `current_open_week` is what
+> tells the wall that drop was a reset rather than 39 overtakes. Anchor them to
+> different weekdays and the wall answers one quiet Monday with a queue of overtake
+> celebrations for teams that did nothing.
 
 ### Why `week_revenue` does not come from `Weekly — by Team`
 
@@ -234,8 +248,8 @@ the client and discards the tick, so all three rows must exist.
 | A (type verbatim) | B |
 |---|---|
 | `as_of` | `=TEXT(MAX('Sync Status'!$B$2:$B$43),"dd mmm HH:mm")` |
-| `current_open_week` | `=MAX(1,INT((TODAY()-DATE(2026,7,20))/7)+1)` |
-| `flea_datetime_iso` | `2026-09-13T10:00:00+05:30` — **typed, not a formula** |
+| `current_open_week` | `=MAX(1,INT((TODAY()-DATE(2026,8,31))/7)+1)` |
+| `flea_datetime_iso` | `2026-10-25T10:00:00+05:30` — **typed, not a formula** |
 | `challenge_mode` | `Yes` or `No` — **typed by hand, the one switch on the wall** |
 
 **Column A is matched exactly; column B is not.** Header names are trimmed and
@@ -277,12 +291,12 @@ was days stale — which is the exact failure this stamp exists to expose.
 
 **`current_open_week` is not clamped at 8.** The eight challenge weeks end on 13 Sep
 but the programme runs to 30 Sep, and a clamp would freeze the weekly board on week
-8's numbers for the last fortnight. On 11 Aug 2026 it reads **4**.
+8's numbers for the last fortnight. On 11 Sep 2026 it reads **2**.
 
 **`flea_datetime_iso` needs the cell formatted as plain text first** — Format ▸ Number
 ▸ Plain text — before you type it. Otherwise Sheets parses it as a date and publishes
 something the client cannot read. After typing, the cell should still read
-`2026-09-13T10:00:00+05:30` character for character, left-aligned.
+`2026-10-25T10:00:00+05:30` character for character, left-aligned.
 
 Keep the `+05:30` offset. It is what makes the countdown correct on a laptop set to
 any timezone: the client subtracts two absolute instants and never asks what timezone
@@ -338,14 +352,14 @@ read off two places and compare.
 5. Pick a team you know sold today: `today_revenue` > 0. If every team reads 0 on a
    day with sales, `Daily Dump` column B is carrying a time component and `=TODAY()`
    no longer matches it.
-6. `TV_Cohort!current_open_week` reads **4** on 11 Aug 2026 and increments each
+6. `TV_Cohort!current_open_week` reads **2** on 11 Sep 2026 and increments each
    Monday. For one team, compare `TV_Feed` `week_revenue` against
    `=SUMIFS('Weekly — by Team'!$C:$C,'Weekly — by Team'!$A:$A,"SLE-C4xx",'Weekly — by Team'!$B:$B,4)`
    in a scratch cell. They should match, or the weekly tab should read 0 — anything
    else means one of them is on the wrong week boundary. Delete the scratch cell after.
 7. `TV_Cohort` has exactly **three** keys in column A, spelled as listed, and
    `TV_Helper` no longer exists in the tab bar.
-8. `flea_datetime_iso` is left-aligned and reads `2026-09-13T10:00:00+05:30`. If it
+8. `flea_datetime_iso` is left-aligned and reads `2026-10-25T10:00:00+05:30`. If it
    is right-aligned or shows `06/09/2026`, the cell was not plain text.
 9. Open both published URLs in a private window. Each returns CSV, not an HTML
    sign-in page. A revoked publish answers with HTTP 200 and a login page, so the only

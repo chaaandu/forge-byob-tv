@@ -80,9 +80,20 @@ npm run build        # next build
 - Ranking: **logged revenue desc → units desc → team ID asc**, matching the admin
   dashboard's `compareTieBreak`. Rank is computed client-side, so the sort is the single
   authority on order.
-- Challenge weeks 1–8, anchored **20 July 2026** (not the 21st). Mesa Flea: **13 September
-  2026**, 10:00 IST assumed — moved from 6 September, and it lives in `TV_Cohort`
-  rather than in code, so the wall picked the change up on its next poll. Capital repayment: 30 September 2026.
+- **Programme weeks are anchored 31 August 2026, and it must stay a Monday.** The
+  31st is a Monday; 1 September, which this was briefly set to, is a Tuesday. An
+  anchor on the wrong weekday reports nothing — the formula still returns a
+  plausible small integer, it just rolls a week on the wrong day, and the two
+  anchors agreed on 11 September. Written in three places that must move together:
+  `TV_Feed!D2` (which decides the day `week_revenue` zeroes), `current_open_week`
+  on `TV_Cohort` (which tells the wall that zeroing was a reset, not 39 overtakes),
+  and `PROGRAMME_START_ISO` in `config.ts`.
+- Mesa Flea: **25 October 2026**, 10:00 IST assumed — moved from 31 October, and it
+  lives in `TV_Cohort` rather than in code, so the wall picked the change up on its
+  next poll. The Cohort 2026 dates this line used to carry (20 July anchor, 13
+  September Flea, 30 September capital repayment) belong to the previous arc; the
+  repayment date has no Forge C1 equivalent recorded here and is not read by any
+  code.
 - A team with an empty `venture_name` **does** fire a trigger, like any other. This line
   previously claimed the opposite; `lib/overtake.ts` never enforced it, and the behaviour
   it describes is not the one we want — an unnamed team that overtakes has still overtaken.
