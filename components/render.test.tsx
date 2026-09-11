@@ -290,6 +290,13 @@ describe('Podium', () => {
     // because a screenshot of a moving frame and a still one are the same
     // picture.
     //
+    // **The answer to "which" is no longer "none".** The crown's two glints
+    // loop, by decision — see the block below and `AGENTS.md`. So this test has
+    // stopped meaning "the board is still" and now means the narrower thing it
+    // always literally checked: the marks, the numerals and the rows do not
+    // move, and the only element that does is the one counted three assertions
+    // down. Do not read a passing run here as a quiet slide.
+    //
     // Unscoped on purpose. Scoping to the mark band would pass just as happily
     // with a numeral dancing again, which is half the regression this catches.
     const host = document.createElement('div')
@@ -305,6 +312,23 @@ describe('Podium', () => {
     // `tv-crown-drop` runs once on mount. A second crown class, or the drop
     // moving onto the mark itself, fails here.
     expect(host.querySelectorAll('.tv-crown-glyph')).toHaveLength(1)
+
+    // **The glints are bounded by count, and by count alone now.** They loop —
+    // two sparks every six seconds, for as long as the slide is up — so unlike
+    // every other assertion in this test they are not a thing that stops. The
+    // count is therefore the whole of the budget: two, on the crown, on
+    // `/podium`. A spark on every stone, or one added to `/weekly`'s cards,
+    // renders beautifully and turns a single repeating gesture into a wall of
+    // twinkling, and it would pass every other test in this file.
+    //
+    // The *period* is the other half and a render test cannot reach it; it
+    // lives in `@keyframes tv-crown-glint`, where the spark occupies 12% of a
+    // six-second cycle and the comment says to lengthen that before shortening
+    // it. Measure it in a browser, not here.
+    const glints = [...host.querySelectorAll('.tv-crown-glint')]
+    expect(glints).toHaveLength(2)
+    expect(glints.every((g) => g.closest('.tv-crown') !== null)).toBe(true)
+
     act(() => root.unmount())
     host.remove()
   })
@@ -370,6 +394,7 @@ describe('Podium', () => {
     act(() => root.render(<WeeklyGrid teams={TRADING} />))
     expect(host.querySelectorAll('[class*="tv-idle-"]')).toHaveLength(0)
     expect(host.querySelectorAll('[class*="tv-look-"]')).toHaveLength(0)
+    expect(host.querySelectorAll('.tv-crown-glint')).toHaveLength(0)
     act(() => root.unmount())
     host.remove()
   })

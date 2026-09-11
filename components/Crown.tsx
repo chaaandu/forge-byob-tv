@@ -234,6 +234,63 @@ export function Crown({ className }: { className?: string }) {
         fill="var(--crown-lit)"
         d="M59.38 29.55c.61-1.25 1.68-2.96 5.17-3.68c1.34-.28 1.73-.86 1.61-1.74c-.24-1.83-2.52-1.7-3.75-1.41c-4.1.96-5.01 4.6-5.18 6.04c-.17 1.37 1.55 2.04 2.15.79z"
       />
+      {/* ── The two glints, and their position is a contrast decision ──
+
+          Drawn last, so they sit over the metal rather than under it, and
+          centred on two of the crown's **ball tips** — the right-hand point and
+          the tall centre one.
+
+          The first attempt put them on the artwork's own specular streaks: the
+          right arc's inner edge and the base band's highlight, which is where
+          Noto's illustrator decided the light is. Screenshotted at full size,
+          **neither was visible.** `--crown-lit` is one step of the same metal
+          ramp the body is painted from — 12.47:1 against the page where
+          `--crown-ink` is 7.17 — so a spark drawn *inside* the silhouette is a
+          pale gold shape on gold and has almost no value step to live on. The
+          lower half of the crown is worse again: it overlaps the mark's own
+          lavender disc, and a pale warm spark on a light disc is nothing at all.
+
+          A tip is where the object *ends*, so a spark centred on one is half on
+          metal and half on Deep Aubergine, and it is the second half that makes
+          it read. Both tips chosen sit in the crown's upper half, which is the
+          part that overhangs the disc against the dark page. That is also what
+          a specular actually does on a curved metal object — it catches the
+          edge, not the middle. */}
+      <path
+        className="tv-crown-glint"
+        fill="var(--crown-lit)"
+        d={sparkle(115, 24, 12)}
+      />
+      <path
+        className="tv-crown-glint tv-crown-glint-2"
+        fill="var(--crown-lit)"
+        d={sparkle(64, 29, 8.5)}
+      />
     </svg>
   )
+}
+
+/**
+ * A four-point spark, centred on (`cx`, `cy`), `r` across from centre to tip.
+ *
+ * **Built in absolute coordinates rather than drawn once and placed with a
+ * `transform` attribute**, and that is not a style choice. The glint is scaled
+ * by CSS, and a CSS `transform` replaces an element's `transform` presentation
+ * attribute outright rather than composing with it — so a spark positioned by
+ * `transform="translate(...)"` would jump to the viewBox origin on the first
+ * animated frame and pulse in the top-left corner of the crown's box. Two
+ * numbers in a path string cannot do that.
+ *
+ * The waist pinches to `0.26r`, which is what makes it a spark rather than a
+ * diamond: the concave sides are the whole read at this size.
+ */
+function sparkle(cx: number, cy: number, r: number): string {
+  const k = r * 0.26;
+  return (
+    `M${cx} ${cy - r}` +
+    `C${cx} ${cy - k} ${cx + k} ${cy} ${cx + r} ${cy}` +
+    `C${cx + k} ${cy} ${cx} ${cy + k} ${cx} ${cy + r}` +
+    `C${cx} ${cy + k} ${cx - k} ${cy} ${cx - r} ${cy}` +
+    `C${cx - k} ${cy} ${cx} ${cy - k} ${cx} ${cy - r}Z`
+  );
 }

@@ -110,10 +110,31 @@ npm run build        # next build
   onto rank 1 and *stops* — one run, on mount, `animation: … both` with no
   iteration count. What this rule bans is motion **at rest**, and a thing that
   is over 1.4 seconds after the slide arrives is not at rest, it is an entrance.
-  The board is completely still thirty seconds later, which is the property that
-  matters and the one `render.test.tsx` pins. **An ornament that loops — a
-  twinkle, a sheen, a pulse, a looping Lottie — does not get in on this
-  precedent** and has to make its own argument.
+
+  **And then one ornament did loop, so this rule is narrower than it reads.**
+  The line above used to end by saying the board is completely still thirty
+  seconds later, and that a twinkle, a sheen or a pulse does not get in on the
+  crown's precedent and has to make its own argument. The crown's two glints
+  are that argument, and they did not win it on the merits — they were asked
+  for directly, after being built the other way first. They sit on two of the
+  crown's tips, a third of a second apart, and the pair repeats **every six
+  seconds** for as long as `/podium` is up. The rule is now: *nothing moves at
+  rest except the crown's glint*, and the exception is one object, one slide,
+  two shapes, one period.
+
+  What it costs is stated rather than argued away. **The board is no longer
+  still thirty seconds later**, which was the property that mattered and the
+  one `render.test.tsx` pinned; that test now checks the narrower claim that
+  the marks, numerals and rows are still, and says so. Every ornament after
+  this one will cite the glint rather than the crown, because a looping
+  precedent is a far cheaper thing to argue from than a one-shot one — so the
+  budget is the count, and the count is two. A spark on every stone, or one on
+  a `/weekly` card, is not an extension of this decision.
+
+  The period is the part to defend. 720ms of spark inside a six-second cycle is
+  an object catching the light; the same spark on a one-second cycle is a
+  blinking fault light on a wall nobody is watching. **Lengthen it before
+  shortening it.**
 - **Gold is back, as exactly one object.** `--forge-metal-gold` sat unread from
   the deletion of the plinths until the crown, kept on §5's stated condition
   that if it returned it would "arrive as one decision in one place". The crown

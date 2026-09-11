@@ -1098,6 +1098,43 @@
      numeral has no text-contrast floor to fail. The card that replaced it
      carries a name *and* a figure, so it does, and the ramp now stops at a mix.
      Nothing on this wall sets `--bright-green` any more. */
+
+  /* ========= GANESH CHATURTHI =========
+
+     Three days of the year, bottom-left of both slides. `components/Ganesha.tsx`
+     has the argument for why a looping ornament is here at all; this block is
+     only about where it sits, which took measuring on both boards.
+
+     **Height, not width.** The idol's crop is 928x720, and the component hands
+     that ratio down as `--ganesha-aspect` so exactly one number lives here. Set
+     a width instead and the figure squashes the moment the crop is re-measured.
+
+     `vw`, not `px`, like every other dimension in this file — the wall is driven
+     at 1920 but the frame is measured at 1600 and 2560 too, and a fixed-px
+     ornament is the `--s-*` trap in miniature: it would hold its size while the
+     board contracted around it and close the gap noted below. */
+  --h-ganesha: 4.1667vw; /* 80px */
+
+  /* ── Why the left inset is 28px and not `--s-safe-x`'s 48 ──
+
+     Measured, on both slides at 1920x1080. `/podium` has 1010x242 of clear
+     space in its bottom-left corner and does not care where this sits.
+     `/weekly` does: its fourth row holds nine cards rather than ten, so the row
+     is centred and card 31's left edge lands at **x=140**. That leaves 92px
+     between the safe margin and the board — and the idol at 80px tall is
+     **104px wide**.
+
+     So the two options were to shrink it below what was asked for, or to spend
+     20px of a 48px margin. This spends the margin: the ornament starts at 28px
+     (1.5% of the frame) and ends 8px clear of card 31, where at 48px it would
+     have crossed the card's rounded corner and touched the `31` numeral. Losing
+     a numeral's left edge to a decoration is a board bug; an ornament sitting
+     nearer the bezel than the board does is not, and 1.5% is still well inside
+     any panel's real overscan.
+
+     If the weekly grid ever returns to ten cards on the bottom row, this has to
+     move or shrink — that row is what is holding it out here. */
+  --s-ganesha-x: 1.4583vw; /* 28px */
 }
 
 /* Animations defined in CSS rather than in Motion, for one shared reason: each
@@ -1189,6 +1226,90 @@
   100% {
     opacity: 1;
     transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+}
+
+/* ── The glint, which loops, and is the one looping ornament on this wall ──
+
+   Two sparks catch on the crown's tips, a third of a second apart, and the
+   pair repeats every six seconds for as long as the slide is up — five times
+   before the rotation takes it away.
+
+   **This does not inherit the crown's exemption and it was never going to.**
+   `AGENTS.md` bans motion *at rest* and admits the drop on the ground that a
+   thing which is over 1.43 seconds after mount is an entrance, not a resting
+   state — and it names "a twinkle, a sheen, a pulse" as exactly what does not
+   get in on that precedent. The glints were built to that rule first: one run,
+   finished at 2.58s, inside the arrival. Looping them was then asked for
+   directly, and this is what that costs, stated rather than argued away:
+
+   **The board is no longer still thirty seconds later.** That was the property
+   the stillness rule protected and the one `render.test.tsx` was written to
+   pin, and it is now false on `/podium`. Anything reasoning from "nothing on
+   this wall moves at rest" — a future ornament arguing by analogy, a test
+   asserting quiet — has to start from here instead.
+
+   ── What the six seconds are buying ──
+
+   Almost all of the cycle is empty. The spark itself is 720ms; the remaining
+   5.28s is the 12% keyframe held at `opacity: 0` to the end. That ratio is the
+   whole design. A twinkle on a one-second cycle is a blinking indicator and
+   reads as a fault light on a wall nobody is watching; at six seconds a
+   passer-by sees the crown catch the light once and it reads as an object in a
+   room, which is the thing being bought. Lengthen this before shortening it.
+
+   The two share one period rather than drifting on two. `/podium`'s deleted
+   idle deliberately used three incommensurate timelines so the marks could
+   never fall into lockstep, and the opposite is right here: locked 0.36s apart,
+   the pair reads as *one* light crossing the crown, repeating. On two periods
+   they would drift into reading as two independent blinkers, which is two
+   moving things rather than one.
+
+   ── Why a spark and not a sheen ──
+
+   The obvious "shine" is a gradient band swept across the artwork under a mask.
+   It costs a `<linearGradient>`, a `<mask>` and an animated transform on a
+   full-size rect, it repaints the whole box every frame — now forever, not once
+   — and at six metres a low-contrast band crossing a gold object is not visible
+   at all. The wall's problem is always legibility at distance, and a sweep's
+   entire effect is a value difference of a few per cent.
+
+   ── The two traps ──
+
+   `transform-box: fill-box` is load-bearing. The initial value is `view-box`,
+   so `transform-origin: center` on an SVG child resolves to the centre of the
+   *viewBox* — 64,64 on this artwork, which is the centre stone. Without it both
+   sparks scale about the crown's middle and swing across it on the way in,
+   which looks like a deliberate flourish and is a bug.
+
+   The elements are `opacity: 0` in their own right, so cancelling the animation
+   leaves them invisible rather than leaving two static gold shapes welded to
+   the crown. That is the same trap `.tv-crown-glyph` documents at the
+   reduced-motion block, in the other direction — and it matters more now that
+   the reduction is switching off something permanent. */
+@keyframes tv-crown-glint {
+  0% {
+    opacity: 0;
+    transform: scale(0.25);
+    animation-timing-function: cubic-bezier(0.16, 0.84, 0.44, 1);
+  }
+  /* 4.08% of 6s is 245ms. Full size, then the long fade: a spark that faded as
+     fast as it arrived reads as a flicker — a fault — rather than as light
+     moving off an edge. */
+  4.08% {
+    opacity: 1;
+    transform: scale(1);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  }
+  /* 12% is 720ms, and everything after it is the wait. Both frames are stated
+     because a keyframe list that simply stopped at 12% would interpolate the
+     scale back up to the `0%` value across the remaining 5.28s — invisible at
+     `opacity: 0`, and a spark that arrived already half-grown on every cycle
+     after the first. */
+  12%,
+  100% {
+    opacity: 0;
+    transform: scale(0.4);
   }
 }
 
@@ -2063,6 +2184,35 @@
     will-change: transform, opacity;
   }
 
+  /* The sparks. `fill-box` first — see the keyframes for why that one line is
+     the difference between a glint and a swing.
+
+     **No `will-change`, and that is a deliberate reversal of what the drop
+     does.** `.tv-crown-glyph` promotes itself for a 1.15s animation that then
+     ends; these two run for as long as the page is open, and the page is open
+     for weeks. Two permanent compositor layers for two shapes a dozen viewBox
+     units across is the wrong trade — and `will-change` on an SVG child does
+     not reliably promote anything anyway, so it would be a leak bought with no
+     frame budget in return. */
+  .tv-crown-glint {
+    transform-box: fill-box;
+    transform-origin: center;
+    opacity: 0;
+    /* The first strike is at 1.50s — 70ms after the crown has finished
+       settling, so it reads as light catching a thing that has stopped moving
+       rather than as part of the bounce. Every strike after it is six seconds
+       later, which on a thirty-second slide is five in all. */
+    animation: tv-crown-glint 6s 1.5s infinite both;
+  }
+
+  /* The second, on the centre point, a third of a second behind the first. Far
+     enough apart to read as two events, close enough that the pair is one
+     gesture — and on the *same* six-second period, so it stays one gesture on
+     every repeat rather than drifting apart. */
+  .tv-crown-glint-2 {
+    animation-delay: 1.86s;
+  }
+
   /* The travelling disc's two faces, during an overtake. Circles in their own
      right, so the ring traces the disc rather than a square box — and drawn
      with `box-shadow` rather than a filter, which would flatten the 3D context
@@ -2199,10 +2349,11 @@
      reduce-motion setting on, and a permanently moving mark is precisely what
      that setting exists to stop.
 
-     **Exactly one thing is left for this to switch off.** The plinth sheens and
-     the numeral lustre went with the metals, `/weekly`'s row-1 idle went with
-     the cards, and `/podium`'s three marks no longer idle either — so what
-     remains is the crown's drop. The block stays because the overtake sequence
+     **Exactly one object is left for this to switch off, in two parts.** The
+     plinth sheens and the numeral lustre went with the metals, `/weekly`'s
+     row-1 idle went with the cards, and `/podium`'s three marks no longer idle
+     either — so what remains is the crown: its drop, which ends, and the two
+     glints, which do not. The block stays because the overtake sequence
      is not covered by it and should not be: a rank changing hands is the one
      thing this wall exists to show, and `docs/DESIGN.md` records the decision
      to ignore reduced motion for it. */
@@ -2219,6 +2370,107 @@
       animation: none;
       opacity: 1;
     }
+
+    /* The glints go entirely, and this is the half of the block that now
+       actually earns it. Everything else here switches off something that was
+       going to stop on its own in a second and a half; the sparks repeat
+       forever, which is precisely the permanently-moving element the OS setting
+       exists to stop. Unlike the crown there is nothing underneath them to
+       reveal — they *are* the motion — so the reduction is removal. The opacity
+       is restated for the same reason it is on the rule above: without it,
+       cancelling the animation returns each spark to its own computed style,
+       and two gold stars would sit pinned to the metal forever. */
+    .tv-crown-glint {
+      animation: none;
+      opacity: 0;
+    }
+
+    /* **The idol stops on a frame rather than disappearing.** Unlike the glints
+       there is something here once the motion is gone — a whole figure — so the
+       reduction is to still it, not to remove it. `animation-play-state` is
+       useless for this: lottie-web's SVG renderer drives its own
+       `requestAnimationFrame` loop and writes attributes, so CSS has no handle
+       on it at all. The component reads the same query and passes `autoplay:
+       false`, which is the only thing that actually stops it; this rule is here
+       so the two are found together rather than one of them being deleted as
+       dead code. */
   }
 
+  /* ── Ganesh Chaturthi ──
+
+     Bottom-left of both slides, three days of the year. The geometry tokens and
+     the reasoning behind the 28px inset are in `:root`; this is the placement.
+
+     `position: fixed` because it hangs off the root layout rather than off
+     either board — the same reason `Rotator` lives there — so there is no
+     `.tv-frame` establishing a containing block above it. Fixed to the viewport
+     is exactly right for a wall that is one fixed 1920x1080 frame and never
+     scrolls. */
+  .tv-ganesha {
+    position: fixed;
+    left: var(--s-ganesha-x);
+    bottom: var(--s-safe-y);
+    height: var(--h-ganesha);
+    /* Width follows the measured crop. `--ganesha-aspect` is set inline by the
+       component from the same constant that produces the `viewBoxSize`, so the
+       box and the artwork inside it cannot disagree. */
+    aspect-ratio: var(--ganesha-aspect);
+
+    /* Above the board, and below nothing. The board draws no stacking context
+       this needs to beat — the cards sit at `auto` — so a single low value is
+       enough, and staying low is what keeps this from ever covering an overtake
+       animation that raises itself. */
+    z-index: 1;
+
+    /* **Not a hit target.** Nobody interacts with this wall, and a transparent
+       104px box pinned over the corner of a fullscreen page is one more thing
+       that can swallow the click an operator is aiming at something else. */
+    pointer-events: none;
+
+    /* No spinner, no placeholder, no reserved rectangle — the wall's rule about
+       filler applies to an ornament that has not loaded yet. The box is empty
+       and invisible until `data-ready` lands, then it fades up once.
+
+       The fade is an *arrival*, on the crown's precedent: one run, `both`, no
+       iteration count. It is over 400ms after the JSON lands and the wall does
+       not repeat it. */
+    opacity: 0;
+  }
+
+  .tv-ganesha[data-ready] {
+    animation: tv-ganesha-in 400ms var(--ease-out) both;
+  }
+
+  @keyframes tv-ganesha-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  /* lottie-web writes its own inline `width`/`height` onto the SVG it creates,
+     from the container's size at load time. That is a snapshot: the container is
+     `vw`-sized, so a frame measured at 1600 after the player mounted at 1920
+     would keep the larger number and overflow. Forcing both to 100% hands the
+     sizing back to the box, where `--h-ganesha` and the aspect ratio own it. */
+  .tv-ganesha-svg {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* The fade goes; the idol stays. Restated rather than left to
+       `animation: none` for the reason the crown's block gives — the `0%` here
+       is `opacity: 0` and it lives in the keyframes, so cancelling the
+       animation would return the element to its own computed style, which is
+       the `opacity: 0` above. An ornament that vanished on a machine with one
+       OS setting flipped is precisely the failure this wall cannot report. */
+    .tv-ganesha[data-ready] {
+      animation: none;
+      opacity: 1;
+    }
+  }
 }
