@@ -165,8 +165,14 @@ export function VentureCard({
   /**
    * ── Today is shown, or it is not ──
    *
-   * A team that has traded today gets a green figure and a mark pointing up. A
-   * team that has not gets neither, and the line stays empty.
+   * A team that has traded today gets a capsule carrying the figure and a mark
+   * pointing up. A team that has not gets no capsule, and the row stays empty —
+   * reserved, so the board does not re-flow as the day's first sales land.
+   *
+   * **One condition, read once.** This was computed here and then re-derived
+   * inline for the render, which is two expressions that have to agree about
+   * what "traded" means — and they did agree, right up until the modifier class
+   * one of them fed was deleted and the other was left behind.
    *
    * **There is no second state and no comparison.** The figure was coloured
    * against the board's average for a while, green above and red below, which
@@ -368,23 +374,37 @@ export function VentureCard({
             no way to tell the week from the day; a permanent caption over an
             empty line would be apparatus describing absence, on all forty cards
             every morning before the first sale. */}
-        <div
-          className={[
-            'tv-card-today tv-card-detail',
-            traded ? 'tv-card-today-traded' : undefined,
-          ]
-            .filter(Boolean)
-            .join(' ')}
-        >
-          {team.todayRevenue > 0 ? (
-            <>
+        {/* ── The capsule ──
+
+            Today used to be a bare line: an accent-ink figure with a triangle
+            beside it, sitting directly under the week's figure in the same
+            type. Two centred rupee amounts, one under the other, differing only
+            in size and ink — which is the hardest pair of things to tell apart
+            at six metres, because both of those attributes are also doing other
+            jobs on this card.
+
+            **The capsule separates them by form instead**, which is the one
+            channel nothing else here is using. A pill is not a figure; it reads
+            as a tag before it reads as a number, so the eye sorts the card
+            without having to compare two amounts. And because only a team that
+            traded today draws one, a glance across thirty-nine cards finds
+            today's movers by shape alone. */}
+        {/* **No `tv-card-today-traded` any more.** It switched the line to a
+            heavier weight and the accent ink, and it was applied on exactly the
+            condition that also decides whether anything is rendered here at
+            all — so it was a modifier that could never appear on the thing it
+            modified being absent. The capsule's existence is the state now.
+            One condition, one element. */}
+        <div className="tv-card-today tv-card-detail">
+          {traded ? (
+            <span className="tv-day-pill">
               {/* A shape, not a glyph: `▲` comes from whatever font in the
                   stack answers for it, at whatever weight and height that font
                   drew it. This is a box with a triangle clipped out of it, so it
                   is the same mark on every machine. */}
               <span className="tv-day-mark" aria-hidden="true" />
               {formatRupees(team.todayRevenue)}
-            </>
+            </span>
           ) : (
             ''
           )}

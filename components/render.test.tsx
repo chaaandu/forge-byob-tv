@@ -697,12 +697,20 @@ describe('VentureCard', () => {
    * higher.
    */
   it('marks a day that happened and shows nothing for one that did not', () => {
+    // **The capsule is the state.** This asserted a `tv-card-today-traded`
+    // modifier alongside the mark; that class switched a bare line to a heavier
+    // weight and the accent ink, and it was applied on exactly the condition
+    // that decides whether anything renders here at all. A card that has not
+    // traded draws no capsule, so its presence carries what the modifier did.
     const traded = markup(<VentureCard team={team({ todayRevenue: 900 })} rank={4} />)
     const quiet = markup(<VentureCard team={team({ todayRevenue: 0 })} rank={4} />)
-    expect(traded).toContain('tv-card-today-traded')
+    expect(traded).toContain('tv-day-pill')
     expect(traded).toContain('tv-day-mark')
-    expect(quiet).not.toContain('tv-card-today-traded')
+    expect(quiet).not.toContain('tv-day-pill')
     expect(quiet).not.toContain('tv-day-mark')
+    // The row itself is reserved either way, so thirty-nine cards keep their
+    // figures on one line as the day's first sales land.
+    expect(quiet).toContain('tv-card-today')
   })
 
   it('has no second direction to draw', () => {

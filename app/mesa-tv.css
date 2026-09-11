@@ -355,6 +355,22 @@
      thing the eye reads the numeral against. */
   --s-card-inset: 0.4167vw; /* 8px */
 
+  /* ── The today capsule ──
+
+     `--r-pill` is a large constant rather than a `vw` share: a capsule's ends
+     are semicircles, and any radius at or above half the element's height gives
+     exactly that. A proportional radius would have to be re-derived every time
+     the row height moved, and would draw a rounded rectangle the first time
+     someone got it wrong. One number, correct at every size.
+
+     The inline padding is what makes it a capsule rather than a tag: the figure
+     needs air on both ends roughly equal to the radius, or the shape reads as a
+     rectangle with its corners filed off. The gap holds the direction mark off
+     the figure by less than a space, so the two read as one token. */
+  --r-pill: 999px;
+  --s-day-pill-x: 0.4688vw; /* 9px */
+  --s-day-pill-gap: 0.2083vw; /* 4px */
+
   /* The card's corner. Small — 8px at 1920 — because thirty-nine of them are on
      screen at once and a radius that reads individually at that count reads as
      a field of lozenges together. Enough to say "bounded", not enough to have a
@@ -503,8 +519,29 @@
   /* Reduced 20% from clamp(15px, 1.45vw, 30px). Still the largest thing on the
      card, and still the figure the board exists to show. */
   --t-tv-card-week: 700 var(--fs-4) / 1 var(--font-sans);
-  --t-tv-card-today: 600 var(--fs-5) / 1 var(--font-sans);
-  --t-tv-card-today-hot: 800 var(--fs-5) / 1 var(--font-sans);
+  /* ── The capsule takes the name's step, and the card drops to three sizes ──
+
+     This was `--fs-5` at 600, one step under the week figure and one over the
+     venture name — four type sizes on a card with four lines, which is a scale
+     that describes nothing. **It also read heavier than 18px**, because the
+     capsule's tinted ground adds weight the type ramp cannot see, so today was
+     competing with the week's figure for the first thing read on a card whose
+     whole job is to show the week's figure.
+
+     At `--fs-6`/700 it is the venture name's exact step and weight, and the
+     card says three things in three sizes: the figure, the two labels around
+     it, the rank. The emphasis today needs is carried by the ground behind it
+     rather than by a size of its own — which is the point of putting it in a
+     capsule at all.
+
+     It also fixes the shape. 18px of type in a 24px row left 3px above and
+     below; a capsule that tight reads as a rounded rectangle. 15px leaves 4.5px
+     and the ends read as semicircles.
+
+     `--t-tv-card-today-hot` is deleted with it. It was 800 weight in the accent
+     — the "traded" state — and there is no second state left to distinguish
+     from: a card with no day draws no capsule at all. */
+  --t-tv-card-today: 700 var(--fs-6) / 1 var(--font-sans);
 
   /* **Dev chrome only** — `DevFlipTrigger`'s buttons, and nothing the wall
      renders. It was the "TODAY" tag on a card, which no longer exists, and it
@@ -1619,26 +1656,65 @@
      for, and a deepened mix on the pale one, where bright green measures 2.41:1
      against soft mint. Quiet by default, so an ordinary day sits under the
      week's figure rather than beside it in weight. */
+  /* The row the capsule is centred in. It reserves its height whether or not
+     anything is drawn in it, so a card that has not traded today keeps the same
+     internal rhythm as one that has — thirty-nine cards whose figures sit on
+     one line, rather than a board that jitters as the day's first sales land. */
   .tv-card-today {
     height: var(--h-card-today);
-    font: var(--t-tv-card-today);
-    color: var(--card-sub-ink);
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--s-1);
-    font-variant-numeric: tabular-nums;
     width: 100%;
     min-width: 0;
     overflow: hidden;
   }
 
-  /* A day that happened. The heavier weight and the green together are the
-     emphasis; there is no second state to distinguish it from, because a team
-     with no day shows nothing at all rather than showing a worse colour. */
-  .tv-card-today-traded {
-    font: var(--t-tv-card-today-hot);
-    color: var(--card-hot-ink);
+  /* ── The capsule, and why its ink is white rather than the accent ──
+
+     The obvious build is an accent-tinted ground with accent ink — the tag
+     pattern every design system ships. **Measured, it fails on this board.**
+     A card's `--card-hot-ink` is Orchid on ranks 1-20 and Violet 300 on the
+     quiet cards below them, and putting either over its own 18% tint costs
+     roughly a third of its contrast:
+
+       orchid      on card 6.89:1  →  on its own tint  4.73:1
+       violet-300  on card 4.60:1  →  on its own tint  3.48:1
+
+     The second number is under the 4.5:1 this wall holds small type to, on
+     nineteen of thirty-nine cards, in the one element on the card that says
+     something is happening right now. A tag nobody can read from the corridor
+     is worse than the bare line it replaced.
+
+     So the ground carries the colour and the ink does not: `--ink` on an 18%
+     accent tint measures **9.53:1 on a solid card and 10.30:1 on a quiet one** —
+     better than the bare line managed on either. The accent is still the thing
+     you see; it has simply moved from the glyph to the shape behind it, which
+     is also what makes the capsule read as a tag rather than as a third figure.
+
+     `color-mix` against `transparent` rather than against the card's own fill,
+     deliberately: that yields the accent at 18% alpha, which composites over
+     whatever the card turns out to be. Mixing against a named card colour would
+     be a second place that has to be corrected the day `--surface-raised`
+     moves, and nothing would report it. */
+  .tv-day-pill {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--s-day-pill-gap);
+    height: 100%;
+    padding-inline: var(--s-day-pill-x);
+    border-radius: var(--r-pill);
+    background: color-mix(in srgb, var(--card-hot-ink) 18%, transparent);
+    font: var(--t-tv-card-today);
+    color: var(--ink);
+    font-variant-numeric: tabular-nums;
+    /* The capsule hugs its figure. Without this it would stretch to the row's
+       full width on a flex parent and stop being a capsule at all — a tinted
+       band across the card, which is a different element entirely. */
+    flex: none;
+    max-width: 100%;
+    white-space: nowrap;
   }
 
   /* ── The direction mark ──
