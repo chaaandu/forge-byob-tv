@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { cohort, cohortCsv, feedCsv, teams } from '@/test/fixtures'
+import { MIN_TEAM_ROWS } from '@/config'
+import { COHORT_SIZE, cohort, cohortCsv, feedCsv, teams } from '@/test/fixtures'
 import {
   COHORT_KEYS,
   TvSchemaError,
@@ -20,7 +21,7 @@ describe('parseTeams', () => {
       feedCsv(
         teams([
           {
-            teamId: 'SLE-C407',
+            teamId: 'VBC107',
             totalRevenue: 104_500,
             weekRevenue: 21_000,
             todayRevenue: 5_400,
@@ -29,8 +30,8 @@ describe('parseTeams', () => {
         ]),
       ),
     )
-    expect(rows).toHaveLength(42)
-    const seven = rows.find((row) => row.teamId === 'SLE-C407')
+    expect(rows).toHaveLength(COHORT_SIZE)
+    const seven = rows.find((row) => row.teamId === 'VBC107')
     expect(seven).toMatchObject({
       totalRevenue: 104_500,
       weekRevenue: 21_000,
@@ -49,36 +50,36 @@ describe('parseTeams', () => {
   it('survives a UTF-8 BOM and CRLF line endings', () => {
     const csv = `﻿${feedCsv(teams()).replace(/\n/g, '\r\n')}`
     const rows = parseTeams(csv)
-    expect(rows).toHaveLength(42)
-    expect(rows[0].teamId).toBe('SLE-C401')
-    expect(rows[41].totalUnits).toBe(0)
+    expect(rows).toHaveLength(COHORT_SIZE)
+    expect(rows[0].teamId).toBe('VBC101')
+    expect(rows[COHORT_SIZE - 1].totalUnits).toBe(0)
   })
 
   it('reads formatted rupee values, because the sheet publishes formatted cells', () => {
-    const csv = ['team_id,venture_name,total_revenue,week_revenue,today_revenue,total_units', 'SLE-C401,Aurora,"₹1,04,500","₹21,000",0,12'].join('\n')
+    const csv = ['team_id,venture_name,total_revenue,week_revenue,today_revenue,total_units', 'VBC101,Aurora,"₹1,04,500","₹21,000",0,12'].join('\n')
     expect(parseTeams(csv)[0].totalRevenue).toBe(104_500)
   })
 
   it('reads challenge_revenue, including a negative one', () => {
     const csv = [
       'team_id,venture_name,total_revenue,week_revenue,today_revenue,total_units,challenge_revenue',
-      'SLE-C401,Dosa Crisps,57826,0,0,236,"-3,850"',
-      'SLE-C402,ROOH,37830,3190,0,108,"3,190"',
+      'VBC101,Dosa Crisps,57826,0,0,236,"-3,850"',
+      'VBC102,ROOH,37830,3190,0,108,"3,190"',
     ].join('\n')
-    expect(parseTeams(csv)[0]).toMatchObject({ teamId: 'SLE-C401', challengeRevenue: -3_850 })
-    expect(parseTeams(csv)[1]).toMatchObject({ teamId: 'SLE-C402', challengeRevenue: 3_190 })
+    expect(parseTeams(csv)[0]).toMatchObject({ teamId: 'VBC101', challengeRevenue: -3_850 })
+    expect(parseTeams(csv)[1]).toMatchObject({ teamId: 'VBC102', challengeRevenue: 3_190 })
   })
 
   it('defaults challenge_revenue to 0 when the sheet has not grown the column', () => {
     const csv = [
       'team_id,venture_name,total_revenue,week_revenue,today_revenue,total_units',
-      'SLE-C401,Dosa Crisps,57826,0,0,236',
+      'VBC101,Dosa Crisps,57826,0,0,236',
     ].join('\n')
     expect(parseTeams(csv)[0]).toMatchObject({ challengeRevenue: 0 })
   })
 
   it('treats a blank revenue as zero — a team with no sales yet is normal', () => {
-    const csv = ['team_id,venture_name,total_revenue,week_revenue,today_revenue,total_units', 'SLE-C401,Aurora,,,,'].join('\n')
+    const csv = ['team_id,venture_name,total_revenue,week_revenue,today_revenue,total_units', 'VBC101,Aurora,,,,'].join('\n')
     expect(parseTeams(csv)[0]).toMatchObject({
       totalRevenue: 0,
       weekRevenue: 0,
@@ -90,13 +91,13 @@ describe('parseTeams', () => {
   it('keeps a venture name containing a comma intact', () => {
     const csv = [
       'team_id,venture_name,total_revenue,week_revenue,today_revenue,total_units',
-      'SLE-C401,"Bhatt, Rao & Co",1000,500,100,1',
+      'VBC101,"Bhatt, Rao & Co",1000,500,100,1',
     ].join('\n')
     expect(parseTeams(csv)[0].ventureName).toBe('Bhatt, Rao & Co')
   })
 
   it('throws on a missing header rather than guessing a column', () => {
-    const csv = ['team_id,venture_name,total_revenue,total_units', 'SLE-C401,Aurora,1000,1'].join('\n')
+    const csv = ['team_id,venture_name,total_revenue,total_units', 'VBC101,Aurora,1000,1'].join('\n')
     expect(() => parseTeams(csv)).toThrow(TvSchemaError)
   })
 
@@ -108,11 +109,11 @@ describe('parseTeams', () => {
   it('drops a row whose numbers did not parse rather than rendering NaN for a week', () => {
     const csv = [
       'team_id,venture_name,total_revenue,week_revenue,today_revenue,total_units',
-      'SLE-C401,Aurora,#REF!,1,1,1',
-      'SLE-C402,Kite,1000,500,100,1',
+      'VBC101,Aurora,#REF!,1,1,1',
+      'VBC102,Kite,1000,500,100,1',
     ].join('\n')
     const rows = parseTeams(csv)
-    expect(rows.map((row) => row.teamId)).toEqual(['SLE-C402'])
+    expect(rows.map((row) => row.teamId)).toEqual(['VBC102'])
     expect(rows.every((row) => Number.isFinite(row.totalRevenue))).toBe(true)
   })
 })
@@ -131,9 +132,9 @@ describe('header handling', () => {
   it('applies the same rule to the feed, so there is no per-tab special case', () => {
     const csv = [
       'Team_ID,Venture_Name,Total_Revenue,Week_Revenue,Today_Revenue,Total_Units',
-      'SLE-C401,Dosa Crisps,9449,4250,0,38',
+      'VBC101,Dosa Crisps,9449,4250,0,38',
     ].join('\r\n')
-    expect(parseTeams(csv)[0]).toMatchObject({ teamId: 'SLE-C401', weekRevenue: 4_250 })
+    expect(parseTeams(csv)[0]).toMatchObject({ teamId: 'VBC101', weekRevenue: 4_250 })
   })
 })
 
@@ -147,9 +148,9 @@ describe('venture names', () => {
   it('treats the workbook placeholder as no name at all', () => {
     const csv = [
       'team_id,venture_name,total_revenue,week_revenue,today_revenue,total_units',
-      'SLE-C421,Type your venture name,0,0,0,0',
-      'SLE-C422,TYPE YOUR VENTURE NAME,0,0,0,0',
-      'SLE-C423,  Dosa Crisps  ,1,1,1,1',
+      'VBC121,Type your venture name,0,0,0,0',
+      'VBC122,TYPE YOUR VENTURE NAME,0,0,0,0',
+      'VBC123,  Dosa Crisps  ,1,1,1,1',
     ].join('\n')
     const rows = parseTeams(csv)
     expect(rows[0].ventureName).toBe('')
@@ -228,11 +229,11 @@ describe('passesRowGate', () => {
    * Acting on that would vanish teams and reshuffle ranks around the hole.
    */
   it('rejects a feed short of the competing cohort', () => {
-    expect(passesRowGate(teams().slice(0, 39))).toBe(false)
+    expect(passesRowGate(teams().slice(0, MIN_TEAM_ROWS - 1))).toBe(false)
   })
 
-  it('accepts the forty competing teams, the two spares being optional', () => {
-    expect(passesRowGate(teams().slice(0, 40))).toBe(true)
+  it('accepts exactly the competing cohort, the spares being optional', () => {
+    expect(passesRowGate(teams().slice(0, MIN_TEAM_ROWS))).toBe(true)
   })
 
   /**
@@ -246,17 +247,17 @@ describe('passesRowGate', () => {
       .map((line, index) => (index >= 1 && index <= 3 ? line.replace(/,0,0,0,0$/, ',#REF!,0,0,0') : line))
       .join('\n')
     const parsed = parseTeams(csv)
-    expect(parsed).toHaveLength(39)
+    expect(parsed).toHaveLength(COHORT_SIZE - 3)
     expect(passesRowGate(parsed)).toBe(false)
   })
 
   /**
-   * The day a 43rd workbook is added, an exact check would freeze every wall on
-   * stale data permanently, silently, with no error state to notice. A partial
-   * write cannot *add* rows, so growth is always legitimate.
+   * The day one more workbook is added, an exact check would freeze every wall
+   * on stale data permanently, silently, with no error state to notice. A
+   * partial write cannot *add* rows, so growth is always legitimate.
    */
-  it('accepts a longer feed, so adding a 43rd team does not freeze the wall', () => {
-    expect(passesRowGate([...teams(), { ...teams()[0], teamId: 'SLE-C443' }])).toBe(true)
+  it('accepts a longer feed, so adding a team does not freeze the wall', () => {
+    expect(passesRowGate([...teams(), { ...teams()[0], teamId: 'VBC142' }])).toBe(true)
   })
 })
 
@@ -266,7 +267,7 @@ describe('parseSnapshot', () => {
       feedCsv: feedCsv(teams()),
       cohortCsv: cohortCsv(cohort()),
     })
-    expect(snapshot.teams).toHaveLength(42)
+    expect(snapshot.teams).toHaveLength(COHORT_SIZE)
     expect(snapshot.cohort.current_open_week).toBe('4')
   })
 })
@@ -287,7 +288,12 @@ describe('openWeek', () => {
 
 describe('fleaInstant', () => {
   it('reads an instant carrying its offset', () => {
-    expect(fleaInstant(cohort())?.toISOString()).toBe('2026-09-06T04:30:00.000Z')
+    // Compared to the fixture's own cell rather than to a literal instant: this
+    // test is about the *parse*, not about which date the Flea is on, and a
+    // restated date here breaks every time the cohort's calendar moves.
+    expect(fleaInstant(cohort())?.toISOString()).toBe(
+      new Date(cohort().flea_datetime_iso).toISOString(),
+    )
   })
 
   /**

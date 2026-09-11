@@ -1,3 +1,4 @@
+import { MIN_TEAM_ROWS, SPARE_TEAM_IDS } from '@/config'
 import { COHORT_KEYS } from '@/lib/feed'
 import type { Team } from '@/lib/types'
 
@@ -9,7 +10,7 @@ import type { Team } from '@/lib/types'
 
 export function team(overrides: Partial<Team> = {}): Team {
   return {
-    teamId: 'SLE-C401',
+    teamId: 'VBC101',
     ventureName: 'Aurora',
     totalRevenue: 0,
     weekRevenue: 0,
@@ -20,11 +21,24 @@ export function team(overrides: Partial<Team> = {}): Team {
   }
 }
 
-/** 42 teams, all named, all on zero — the shape of the cohort before trading. */
+/**
+ * The cohort shape, and the only place in the tests that knows it.
+ *
+ * **Derived from config, not restated.** `COHORT_SIZE` is the competing cohort
+ * plus the spares, which is exactly what `TV_Feed` publishes — 41 rows,
+ * `VBC101`–`VBC141`, of which the last two are `SPARE_TEAM_IDS`. Every
+ * assertion about "how many teams are on the board" reads these rather than a
+ * literal, because the literals are what made six tests fail the day the cohort
+ * changed size, each one restating a number it did not own.
+ */
+export const COMPETING_SIZE = MIN_TEAM_ROWS
+export const COHORT_SIZE = COMPETING_SIZE + SPARE_TEAM_IDS.length
+
+/** The whole cohort, all named, all on zero — the shape before trading opens. */
 export function teams(overrides: Partial<Team>[] = []): Team[] {
-  const rows = Array.from({ length: 42 }, (_, index) =>
+  const rows = Array.from({ length: COHORT_SIZE }, (_, index) =>
     team({
-      teamId: `SLE-C4${String(index + 1).padStart(2, '0')}`,
+      teamId: `VBC1${String(index + 1).padStart(2, '0')}`,
       ventureName: `Venture ${index + 1}`,
     }),
   )
@@ -42,7 +56,7 @@ export function cohort(overrides: Record<string, string> = {}): Record<string, s
   for (const key of COHORT_KEYS) base[key] = ''
   base.as_of = '11 Aug 14:23'
   base.current_open_week = '4'
-  base.flea_datetime_iso = '2026-09-06T10:00:00+05:30'
+  base.flea_datetime_iso = '2026-10-31T10:00:00+05:30'
   return { ...base, ...overrides }
 }
 

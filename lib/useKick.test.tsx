@@ -23,10 +23,10 @@ import { useKick, type Kick } from '@/lib/useKick'
 const BOARD = 'weekly-test'
 
 const EVENT: OvertakeEvent = {
-  id: 'challenge:1:SLE-C407:3',
-  attacker: 'SLE-C407',
+  id: 'challenge:1:VBC107:3',
+  attacker: 'VBC107',
   attackerName: 'Wake & Wyze',
-  defender: 'SLE-C412',
+  defender: 'VBC112',
   defenderName: 'XOCO',
   fromRank: 5,
   toRank: 3,

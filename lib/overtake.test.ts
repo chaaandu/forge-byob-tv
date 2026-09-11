@@ -58,7 +58,7 @@ describe('a challenge board', () => {
     const before = runChallenge(null, challengeBoard()).state
     const { events } = runChallenge(
       before,
-      challengeBoard([{ teamId: 'SLE-C410', challengeRevenue: 41_500 }]),
+      challengeBoard([{ teamId: 'VBC110', challengeRevenue: 41_500 }]),
     )
     expect(events.length).toBeGreaterThan(0)
   })
@@ -72,7 +72,7 @@ describe('a challenge board', () => {
     const before = runChallenge(null, challengeBoard(), 1).state
     const { events } = runChallenge(
       before,
-      challengeBoard([{ teamId: 'SLE-C410', challengeRevenue: 41_500 }]),
+      challengeBoard([{ teamId: 'VBC110', challengeRevenue: 41_500 }]),
       2,
     )
     expect(events).toEqual([])
@@ -93,7 +93,7 @@ describe('seeding', () => {
   it('records everything and animates nothing on a wall with no memory', () => {
     const { state, events } = run(null, board())
     expect(events).toEqual([])
-    expect(state.ranks['SLE-C401']).toBe(1)
+    expect(state.ranks['VBC101']).toBe(1)
     expect(state.week).toBe(4)
   })
 
@@ -113,11 +113,11 @@ describe('detection', () => {
   it('emits one event for one climb, naming the team whose slot was taken', () => {
     const before = run(null, board()).state
     // C405 was 5th; enough week revenue to take 2nd.
-    const { events } = run(before, board([{ teamId: 'SLE-C405', weekRevenue: 41_500 }]))
+    const { events } = run(before, board([{ teamId: 'VBC105', weekRevenue: 41_500 }]))
     expect(events).toHaveLength(1)
     expect(events[0]).toMatchObject({
-      attacker: 'SLE-C405',
-      defender: 'SLE-C402',
+      attacker: 'VBC105',
+      defender: 'VBC102',
       fromRank: 5,
       toRank: 2,
     })
@@ -129,9 +129,9 @@ describe('detection', () => {
    */
   it('emits one event, not one per row that shifted', () => {
     const before = run(null, board()).state
-    const { events } = run(before, board([{ teamId: 'SLE-C412', weekRevenue: 41_500 }]))
+    const { events } = run(before, board([{ teamId: 'VBC112', weekRevenue: 41_500 }]))
     expect(events).toHaveLength(1)
-    expect(events[0].attacker).toBe('SLE-C412')
+    expect(events[0].attacker).toBe('VBC112')
   })
 
   it('emits one event per team when two climb in the same fetch', () => {
@@ -139,11 +139,11 @@ describe('detection', () => {
     const { events } = run(
       before,
       board([
-        { teamId: 'SLE-C410', weekRevenue: 41_500 },
-        { teamId: 'SLE-C415', weekRevenue: 40_500 },
+        { teamId: 'VBC110', weekRevenue: 41_500 },
+        { teamId: 'VBC115', weekRevenue: 40_500 },
       ]),
     )
-    expect(events.map((event) => event.attacker).sort()).toEqual(['SLE-C410', 'SLE-C415'])
+    expect(events.map((event) => event.attacker).sort()).toEqual(['VBC110', 'VBC115'])
   })
 
   it('orders the biggest climb first, since the queue is capped', () => {
@@ -151,17 +151,17 @@ describe('detection', () => {
     const { events } = run(
       before,
       board([
-        { teamId: 'SLE-C403', weekRevenue: 41_500 },
-        { teamId: 'SLE-C420', weekRevenue: 40_500 },
+        { teamId: 'VBC103', weekRevenue: 41_500 },
+        { teamId: 'VBC120', weekRevenue: 40_500 },
       ]),
     )
-    expect(events[0].attacker).toBe('SLE-C420')
+    expect(events[0].attacker).toBe('VBC120')
   })
 
   it('ignores a change below the watched depth', () => {
     const before = run(null, board()).state
     // C440 climbs to 25th — real, but nobody is reading that far down.
-    const { events } = run(before, board([{ teamId: 'SLE-C440', weekRevenue: 17_500 }]))
+    const { events } = run(before, board([{ teamId: 'VBC139', weekRevenue: 17_500 }]))
     expect(events).toEqual([])
   })
 
@@ -172,13 +172,13 @@ describe('detection', () => {
    */
   it('says nothing when the whole board is lifted by one team falling', () => {
     const before = run(null, board()).state
-    const { events } = run(before, board([{ teamId: 'SLE-C401', weekRevenue: 1 }]))
+    const { events } = run(before, board([{ teamId: 'VBC101', weekRevenue: 1 }]))
     expect(events).toEqual([])
   })
 
   it('says nothing when a team is overtaken and takes its place back with no new sales', () => {
     const seeded = run(null, board()).state
-    const climbed = run(seeded, board([{ teamId: 'SLE-C405', weekRevenue: 41_500 }]))
+    const climbed = run(seeded, board([{ teamId: 'VBC105', weekRevenue: 41_500 }]))
     expect(climbed.events).toHaveLength(1)
     // C402's revenue never moved; it is back at 2nd only because C405's was
     // restated. Nobody overtook anybody.
@@ -199,7 +199,7 @@ describe('the floor and the rollover', () => {
     // C442 sorts last on team id alone; give it all-time revenue but no week.
     const { events } = run(
       before,
-      flat.map((team) => (team.teamId === 'SLE-C442' ? { ...team, totalRevenue: 99_000 } : team)),
+      flat.map((team) => (team.teamId === 'VBC141' ? { ...team, totalRevenue: 99_000 } : team)),
     )
     expect(events).toEqual([])
   })
@@ -224,15 +224,15 @@ describe('the floor and the rollover', () => {
     // suppressed — which is its own test below, not this one.
     const { events } = run(
       seeded,
-      monday.map((team) => (team.teamId === 'SLE-C410' ? { ...team, weekRevenue: 9_000 } : team)),
+      monday.map((team) => (team.teamId === 'VBC110' ? { ...team, weekRevenue: 9_000 } : team)),
       5,
     )
     expect(events).toHaveLength(1)
-    expect(events[0].attacker).toBe('SLE-C410')
+    expect(events[0].attacker).toBe('VBC110')
   })
 
   it('treats a team that was not on the board before as arriving, not overtaking', () => {
-    const before: BoardState = { week: 4, ranks: { 'SLE-C401': 1 }, earned: { 'SLE-C401': 41_000 } }
+    const before: BoardState = { week: 4, ranks: { 'VBC101': 1 }, earned: { 'VBC101': 41_000 } }
     const { events } = run(before, board())
     expect(events).toEqual([])
   })

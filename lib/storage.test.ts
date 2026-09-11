@@ -8,8 +8,8 @@ afterEach(() => vi.restoreAllMocks())
 
 describe('csv cache', () => {
   it('round-trips raw text so parseSnapshot stays the only path from bytes to data', () => {
-    writeCsvCache({ feedCsv: 'team_id\nSLE-C401', cohortCsv: 'key,value\nas_of,now' })
-    expect(readCsvCache()).toEqual({ feedCsv: 'team_id\nSLE-C401', cohortCsv: 'key,value\nas_of,now' })
+    writeCsvCache({ feedCsv: 'team_id\nVBC101', cohortCsv: 'key,value\nas_of,now' })
+    expect(readCsvCache()).toEqual({ feedCsv: 'team_id\nVBC101', cohortCsv: 'key,value\nas_of,now' })
   })
 
   it('returns null when absent, which is a valid first-paint state', () => {

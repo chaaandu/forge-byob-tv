@@ -3,7 +3,8 @@ import { describe, expect, it } from 'vitest'
 import { BOARD } from '@/app/weekly/page'
 import { currentChallenge, openWeek } from '@/lib/feed'
 import { rankByChallenge } from '@/lib/ranking'
-import { team, teams } from '@/test/fixtures'
+import { SPARE_TEAM_IDS } from '@/config'
+import { COMPETING_SIZE, team, teams } from '@/test/fixtures'
 
 /**
  * `/weekly`'s board spec, asserted directly.
@@ -45,25 +46,27 @@ describe('/weekly board spec', () => {
 
     const ranked = BOARD.rank(
       teams([
-        { teamId: 'SLE-C401', challengeRevenue: 100, weekRevenue: 90_000 },
-        { teamId: 'SLE-C402', challengeRevenue: 9_000, weekRevenue: 0 },
+        { teamId: 'VBC101', challengeRevenue: 100, weekRevenue: 90_000 },
+        { teamId: 'VBC102', challengeRevenue: 9_000, weekRevenue: 0 },
       ]),
     )
-    expect(ranked[0].teamId).toBe('SLE-C402')
+    expect(ranked[0].teamId).toBe('VBC102')
   })
 
-  /** The two spares exist as workbooks but do not compete for a slot. */
+  /** The spares exist as workbooks but do not compete for a slot. */
   it('drops the spares before ranking', () => {
     const ranked = BOARD.rank(teams())
-    expect(ranked).toHaveLength(40)
-    expect(ranked.map((row) => row.teamId)).not.toContain('SLE-C441')
+    expect(ranked).toHaveLength(COMPETING_SIZE)
+    for (const spare of SPARE_TEAM_IDS) {
+      expect(ranked.map((row) => row.teamId)).not.toContain(spare)
+    }
   })
 
   it('uses the same comparator the grid renders with', () => {
     const rows = teams([
-      { teamId: 'SLE-C405', challengeRevenue: 16_141 },
-      { teamId: 'SLE-C412', challengeRevenue: -3_850 },
-    ]).filter((row) => row.teamId !== 'SLE-C441' && row.teamId !== 'SLE-C442')
+      { teamId: 'VBC105', challengeRevenue: 16_141 },
+      { teamId: 'VBC112', challengeRevenue: -3_850 },
+    ]).filter((row) => row.teamId !== 'VBC140' && row.teamId !== 'VBC141')
     expect(BOARD.rank(rows).map((row) => row.teamId)).toEqual(
       rankByChallenge(rows).map((row) => row.teamId),
     )

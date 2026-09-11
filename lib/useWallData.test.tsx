@@ -3,7 +3,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { POLL_INTERVAL_MS, WATCH_RANKS_WEEKLY } from '@/config'
+import { FEED_CSV_URL, POLL_INTERVAL_MS, WATCH_RANKS_WEEKLY } from '@/config'
 import { rankByWeek } from '@/lib/ranking'
 import { KEYS } from '@/lib/storage'
 import type { Team } from '@/lib/types'
@@ -69,12 +69,24 @@ beforeEach(async () => {
   vi.useFakeTimers()
   localStorage.clear()
   servedTeams = board()
+  // **Matched against `FEED_CSV_URL` itself, not against a substring of it.**
+  //
+  // This used to read `String(url).includes('feed')`, which is true of a
+  // fixture path like `/mock/feed.csv` and false of every published Google URL
+  // — those carry an opaque `2PACX-…` id and a numeric `gid`. So on any machine
+  // without a `.env.local` pointing at fixtures, *both* fetches were served the
+  // cohort CSV, `parseTeams` threw `TvSchemaError` on every tick, and five of
+  // the six tests in this file failed on a fresh clone. The suite was green
+  // only against an untracked file.
+  //
+  // Comparing to the constant the hook actually fetches cannot drift: change
+  // the URL in config and this follows it.
   vi.stubGlobal(
     'fetch',
     vi.fn(async (url: string) => ({
       ok: true,
       text: async () =>
-        String(url).includes('feed') ? feedCsv(servedTeams) : cohortCsv(cohort()),
+        String(url) === FEED_CSV_URL ? feedCsv(servedTeams) : cohortCsv(cohort()),
     })),
   )
   host = document.createElement('div')
@@ -95,9 +107,9 @@ afterEach(() => {
 describe('useWallData freeze', () => {
   it('applies a quiet tick immediately when nothing is playing', async () => {
     expect(latest?.snapshot?.teams[0].weekRevenue).toBe(42_000)
-    servedTeams = board([{ teamId: 'SLE-C401', weekRevenue: 50_000 }])
+    servedTeams = board([{ teamId: 'VBC101', weekRevenue: 50_000 }])
     await advance(POLL_INTERVAL_MS)
-    expect(latest?.snapshot?.teams.find((t) => t.teamId === 'SLE-C401')?.weekRevenue).toBe(50_000)
+    expect(latest?.snapshot?.teams.find((t) => t.teamId === 'VBC101')?.weekRevenue).toBe(50_000)
   })
 
   /**
@@ -106,24 +118,24 @@ describe('useWallData freeze', () => {
    * kick plays. It must be held even though nothing is frozen yet.
    */
   it('holds the snapshot of the very tick that queued a kick', async () => {
-    servedTeams = board([{ teamId: 'SLE-C408', weekRevenue: 38_500 }]) // 8th takes 5th
+    servedTeams = board([{ teamId: 'VBC108', weekRevenue: 38_500 }]) // 8th takes 5th
     await advance(POLL_INTERVAL_MS)
     // The kick is queued and announced…
     expect(latest?.queueVersion).toBe(1)
     expect(JSON.parse(localStorage.getItem(KEYS.queue('weekly-test')) ?? '[]')).toHaveLength(1)
     // …but the rendered order is still the old one.
-    expect(latest?.snapshot?.teams.find((t) => t.teamId === 'SLE-C408')?.weekRevenue).toBe(35_000)
+    expect(latest?.snapshot?.teams.find((t) => t.teamId === 'VBC108')?.weekRevenue).toBe(35_000)
     // Settle: the held snapshot lands.
     act(() => latest?.thaw())
-    expect(latest?.snapshot?.teams.find((t) => t.teamId === 'SLE-C408')?.weekRevenue).toBe(38_500)
+    expect(latest?.snapshot?.teams.find((t) => t.teamId === 'VBC108')?.weekRevenue).toBe(38_500)
   })
 
   it('holds every tick that lands while frozen, applying only the newest on thaw', async () => {
     act(() => latest?.freeze())
-    servedTeams = board([{ teamId: 'SLE-C401', weekRevenue: 60_000 }])
+    servedTeams = board([{ teamId: 'VBC101', weekRevenue: 60_000 }])
     await advance(POLL_INTERVAL_MS)
     expect(latest?.snapshot?.teams[0].weekRevenue).toBe(42_000)
-    servedTeams = board([{ teamId: 'SLE-C401', weekRevenue: 70_000 }])
+    servedTeams = board([{ teamId: 'VBC101', weekRevenue: 70_000 }])
     await advance(POLL_INTERVAL_MS)
     expect(latest?.snapshot?.teams[0].weekRevenue).toBe(42_000)
     act(() => latest?.thaw())
@@ -132,17 +144,17 @@ describe('useWallData freeze', () => {
 
   it('still detects and queues a real overtake on a tick that lands mid-kick', async () => {
     act(() => latest?.freeze())
-    servedTeams = board([{ teamId: 'SLE-C408', weekRevenue: 38_500 }])
+    servedTeams = board([{ teamId: 'VBC108', weekRevenue: 38_500 }])
     await advance(POLL_INTERVAL_MS)
     // Queued for the next drain, snapshot held: the mailbox works during a kick.
     expect(latest?.queueVersion).toBe(1)
     expect(JSON.parse(localStorage.getItem(KEYS.queue('weekly-test')) ?? '[]')).toHaveLength(1)
-    expect(latest?.snapshot?.teams.find((t) => t.teamId === 'SLE-C408')?.weekRevenue).toBe(35_000)
+    expect(latest?.snapshot?.teams.find((t) => t.teamId === 'VBC108')?.weekRevenue).toBe(35_000)
   })
 
   it('keeps writing the CSV cache while frozen, so a remount never boots stale', async () => {
     act(() => latest?.freeze())
-    servedTeams = board([{ teamId: 'SLE-C401', weekRevenue: 60_000 }])
+    servedTeams = board([{ teamId: 'VBC101', weekRevenue: 60_000 }])
     await advance(POLL_INTERVAL_MS)
     const cached = JSON.parse(localStorage.getItem(KEYS.csv) ?? '{}') as { feedCsv?: string }
     expect(cached.feedCsv).toContain('60000')

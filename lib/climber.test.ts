@@ -17,10 +17,10 @@ const board = (...teams: Parameters<typeof team>[0][]) => rankTeams(teams.map(te
 describe('biggestMover', () => {
   it('finds the largest climb among teams that have banked something', () => {
     const ranked = board(
-      { teamId: 'SLE-C401', ventureName: 'Alpha', totalRevenue: 90_000, weekRevenue: 1_000 },
+      { teamId: 'VBC101', ventureName: 'Alpha', totalRevenue: 90_000, weekRevenue: 1_000 },
       // Up from 17th to 2nd: fifteen places, the largest here.
-      { teamId: 'SLE-C402', ventureName: 'Bravo', totalRevenue: 80_000, weekRevenue: 18_400, prevWeekRank: 17 },
-      { teamId: 'SLE-C403', ventureName: 'Cadet', totalRevenue: 70_000, weekRevenue: 500, prevWeekRank: 4 },
+      { teamId: 'VBC102', ventureName: 'Bravo', totalRevenue: 80_000, weekRevenue: 18_400, prevWeekRank: 17 },
+      { teamId: 'VBC103', ventureName: 'Cadet', totalRevenue: 70_000, weekRevenue: 500, prevWeekRank: 4 },
     )
     expect(biggestMover(ranked)).toMatchObject({
       kind: 'climb',
@@ -38,11 +38,11 @@ describe('biggestMover', () => {
     // so it has no climb, and the panel falls back to the biggest week instead
     // of announcing a fifteen-place surge that did not happen.
     const ranked = board(
-      { teamId: 'SLE-C401', ventureName: 'Alpha', totalRevenue: 90_000, weekRevenue: 2_000, prevWeekRank: 1 },
-      { teamId: 'SLE-C404', ventureName: 'Delta', totalRevenue: 500, weekRevenue: 500 },
-      { teamId: 'SLE-C405', ventureName: 'Echo', totalRevenue: 0, weekRevenue: 0, totalUnits: 3 },
-      { teamId: 'SLE-C406', ventureName: 'Fox', totalRevenue: 0, weekRevenue: 0, totalUnits: 2 },
-      { teamId: 'SLE-C407', ventureName: 'Golf', totalRevenue: 0, weekRevenue: 0, totalUnits: 1 },
+      { teamId: 'VBC101', ventureName: 'Alpha', totalRevenue: 90_000, weekRevenue: 2_000, prevWeekRank: 1 },
+      { teamId: 'VBC104', ventureName: 'Delta', totalRevenue: 500, weekRevenue: 500 },
+      { teamId: 'VBC105', ventureName: 'Echo', totalRevenue: 0, weekRevenue: 0, totalUnits: 3 },
+      { teamId: 'VBC106', ventureName: 'Fox', totalRevenue: 0, weekRevenue: 0, totalUnits: 2 },
+      { teamId: 'VBC107', ventureName: 'Golf', totalRevenue: 0, weekRevenue: 0, totalUnits: 1 },
     )
     const mover = biggestMover(ranked)
     expect(mover?.kind).toBe('earn')
@@ -51,8 +51,8 @@ describe('biggestMover', () => {
 
   it('ignores a team that slipped, and one that held its place', () => {
     const ranked = board(
-      { teamId: 'SLE-C401', ventureName: 'Alpha', totalRevenue: 90_000, weekRevenue: 400, prevWeekRank: 1 },
-      { teamId: 'SLE-C402', ventureName: 'Bravo', totalRevenue: 80_000, weekRevenue: 900, prevWeekRank: 1 },
+      { teamId: 'VBC101', ventureName: 'Alpha', totalRevenue: 90_000, weekRevenue: 400, prevWeekRank: 1 },
+      { teamId: 'VBC102', ventureName: 'Bravo', totalRevenue: 80_000, weekRevenue: 900, prevWeekRank: 1 },
     )
     // Bravo is 2nd having been 1st: a fall, not a climb. Alpha held.
     expect(biggestMover(ranked)?.kind).toBe('earn')
@@ -60,8 +60,8 @@ describe('biggestMover', () => {
 
   it('breaks a tie on the bigger week rather than on sort order', () => {
     const ranked = board(
-      { teamId: 'SLE-C401', ventureName: 'Alpha', totalRevenue: 90_000, weekRevenue: 1_000, prevWeekRank: 4 },
-      { teamId: 'SLE-C402', ventureName: 'Bravo', totalRevenue: 80_000, weekRevenue: 9_000, prevWeekRank: 5 },
+      { teamId: 'VBC101', ventureName: 'Alpha', totalRevenue: 90_000, weekRevenue: 1_000, prevWeekRank: 4 },
+      { teamId: 'VBC102', ventureName: 'Bravo', totalRevenue: 80_000, weekRevenue: 9_000, prevWeekRank: 5 },
     )
     // Both up three. Bravo had the bigger week, and comes second in sort order —
     // so a naive "first match wins" would pick Alpha.
@@ -71,16 +71,16 @@ describe('biggestMover', () => {
   it('falls back to the biggest week when the sheet publishes no previous rank', () => {
     // The state the wall runs in until `prev_week_rank` exists.
     const ranked = board(
-      { teamId: 'SLE-C401', ventureName: 'Alpha', totalRevenue: 90_000, weekRevenue: 1_000 },
-      { teamId: 'SLE-C402', ventureName: 'Bravo', totalRevenue: 80_000, weekRevenue: 18_400 },
+      { teamId: 'VBC101', ventureName: 'Alpha', totalRevenue: 90_000, weekRevenue: 1_000 },
+      { teamId: 'VBC102', ventureName: 'Bravo', totalRevenue: 80_000, weekRevenue: 18_400 },
     )
     expect(biggestMover(ranked)).toMatchObject({ kind: 'earn', toRank: 2, weekRevenue: 18_400 })
   })
 
   it('returns nothing at all when nobody has traded this week', () => {
     const ranked = board(
-      { teamId: 'SLE-C401', ventureName: 'Alpha', totalRevenue: 90_000, weekRevenue: 0, prevWeekRank: 2 },
-      { teamId: 'SLE-C402', ventureName: 'Bravo', totalRevenue: 80_000, weekRevenue: 0 },
+      { teamId: 'VBC101', ventureName: 'Alpha', totalRevenue: 90_000, weekRevenue: 0, prevWeekRank: 2 },
+      { teamId: 'VBC102', ventureName: 'Bravo', totalRevenue: 80_000, weekRevenue: 0 },
     )
     // Alpha climbed one, so this is still a climb — the week being quiet does
     // not erase last week's movement.

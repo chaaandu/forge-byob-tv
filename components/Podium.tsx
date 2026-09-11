@@ -555,6 +555,26 @@ function Strip({
         height: '100%',
       }}
     >
+      {/* **A deliberate render-phase ref read, not an oversight.**
+
+          `restingTops` is a cache of measured layout, written by the
+          `useLayoutEffect` above on every *idle* render and read here to work
+          out how far a row travels. The effect returns early while a kick
+          plays, so what this reads is always the last untransformed geometry —
+          which is exactly the number the animation needs and the only render at
+          which it can be asked for.
+
+          The alternative is holding the measurement in state, which trades this
+          suppression for a `react-hooks/set-state-in-effect` one (the pattern
+          `lib/useWallData.ts` and `lib/useKick.ts` already use) plus an extra
+          render pass through animation code whose failure mode is a row
+          travelling a distance that no longer exists. Not worth it for a
+          mutable layout cache, which is what a ref is for.
+
+          If this is ever restructured, the thing to verify is not the lint
+          output: it is that two bars trading places still land on each other's
+          seats, measured in a browser at 1920x1080. */}
+      {/* eslint-disable-next-line react-hooks/refs */}
       {teams.map((team, index) => {
         const rowRank = fromRank + index
         // **A slide, and nothing more.** Two bars trading places inside the list

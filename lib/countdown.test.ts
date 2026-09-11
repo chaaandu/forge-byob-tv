@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
+import { PROGRAMME_START_MS } from '@/config'
 import { computeCountdownState, mastheadCountdown } from '@/lib/countdown'
 
 /** The real target: Mesa Flea, 6 September 2026, 10:00 IST. */
@@ -89,7 +90,15 @@ describe('computeCountdownState', () => {
  * says something true rather than decorative.
  */
 describe('progress', () => {
-  const START = Date.parse('2026-07-20T00:00:00+05:30')
+  /**
+   * **Read from config, not restated here.** `computeCountdownState` defaults
+   * its third argument to `PROGRAMME_START_MS`, so a literal date in this file
+   * is a second copy of the anchor that goes stale silently: when the anchor
+   * moved to Forge C1's 1 September, the two "is 0 / clamps" assertions kept
+   * passing by accident — everything before the real start clamps to 0 — and
+   * only the halfway case failed.
+   */
+  const START = PROGRAMME_START_MS
 
   it('is 0 at the programme start and 1 at the Flea', () => {
     expect(computeCountdownState(FLEA, START).progress).toBe(0)
