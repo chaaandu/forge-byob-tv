@@ -213,6 +213,50 @@ export const FLEA_EVENT_DURATION_MS = 8 * 60 * 60 * 1000
 export const PROGRAMME_START_ISO = '2026-08-31T00:00:00+05:30'
 export const PROGRAMME_START_MS = Date.parse(PROGRAMME_START_ISO)
 
+// ── Ganesh Chaturthi ────────────────────────────────────────────────────────
+
+/**
+ * The window the Ganesha ornament is on the wall — **14 to 16 September 2026,
+ * IST**, and then it is gone without anyone touching the laptop.
+ *
+ * Ganesh Chaturthi 2026 falls on Monday 14 September; the full festival runs to
+ * Anant Chaturdashi on Friday 25 September. This wall takes the first three
+ * days by decision, not by accident — see `isFestival`.
+ *
+ * ── Why an end date at all ──
+ *
+ * Because nobody is at the laptop. Every other thing on this wall is driven by
+ * a sheet someone edits or by a figure that moves on its own; a festival
+ * ornament is the one element whose correct state is *absent*, and absence is
+ * the state no polling loop will ever arrive at. Left ungated it would still be
+ * there in October — during the Mesa Flea run-up — and it would look exactly as
+ * deliberate then as it does on the 14th. That is the same failure mode as the
+ * missing `as_of` stamp, so it gets the treatment the stamp did not.
+ *
+ * **The end is exclusive and it is the 17th, not the 16th.** `UNTIL` is the
+ * instant the window shuts, so naming the last day here would take the ornament
+ * down at midnight *entering* the 16th and give two days rather than three —
+ * off-by-one in the direction that reports nothing, because a wall that stopped
+ * a day early looks precisely like a wall that was configured that way.
+ *
+ * Both are absolute instants with an explicit `+05:30`, for the reason in
+ * `docs/DESIGN.md` §"Timezone: the client needs none": the comparison is then
+ * correct on any machine whose clock is right, including a laptop that came
+ * back from a trip still set to another timezone.
+ */
+export const GANESH_FROM_ISO = '2026-09-14T00:00:00+05:30'
+export const GANESH_UNTIL_ISO = '2026-09-17T00:00:00+05:30'
+export const GANESH_FROM_MS = Date.parse(GANESH_FROM_ISO)
+export const GANESH_UNTIL_MS = Date.parse(GANESH_UNTIL_ISO)
+
+/** Where the animation is served from. A plain file in `public/`, fetched at
+    runtime rather than imported — see `components/Ganesha.tsx` for why 877KB
+    does not belong in the JS bundle of a page that must paint immediately. */
+export const GANESH_LOTTIE_URL = '/lottie/ganesha.json'
+
+/** Once a minute is plenty to notice a three-day window opening or shutting. */
+export const GANESH_CHECK_MS = 60_000
+
 /** Once a second while the live timer shows seconds; once a minute before that. */
 export const TICK_MS = 1_000
 export const TICK_SLOW_MS = 60_000

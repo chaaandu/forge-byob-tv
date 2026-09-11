@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import localFont from 'next/font/local'
 
+import { Ganesha } from '@/components/Ganesha'
 import { Rotator } from '@/components/Rotator'
 import './globals.css'
 
@@ -142,6 +143,19 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             outlive both of them: a rotator inside `/weekly` would unmount at the
             moment it navigated away and never arm the swap back. */}
         <Rotator />
+        {/* Ganesh Chaturthi, 14–16 September 2026, bottom-left of both slides.
+            Renders nothing for the other 362 days.
+
+            **Here rather than in either page, and for the load-bearing half of
+            `Rotator`'s reason rather than the obvious one.** A looping animation
+            mounted inside `/weekly` would be destroyed and rebuilt every thirty
+            seconds — 877KB re-parsed and a fresh SVG tree written, twice a
+            minute, forever — and the loop would restart from frame 0 on every
+            rotation, so the idol would perform the same first second of its
+            animation and never reach the rest of it. Mounted here it survives
+            the soft navigation the way the rotator itself does, and simply
+            keeps going while the board changes underneath it. */}
+        <Ganesha />
       </body>
     </html>
   )

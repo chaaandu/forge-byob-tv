@@ -1,4 +1,4 @@
-import { EOD_FROM_HOUR_IST, IST_TIMEZONE } from '@/config'
+import { EOD_FROM_HOUR_IST, GANESH_FROM_MS, GANESH_UNTIL_MS, IST_TIMEZONE } from '@/config'
 
 /**
  * The only module in the project that asks what time it is.
@@ -36,4 +36,24 @@ export function istHour(now: Date): number {
 export function isEndOfDay(now: Date): boolean {
   const hour = istHour(now)
   return hour >= EOD_FROM_HOUR_IST && hour <= 23
+}
+
+/**
+ * Is the Ganesha ornament in its window?
+ *
+ * Half-open — `[from, until)` — which is what makes the two constants in
+ * `config.ts` readable as the boundaries they are rather than as days. The
+ * ornament appears the moment 14 September begins in IST and is gone the moment
+ * the 17th does, on a wall nobody touches in between.
+ *
+ * **No `Intl` here, deliberately**, unlike `istHour` above. Both bounds are
+ * already absolute instants carrying `+05:30`, so comparing epoch milliseconds
+ * is timezone-independent by construction — the machine's own setting cannot
+ * reach this any more than it can reach the hour check, and it gets there
+ * without a formatter. Asking `Intl` for a date here would be the version that
+ * *looks* more careful and is the one that can be wrong.
+ */
+export function isFestival(now: Date): boolean {
+  const at = now.getTime()
+  return at >= GANESH_FROM_MS && at < GANESH_UNTIL_MS
 }

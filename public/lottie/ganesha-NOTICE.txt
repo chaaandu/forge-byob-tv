@@ -1,0 +1,62 @@
+`ganesha.json` is a third-party animation, downloaded unmodified.
+
+  Title:     Ganesha
+  Author:    Dhaval Bhatt (LottieFiles user /a0ueoybn5je2ptrz)
+  Source:    https://lottiefiles.com/free-animation/ganesha-t8e5S0AIgX
+  Asset id:  119704
+  Licence:   Lottie Simple License (FL 9.13.21)
+             https://lottiefiles.com/page/license
+
+Kept beside the asset for the same reason `Crown-NOTICE.txt` sits beside
+`Crown.tsx` and an OFL file sits beside each face in `app/fonts/`: the licence
+travels with the artwork, so a licence question can be answered without a git
+archaeology session.
+
+── What the licence permits, and the one line that matters here ──
+
+The Lottie Simple License allows use of a free LottieFiles animation in
+commercial and non-commercial work without attribution, and prohibits
+redistributing or reselling it as a standalone asset. This project displays it
+inside a page; it does not offer it for download and does not repackage it. The
+notice is retained regardless, which is the point of keeping one.
+
+Attribution is not required. The author is named above anyway, because
+`LOGOS` in `config.ts` is empty for a reason and this repository does not have a
+second standard for artwork it did not draw.
+
+── How it got here ──
+
+LottieFiles' web pages return HTTP 403 to anything without a browser session, so
+this was not downloaded by hand. Their public GraphQL endpoint answers without
+one:
+
+  curl -s -H 'Content-Type: application/json' \
+    -X POST https://graphql.lottiefiles.com/2022-08 \
+    -d '{"query":"{ publicAnimationByHash(hash:\"t8e5S0AIgX\"){ jsonUrl } }"}'
+
+which returns the `assets-v2.lottiefiles.com` URL this file came from. Recorded
+because the next person to update the artwork will otherwise spend the same
+half hour discovering that the obvious route is blocked.
+
+── The file is unmodified, and the modifications are elsewhere ──
+
+Nothing has been changed in this JSON. That is deliberate: it can go straight
+back into the LottieFiles editor, be edited there, and be dropped back in place.
+
+Three things are therefore stripped at runtime, in `components/Ganesha.tsx`
+rather than here — the full-frame maroon background layer, the two baked-in text
+layers, and nothing else. See that file for why each.
+
+── One trap, for whoever edits this next ──
+
+The two text layers read "Ladoo Taiyaar Rakhna...." and "...Aaa Gaye Hai Hum.",
+set in Tw Cen MT Condensed Extra Bold. **The font is not embedded; twenty-one
+individual glyphs are**, as outlines, covering exactly the characters those two
+strings use:
+
+  space . A G H L R T a d e h i k m n o r u y
+
+Retype either string in the editor and any character outside that set has no
+outline to draw. It will render as nothing, in a file that still loads, still
+plays, and reports no error. This wall strips both layers anyway, so it only
+bites someone who turns them back on.
