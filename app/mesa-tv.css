@@ -218,24 +218,49 @@
      the same object on the same surface — and the third is reduced to 11%.
 
      Measured, the trade is better than it sounds. Discs went 107 / 87 / 76 / 62
-     and now go 94 / 82 / 76 / 71: row 1 gives up 13px, row 4 gains 9, and the
+     and now go 99 / 87 / 81 / 76: row 1 gives up 8px, row 4 gains 14, and the
      bottom of the board is further above the ~50px floor at which
      `scripts/logo-legibility.py` says a logo stops being a logo. The ramp still
      points, which is all it was ever for.
 
-     ── The rule adjustments must keep: the four sum to <= 42.6vw ──
+     ── THEY ARE SHARES OF THE BOARD, NOT `vw`, AND THAT IS A BUG FIX ──
 
-     The editorial frame spends 195px of the 1080 on chrome — safe margins top
-     and bottom, the masthead, its rule, the footer line — against the old
-     band's 143. The rows absorbed that by flattening rather than by any of them
-     getting shorter than row 4 already was. It is `--s-*` fixed px — the three
-     row gaps, the board's padding — that make 1600x900 the tightest viewport
-     rather than the smallest. Re-run `scripts/measure-fit.mjs` after touching
-     any of the four. */
-  --h-row-1: 11.35vw;
-  --h-row-2: 10.73vw;
-  --h-row-3: 10.42vw;
-  --h-row-4: 10.13vw;
+     Every one of these was a `vw` length, like the rest of the wall. **The
+     frame's height is not.** So the rows held their proportion to the *type*
+     while the space they had to fit into did whatever the viewport's aspect
+     ratio said — and at 2000x1100, which is only 2% off 16:9, they summed to
+     23px more than the board had. Measured with `scripts/measure-fit.mjs`: the
+     last row overlapped the frame's bottom rule by 19px, on a layout that is
+     exact to 0.2px at 1920x1080. Nothing errored and the board still rendered
+     forty cards.
+
+     This is the trap `measure-fit.mjs`'s own header describes, arrived at from
+     the other direction: there, fixed `--s-*` px hold their size while `vw`
+     shrinks; here, `vw` heights grow while the frame's height does not.
+
+     `--h-board` is the height the grid actually has — 100vh less every band of
+     the editorial frame above and below it — and the four rows are *shares* of
+     what is left after the gaps. The ramp is therefore ratios (0.266 : 0.252 :
+     0.244 : 0.238, summing to exactly 1) rather than lengths, and the board
+     fills its region at every viewport by construction rather than by budget.
+     The discs absorb the difference, which is what the ramp comment above says
+     they are for, and `--d-card-logo` already caps them at the card's width at
+     one end and the legibility floor at the other.
+
+     **Every term in `--h-board` must match `app/weekly/page.tsx`'s grid.** They
+     are two statements of one layout; if a band is added to the frame it has to
+     be subtracted here in the same commit, or the board silently overflows the
+     one it was added for. */
+  --h-board: calc(
+    100vh - 2 * var(--s-safe-y) - var(--h-mast) - var(--s-mast-rule) - 2 *
+      var(--stroke-hair) - var(--s-rule-board) - var(--s-board-top) -
+      var(--s-board-bottom) - var(--h-foot)
+  );
+  --h-rows: calc(var(--h-board) - 3 * var(--s-row-gap));
+  --h-row-1: calc(var(--h-rows) * 0.26625);
+  --h-row-2: calc(var(--h-rows) * 0.2517);
+  --h-row-3: calc(var(--h-rows) * 0.24443);
+  --h-row-4: calc(var(--h-rows) * 0.23762);
 
   /* The grid's own spacing. Fixed px, and therefore the `--s-*` trap: these
      hold their size while every `vw` above shrinks, so the ramp has less room
