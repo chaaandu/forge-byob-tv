@@ -268,7 +268,34 @@ export function WeeklyGrid({
           style={
             {
               display: 'grid',
-              gridTemplateColumns: `repeat(${ROW_LENGTH}, minmax(0, 1fr))`,
+              // **A short row centres rather than hanging left.** The competing
+              // cohort is 39, so the rows are 10, 10, 10 and 9 — and a nine-card
+              // row in a ten-column grid sits against the left edge with a
+              // card-shaped hole at the right end. On a wall that reads as a
+              // card that failed to load, not as a row that has nine teams in
+              // it, which is the whole class of bug this project is built
+              // around: nothing reports it and it renders perfectly.
+              //
+              // **The columns become a length rather than staying fractional.**
+              // Leaving ten `1fr` columns and centring does nothing — fractions
+              // consume the free space that centring needs. Cutting to nine
+              // `1fr` columns would centre, but each would grow by a ninth and
+              // the last row's cards would come out wider than every other
+              // row's, which breaks the one thing the grid guarantees: rank is
+              // carried by row *height*, and every card is the same width.
+              //
+              // `--w-card` is the length those ten fractions already resolve
+              // to — `:root` states the arithmetic once and says it agrees with
+              // the rendered card to 0.1px at 1920. Reusing it is what keeps a
+              // centred row and a full row the same card.
+              gridTemplateColumns:
+                row.length < ROW_LENGTH
+                  ? `repeat(${row.length}, var(--w-card))`
+                  : `repeat(${ROW_LENGTH}, minmax(0, 1fr))`,
+              // Only a short row is centred. A full row has no free space to
+              // centre in, and asking for it there would be a no-op that looked
+              // like a rule.
+              justifyContent: row.length < ROW_LENGTH ? 'center' : undefined,
               gap: 'var(--s-card-gap)',
               minHeight: 0,
               // **The row publishes its own height under a different name.** It

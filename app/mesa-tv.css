@@ -320,8 +320,14 @@
   /* The card's own width, spelled out because the mark needs it as a *length*
      and the grid only ever expresses it as a fraction. Ten columns and nine
      gaps inside the frame's content box; it agrees with the rendered card to
-     0.1px at 1920 (171.6), and it is the only place that arithmetic is written
-     down. */
+     0.01px at 1920 (175.19 measured, all four rows), and it is the only place
+     that arithmetic is written down.
+
+     **`WeeklyGrid` reads it as a length, not just the mark.** The last row of a
+     39-team cohort holds nine cards, and it is centred by giving it nine columns
+     of exactly this width — so the agreement above is what keeps a centred row
+     and a full row the same card. The 171.6 this comment used to claim was left
+     over from an earlier gap value. */
   --w-card: calc((100vw - 2 * var(--s-12) - 9 * var(--s-card-gap)) / 10);
 
   /* Type is constant across all forty cards — see the text block note above.
