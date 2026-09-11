@@ -59,6 +59,52 @@
  * the highlight paths rather than shrinking them: detail below the legibility
  * floor is noise that costs paint time and buys nothing.
  */
+/**
+ * Where each spark sits and when it fires — six of them, in three pairs.
+ *
+ * **The pairs are what the table is for.** A twinkle that returns to the same
+ * two points every cycle is a pair of indicator lights: the eye learns the
+ * position after the second repeat and then reads it as a blinking widget
+ * rather than as an object in a room. Moving it means the crown is never
+ * twinkling in the place you last saw it twinkle, which is what a real
+ * highlight does as the thing it is on shifts under the light.
+ *
+ * `at` is a delay into the shared 18s cycle, so the three pairs land 6s apart —
+ * 1.5s, 7.5s, 13.5s — and each pair's second spark is 0.36s behind its first.
+ * On a thirty-second slide that is five strikes: A · B · C · A · B. No pair
+ * repeats back to back, and the sequence restarts on every rotation because
+ * `/podium` remounts.
+ *
+ * **Each pair straddles the crown**, one spark left of centre and one right,
+ * so a strike reads as light crossing the whole object rather than as one
+ * corner of it lighting up twice.
+ *
+ * `r` is centre-to-tip in viewBox units, and it tracks the feature underneath:
+ * the two big terminal balls carry the largest sparks, the arc balls and the
+ * centre stone smaller ones. A spark much bigger than the form it is sitting on
+ * stops reading as a highlight and starts reading as a star sticker.
+ */
+const GLINTS = [
+  // Pair A — the right-hand terminal ball, and the left arc's ball.
+  { cx: 115, cy: 24, r: 12, at: 1.5 },
+  { cx: 38, cy: 15, r: 10, at: 1.86 },
+  // Pair B — the left-hand terminal ball, and the right arc's ball.
+  { cx: 9, cy: 24, r: 11, at: 7.5 },
+  { cx: 91, cy: 15, r: 10, at: 7.86 },
+  // Pair C — the tall centre point, and the base band's lower-left corner. The
+  // only pair that is not two ball tips, and that corner is on its third
+  // position. It was the left flank *stone* first, which photographed as
+  // nothing: the stone is `--crown-gem-lit`, a pale lavender, and pale gold on
+  // pale lavender has no value step — the same failure as painting a spark on
+  // the metal, one material along. It was then the left arc's outer foot, which
+  // read but weakly, because the arc there is a thin edge rather than a form
+  // and the spark had no silhouette to break. The band's corner is a real
+  // corner with the page behind it, and it is the only strong position on the
+  // crown's bottom half.
+  { cx: 64, cy: 29, r: 9, at: 13.5 },
+  { cx: 19, cy: 106, r: 9.5, at: 13.86 },
+]
+
 export function Crown({ className }: { className?: string }) {
   return (
     <svg
@@ -234,38 +280,47 @@ export function Crown({ className }: { className?: string }) {
         fill="var(--crown-lit)"
         d="M59.38 29.55c.61-1.25 1.68-2.96 5.17-3.68c1.34-.28 1.73-.86 1.61-1.74c-.24-1.83-2.52-1.7-3.75-1.41c-4.1.96-5.01 4.6-5.18 6.04c-.17 1.37 1.55 2.04 2.15.79z"
       />
-      {/* ── The two glints, and their position is a contrast decision ──
+      {/* ── The glints ──
 
-          Drawn last, so they sit over the metal rather than under it, and
-          centred on two of the crown's **ball tips** — the right-hand point and
-          the tall centre one.
+          Six sparks, **two lit at a time**, in three pairs that take it in
+          turns. Position and timing are one table rather than two, because the
+          thing being decided is "this place, at this moment" — see `GLINTS`
+          below for both, and the keyframes in `mesa-tv.css` for the cycle they
+          share. Drawn last so they sit over the metal rather than under it.
 
-          The first attempt put them on the artwork's own specular streaks: the
-          right arc's inner edge and the base band's highlight, which is where
-          Noto's illustrator decided the light is. Screenshotted at full size,
-          **neither was visible.** `--crown-lit` is one step of the same metal
-          ramp the body is painted from — 12.47:1 against the page where
-          `--crown-ink` is 7.17 — so a spark drawn *inside* the silhouette is a
-          pale gold shape on gold and has almost no value step to live on. The
-          lower half of the crown is worse again: it overlaps the mark's own
-          lavender disc, and a pale warm spark on a light disc is nothing at all.
+          ── Why every one of the six is on an edge ──
+
+          The first attempt put two sparks on the artwork's own specular
+          streaks: the right arc's inner edge and the base band's highlight,
+          which is where Noto's illustrator decided the light is. Screenshotted
+          at full size, **neither was visible.** `--crown-lit` is one step of
+          the same metal ramp the body is painted from — 12.47:1 against the
+          page where `--crown-ink` is 7.17 — so a spark drawn *inside* the
+          silhouette is a pale gold shape on gold, with almost no value step to
+          live on.
 
           A tip is where the object *ends*, so a spark centred on one is half on
           metal and half on Deep Aubergine, and it is the second half that makes
-          it read. Both tips chosen sit in the crown's upper half, which is the
-          part that overhangs the disc against the dark page. That is also what
-          a specular actually does on a curved metal object — it catches the
-          edge, not the middle. */}
-      <path
-        className="tv-crown-glint"
-        fill="var(--crown-lit)"
-        d={sparkle(115, 24, 12)}
-      />
-      <path
-        className="tv-crown-glint tv-crown-glint-2"
-        fill="var(--crown-lit)"
-        d={sparkle(64, 29, 8.5)}
-      />
+          it read at six metres. That is also what a specular does on a curved
+          metal object: it catches the edge, not the middle.
+
+          **The disc is the other half of that constraint, and it is what rules
+          most of the crown out.** The mark's Lavender Mist disc sits behind the
+          crown's lower right, and a pale warm spark landing there has nothing
+          to be brighter than. So the six are the crown's five ball tips, which
+          all overhang into the dark page, plus the base band's lower-left
+          corner, which clears the disc on the other side. **The lower right has
+          no position on it and cannot have one** without a second colour — if a
+          seventh spark is ever wanted, it is not going there. */}
+      {GLINTS.map(({ cx, cy, r, at }) => (
+        <path
+          key={`${cx}-${cy}`}
+          className="tv-crown-glint"
+          fill="var(--crown-lit)"
+          style={{ animationDelay: `${at}s` }}
+          d={sparkle(cx, cy, r)}
+        />
+      ))}
     </svg>
   )
 }

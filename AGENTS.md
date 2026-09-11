@@ -116,11 +116,12 @@ npm run build        # next build
   seconds later, and that a twinkle, a sheen or a pulse does not get in on the
   crown's precedent and has to make its own argument. The crown's two glints
   are that argument, and they did not win it on the merits — they were asked
-  for directly, after being built the other way first. They sit on two of the
-  crown's tips, a third of a second apart, and the pair repeats **every six
-  seconds** for as long as `/podium` is up. The rule is now: *nothing moves at
-  rest except the crown's glint*, and the exception is one object, one slide,
-  two shapes, one period.
+  for directly, after being built the other way first. Six positions on the
+  crown fire **two at a time**, in three pairs that take it in turns: a pair
+  strikes every six seconds, 0.36s between its two sparks, and never in the
+  place the last one did. The rule is now: *nothing moves at rest except the
+  crown's glint*, and the exception is one object, on one slide, twinkling
+  twice at a time on an eighteen-second cycle.
 
   What it costs is stated rather than argued away. **The board is no longer
   still thirty seconds later**, which was the property that mattered and the
@@ -128,13 +129,25 @@ npm run build        # next build
   the marks, numerals and rows are still, and says so. Every ornament after
   this one will cite the glint rather than the crown, because a looping
   precedent is a far cheaper thing to argue from than a one-shot one — so the
-  budget is the count, and the count is two. A spark on every stone, or one on
-  a `/weekly` card, is not an extension of this decision.
+  budget is the count, and the count is **six positions, two lit**. A spark on
+  every stone, or one on a `/weekly` card, is not an extension of this decision.
+  Nor is putting the six on one beat: that is a crown flashing all over at once,
+  and it is the same six elements.
 
-  The period is the part to defend. 720ms of spark inside a six-second cycle is
-  an object catching the light; the same spark on a one-second cycle is a
-  blinking fault light on a wall nobody is watching. **Lengthen it before
-  shortening it.**
+  Where they can go is a measured constraint, not a taste one. A spark only
+  reads where it breaks the silhouette against Deep Aubergine — drawn inside
+  the metal it is pale gold on gold, and the mark's Lavender Mist disc sits
+  behind the crown's lower right, so a pale warm spark there has nothing to be
+  brighter than. Two positions were photographed and thrown away for exactly
+  that. The five ball tips and the base band's lower-left corner are the whole
+  of the usable set.
+
+  The period is the part to defend. 720ms of spark, and six seconds between
+  strikes, is an object catching the light; the same spark on a one-second
+  cycle is a blinking fault light on a wall nobody is watching. **Lengthen it
+  before shortening it.** Eighteen against the slide's thirty is also not a
+  rounding — five strikes fit, A · B · C · A · B, so no pair repeats back to
+  back, which is the failure three pairs exist to prevent.
 - **Gold is back, as exactly one object.** `--forge-metal-gold` sat unread from
   the deletion of the plinths until the crown, kept on §5's stated condition
   that if it returned it would "arrive as one decision in one place". The crown
@@ -143,6 +156,35 @@ npm run build        # next build
   this one. Components read `--crown-ink`, never the metal token, because gold
   measures 8.59:1 on Deep Aubergine and **1.61:1 on Lavender Mist**, so the
   light surface answers with Royal Purple instead.
+- **One looping Lottie is on the wall, for three days, and it is the borrowed
+  artwork exception too.** `components/Ganesha.tsx` puts an 80px Ganesha in the
+  bottom-left corner of both slides from **14 to 16 September 2026** and renders
+  `null` the other 362 days. It loops, which the rule above says an ornament does
+  not get to do on the crown's precedent — so it makes its own argument, and the
+  argument is in that file rather than here.
+
+  The short form: the motion rule protects *the board*, where movement means a
+  rank changed hands. This carries no figure, sits outside the board, and is
+  bounded by a date rather than by someone remembering. That last part is the
+  condition, not a detail — the ornament's correct state is **absent**, and
+  absence is the one state no polling loop arrives at on its own. `isFestival`
+  in `lib/schedule.ts` owns the window; `GANESH_UNTIL_ISO` is the **17th**,
+  exclusive, because naming the last day gives two days instead of three and
+  looks exactly like a wall configured that way.
+
+  It is also the only artwork here this project did not draw, which the `LOGOS`
+  rule below otherwise forbids — and the distinction that lets it in is the one
+  that rule is actually about. A borrowed venture logo says something false
+  about a team; a festival illustration is not claiming to be anyone's mark.
+  `public/lottie/ganesha-NOTICE.txt` carries the author and licence beside the
+  file, the way `Crown-NOTICE.txt` does. The JSON is the untouched download so
+  it can go back into the LottieFiles editor; the maroon background layer and
+  the two baked-in text layers are stripped at runtime, not in the file.
+
+  **If it should stop looping, that is one word** — `loop: false` on the
+  `loadAnimation` call — and what remains is a figure that arrives once and
+  holds, exactly as the crown does. **A second looping ornament is a new
+  argument, not an extension of this one.**
 - **No filler content.** Empty is a valid state. The wall being quiet is what makes it
   loud when something happens. No spinners, ever — first paint reads cached CSV.
 - **There is no footer and no `as_of` stamp**, on either slide. Both were removed

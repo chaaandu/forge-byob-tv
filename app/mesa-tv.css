@@ -1133,8 +1133,30 @@
      any panel's real overscan.
 
      If the weekly grid ever returns to ten cards on the bottom row, this has to
-     move or shrink — that row is what is holding it out here. */
-  --s-ganesha-x: 1.4583vw; /* 28px */
+     move or shrink — that row is what is holding it out here.
+
+     ── And it is fixed px, which is the opposite of the rule above ──
+
+     `--h-ganesha` is `vw` like every other dimension here. This is not, and the
+     inconsistency is the point: **`--s-safe-x` is fixed px too**, deliberately,
+     "so the columns do not move". The board's left edge therefore sits at 48px
+     at every viewport while the cards either side of it scale — so the gutter
+     this ornament lives in does *not* grow with the frame the way a `vw` inset
+     would assume.
+
+     Measured, with this as `1.4583vw`: at 2560x1440 the idol grew to 138px wide
+     while card 31's left edge moved only to 172px, and the ornament **crossed
+     into the card by 3px**. Three pixels, in the corner, on a board nobody is
+     standing next to — which is exactly the class of bug this wall cannot
+     report. Pinned at 28px the same measurement clears by 7px, and 1600 and
+     2000 clear by 10px and 7px.
+
+     The clearance does still narrow as the frame grows, because the idol's
+     width is `vw` and the gutter's is not. It is positive at every size in
+     `measure-fit.mjs` and at 3840 too, with about 2px to spare — so a frame
+     materially wider than 4K is the point at which this needs re-measuring
+     rather than trusting. */
+  --s-ganesha-x: 28px;
 }
 
 /* Animations defined in CSS rather than in Motion, for one shared reason: each
@@ -1231,9 +1253,10 @@
 
 /* ── The glint, which loops, and is the one looping ornament on this wall ──
 
-   Two sparks catch on the crown's tips, a third of a second apart, and the
-   pair repeats every six seconds for as long as the slide is up — five times
-   before the rotation takes it away.
+   Six sparks sit on the crown, **two lit at a time**, in three pairs that take
+   it in turns: a pair strikes every six seconds and never in the place the last
+   one did. `GLINTS` in `components/Crown.tsx` holds the positions and the
+   delays as one table; this holds the cycle they all share.
 
    **This does not inherit the crown's exemption and it was never going to.**
    `AGENTS.md` bans motion *at rest* and admits the drop on the ground that a
@@ -1249,21 +1272,32 @@
    this wall moves at rest" — a future ornament arguing by analogy, a test
    asserting quiet — has to start from here instead.
 
-   ── What the six seconds are buying ──
+   ── The cycle is eighteen seconds and almost all of it is empty ──
 
-   Almost all of the cycle is empty. The spark itself is 720ms; the remaining
-   5.28s is the 12% keyframe held at `opacity: 0` to the end. That ratio is the
-   whole design. A twinkle on a one-second cycle is a blinking indicator and
-   reads as a fault light on a wall nobody is watching; at six seconds a
-   passer-by sees the crown catch the light once and it reads as an object in a
-   room, which is the thing being bought. Lengthen this before shortening it.
+   The spark itself is 720ms, which is **4% of the cycle**; the other 96% is
+   that keyframe held at `opacity: 0` to the end. Six sparks at 4% each is 24%
+   of duty across the whole object, and they are grouped rather than spread, so
+   what a passer-by sees is three brief events in eighteen seconds and not a
+   crown that shimmers continuously.
 
-   The two share one period rather than drifting on two. `/podium`'s deleted
-   idle deliberately used three incommensurate timelines so the marks could
-   never fall into lockstep, and the opposite is right here: locked 0.36s apart,
-   the pair reads as *one* light crossing the crown, repeating. On two periods
-   they would drift into reading as two independent blinkers, which is two
-   moving things rather than one.
+   That ratio is the whole design. A twinkle on a one-second cycle is a blinking
+   indicator and reads as a fault light on a wall nobody is watching; at six
+   seconds between strikes a passer-by sees the crown catch the light and it
+   reads as an object in a room, which is the thing being bought. **Lengthen
+   this before shortening it.**
+
+   Eighteen against the slide's thirty is deliberate and not a rounding. Five
+   strikes fit — A · B · C · A · B — so no pair ever repeats back to back, which
+   is the failure the three pairs exist to prevent. Cut the cycle to twelve and
+   the third pair never fires at all; stretch it to thirty and the slide leaves
+   mid-cycle with a pair unseen.
+
+   Within a pair the two share one period and sit 0.36s apart, rather than
+   drifting on two. `/podium`'s deleted idle deliberately used three
+   incommensurate timelines so the marks could never fall into lockstep, and the
+   opposite is right here: locked, the pair reads as *one* light crossing the
+   crown. On two periods they would drift into reading as independent blinkers,
+   which is two moving things rather than one.
 
    ── Why a spark and not a sheen ──
 
@@ -1278,12 +1312,12 @@
 
    `transform-box: fill-box` is load-bearing. The initial value is `view-box`,
    so `transform-origin: center` on an SVG child resolves to the centre of the
-   *viewBox* — 64,64 on this artwork, which is the centre stone. Without it both
-   sparks scale about the crown's middle and swing across it on the way in,
+   *viewBox* — 64,64 on this artwork, which is the centre stone. Without it all
+   six sparks scale about that one point and swing in across the crown from it,
    which looks like a deliberate flourish and is a bug.
 
    The elements are `opacity: 0` in their own right, so cancelling the animation
-   leaves them invisible rather than leaving two static gold shapes welded to
+   leaves them invisible rather than leaving six static gold shapes welded to
    the crown. That is the same trap `.tv-crown-glyph` documents at the
    reduced-motion block, in the other direction — and it matters more now that
    the reduction is switching off something permanent. */
@@ -1293,20 +1327,20 @@
     transform: scale(0.25);
     animation-timing-function: cubic-bezier(0.16, 0.84, 0.44, 1);
   }
-  /* 4.08% of 6s is 245ms. Full size, then the long fade: a spark that faded as
+  /* 1.36% of 18s is 245ms. Full size, then the long fade: a spark that faded as
      fast as it arrived reads as a flicker — a fault — rather than as light
      moving off an edge. */
-  4.08% {
+  1.36% {
     opacity: 1;
     transform: scale(1);
     animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
-  /* 12% is 720ms, and everything after it is the wait. Both frames are stated
-     because a keyframe list that simply stopped at 12% would interpolate the
-     scale back up to the `0%` value across the remaining 5.28s — invisible at
+  /* 4% is 720ms, and everything after it is the wait. Both frames are stated
+     because a keyframe list that simply stopped at 4% would interpolate the
+     scale back up to the `0%` value across the remaining 17.28s — invisible at
      `opacity: 0`, and a spark that arrived already half-grown on every cycle
      after the first. */
-  12%,
+  4%,
   100% {
     opacity: 0;
     transform: scale(0.4);
@@ -2198,19 +2232,13 @@
     transform-box: fill-box;
     transform-origin: center;
     opacity: 0;
-    /* The first strike is at 1.50s — 70ms after the crown has finished
-       settling, so it reads as light catching a thing that has stopped moving
-       rather than as part of the bounce. Every strike after it is six seconds
-       later, which on a thirty-second slide is five in all. */
-    animation: tv-crown-glint 6s 1.5s infinite both;
-  }
-
-  /* The second, on the centre point, a third of a second behind the first. Far
-     enough apart to read as two events, close enough that the pair is one
-     gesture — and on the *same* six-second period, so it stays one gesture on
-     every repeat rather than drifting apart. */
-  .tv-crown-glint-2 {
-    animation-delay: 1.86s;
+    /* **No delay here — every spark states its own**, inline, from the same row
+       of `GLINTS` that places it. Six positions on three schedules is one fact
+       per spark, and splitting it across two files is how a spark ends up
+       firing from a tip it no longer sits on. The first strike lands at 1.50s,
+       70ms after the crown has finished settling, so it reads as light catching
+       a thing that has stopped moving rather than as part of the bounce. */
+    animation: tv-crown-glint 18s infinite both;
   }
 
   /* The travelling disc's two faces, during an overtake. Circles in their own
@@ -2379,7 +2407,9 @@
        reveal — they *are* the motion — so the reduction is removal. The opacity
        is restated for the same reason it is on the rule above: without it,
        cancelling the animation returns each spark to its own computed style,
-       and two gold stars would sit pinned to the metal forever. */
+       and **all six at once** would sit pinned to the metal forever — a crown
+       wearing every highlight it has, which is a worse picture than any single
+       frame of the animation. */
     .tv-crown-glint {
       animation: none;
       opacity: 0;

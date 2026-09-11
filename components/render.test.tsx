@@ -314,20 +314,40 @@ describe('Podium', () => {
     expect(host.querySelectorAll('.tv-crown-glyph')).toHaveLength(1)
 
     // **The glints are bounded by count, and by count alone now.** They loop —
-    // two sparks every six seconds, for as long as the slide is up — so unlike
-    // every other assertion in this test they are not a thing that stops. The
-    // count is therefore the whole of the budget: two, on the crown, on
-    // `/podium`. A spark on every stone, or one added to `/weekly`'s cards,
-    // renders beautifully and turns a single repeating gesture into a wall of
-    // twinkling, and it would pass every other test in this file.
+    // a pair strikes every six seconds, for as long as the slide is up — so
+    // unlike every other assertion in this test they are not a thing that
+    // stops. The count is therefore the whole of the budget: six positions on
+    // the crown, on `/podium`, firing two at a time. A spark on every stone, or
+    // one added to `/weekly`'s cards, renders beautifully and turns three brief
+    // events into a wall of twinkling, and it would pass every other test here.
     //
-    // The *period* is the other half and a render test cannot reach it; it
-    // lives in `@keyframes tv-crown-glint`, where the spark occupies 12% of a
-    // six-second cycle and the comment says to lengthen that before shortening
-    // it. Measure it in a browser, not here.
+    // **Six elements, two lit.** The number that governs what a passer-by sees
+    // is not this one — it is how many share each `animationDelay`, which is
+    // the line below. Six sparks on one delay is a crown that flashes all over
+    // at once and is still "six glints" to the assertion above it.
+    //
+    // The *period* is the third thing and a render test cannot reach it; it
+    // lives in `@keyframes tv-crown-glint`, where each spark occupies 4% of an
+    // eighteen-second cycle and the comment says to lengthen that before
+    // shortening it. Measure it in a browser, not here.
     const glints = [...host.querySelectorAll('.tv-crown-glint')]
-    expect(glints).toHaveLength(2)
+    expect(glints).toHaveLength(6)
     expect(glints.every((g) => g.closest('.tv-crown') !== null)).toBe(true)
+
+    // Three pairs, two sparks each, and no two pairs on the same beat. This is
+    // what stops the crown twinkling in one place — the whole of the change
+    // that put six positions on it rather than two.
+    const beats = glints.map((g) => (g as HTMLElement).style.animationDelay)
+    const perBeat = new Map<string, number>()
+    for (const b of beats) perBeat.set(b, (perBeat.get(b) ?? 0) + 1)
+    expect(perBeat.size).toBe(6)
+    expect([...perBeat.values()].every((n) => n === 1)).toBe(true)
+
+    // And the six sit in six distinct places. A table with a duplicated row
+    // fires two sparks from one point, which is the old behaviour wearing the
+    // new structure and looks exactly like a single brighter spark.
+    const places = new Set(glints.map((g) => g.getAttribute('d')))
+    expect(places.size).toBe(6)
 
     act(() => root.unmount())
     host.remove()
