@@ -311,6 +311,28 @@ describe('WallHeader', () => {
     // Provenance survives, so a frozen results board still says when it last read.
     expect(text).toContain('Updated')
   })
+
+  /**
+   * **The day count belongs to the challenge, not to the window.**
+   *
+   * Turning `challenge_mode` off deliberately leaves `challenge_start_iso` and
+   * `challenge_end_iso` in the sheet — the window is kept for next time rather
+   * than deleted, which is the whole reason the switch is its own cell. So the
+   * chip is perfectly computable here and must still not render: a board
+   * ranking the open week's revenue under `Day 2 of 14` tells a passer-by the
+   * figures below are a fortnight's, in the second-loudest element on the
+   * frame, with nothing anywhere to report it.
+   */
+  it('drops the day count in week mode even with a live window', () => {
+    vi.useFakeTimers({ toFake: ['Date'] })
+    vi.setSystemTime(new Date('2026-08-19T12:41:00+05:30'))
+    const text = render(
+      <WallHeader snapshot={snapshotAt(...WINDOW)} label="Weekly Leaderboard" mode="week" />,
+    )
+    expect(text).toContain('Weekly Leaderboard')
+    expect(text).not.toContain('Day')
+    expect(text).toContain('Updated')
+  })
 })
 
 describe('WeeklyGrid', () => {

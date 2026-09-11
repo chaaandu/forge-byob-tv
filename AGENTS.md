@@ -90,6 +90,18 @@ npm run build        # next build
   name-or-ID rather than not at all. Decided in
   `docs/superpowers/specs/2026-08-12-weekly-card-grid.md` §3; the doc was corrected to
   match the code, not the other way round.
+- **`/weekly` shows one of two contests, and `TV_Cohort`'s `challenge_mode` cell
+  picks which.** `Yes` ranks and prints `challenge_revenue` under a `10-Day
+  Challenge` heading with the day chip and the `Revenue since` caption; anything
+  else ranks and prints `week_revenue` as `Weekly Leaderboard` with both of those
+  gone. One cell, not two booleans — two have four states and only two mean
+  anything. Not derived from the `challenge_*_iso` dates either: those say *when*
+  and stay put through a switch-off, this says *whether*. Every unreadable value
+  falls to week, because `week_revenue` is required and always real while
+  `challenge_revenue` between challenges is whatever the consolidator last left
+  there — guessing wrong towards challenge is ₹0 on 39 cards, rendered perfectly.
+  `lib/board.ts` owns all of it, including folding the mode into the reset period
+  so flipping the cell does not read as 39 overtakes.
 - Currency: `Intl.NumberFormat('en-IN')` — `₹1,04,500`, not `₹104,500`.
 
 ## Traps that report nothing

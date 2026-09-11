@@ -3,7 +3,7 @@ import Image from 'next/image'
 import { AsOf } from '@/components/AsOf'
 import { ChallengeDay } from '@/components/ChallengeDay'
 import { cohortInstant } from '@/lib/feed'
-import type { Snapshot } from '@/lib/types'
+import type { BoardMode, Snapshot } from '@/lib/types'
 
 /**
  * The band across the top of `/weekly`: Mesa in the corner, the heading, the
@@ -40,7 +40,27 @@ import type { Snapshot } from '@/lib/types'
  * The as-of stamp goes the other way — down to a small tracked caption in muted
  * mint. It is provenance, and provenance recedes.
  */
-export function WallHeader({ snapshot, label }: { snapshot: Snapshot | null; label?: string }) {
+export function WallHeader({
+  snapshot,
+  label,
+  mode = 'challenge',
+}: {
+  snapshot: Snapshot | null
+  label?: string
+  /**
+   * Which contest is on. **The day count belongs to the challenge and leaves
+   * with it.**
+   *
+   * `challenge_start_iso` and `challenge_end_iso` stay in the sheet when
+   * `challenge_mode` goes to `No` — that is the point of a separate switch,
+   * the window is kept for the next time rather than deleted. But a board
+   * ranking the open week's revenue under a chip reading `Day 7 of 10` tells a
+   * passer-by the figures below are a fortnight's when they are not, and does
+   * it in the second-loudest element on the frame. The window still exists;
+   * this board is simply not the one measuring against it.
+   */
+  mode?: BoardMode
+}) {
   return (
     <header className="tv-band">
       <Image
@@ -62,10 +82,12 @@ export function WallHeader({ snapshot, label }: { snapshot: Snapshot | null; lab
       <div
         style={{ display: 'flex', alignItems: 'center', gap: 'var(--s-5)', justifySelf: 'end' }}
       >
-        <ChallengeDay
-          start={snapshot === null ? null : cohortInstant(snapshot.cohort, 'challenge_start_iso')}
-          end={snapshot === null ? null : cohortInstant(snapshot.cohort, 'challenge_end_iso')}
-        />
+        {mode === 'challenge' ? (
+          <ChallengeDay
+            start={snapshot === null ? null : cohortInstant(snapshot.cohort, 'challenge_start_iso')}
+            end={snapshot === null ? null : cohortInstant(snapshot.cohort, 'challenge_end_iso')}
+          />
+        ) : null}
         <AsOf snapshot={snapshot} />
       </div>
     </header>

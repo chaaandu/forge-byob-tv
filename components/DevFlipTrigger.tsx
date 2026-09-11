@@ -1,9 +1,9 @@
 'use client'
 
 import { devQueueClimb } from '@/lib/devOvertake'
-import { rankByChallenge } from '@/lib/ranking'
+import { rankForMode } from '@/lib/board'
 import { clearKicks, enqueueKicks } from '@/lib/storage'
-import type { OvertakeEvent, Team } from '@/lib/types'
+import type { BoardMode, OvertakeEvent, Team } from '@/lib/types'
 
 /**
  * Fire an overtake flip on demand, in development only.
@@ -55,18 +55,22 @@ const CASES: readonly { label: string; from: number; to: number }[] = [
 
 export function DevFlipTrigger({
   teams,
+  mode = 'challenge',
   week,
   onQueued,
   onReset,
 }: {
   teams: readonly Team[]
+  /** Ranked the way the board is ranked, so "rank 4 overtakes rank 2" picks the
+      two cards actually sitting in those slots. */
+  mode?: BoardMode
   week: number | null
   onQueued: () => void
   onReset: () => void
 }) {
   if (process.env.NODE_ENV === 'production') return null
 
-  const ranked = rankByChallenge(teams)
+  const ranked = rankForMode(mode, teams)
   const fire = (from: number, to: number) => {
     const attacker = ranked[from - 1]
     const defender = ranked[to - 1]

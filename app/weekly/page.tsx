@@ -7,9 +7,10 @@ import { DevFlipTrigger } from '@/components/DevFlipTrigger'
 import { WallHeader } from '@/components/WallHeader'
 import { WeeklyGrid } from '@/components/WeeklyGrid'
 import { WATCH_RANKS_WEEKLY } from '@/config'
+import { boardHeading, boardEarned, boardMode, boardPeriod, rankForMode } from '@/lib/board'
 import { baselineLabel } from '@/lib/challenge'
-import { cohortInstant, currentChallenge, openWeek } from '@/lib/feed'
-import { competingTeams, rankByChallenge } from '@/lib/ranking'
+import { cohortInstant, openWeek } from '@/lib/feed'
+import { competingTeams } from '@/lib/ranking'
 import { useDevOvertakes } from '@/lib/devOvertake'
 import { useKick } from '@/lib/useKick'
 import { useWallData, type BoardSpec } from '@/lib/useWallData'
@@ -34,19 +35,23 @@ import { useWallData, type BoardSpec } from '@/lib/useWallData'
 // wrong are invisible on screen — see that file for why they earn a test.
 export const BOARD: BoardSpec = {
   name: 'weekly',
-  rank: (teams) => rankByChallenge(competingTeams(teams)),
-  earned: (team) => team.challengeRevenue,
+  // **Both read the mode off the cohort they are handed**, rather than closing
+  // over one. The spec is a module constant so the 60-second loop is never torn
+  // down (see `useWallData`), which means the mode cannot be captured here — it
+  // is a property of each fetch, and `challenge_mode` can change between two.
+  rank: (teams, cohort) => rankForMode(boardMode(cohort), competingTeams(teams)),
+  earned: (team, cohort) => boardEarned(boardMode(cohort), team),
   // Ranks 1–20 are the top two rows of the grid. The old justification was "the
   // whole first column", which the columns took with them — see the spec's
   // WATCH_RANKS_WEEKLY note for why the number survived the reasoning.
   watchTo: WATCH_RANKS_WEEKLY,
-  // **Not `openWeek`, which is the default.** This board's figure resets when a
-  // challenge rolls over — a Tuesday — and not on the Monday a programme week
-  // turns. The two clocks never align: week 7 spans both the end of challenge 1
-  // and the start of challenge 2. Left at the default the wall would go deaf to
-  // real overtakes every Monday and stay talkative through the one tick where
-  // forty figures drop to zero together.
-  period: currentChallenge,
+  // **Not `openWeek`, which is the default**, and not `currentChallenge`
+  // either. Which of those two this board resets with is itself decided by
+  // `challenge_mode`, and the flip between them is a third reset that neither
+  // one can see — every card's figure changes in the poll the cell is edited.
+  // `boardPeriod` folds all three into one number so `detect` stays silent
+  // through each of them. Its docblock has the arithmetic.
+  period: boardPeriod,
 }
 
 export default function WeeklyPage() {
@@ -63,6 +68,10 @@ export default function WeeklyPage() {
   }, [kick, freeze, thaw])
 
   const week = snapshot === null ? null : openWeek(snapshot.cohort)
+  // **Week mode until the sheet says otherwise**, including before the first
+  // fetch lands. `boardMode`'s docblock has the argument: the safe guess is the
+  // one whose column always holds real figures.
+  const mode = snapshot === null ? 'week' : boardMode(snapshot.cohort)
   // In production this hook returns its argument — see lib/devOvertake.ts. In
   // development it is what makes a triggered climb change the standings, so a
   // flip settles onto a board that has actually re-sorted rather than onto the
@@ -93,10 +102,17 @@ export default function WeeklyPage() {
           about the number, so it is unconditional now, and the board keeps its
           masthead on a morning when the sheet is late.
 
-          `openWeek` is still read: `/weekly`'s board is the *open week's*
-          revenue whatever the heading says, and the value is what the dev
-          trigger stamps into an event id. */}
-      <WallHeader snapshot={snapshot} label="10-Day Challenge" />
+          **It does carry the contest**, which is a different thing from
+          carrying a number. `challenge_mode` decides which figure all
+          thirty-nine cards print, and a board titled `10-Day Challenge` while
+          ranking the week's revenue is the precise failure this project is
+          built around: entirely plausible, reported by nothing, and good for
+          weeks. The heading is not decoration here — it is the only thing on
+          the frame that says which contest the figures belong to.
+
+          `openWeek` is still read: it is what the dev trigger stamps into an
+          event id, whichever contest is on. */}
+      <WallHeader snapshot={snapshot} label={boardHeading(mode)} mode={mode} />
 
       <div
         style={{
@@ -110,6 +126,7 @@ export default function WeeklyPage() {
       >
         <WeeklyGrid
           teams={teams}
+          mode={mode}
           kick={kick}
           // One commit: the standings move and the kick clears together, so the
           // board is never seen reordering under a mark that has landed.
@@ -118,9 +135,13 @@ export default function WeeklyPage() {
             settled()
           }}
         />
+        {/* **The baseline caption belongs to the challenge and leaves with
+            it.** In week mode the figure is the open week's own revenue, which
+            has no photographed baseline to be "since" — printing one would
+            caption the board with a date its numbers are not measured from. */}
         <BoardLegend
           since={
-            snapshot === null
+            snapshot === null || mode !== 'challenge'
               ? null
               : baselineLabel(cohortInstant(snapshot.cohort, 'challenge_start_iso'))
           }
@@ -129,6 +150,7 @@ export default function WeeklyPage() {
 
       <DevFlipTrigger
         teams={teams}
+        mode={mode}
         week={week}
         onQueued={() => setDevTicks((n) => n + 1)}
         onReset={() => {

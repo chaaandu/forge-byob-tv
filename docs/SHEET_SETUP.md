@@ -81,6 +81,7 @@ Keep `as_of` exactly as it is. Delete the other twelve rows. Add two.
 | `as_of` | ✔ | **keep, unchanged** |
 | `current_open_week` | — | **add** |
 | `flea_datetime_iso` | — | **add** |
+| `challenge_mode` | — | **add** — `Yes` or `No`, see below |
 | `biggest_sale_today_team` / `_amount` | ✔ | delete |
 | `most_units_today_team` / `_count` | ✔ | delete |
 | `biggest_revenue_day_team` / `_amount` / `_date` | ✔ | delete |
@@ -235,6 +236,40 @@ the client and discards the tick, so all three rows must exist.
 | `as_of` | `=TEXT(MAX('Sync Status'!$B$2:$B$43),"dd mmm HH:mm")` |
 | `current_open_week` | `=MAX(1,INT((TODAY()-DATE(2026,7,20))/7)+1)` |
 | `flea_datetime_iso` | `2026-09-13T10:00:00+05:30` — **typed, not a formula** |
+| `challenge_mode` | `Yes` or `No` — **typed by hand, the one switch on the wall** |
+
+**Column A is matched exactly; column B is not.** Header names are trimmed and
+lowercased before parsing, but the *keys* in column A are only trimmed — so
+`Challenge_Mode` in A is a different key from `challenge_mode` and the client
+will never find it. Type the key lowercase. The value in B is read case-
+insensitively: `Yes`, `yes`, `Y` and a ticked checkbox all read the same.
+
+### `challenge_mode` — which contest `/weekly` shows
+
+`Yes` → the board is the **10-Day Challenge**: it ranks and prints
+`challenge_revenue`, the band reads `10-Day Challenge`, the `Day 7 of 10` chip
+appears, and the legend adds `Revenue since 4 Sept`.
+
+`No` → the board is the **Weekly Leaderboard**: it ranks and prints
+`week_revenue`, the band reads `Weekly Leaderboard`, and both the day chip and
+the `Revenue since` caption leave. Nothing else on the wall changes; `/podium`
+is all-time revenue either way and never looks at this cell.
+
+**Leave the two `challenge_*_iso` dates in place when you switch to `No`.** They
+are the window, not the switch, and you will want them back. The wall simply
+stops measuring against them.
+
+**Anything that is not a yes is a no** — blank, missing, `Nope`, a typo. That
+asymmetry is the safety margin and it only runs one way: `week_revenue` is a
+required column and always holds real figures, while `challenge_revenue` is
+optional and between challenges holds whatever the consolidator last left in it.
+Guessing wrong towards week puts true numbers under an honest heading. Guessing
+wrong towards challenge puts **₹0 on thirty-nine cards** — which renders
+perfectly, reports nothing, and would run for weeks.
+
+Deliberately **not** in `COHORT_KEYS`, so adding the row is not urgent and
+editing it mid-poll cannot discard a tick: a missing key there throws the whole
+fetch away. Until the row exists the wall is in week mode.
 
 **`as_of` reads `Sync Status`, not `NOW()`.** `NOW()` would restamp on every
 recalculation and the wall would look freshly updated even while the data underneath

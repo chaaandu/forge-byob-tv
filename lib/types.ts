@@ -93,6 +93,12 @@ export type Team = {
 export type Cohort = Readonly<Record<string, string>>
 
 /**
+ * Which contest `/weekly` is showing. Set by `challenge_mode` in `TV_Cohort`;
+ * everything that follows from it lives in `lib/board.ts`.
+ */
+export type BoardMode = 'challenge' | 'week'
+
+/**
  * Both CSVs, parsed together, and always constructed as a unit.
  *
  * `current_open_week` is what tells the wall a week rolled over and the weekly

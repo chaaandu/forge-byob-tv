@@ -43,8 +43,15 @@ export type WallData = {
 export type BoardSpec = {
   /** Storage namespace. `/podium` and `/weekly` must not share a memory. */
   name: string
-  rank: (teams: readonly Team[]) => Team[]
-  earned: (team: Team) => number
+  /**
+   * Both are handed the cohort as well as the teams, because `/weekly` ranks on
+   * a figure the *sheet* chooses — `challenge_mode` decides between the
+   * challenge total and the week's. The spec itself must stay a stable module
+   * constant (see the note at the foot of `tick`), so the mode cannot be baked
+   * into it at construction; it has to be read per fetch, from the fetch.
+   */
+  rank: (teams: readonly Team[], cohort: Cohort) => Team[]
+  earned: (team: Team, cohort: Cohort) => number
   watchTo: number
   /**
    * What counts as "the period this board's figure resets with", read off the
@@ -156,7 +163,7 @@ export function useWallData(board: BoardSpec): WallData {
       // is idempotent, and would cost a write for nothing.
       const { name, rank, earned, watchTo, period = openWeek } = board
       const { state, events } = detect(readBoard(name), {
-        ranked: rank(fresh.teams),
+        ranked: rank(fresh.teams, fresh.cohort),
         // `BoardState.week` keeps its name while carrying a challenge number on
         // `/weekly`. Renaming the stored field would change the shape of what
         // every TV holds in localStorage and force a storage key version bump —
@@ -166,7 +173,9 @@ export function useWallData(board: BoardSpec): WallData {
         // nothing. Which is exactly the seeding the version bump was for.
         week: period(fresh.cohort),
         watchTo,
-        earned,
+        // Bound to this tick's cohort rather than passed bare: `detect` calls it
+        // per team and has no cohort of its own to hand it.
+        earned: (team) => earned(team, fresh.cohort),
       })
       writeBoard(name, state)
       if (events.length > 0) {

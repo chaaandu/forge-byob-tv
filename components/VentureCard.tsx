@@ -5,10 +5,11 @@ import { motion, type Easing } from 'motion/react'
 
 import { VentureDisc } from '@/components/VentureDisc'
 import { SOLID_RANKS } from '@/config'
+import { boardEarned } from '@/lib/board'
 import { formatRupees } from '@/lib/format'
 import { BEATS, TOTAL, at, type FlipCue } from '@/lib/flipTimeline'
 import { nameOf } from '@/lib/team'
-import type { Team } from '@/lib/types'
+import type { BoardMode, Team } from '@/lib/types'
 
 /**
  * One team's card: a solid Deep Forest object carrying rank, mark, venture name
@@ -110,6 +111,7 @@ function travelMotion(cue: FlipCue) {
 export function VentureCard({
   team,
   rank,
+  mode = 'challenge',
   idle,
   delaySeconds,
   cue,
@@ -118,6 +120,10 @@ export function VentureCard({
 }: {
   team: Team
   rank: number
+  /** Which contest is on, from `challenge_mode`. The figure below is the one
+      the board sorted by — a card printing the other one turns every rank on
+      the board into a visible lie, with nothing to report it. */
+  mode?: BoardMode
   /** Set for one render on the two cards an overtake just settled, and on
       nobody else. It is what lets their details fade in after a remount without
       every unrelated re-sort doing the same. */
@@ -344,7 +350,7 @@ export function VentureCard({
           className="tv-figure tv-card-week tv-card-detail"
           style={{ font: 'var(--t-tv-card-week)', color: 'var(--card-fig-ink)' }}
         >
-          {formatRupees(team.challengeRevenue)}
+          {formatRupees(boardEarned(mode, team))}
         </div>
 
         {/* ── Today, back on the card ──

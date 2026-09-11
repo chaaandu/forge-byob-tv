@@ -4,8 +4,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { VentureCard } from '@/components/VentureCard'
 import { STAGGER, type FlipCue } from '@/lib/flipTimeline'
-import { rankByChallenge } from '@/lib/ranking'
-import type { OvertakeEvent, Team } from '@/lib/types'
+import { rankForMode } from '@/lib/board'
+import type { BoardMode, OvertakeEvent, Team } from '@/lib/types'
 
 /**
  * Slide 2 — the whole competing cohort as forty cards, ranked on this week's
@@ -82,8 +82,8 @@ const ROW_HEIGHTS = [
  * another, an overtake animates the wrong two cards — on a board that otherwise
  * looks entirely correct. `app/weekly/board.test.ts` pins them together.
  */
-export function rowsOf(teams: readonly Team[]): Team[][] {
-  const ranked = rankByChallenge(teams)
+export function rowsOf(teams: readonly Team[], mode: BoardMode = 'challenge'): Team[][] {
+  const ranked = rankForMode(mode, teams)
   return ROW_HEIGHTS.map((_, i) => ranked.slice(i * ROW_LENGTH, (i + 1) * ROW_LENGTH))
 }
 
@@ -159,10 +159,14 @@ export function cuesFor(grid: HTMLElement, kick: OvertakeEvent): Map<number, Fli
 
 export function WeeklyGrid({
   teams,
+  mode = 'challenge',
   kick = null,
   onSettled,
 }: {
   teams: readonly Team[]
+  /** Which contest is on, from `challenge_mode`. Decides the sort and the
+      figure every card prints — the two must never disagree. */
+  mode?: BoardMode
   /** The flip in progress, so the cards involved know what to do. */
   kick?: OvertakeEvent | null
   /** Called once, by the attacker's card, when the last beat finishes. */
@@ -198,7 +202,7 @@ export function WeeklyGrid({
     return () => clearTimeout(done)
   }, [kick])
 
-  const rows = rowsOf(teams)
+  const rows = rowsOf(teams, mode)
   const gridRef = useRef<HTMLDivElement>(null)
   const [cues, setCues] = useState<Map<number, FlipCue> | null>(null)
 
@@ -309,6 +313,7 @@ export function WeeklyGrid({
                 key={team.teamId}
                 team={team}
                 rank={rank}
+                mode={mode}
                 arriving={arriving.has(team.teamId)}
                 cue={cue}
                 onSettled={cue?.role === 'attacker' ? onSettled : undefined}
