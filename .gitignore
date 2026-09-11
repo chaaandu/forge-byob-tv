@@ -47,3 +47,7 @@ next-env.d.ts
 
 # Brainstorming companion mockups
 .superpowers/
+
+# Local copies of BYOB_MASTER. This project reads two published CSVs and never
+# writes to the master; a workbook export here is a working file, not a source.
+*.xlsx
