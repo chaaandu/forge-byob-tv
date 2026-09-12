@@ -680,17 +680,30 @@
      availability, which is why it never looked deliberate. A tag flush to the
      edge pays no inset and starts at the card's top corner.
 
-     28 wide rather than 24, and that width is what made the type possible: the
-     halo gives up 2px (8 to 6, still enough to union the two shapes) and the
-     tag takes 4. It clears the circle by 6.9px at 1920 and 5.0 at 1600.
+     31 wide. It was 24, then 28 — width is what made the type possible at all,
+     since a condensed numeral only earns its size if the box gives it optical
+     margin. The halo gave up 2px along the way (8 to 6, still enough to union
+     the two shapes) and the tag has taken the rest.
 
-     44 long against 28 wide is a 1.57 ratio — hanging rather than square — and
+     **This is the width where the corner runs out**, and what it runs out
+     against is the halo rather than the eye. The halo is painted by the mark's
+     seat, which sits a layer above the tag, so an overlap would put a band of
+     card colour *across* the tag — the clearance that has to stay positive is
+     tag-edge to halo-edge, and at 31 it is 3.9px at 1920 and **2.5px at 1600**.
+     Thin, and the tightest margin anything on this card has.
+
+     The *visible* separation is larger, because the halo is the card's own
+     colour: what the eye sees between the tag and the disc is the clearance
+     plus the halo, 9.9px at 1920 and 7.5 at 1600. Measured, not trusted — and
+     the next 3px do not exist without taking them from the mark.
+
+     44 long against 31 wide is a 1.42 ratio — hanging rather than square — and
      the number takes the head while the shaft stays empty, which is the part
      that says it hangs from something. 48 was built first and its foot came
      within **2.9px** of the venture name's box; the name is what this must
      never reach, so the length is bounded by the name rather than by the
      ratio. */
-  --w-card-ribbon: 1.4583vw; /* 28px */
+  --w-card-ribbon: 1.6146vw; /* 31px */
   --h-card-ribbon: 2.2917vw; /* 44px */
 
   /* How much of the mark stands above the card's top edge, as a fraction of its
@@ -2290,10 +2303,22 @@
        darkens instead. Nothing here names a colour. */
     background: color-mix(in srgb, var(--surface-solid) 78%, var(--ink));
 
-    /* Head tucked into the card's corner, foot a semicircle: half the width, so
-       the arc meets both sides tangentially at every viewport. */
-    border-radius: var(--r-card) 0 calc(var(--w-card-ribbon) / 2)
-      calc(var(--w-card-ribbon) / 2);
+    /* ── Three corners, and the fourth is square on purpose ──
+
+       Head tucked into the card's top-left with the card's own radius, so the
+       two curves are one line. Foot rounded on the **inner** corner only, at
+       half the width, so the arc meets the right-hand side tangentially at
+       every viewport.
+
+       **The outer bottom corner is 0.** It was `w / 2`, and that was wrong for
+       a reason worth stating: the tag's left side *is* the card's left edge, so
+       a radius there curves the tag away from the edge it is attached to and
+       leaves a crescent of card colour between them. The tag stopped reading as
+       fixed to the card and started reading as floating beside it. Square, the
+       left side runs straight down the card's edge and the rounding happens
+       only where the tag ends — which is what a thing hanging off an edge
+       actually looks like. */
+    border-radius: var(--r-card) 0 calc(var(--w-card-ribbon) / 2) 0;
 
     /* The number sits in the head; the shaft below is deliberately empty. */
     display: grid;
