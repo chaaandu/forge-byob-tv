@@ -3,6 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { motion, type Easing } from 'motion/react'
 
+import { Crown } from '@/components/Crown'
 import { VentureDisc } from '@/components/VentureDisc'
 import { SOLID_RANKS } from '@/config'
 import { boardEarned } from '@/lib/board'
@@ -290,6 +291,98 @@ export function VentureCard({
         {rank}
       </span>
 
+      {/* ── The mark, on the cell rather than in the card ──
+
+          Centred on the card's top edge: upper half on the page, lower half
+          overhanging the card. It is the only object on either slide that
+          crosses a boundary, and that is the whole reason it is here — see
+          `--h-mark-out`. A child of the card could not do it.
+
+          `--d-card-logo` is published by the row, so every mark in a row is
+          the same size and the seat is square, which is what lets the crown's
+          percentage placement resolve identically here and on `/podium`. */}
+      <motion.div
+        {...travel}
+        className="tv-mark-seat"
+        // The travel is the longest-running property in the sequence, so its
+        // completion is the sequence's. Component-level, not
+        // transition-level: the old kick measured the per-transition
+        // `onComplete` never firing at all once the transition carried
+        // per-property overrides, which wedged the queue with nothing on
+        // screen progressing.
+        onAnimationComplete={attacker ? onSettled : undefined}
+        style={{
+          // ── The marks live in a layer above every card ──
+          //
+          // `position` matters as much as the number, and `.tv-mark-seat`
+          // supplies it: a static element takes no z-index at all. With the
+          // cells no longer creating stacking contexts every one of these
+          // resolves against the same root, so a mark is above every card
+          // whatever the DOM order, and a travelling mark is above every
+          // resting mark. It is also what puts the overhang in front of its
+          // own card rather than behind it.
+          zIndex: cue === undefined ? 2 : 5,
+          // **On the mark's direct parent, not on the cell.** `perspective`
+          // applies only to an element's own children, so one level further up
+          // it does nothing and the turn renders orthographically — a flat
+          // squash rather than a mark tipping its face. Measured while it sat
+          // on the cell: the disc's height was exactly cos(30°) of its width,
+          // which is the signature of no perspective at all.
+          perspective: '900px',
+        }}
+      >
+        {/* ── The crown, on first place, on this slide too ──
+
+            `AGENTS.md` spends gold's entire budget on "one glyph, one rank, one
+            slide", and this is the same glyph on the same rank on the other
+            slide — the leader wears it wherever the leader is drawn, which is
+            the opposite of a second gold object. The component, the tokens and
+            the placement percentages are `/podium`'s, unchanged, so the two
+            boards cannot drift into crowning first place two ways.
+
+            Drawn **after** the disc, so it sits in front of the mark.
+
+            It was behind, on the argument that a crown overlapping the monogram
+            would cover the one thing on the card that identifies the venture.
+            Measured on the running board, behind was the worse failure: the
+            disc cut the crown's lower-right clean off, so what rank 1 actually
+            wore was a gold fragment peeking out beside its head — a sticker
+            stuck to the card rather than a crown on anything.
+
+            **The rim is what makes front work**, and the two changes arrived
+            together for that reason. `Crown`'s contact corner sits about 9% of
+            the diameter inside the disc's edge, which is exactly the band
+            `--mark-rim` paints; so the crown now rests on the mark's *edge*
+            rather than on its face, and covers no part of the monogram or the
+            artwork. In front of a flat disc it would have been a sticker over a
+            logo. In front of a rimmed one it is a crown on a head.
+
+            It lands on mount and stops — `Crown`'s drop is one run — so an
+            overtake into first place is a crown arriving on the new leader,
+            which is exactly the event this board exists to show.
+
+            **`glint={false}`, and that is where the borrowing stops.** The
+            sparks are a looping animation, and this board's one job is to say
+            that a rank changed hands with a two-and-a-half-second interrupt
+            against thirty-nine still cards. An interrupt only reads as one
+            against a still frame. `Crown`'s own docblock carries the argument;
+            it is the same one that removed row 1's idle. */}
+        <div style={{ display: 'grid', placeItems: 'center', width: '100%', height: '100%' }}>
+          <VentureDisc
+            team={team}
+            idle={idle}
+            delaySeconds={delaySeconds}
+            {...(flips ? { flipShift: cue.shift } : {})}
+          />
+        </div>
+
+        {rank === 1 ? (
+          <span className="tv-crown">
+            <Crown className="tv-crown-glyph" glint={false} />
+          </span>
+        ) : null}
+      </motion.div>
+
       <motion.div
 
         className={[
@@ -305,82 +398,40 @@ export function VentureCard({
           .filter(Boolean)
           .join(' ')}
         style={{
+          // **Not `inset: 0`.** The card starts `--h-mark-out` below the cell's
+          // top, and the strip above it is where the mark's upper half floats.
           position: 'absolute',
-          inset: 0,
+          top: 'var(--h-mark-out)',
+          left: 0,
+          right: 0,
+          bottom: 0,
           display: 'grid',
-          // **Four rows, and the first one is the head band.** It used to be
-          // five: a strip for the rank, the mark, the name, the figure and a
-          // fifth row at the bottom holding the day capsule. That fifth row was
-          // reserved on all thirty-nine cards and drawn on six, which is the
-          // empty band that sat under every `₹0`, and it cost every mark on the
-          // board 34px it could not spare — measured, the mark was 40% of its
-          // own card.
+          // ── FOUR ROWS, AND THE FIRST ONE IS HALF A MARK ──
           //
-          // The capsule sits in the head band now, at the right-hand end. The
-          // rank is absolutely positioned over the left of that same band and
-          // belongs to the *cell* rather than to this card (see the note on the
-          // rank above), so the band was 155.6px wide and spending 26.6px of
-          // it. Sharing it costs nothing and returns the whole fifth row to the
-          // marks: 90.6 → 113.1px on row 1, 66.2 → 88.7 on row 4.
+          // The mark is not in this grid at all any more. It sits on the cell,
+          // centred on the card's top edge, with its upper half on the page and
+          // its lower half overhanging the card — so what the card reserves is
+          // `--h-mark-in`, the height the overhang covers, and the rest of the
+          // stack starts below it.
           //
-          // The band is still reserved on ranks 1-3, whose numeral is outside
-          // the card entirely — without it their discs would sit a strip higher
-          // than row 1's other seven and the row would read as broken.
+          // That row replaced two things and is smaller than either pair: the
+          // card's top padding and a 12px band held open for the rank numeral,
+          // which is absolutely positioned and reserves its own line box. The
+          // mark came out of it 4px *larger* than when it was inside the card.
           //
           // No `gap`. Every one of these tracks carries its own separation, so
           // nothing leaves a gap behind if it ever stops being drawn.
           gridTemplateRows:
-            'var(--h-card-head) auto var(--h-card-name) var(--h-card-fig) var(--h-card-today)',
+            'var(--h-mark-in) var(--h-card-name) var(--h-card-fig) var(--h-card-today)',
           justifyItems: 'center',
           alignContent: 'start',
           minWidth: 0,
         }}
       >
-        {/* The head band: the rank, and the rank only. The rank numeral is
-            absolutely positioned on the *cell* rather than on this card (see
-            the note on it above), so what this row contributes is the height
-            the mark is not allowed to enter — reserved on ranks 1-3 as well,
-            whose numeral is larger, so their discs do not sit a strip higher
-            than row 1's other seven. */}
+        {/* The strip the overhanging half of the mark covers. Empty, and it has
+            to be: the mark is on the cell, a layer above every card, so a card
+            that tried to hold it would clip it at its own top edge. */}
         <span aria-hidden="true" />
-        <motion.div
-          {...travel}
-          // The travel is the longest-running property in the sequence, so its
-          // completion is the sequence's. Component-level, not
-          // transition-level: the old kick measured the per-transition
-          // `onComplete` never firing at all once the transition carried
-          // per-property overrides, which wedged the queue with nothing on
-          // screen progressing.
-          onAnimationComplete={attacker ? onSettled : undefined}
-          style={{
-            display: 'grid',
-            placeItems: 'center',
-            // ── The marks live in a layer above every card ──
-            //
-            // `position` matters as much as the number: this wrapper was
-            // `static` and carried `zIndex: 4`, which does nothing at all — a
-            // static element takes no z-index. With the cells no longer creating
-            // stacking contexts, every one of these resolves against the same
-            // root, so a mark is above every card whatever the DOM order, and a
-            // travelling mark is above every resting mark.
-            position: 'relative',
-            zIndex: cue === undefined ? 2 : 5,
-            // **On the mark's direct parent, not on the cell.** `perspective`
-            // applies only to an element's own children, so one level further
-            // up it does nothing and the turn renders orthographically — a flat
-            // squash rather than a mark tipping its face. Measured while it sat
-            // on the cell: the disc's height was exactly cos(30°) of its width,
-            // which is the signature of no perspective at all.
-            perspective: '900px',
-          }}
-        >
-          <VentureDisc
-            team={team}
-            idle={idle}
-            delaySeconds={delaySeconds}
-            {...(flips ? { flipShift: cue.shift } : {})}
-          />
-        </motion.div>
 
         {/* **The name is back.** The mark identifies a venture to anyone who
             already knows it; the name is what the other thirty-nine teams read.

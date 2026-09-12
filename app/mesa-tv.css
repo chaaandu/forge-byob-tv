@@ -62,6 +62,12 @@
      if the wall's laptop has neither. Checked on the machine measuring this:
      see the QC note for which one is in use. */
   --font-serif: var(--font-mesa-serif), 'New York', ui-serif, Georgia, serif;
+  /* The rank numeral's face — Fraunces Italic, nine glyphs. See `app/layout.tsx`
+     for why a fifth family exists and why the italic is declared on the face
+     rather than asked for in CSS. The serif behind it is a fallback that should
+     never be reached, and would be visibly wrong if it were: this project's
+     serif ships no italic, so it would render a synthesised oblique. */
+  --font-rank: var(--font-rank-italic), var(--font-serif);
   --font-sans: var(--font-mesa-body), ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
     Helvetica, Arial, sans-serif;
 
@@ -367,7 +373,7 @@
      each card carries less height. */
   /* The same 16. See `--s-card-gap`; these are one decision and must not drift
      apart again. The hairline this once had to make room for is long gone. */
-  --s-row-gap: var(--s-card-gap);
+  --s-row-gap: 2.0833vw; /* 40px — the air a breakout mark floats in */
 
   /* The card's horizontal padding. It went to zero while the cells were
      unbounded — with no card, all it did was push the rank numeral 8px in from
@@ -378,7 +384,7 @@
      what puts it there. 0.4vw is 7.7px, which is what it was; the alignment
      that mattered when the box was invisible does not, now that the box is the
      thing the eye reads the numeral against. */
-  --s-card-inset: 0.5208vw; /* 10px */
+  --s-card-inset: 0.4167vw; /* 8px */
 
   /* ── The today delta ──
 
@@ -410,7 +416,7 @@
      cell used: a visible edge needs clearance from its contents, where an
      invisible one only needed to not collide with the row gap. It costs each
      row ~7.7px of mark. */
-  --s-card-pad-y: 0.5208vw; /* 10px */
+  --s-card-pad-y: 0.5208vw; /* 10px — the card's *bottom* only; see .tv-card */
 
   /* How far the card's contents sit above where the padding alone would put
      them. 0.31vw is 6px at 1920 and 5px at 1600 — inside the 7.7px and 6.4px of
@@ -421,11 +427,19 @@
      row and has pulled their top padding to zero, so there is nothing left to
      give. */
 
-  /* The board's margin under the masthead rule, and above the footer line.
+  /* ── The board's top margin, and the crown is what sets it ──
 
-     The top one is the whole distance between the rule and row 1's numerals, so
-     it is the single value that moves all four rows up or down together. */
-  --s-board-top: var(--s-1);
+     It was `--s-1` (4px) while nothing reached above row 1. The mark breaks its
+     card's top edge now, so a cell starts at its *mark* rather than at its
+     card — and rank 1's crown hangs 18% of a disc above even that, which put a
+     gold object 6.2px under the masthead's hairline. Measured:
+     `crownTopVsBoard` was -17.8px at 1920 against 24px of total margin.
+
+     24px here puts the crown 26px clear of the rule. It costs 20px of board,
+     which is 5px off every mark on the wall, and that is the right direction to
+     pay: a crown grazing a rule looks like a rendering fault on a screen nobody
+     is close enough to resolve. */
+  --s-board-top: 1.25vw; /* 24px */
   --s-board-bottom: var(--s-1);
 
   /* ══ THE EDITORIAL FRAME ══════════════════════════════════════════════════
@@ -560,14 +574,66 @@
 
      `--h-rank-line` stays separate from the band, so no numeral moves a pixel
      whatever the band does. */
-  /* How tall the rank numeral's own line box is — not the band it sits in. */
-  --h-rank-line: 1.25vw; /* 24px */
-  /* The card's head band: the rank numeral, and nothing else. It held the day
-     capsule at its right-hand end for a while — see `.tv-card-today` for why
-     that came back out — so it needed the capsule's 24px. The numeral is
-     absolutely positioned and reserves its own line box in `--h-rank-line`, so
-     what is left here is only how far down the mark starts. */
-  --h-card-head: 0.625vw; /* 12px */
+  /* The rank numeral's own line box, and it is the *type's* size rather than a
+     round number above it. The numeral is absolutely positioned between a
+     circle above-right of it and a venture name below, so every pixel of line
+     box it does not need is a pixel of clearance spent on nothing. */
+  --h-rank-line: 0.9375vw; /* 18px */
+  /* ── THE MARK BREAKS THE CARD'S TOP EDGE ──
+
+     There is no head band any more, because the mark is no longer inside the
+     card. Its centre sits **on** the card's top edge: the upper half floats
+     free on the page, the lower half is the card's first row.
+
+     What that buys is depth on a slide that has none. The wall is one flat
+     field with thirty-nine flat rectangles on it, and every device usually
+     available for depth is ruled out here — no shadow reads on Deep Aubergine,
+     no lighting survives the brand rules, and nothing is allowed to move. An
+     object crossing a boundary is the one cue left that does not need any of
+     those: the mark is unambiguously *in front of* the card because it covers
+     its edge, and that is legible at six metres where a 1px stroke or a 4%
+     gradient is not.
+
+     It also costs nothing, which is the part worth stating. The card's top
+     padding and the 12px rank band are both inside the mark's outset now, so
+     the mark is **larger** than when it sat in the card — 95.25px against
+     91.25 — while the card itself is 47px shorter and reads as a caption block
+     under an object rather than as a box with an object in it.
+
+     `--h-mark-out` is the half above the card and therefore the height of the
+     cell's headroom; `--h-mark-in` is the card's first grid row. They are the
+     same number by definition and are written as two names because they are
+     read in two different places, and a future crop that is not half-and-half
+     would move only one of them.
+
+     **Both are declared on `.tv-card-row`, not here**, and that is not a
+     stylistic choice — it is this file's own documented trap, walked into once
+     while writing them. A custom property's `var()`s are substituted where the
+     property is *declared*, so `calc(var(--d-card-logo) / 2)` written at
+     `:root` resolves against a `--d-card-logo` that only exists on the row:
+     the calc is guaranteed-invalid, and guaranteed-invalid *inherits*. Every
+     descendant then reads an invalid value, `top` falls back to `auto` and
+     `grid-template-rows` is dropped entirely — so the card bottom-anchored
+     itself, sized to its content, and the board rendered thirty-nine perfectly
+     plausible cards at the wrong height with no error anywhere. Measured, not
+     noticed. */
+
+  /* How far below the card's top edge the rank numeral starts.
+
+     The numeral and the mark compete for the card's top-left, and the circle is
+     at its widest exactly where the card's edge cuts it — so a numeral flush
+     with that edge has the least room it will ever have. Dropping it clears the
+     curve: the disc's half-width at depth `t` is `sqrt(r² - t²)`, so every pixel
+     of drop widens the corner the numeral sits in.
+
+     **It is bounded at both ends**, which is why it is 26 and not 40. Dropping
+     further buys horizontal clearance and spends vertical: the numeral's box
+     has to finish above where a *wrapped* venture name begins, and a wrapped
+     name starts only 6px under the mark.
+
+     Measured at all four viewports rather than trusted. The worst case on the
+     board is rank 20 — two digits, and Fraunces' italic `2` and `0` are wide. */
+  --s-rank-drop: 1.3542vw; /* 26px */
   /* 46.5px: two 17.25px lines and **6px before the figure**, with whatever a
      one-line name does not use falling *above* it. Which end of this box the
      slack lands on is the whole design of it — see `.tv-card-name`. */
@@ -696,9 +762,29 @@
 
      Serif went with the size. One face on the frame, at three sizes, is the
      whole type system on these two slides now. */
-  --t-tv-card-rank: 700 var(--fs-5) / 1 var(--font-sans);
+  /* ── The rank, set as a folio ──
+
+     It was `700 --fs-5` in the sans with `--track-overline` and tabular figures
+     — the correct way to set a number in a table, and this is not a table. Ten
+     of them across a row, four rows down, in the same face as every other
+     number on the slide, read as a spreadsheet's row index: apparatus that had
+     become the visual equal of the money beside it.
+
+     Fraunces Italic at `--fs-4` instead, one step up in size and several in
+     character. A serif italic numeral beside an object is a *folio* — a page
+     number, a plate number, the label an editorial page puts on a thing — which
+     is exactly what a rank is. It cannot be confused with the rupee figures
+     under it, because nothing else on either slide is italic or serif.
+
+     **No `tabular-nums` and no tracking.** Both were doing the table's job.
+     Fraunces' italic digits are proportional by design and a `1` that takes a
+     `1`'s width is the point of setting it this way. */
+  --t-tv-card-rank: italic 600 var(--fs-5) / 1 var(--font-rank);
   /* Ranks 1-3. The one step up, and it replaces the metals outright. */
-  --t-tv-card-rank-lead: 800 var(--fs-4) / 1 var(--font-sans);
+  /* The top three, one step larger and in the surface's accent. The face is
+     the same — the distinction is size and ink, as it is everywhere else on
+     this board. */
+  --t-tv-card-rank-lead: italic 600 var(--fs-4) / 1 var(--font-rank);
 
   /* ── The mark's legibility floor ──
 
@@ -1029,8 +1115,57 @@
      of the column — which leaves a little over 200px of air above and below it.
      Air a group is centred in reads as a field; air a group has fallen to the
      bottom of reads as a fault. See `alignSelf` in components/Podium.tsx. */
-  --d-pod-disc: 14.5833vw; /* 280px */
-  --d-pod-disc-rest: 11.25vw; /* 216px */
+  /* **210 and 170, down from 280 and 216, because the mark no longer has to
+     be the podium.** With a plinth under each place the height is carried by
+     the block and the metal by its edge, so the disc is back to being what
+     it is on `/weekly`: the venture's identity, floating over its seat. Both
+     are still three to four times the 48px legibility floor. */
+  --d-pod-disc: 10.9375vw; /* 210px */
+  --d-pod-disc-rest: 8.8542vw; /* 170px */
+
+  /* ── The stage: three plinths, and the numbers that draw them ──
+
+     Widths first. 330 · 280 · 280 with 24px between is 938px, inside a
+     1010px column with 36px either side — and the leader's figure at its
+     widest (`₹1,00,00,000`, twelve glyphs at 48px, ~300px) fits its 330px
+     block without touching the gaps. `--s-pod-gap` is the gap and is unchanged.
+
+     Heights are the ranking, stated as a staircase a corridor can read: 320
+     · 230 · 170, so 1 stands 90px over 2 and 2 stands 60px over 3. Not equal
+     steps, on purpose — the leap to first place is the one the wall is
+     about, and a podium with three equal risers reads as a bar chart.
+
+     The top slab is drawn as a trapezoid seen from slightly above; 26px is
+     enough to read as a *face* at 1920 rather than as a border. */
+  --w-stage-1: 17.1875vw; /* 330px */
+  --w-stage-rest: 14.5833vw; /* 280px */
+  --h-stage-face-1: 16.6667vw; /* 320px */
+  --h-stage-face-2: 11.9792vw; /* 230px */
+  --h-stage-face-3: 8.8542vw; /* 170px */
+  --h-stage-top: 1.3542vw; /* 26px */
+  /* Between the figure and the slab it is printed over. Tighter than the
+     mark-to-name gap so the name and figure group with the block under them
+     rather than with the mark above. */
+  --s-stage-lift: 1.1458vw; /* 22px */
+  /* Air under the three blocks for the light they throw on the floor. It is
+     the only slack the stage keeps at the bottom: everything else goes above
+     the leader, which is where the cone of light is. */
+  --s-stage-floor: 2.9167vw; /* 56px */
+  /* The numeral on the face. First place's is a step up, like its figure. At
+     150px it is the largest glyph on either slide and it is meant to be —
+     the numeral is the one thing on this board legible from the far end of
+     the corridor. */
+  --t-stage-numeral: 800 7.8125vw / 1 var(--font-sans);
+  --t-stage-numeral-rest: 800 5.7292vw / 1 var(--font-sans);
+  /* The lip: the pale specular along the front edge of the slab. */
+  --h-stage-lip: 0.2083vw; /* 4px */
+  /* How far the three blocks rise, and how long they take. Seven tenths of a
+     second, staggered 3 · 2 · 1 by `--stage-delay` on each slot, so the last
+     block to settle is the leader's, at 0.86s; the mark and details fade in
+     over the top of that and the crown — whose own clock in `.tv-crown-glyph`
+     is untouched — lands at 1.43s on a stage that has been still for half a
+     second. **Lengthen the crown's delay before shortening this.** */
+  --dur-stage-rise: 0.7s;
 
   /* ── The crown ──
 
@@ -1065,16 +1200,19 @@
      each other **horizontally** — 20.4px at 1920 — while overlapping
      vertically by design. `scripts/measure-crown.mjs` checks both axes for
      that reason: a vertical gap on its own reports a collision every time. */
-  --d-crown: 34%;
+  /* **42%, up from 34%, because the disc shrank.** 34% of the old 280px disc
+     was 95px; 42% of 210 is 88px, which keeps the crown within a few pixels
+     of the size the paragraph above argued for. `--y-crown` moves with it: a
+     taller crown in a square box has its base band further from the box's
+     top, so the box hangs higher to keep the band on the same rim. */
+  --d-crown: 42%;
   --x-crown: 4%;
-  --y-crown: -18%;
+  --y-crown: -25%;
   --r-crown: -20deg;
 
-  /* Air between a rank numeral and the mark under it, and between the mark and
-     the name under that. The numeral sits closer to its mark than the mark does
-     to its name, so a place reads top-down as one object rather than as a
-     numeral over a card. */
-  --s-pod-num-gap: 0.8333vw; /* 16px */
+  /* Air between the mark and the name under it, and between the name and the
+     figure. `--s-pod-num-gap` was here too — the numeral sat above the mark —
+     and went when the numeral moved onto the plinth's face. */
   --s-pod-mark-gap: 1.25vw; /* 24px */
   --s-pod-name-gap: 0.4167vw; /* 8px */
 
@@ -1511,6 +1649,47 @@
 
    Transform only, so this is compositor work rather than layout. */
 
+/* ── The stage rising, once, on mount ──
+
+   `/podium`'s three plinths grow up out of the floor when the slide arrives,
+   and the mark, name, figure and numeral fade in over the top of them. This
+   is an *arrival* in the sense `AGENTS.md` uses for the crown: it runs once,
+   `both`, no iteration count, and is over well before the crown lands. The
+   board is then still.
+
+   **`scaleY` on the block, never a height.** A height animation relayouts the
+   column on every frame, and the column is what `useCentroidShift` and
+   `measurePath` read — an overtake fired during the first second would be
+   measured against a podium that was still growing. A transform changes no
+   layout, so every measurement is right from the first frame whether or not
+   the block has finished rising.
+
+   The fades are opacity only, for the same reason and one more: a transform
+   on the mark band would be a second transform under the crown, and the
+   crown is welded to that box. */
+@keyframes tv-stage-rise {
+  0% {
+    opacity: 0;
+    transform: scaleY(0.04);
+  }
+  35% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes tv-stage-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
 @layer components {
   /* Class rules live here, not at the top level, so Tailwind utilities can
      still override them. See the `.overline` note in globals.css for what
@@ -1581,13 +1760,18 @@
       min(
         calc(
           (
-              var(--h-row) - 2 * var(--s-card-pad-y) - var(--h-card-head) -
-                var(--h-card-name) - var(--h-card-fig) - var(--h-card-today)
+              var(--h-row) - var(--s-card-pad-y) - var(--h-card-name) -
+                var(--h-card-fig) - var(--h-card-today)
             ) * var(--k-mark, 1)
         ),
         calc(var(--w-card) - 2 * var(--s-card-inset))
       )
     );
+
+    /* Declared here, with `--d-card-logo`, and never at `:root` — see the note
+       on these two tokens for the invalid-inheritance trap that forces it. */
+    --h-mark-out: calc(var(--d-card-logo) / 2);
+    --h-mark-in: calc(var(--d-card-logo) / 2);
   }
 
   /* ── The floating disc ──
@@ -1718,9 +1902,68 @@
     --card-hot-ink: var(--accent);
     --card-fig-ink: var(--ink);
 
-    background: var(--surface-raised);
+    /* ── A gradient, and a narrow one ──
+
+       Flat `--surface-raised` was right while the card was a box with a mark
+       inside it: one value of contrast, enough to bound, nothing to compete
+       with thirty-nine pieces of artwork. With the mark crossing the top edge
+       the card is *behind* something, and a surface that is behind something
+       and perfectly even reads as a shape rather than as a ground.
+
+       Two stops, both tokens, about a fifth of the way to the page colour at
+       the foot. It is under the threshold at which anyone would call it a
+       gradient from the corridor; what it does is stop the bottom edge of
+       thirty-nine cards being a hard value step against the page, which is what
+       makes a flat rectangle look stuck on rather than laid down.
+
+       `color-mix` against `--surface`, so the fade goes towards whatever the
+       page turns out to be and the light surface gets the same treatment
+       inverted for free. No third colour is named, here or anywhere. */
+    background: linear-gradient(
+      to bottom,
+      var(--surface-raised),
+      color-mix(in srgb, var(--surface-raised) 78%, var(--surface))
+    );
     border-radius: var(--r-card);
-    padding: var(--s-card-pad-y) var(--s-card-inset);
+    /* **No top padding.** The card's first grid row is the lower half of the
+       mark that overhangs it, so the mark's own outset is the padding — see
+       `--h-mark-out`. The bottom is the only side that still needs air, since
+       the day delta ends the card. */
+    padding: 0 var(--s-card-inset) var(--s-card-pad-y);
+  }
+
+  /* ── The mark's seat ──
+
+     Absolutely positioned on the *cell*, not on the card, because half of it is
+     outside the card. Owning the cell also means the seat survives the card's
+     fade during a flip: `.tv-card-away` dims the details and the mark keeps
+     travelling at full strength, which is the one thing that should be visible
+     while it moves.
+
+     `left` rather than a `translateX(-50%)`: Motion animates `x` on this
+     element during an overtake and writes the whole `transform`, so a centring
+     transform in the style attribute is silently overwritten on the first frame
+     of every flip — the mark would jump half its width sideways and back.
+
+     **No shadow under it, and that was tested rather than assumed.** A drop
+     shadow is what the light-UI reference this borrows from uses to float an
+     object off a card, and `--shadow-lg` was rendered here and photographed:
+     on Deep Aubergine it is invisible. It cannot not be — a shadow works by
+     being darker than its ground, and this ground is already dark. The depth
+     cue that survives a dark surface is **occlusion**, which is exactly what
+     the overhang is, and it reads at six metres where a soft shadow would not
+     read at one.
+
+     It is square by construction so `--x-crown` / `--y-crown` / `--d-crown` —
+     all percentages of their containing block — resolve against the disc the
+     way they do on `/podium`, and one crown places itself identically on both
+     slides. */
+  .tv-mark-seat {
+    position: absolute;
+    top: 0;
+    left: calc(50% - var(--d-card-logo) / 2);
+    width: var(--d-card-logo);
+    height: var(--d-card-logo);
   }
 
   /* ── The bottom half of the board is quieter, and it is the ink that says so ──
@@ -1831,15 +2074,18 @@
      content. */
   .tv-card-rank {
     position: absolute;
-    /* The card's padding box, not the cell's top edge. While the cells were
-       unbounded these were the same line; with a card the numeral has to sit
-       inside its own padding or it rides the card's top edge. */
-    top: var(--s-card-pad-y);
+    /* Below the card's top edge by `--s-rank-drop`, which is where the mark's
+       circle has curved far enough out of the corner to leave room — that token
+       carries the arithmetic. `--h-mark-out` is the card's own top, so this
+       moves with the mark rather than needing to be re-tuned beside it. */
+    top: calc(var(--h-mark-out) + var(--s-rank-drop));
     left: var(--s-card-inset);
     z-index: 2;
     font: var(--t-tv-card-rank);
-    letter-spacing: var(--track-overline);
-    font-variant-numeric: tabular-nums;
+    /* **No tracking and no tabular figures.** Both were the sans numeral doing
+       a table's job. Fraunces' italic digits are proportional by design, and a
+       `1` that takes a `1`'s width is the point of setting a rank as a folio
+       rather than as a row index. */
     line-height: var(--h-rank-line);
     color: var(--ink-muted);
   }
@@ -2364,12 +2610,21 @@
      line, so the biggest mark is also the highest. */
   .tv-pod-slot {
     position: relative;
-    flex: 1;
+    /* A stated width per place rather than `flex: 1`, because the leader's
+       block is wider than the other two and the widths are the plinths'.
+       `.tv-stage-1` overrides the basis. */
+    flex: 0 0 var(--w-stage-rest);
     min-width: 0;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-end;
+    /* A stacking context of its own, so the light behind the leader can sit
+       at `z-index: 0` under the slot's content without falling behind the
+       page. Without this a negative or zero z-index resolves against the
+       root and the cone paints *under* `<main>`'s gradient — present in the
+       DOM, invisible on the wall. */
+    isolation: isolate;
     /* **No drop shadow.** It was a `filter`, which forces `transform-style:
        flat` on the whole subtree — the mark's turn during an overtake depends
        on a 3D context, and this rule was one `filter` away from flattening it.
@@ -2378,33 +2633,252 @@
        to describe. */
   }
 
-  /* The rank numeral, above its mark. Same size on all three: the *mark* is
-     what carries the ranking, and a numeral ramp on top of a mark ramp is the
-     same fact stated twice at the cost of the numerals no longer aligning. */
-  .tv-pod-numeral-slot {
-    display: grid;
-    place-items: center;
-    padding-bottom: var(--s-pod-num-gap);
+  /* ══ THE STAGE ════════════════════════════════════════════════════════════
+
+     Three plinths, 2 · 1 · 3, each a lit metal slab over a purple face with
+     the rank cut into it, standing on a floor that takes their light. The
+     leader's stands under a cone from above. The list of seven sits in a
+     pane of glass to the right.
+
+     ── What this reverses, and why ──
+
+     The editorial pass took the cards, the plinths and the metals off this
+     slide and made the mark's diameter carry the whole ranking — one
+     attribute, argued at length in `.tv-pod-slot`'s old note and in
+     `components/Podium.tsx`. That argument was sound for the slide it
+     described and it is set aside here by decision, on 12 September 2026,
+     for a direct request: *more graphical, more colourful, like a podium.*
+
+     The thing the request is right about is the corridor. A mark 1.31x
+     wider is a fact a viewer has to compare; a gold block that is taller
+     than a silver block that is taller than a bronze block is a fact they
+     already know. Rank is now said four ways — height, metal, face
+     brightness and numeral — and the redundancy the editorial pass called
+     spent is what makes the slide legible from the far end of a room and in
+     a greyscale crop.
+
+     ── What it keeps ──
+
+     Everything mechanical. The mark band, the disc, the crown's mount, the
+     class `measurePath` finds the disc by, the arriving and departing
+     cross-fades, the list's swap and the travelling disc are all as they
+     were; the plinth is drawn *under* the existing column. And the motion
+     rule: the stage rises once on mount and then nothing here moves. Every
+     glow is a static gradient, every glint is still the crown's.
+
+     ── Per-place tokens live on the slot ──
+
+     `.tv-stage-1/2/3` set the metal ramp, the face, the height and the
+     entrance delay as custom properties; every rule below reads those and
+     none of them branches on the place. A block that picked up second
+     place's metal and third place's height because two rules disagreed is
+     the failure this shape prevents. */
+  .tv-stage-1 {
+    --stage-metal: var(--stage-metal-1);
+    --stage-metal-deep: var(--stage-metal-1-deep);
+    --stage-metal-lit: var(--stage-metal-1-lit);
+    --stage-face: var(--stage-face-1);
+    --h-stage-face: var(--h-stage-face-1);
+    --t-stage-numeral-here: var(--t-stage-numeral);
+    --stage-delay: 0.16s;
+    flex-basis: var(--w-stage-1);
   }
 
+  .tv-stage-2 {
+    --stage-metal: var(--stage-metal-2);
+    --stage-metal-deep: var(--stage-metal-2-deep);
+    --stage-metal-lit: var(--stage-metal-2-lit);
+    --stage-face: var(--stage-face-2);
+    --h-stage-face: var(--h-stage-face-2);
+    --t-stage-numeral-here: var(--t-stage-numeral-rest);
+    --stage-delay: 0.08s;
+  }
+
+  .tv-stage-3 {
+    --stage-metal: var(--stage-metal-3);
+    --stage-metal-deep: var(--stage-metal-3-deep);
+    --stage-metal-lit: var(--stage-metal-3-lit);
+    --stage-face: var(--stage-face-3);
+    --h-stage-face: var(--h-stage-face-3);
+    --t-stage-numeral-here: var(--t-stage-numeral-rest);
+    --stage-delay: 0s;
+  }
+
+  /* ── The light over first place ──
+
+     Two gradients in one box behind the leader's column: a bloom centred on
+     the mark, and a cone that opens from a point above the frame's top edge
+     down to the slab. `z-index: 0` under the slot's own stacking context,
+     so it is behind the disc, the details and the block, and in front of
+     the page. Static — it is a lamp, not a sweep.
+
+     The cone is a `clip-path` on the pseudo-element, not on the box, so the
+     bloom is not cut by the cone's edges: light spills, a beam does not. */
+  .tv-stage-spot {
+    position: absolute;
+    z-index: 0;
+    left: -45%;
+    right: -45%;
+    top: -34%;
+    bottom: calc(var(--h-stage-face) + var(--h-stage-top) - 2vw);
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 38% 26% at 50% 44%,
+      var(--stage-spot-core),
+      transparent 72%
+    );
+  }
+
+  .tv-stage-spot::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, var(--stage-spot) 0%, transparent 96%);
+    clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+  }
+
+  /* ── The floor ──
+
+     One pool of violet under all three blocks, drawn on the podium row
+     rather than on a slot so it spans the group. It sits in the
+     `--s-stage-floor` band the row keeps clear beneath the blocks. */
+  .tv-stage-floor {
+    position: absolute;
+    left: -8%;
+    right: -8%;
+    bottom: calc(-1.4 * var(--s-stage-floor));
+    height: calc(2.4 * var(--s-stage-floor));
+    pointer-events: none;
+    background: radial-gradient(ellipse 50% 50% at 50% 50%, var(--stage-floor), transparent 70%);
+  }
+
+  /* ── One plinth ──
+
+     Slab, face, numeral, and the light it throws on the floor. It is
+     `z-index: 1` in the slot so it paints over the spot and under nothing.
+
+     **The rise is a `scaleY` about the bottom edge**, so the block grows out
+     of the floor. `both`, no iteration count: it runs once per mount and the
+     block is then a still object. See `@keyframes tv-stage-rise`. */
+  .tv-stage-block {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    margin-top: var(--s-stage-lift);
+    transform-origin: 50% 100%;
+    animation: tv-stage-rise var(--dur-stage-rise) cubic-bezier(0.22, 1, 0.36, 1) both
+      var(--stage-delay);
+  }
+
+  /* The metal on the floor under its own block. `z-index: -1` inside the
+     block's stacking context puts it under the face and over the page. It
+     scales with the block during the rise, which is right: a block that is
+     not there yet throws no light. */
+  .tv-stage-block::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: -22%;
+    right: -22%;
+    bottom: calc(-1.1 * var(--s-stage-floor));
+    height: calc(1.9 * var(--s-stage-floor));
+    pointer-events: none;
+    background: radial-gradient(
+      ellipse 50% 50% at 50% 42%,
+      color-mix(in srgb, var(--stage-metal) var(--stage-metal-pool), transparent),
+      transparent 70%
+    );
+  }
+
+  /* The top face, seen from a little above: a trapezoid, wider at the front
+     edge than the back, in the metal's full ramp with the specular just left
+     of centre so the three slabs share one light. It overhangs the face by
+     2% a side, which is what makes it a slab resting on the block rather
+     than a stripe painted across it. */
+  .tv-stage-top {
+    display: block;
+    height: var(--h-stage-top);
+    margin: 0 -2%;
+    background: linear-gradient(
+      90deg,
+      var(--stage-metal-deep) 0%,
+      var(--stage-metal) 22%,
+      var(--stage-metal-lit) 46%,
+      var(--stage-metal) 68%,
+      var(--stage-metal-deep) 100%
+    );
+    clip-path: polygon(6% 0, 94% 0, 100% 100%, 0 100%);
+  }
+
+  /* The front face. The gradient is the place's own — see §7 of
+     `forge-tokens.css` for why all three are purple and only the top stop
+     differs. The inset shadow at the bottom is the block sinking into the
+     floor's light; the outer glow is the metal's edge lighting the page
+     around it. */
+  .tv-stage-face {
+    position: relative;
+    height: var(--h-stage-face);
+    display: grid;
+    place-items: center;
+    background: var(--stage-face);
+    box-shadow:
+      inset 0 calc(-2.5 * var(--s-stage-lift)) calc(2 * var(--s-stage-lift)) calc(-1 * var(--s-stage-lift))
+        var(--stage-face-shade),
+      0 0 2.6vw color-mix(in srgb, var(--stage-metal) 18%, transparent);
+  }
+
+  /* The lip: the specular along the front edge of the slab, which is the
+     brightest line on the block and the thing that reads as metal from the
+     corridor. Pale metal, with its own bloom. */
+  .tv-stage-face::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: var(--h-stage-lip);
+    background: var(--stage-metal-lit);
+    box-shadow:
+      0 0 1.2vw 0.12vw color-mix(in srgb, var(--stage-metal-lit) 55%, transparent),
+      0 0.15vw 0 var(--stage-face-sheen);
+  }
+
+  /* The numeral, cut into the face in its own metal. It was above the mark
+     in `--accent`, one size for all three, on the argument that the mark
+     carried rank and a numeral ramp on top was the same fact twice. The
+     plinth is what carries rank now, and the numeral is its label — so it
+     is on the plinth, in the plinth's metal, at the plinth's scale.
+
+     The ramp is a gradient clipped to the glyph rather than a flat fill, for
+     the reason the crown's is: three steps interpolated read as a lit
+     surface, three flat regions read as paint. The `drop-shadow` is safe
+     here — this element is nowhere under the mark band's `perspective`, so
+     the flattening a `filter` forces has nothing to flatten. */
   .tv-pod-numeral {
     display: block;
-    font: var(--t-pod-numeral);
-    /* Trims the box to the cap, so the gap below the numeral is measured from
-       the glyph rather than from a line box a fifth of an em taller. */
+    font: var(--t-stage-numeral-here);
     text-box: trim-both cap alphabetic;
     font-variant-numeric: tabular-nums;
     letter-spacing: var(--track-pod-fig);
-    /* **`--accent`, and ranks 2 and 3 override it to muted ink.** This was the
-       one place on the wall the three metals were poured into a glyph, with a
-       lustre sweep travelling through it on a 9s clock. `/weekly` dropped them
-       in the same pass; a wall that says gold on one slide and not on the other
-       is worse than a wall that does not say it at all. */
-    color: var(--accent);
+    background: linear-gradient(
+      172deg,
+      var(--stage-metal-lit) 0%,
+      var(--stage-metal) 48%,
+      var(--stage-metal-deep) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    filter: drop-shadow(0 0 1vw color-mix(in srgb, var(--stage-metal) 38%, transparent));
+    animation: tv-stage-in 0.45s ease-out both calc(var(--stage-delay) + 0.38s);
   }
 
-  .tv-pod-numeral-rest {
-    color: var(--ink-muted);
+  /* The mark band and the details fade in over the risen block. Opacity
+     only — see the keyframes for why neither may carry a transform. */
+  .tv-stage-in {
+    position: relative;
+    z-index: 1;
+    animation: tv-stage-in 0.55s ease-out both calc(var(--stage-delay) + 0.3s);
   }
 
   /* The mark's own band. **The riser is gone with the plinths** — a place's
@@ -2567,8 +3041,25 @@
     width: 100%;
     min-width: 0;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    /* ── Two lines, balanced, then clamped ──
+
+       It was one line with an ellipsis, and at 330px wide the column could
+       hold most of the cohort. The plinths are 280px, so `ATC (ALL THINGS
+       CAMPHOR)` and `NAMMA SNACKING CO` would lose their second half on the
+       one slide that is supposed to be celebrating them. A second line is
+       cheap here because the column is bottom-aligned: the name grows
+       *upward* and pushes the mark up with it, and nothing below moves.
+
+       Clamped at two rather than left to wrap, because a four-line name is
+       a name nobody sized for and the guard has to hold on a wall that is
+       renamed from a spreadsheet. `text-wrap: balance` is what stops a
+       two-line name reading as a long line with one orphaned word. */
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    text-wrap: balance;
+    overflow-wrap: anywhere;
   }
 
   /* ── The seven rows, and the bars that are gone ──
@@ -2582,12 +3073,52 @@
      guess most people make is "share of the leader", which is not what it was.
 
      The ranking is the comparison. The figures are printed. */
+  /* ── The glass the seven sit in ──
+
+     A pane rather than open rows, so the list is one object beside the stage
+     rather than seven lines floating next to three blocks. White at 4.5%
+     over the page gradient, edged by a hairline and a one-pixel sheen along
+     the top — the glass reads as glass because the page shows through it,
+     which a purple step would not do. It fades in with the stage. */
+  .tv-stage-list {
+    min-height: 0;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr);
+    padding: 0.4167vw 1.6667vw;
+    border-radius: var(--radius-lg);
+    background: var(--stage-panel);
+    box-shadow:
+      inset 0 0 0 var(--stroke-hair) var(--stage-panel-edge),
+      inset 0 var(--stroke-hair) 0 var(--stage-panel-sheen);
+    animation: tv-stage-in 0.6s ease-out both 0.2s;
+  }
+
   .tv-pod-row {
     display: grid;
     grid-template-columns: var(--w-pod-rank) var(--d-pod-row-logo) minmax(0, 1fr) auto;
     align-items: center;
     column-gap: var(--s-pod-row-mark-gap);
     position: relative;
+  }
+
+  /* The rank, in a chip. It was a bare right-aligned numeral; on glass a
+     bare numeral reads as a line number, and a chip reads as a seat — the
+     same thing the plinths say for the three above it, at list scale. The
+     figure inside stays muted ink and tabular. */
+  .tv-pod-row-rank {
+    width: var(--w-pod-rank);
+    height: var(--w-pod-rank);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: var(--stage-chip);
+    box-shadow: inset 0 0 0 var(--stroke-hair) var(--stage-chip-edge);
+    font: var(--t-pod-rank-row);
+    letter-spacing: var(--track-pod-fig);
+    color: var(--ink-muted);
+    /* Optically centred: digits sit high in the em box, as the monogram's
+       note in `VentureLogo` says of capitals. */
+    padding-top: 0.1vw;
   }
 
   /* The rule between two list rows, seated in the middle of the row gap — the
@@ -2659,6 +3190,21 @@
     .tv-crown-glyph {
       animation: none;
       opacity: 1;
+    }
+
+    /* The stage is simply there. Same trap as the crown, twice over: the
+       block's `0%` keyframe is `scaleY(0.04)` at opacity 0 and the fades'
+       is opacity 0, all held in the keyframes rather than on the elements,
+       so cancelling the animations returns each to its own computed style
+       — which is upright and opaque. Stated anyway, because "correct by
+       accident" is not a state to leave a wall in. */
+    .tv-stage-block,
+    .tv-stage-in,
+    .tv-stage-list,
+    .tv-pod-numeral {
+      animation: none;
+      opacity: 1;
+      transform: none;
     }
 
     /* The glints go entirely, and this is the half of the block that now

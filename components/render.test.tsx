@@ -389,20 +389,34 @@ describe('Podium', () => {
     expect(host.querySelectorAll('.tv-crown')).toHaveLength(0)
   })
 
-  it('puts no crown on /weekly', () => {
-    // **The half that is easy to lose**, and the reason is that it is not a
-    // tidiness rule. `/podium` ranks all-time revenue and `/weekly` ranks the
-    // week or the challenge, so the two boards' rank 1 is usually a *different
-    // venture*. Crowning both means the wall crowns two teams thirty seconds
+  it('crowns one card on /weekly, and its crown does not glint', () => {
+    // ── THIS TEST USED TO ASSERT THE OPPOSITE, AND THE OLD ARGUMENT STANDS ──
+    //
+    // It read: `/podium` ranks all-time revenue and `/weekly` ranks the week or
+    // the challenge, so the two boards' rank 1 is usually a **different
+    // venture** — crowning both means the wall crowns two teams thirty seconds
     // apart, which a passer-by reads as a fault rather than as two contests.
+    //
+    // That cost is real and was accepted rather than answered: the crown was
+    // asked for on this board directly. What is *not* accepted is the glint.
+    // The sparks loop, and this board's whole discipline is that movement means
+    // a rank changed hands — so the crown crosses to `/weekly` and its loop
+    // does not. `AGENTS.md` scopes the motion exception to "one object, on one
+    // slide"; that scope is what this second assertion keeps.
     const host = document.createElement('div')
     document.body.append(host)
     const root = createRoot(host)
     act(() => root.render(<WeeklyGrid teams={TRADING} />))
-    expect(host.querySelectorAll('.tv-crown')).toHaveLength(0)
+    expect(host.querySelectorAll('.tv-crown')).toHaveLength(1)
+    expect(host.querySelectorAll('.tv-crown-glint')).toHaveLength(0)
+    act(() => root.unmount())
+    host.remove()
   })
 
   it('idles nothing at all on /weekly', () => {
+    // The crown is on this board now, and the glint is not — see the test
+    // above. This is where a change that let the sparks follow it across has to
+    // fail.
     // The other half of the scope, and the half that is easy to lose. Ten
     // idling marks on a board of thirty-nine is the case the wall's
     // movement rule was written for; three on a slide that exists to celebrate
@@ -589,7 +603,7 @@ it('declares every custom property that anything reads', () => {
 
   // `next/font` emits these into a class at build time, so they are declared in
   // generated CSS no source file contains. See app/layout.tsx.
-  const external = new Set(['--font-mesa-body', '--font-mesa-serif'])
+  const external = new Set(['--font-mesa-body', '--font-mesa-serif', '--font-rank-italic'])
 
   // `var(--x, fallback)` cannot fail — a missing token yields the fallback
   // rather than an invalid declaration — so only bare reads are checked.
@@ -906,16 +920,32 @@ describe('VentureCard', () => {
    * asserts the *structure* that guarantees it — the rendered geometry is
    * measured in a browser at 1920x1080, where a jsdom box has no size.
    *
-   * The band is the rank's alone. It held the day capsule at its right-hand end
-   * for one revision and that is recorded in `.tv-card-today` — a filled
-   * capsule in a top corner outshouted the figure the board sorts by, and read
-   * as a pair with a rank it has nothing to do with.
+   * **The band is gone and the mark's own outset replaced it.** The mark sits
+   * on the cell now, centred on the card's top edge, so the card starts
+   * `--h-mark-out` down and reserves `--h-mark-in` for the overhang. Both are
+   * asserted: dropping either is a mark that renders over the name, or a card
+   * that starts at the cell's top with the mark floating clear of it.
    */
-  it('reserves the head band on every card, including the lead ranks', () => {
+  it('offsets the card by the mark\u2019s outset on every card', () => {
     for (const rank of [1, 4, COMPETING_SIZE]) {
-      expect(markup(<VentureCard team={team({})} rank={rank} />)).toContain(
-        'var(--h-card-head)',
-      )
+      const html = markup(<VentureCard team={team({})} rank={rank} />)
+      expect(html).toContain('var(--h-mark-out)')
+      expect(html).toContain('var(--h-mark-in)')
+    }
+  })
+
+  /**
+   * ── The crown is first place's, on this slide as on `/podium` ──
+   *
+   * `AGENTS.md` spends gold's whole budget on "one glyph, one rank, one slide",
+   * and this is that glyph on that rank on the other slide. What this pins is
+   * the "one rank" half: a crown that reached rank 2 would be a second gold
+   * object, which the rule says is a new argument rather than an extension.
+   */
+  it('crowns rank 1 and nobody else', () => {
+    expect(markup(<VentureCard team={team({})} rank={1} />)).toContain('tv-crown')
+    for (const rank of [2, 3, 4, COMPETING_SIZE]) {
+      expect(markup(<VentureCard team={team({})} rank={rank} />)).not.toContain('tv-crown')
     }
   })
 
