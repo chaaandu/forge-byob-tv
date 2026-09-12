@@ -62,24 +62,23 @@
      if the wall's laptop has neither. Checked on the machine measuring this:
      see the QC note for which one is in use. */
   --font-serif: var(--font-mesa-serif), 'New York', ui-serif, Georgia, serif;
-  /* ── The rank numeral's face, and the fifth family is gone again ──
+  /* ── The rank's face has been three things, and the chip settles it ──
 
-     Fraunces Italic was bundled for this — nine glyphs, 7.2KB — on the argument
-     that a sans tabular numeral repeated thirty-nine times reads as a
-     spreadsheet's row index. The argument stands; the face did not. At 18px on
-     a lit plate its italic digits do far more than the job needs: the axis is a
-     display face's, the `2` and `0` are wide enough to become the card's
-     tightest clearance problem, and thirty-nine of them tilt a board whose
-     every other line is upright.
+     A sans tabular figure first, which read as a spreadsheet's row index. Then
+     Fraunces Italic — a fifth font family, bundled for nine glyphs — too
+     mannered at 18px, and whose wide `2` and `0` became the card's tightest
+     clearance problem. Then this project's own serif, roman, which was quieter
+     and cost nothing.
 
-     `--font-serif` instead, which this wall already loads. A roman serif
-     numeral is still unmistakably not a table cell, and it is upright,
-     narrower, and costs nothing. **Roman and not italic**, which is not a
-     preference: this project's serif ships no italic at all, so asking for one
-     returns a browser-synthesised oblique — measured, at advance widths
-     identical to the roman, which is the signature of a shear rather than a
-     face. That synthesis was the only reason a fifth family was ever needed. */
-  --font-rank: var(--font-serif);
+     All three were trying to make a *bare numeral* stop looking like a table
+     cell. The chip does that instead, so the numeral no longer has to: inside a
+     ring, a number is unambiguously a position. And `/podium` had already
+     reached the same answer for its ranks 4-10 — a circular chip with bold sans
+     in it — so the wall says "position" one way rather than two, which is worth
+     more than any of the three faces was.
+
+     `--font-rank` is deleted with the serif; this reads the sans like every
+     other number on the slide. */
   --font-sans: var(--font-mesa-body), ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
     Helvetica, Arial, sans-serif;
 
@@ -694,7 +693,20 @@
 
      Measured at all four viewports rather than trusted. The worst case on the
      board is rank 20 — two digits, and Fraunces' italic `2` and `0` are wide. */
-  --s-rank-drop: 1.25vw; /* 24px */
+  --s-rank-drop: 1.0417vw; /* 20px */
+
+  /* ── The rank chip ──
+
+     24px, and the number sets the floor: two digits of 15px bold sans need
+     ~18px, so 24 leaves 3px of ring on each side — the least a circle can have
+     and still read as a circle rather than as a number with a stroke round it.
+
+     The ceiling is the card. The chip sits in the top-left between the mark's
+     circle to its right and a *wrapped* venture name below, and both move when
+     it grows: at 26px its foot landed 0.85px above where a two-line name
+     starts. 24 with a 20px drop clears the name by 7.5px and the mark by 9.1px
+     at the worst viewport. */
+  --d-card-rank: 1.25vw; /* 24px */
 
   /* How much of the mark stands above the card's top edge, as a fraction of its
      diameter. 0.41 rather than 0.5 — the argument is at `--h-mark-out`, and the
@@ -860,12 +872,12 @@
      **No `tabular-nums` and no tracking.** Both were doing the table's job.
      Fraunces' italic digits are proportional by design and a `1` that takes a
      `1`'s width is the point of setting it this way. */
-  --t-tv-card-rank: 600 var(--fs-5) / 1 var(--font-rank);
+  --t-tv-card-rank: 700 var(--fs-6) / 1 var(--font-sans);
   /* Ranks 1-3. The one step up, and it replaces the metals outright. */
   /* The top three, one step larger and in the surface's accent. The face is
      the same — the distinction is size and ink, as it is everywhere else on
      this board. */
-  --t-tv-card-rank-lead: 600 var(--fs-4) / 1 var(--font-rank);
+  --t-tv-card-rank-lead: 700 var(--fs-6) / 1 var(--font-sans);
 
   /* ── The mark's legibility floor ──
 
@@ -2206,22 +2218,47 @@
      content. */
   .tv-card-rank {
     position: absolute;
-    /* Below the mark's own centre line, which is half a diameter from the top
-       of the cell — **not** below the card's top edge. The numeral is dodging a
-       circle and the circle's geometry is measured from its centre, so an
-       anchor on the card's edge makes this drift every time `--k-mark-out` is
-       touched. See `--s-rank-drop`, where that is recorded with the numbers. */
+    /* Below the mark's own centre line, half a diameter from the cell's top —
+       **not** below the card's top edge. The chip is dodging a circle, and a
+       circle's geometry is measured from its centre, so an anchor on the card's
+       edge makes this drift every time `--k-mark-out` is touched. */
     top: calc(var(--d-card-logo) / 2 + var(--s-rank-drop));
-    /* Inside the well, so it clears the rim as well as the mark. */
     left: var(--s-card-inset);
     z-index: 2;
+
+    /* ── A chip, and it is `/podium`'s chip ──
+
+       The bare numeral was the one element on this card placed opportunistically
+       rather than designed: it sat in the top-left because the mark's circle
+       curves away there, not because anything put it there. At 4.58:1 in muted
+       serif it was faint at two metres and gone at six.
+
+       A circle with a translucent lift, a hairline ring and the number inside is
+       what `/podium`'s list already uses for ranks 4-10. Reusing the
+       *construction* rather than its tokens is deliberate: `--stage-chip` and
+       `--stage-chip-edge` belong to that slide's stage, and a token shared
+       across two slides breaks silently when one of them is retuned. Built from
+       the surface interface instead — ink at 8% and `--hairline`, which on this
+       surface is the identical `rgba(255,255,255,0.14)` — so it composites over
+       whatever the card turns out to be and inverts with the surface for free.
+
+       **Alpha rather than a colour**, which is what makes it survive: the card's
+       fill has changed five times in this arc, and a solid chip would have had
+       to be re-picked against every one of them. A lift of the ink over the card
+       cannot be wrong. */
+    width: var(--d-card-rank);
+    height: var(--d-card-rank);
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    background: color-mix(in srgb, var(--ink) 8%, transparent);
+    box-shadow: inset 0 0 0 var(--stroke-hair) var(--hairline);
     font: var(--t-tv-card-rank);
-    /* **No tracking and no tabular figures.** Both were the sans numeral doing
-       a table's job. Fraunces' italic digits are proportional by design, and a
-       `1` that takes a `1`'s width is the point of setting a rank as a folio
-       rather than as a row index. */
-    line-height: var(--h-rank-line);
-    color: var(--ink-muted);
+    color: var(--ink-2);
+    font-variant-numeric: tabular-nums;
+    /* Optically centred: digits sit high in the em box, the same correction
+       `/podium`'s chip and `VentureLogo`'s monogram both carry. */
+    padding-top: 0.08vw;
   }
 
   /* ── There is no quiet rank ──
@@ -2249,18 +2286,26 @@
      thirty-six and set in the surface's accent rather than in muted ink, which
      is the same information in one device instead of four. `/podium` makes the
      identical move, so the two boards still say "first" one way. */
+  /* ── Ranks 1, 2 and 3 ──
+
+     The chip's geometry is fixed for all thirty-nine — thirty-nine circles of
+     one size is the point of it — so the top three change their *ink* and
+     nothing else. The size step this used to carry went with the bare numeral:
+     a bigger chip on three cards would break the line of thirty-nine circles
+     the board reads across.
+
+     **It is `--ink`, and it was `--accent` until it was measured.** The accent
+     was the obvious choice and it fails: Orchid on the composited chip is
+     **3.71:1**, under the 4.5 this wall holds 15px type to, on the three cards
+     whose rank anybody actually looks for. The chip's translucent lift is what
+     does it — it raises the ground toward the ink, and the accent has the least
+     headroom of anything available. White measures 7.00:1 against the other
+     thirty-six's 5.31: a visible step, in the one direction that cannot fail.
+
+     It also leaves the accent spent on exactly one thing, the day's delta,
+     which is where this board's one saturated colour should stay. */
   .tv-card-rank-lead {
-    font: var(--t-tv-card-rank-lead);
-    /* **After the `font` shorthand, not inside the token.** `font` resets
-       `line-height`, and the token ends `/ 1` — so the lead numerals got a
-       22.1px line box against the other thirty-six's 24px and sat two pixels
-       high. Measured: ranks 1-3 topped at y=124.9 with a 22.1px box while rank
-       4 topped at the same y with a 24px one, which on a ruled matrix is three
-       numerals visibly off the line the other thirty-six are on. Restating it
-       here puts every rank on the cell's own rhythm whatever its size. */
-    line-height: var(--h-rank-line);
-    color: var(--accent);
-    opacity: 1;
+    color: var(--ink);
   }
 
   /* ── The rule between two rows has gone ──
