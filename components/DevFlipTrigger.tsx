@@ -45,8 +45,16 @@ import type { BoardMode, OvertakeEvent, Team } from '@/lib/types'
  * this is the only button that exercises the mid-travel resize, and it is the
  * one most likely to look wrong. `Δ4` moves three uninvolved cards, which is
  * where the sliding cue earns its place.
+ *
+ * `Δ1 at #1` is the only one that changes who wears the crown, and it was
+ * missing for as long as the crown has been on this board — every other case
+ * runs between two cards that are both bare, so the crown's behaviour during a
+ * flip was the one thing none of these buttons could show. Rank 2 taking rank
+ * 1 is also the shape that actually happens: a leader is passed by the team
+ * directly behind them far more often than by rank 5.
  */
 const CASES: readonly { label: string; from: number; to: number }[] = [
+  { label: 'Δ1 at #1', from: 2, to: 1 },
   { label: 'Δ1 in row', from: 6, to: 5 },
   { label: 'Δ1 across rows', from: 11, to: 10 },
   { label: 'Δ4', from: 9, to: 5 },
