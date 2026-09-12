@@ -723,6 +723,60 @@ describe('WeeklyGrid', () => {
     expect(first).not.toHaveBeenCalled()
     host.remove()
   })
+
+  /**
+   * ── The crown has to come off the leader who was passed ──
+   *
+   * It is drawn inside the mark's travelling seat, which is what welds it to
+   * the head it sits on — and with no exit it does not stay behind, it rides.
+   * Measured in the browser before `tv-crown-off` existed: on a rank-2-takes-
+   * rank-1 flip the crown crossed to **rank 2's slot** at full opacity and sat
+   * there for 2.3 seconds, 1.5 of them on the anonymous Mesa card back. Then it
+   * cut out on the settle frame and a fresh one dropped on the new leader.
+   *
+   * Nothing reported it, nothing here failed, and it is the exact shape of bug
+   * this wall is built around: on a board nobody is watching closely, the crown
+   * simply appeared to land on the wrong team for two seconds.
+   *
+   * This pins the wiring rather than the animation — the lift itself is CSS and
+   * only a browser can say what it looks like. What has to hold in jsdom is
+   * that a flip *into* rank 1 marks the crown, and that a flip anywhere else on
+   * the board does not touch it. The second half matters as much: the crown
+   * re-animating on an overtake at rank 12 would be a gold flicker at the top
+   * of the board every time anything happened anywhere on it.
+   */
+  it('takes the crown off a leader who has just been overtaken, and only then', () => {
+    const host = document.createElement('div')
+    document.body.append(host)
+    const root = createRoot(host)
+    const ranked = rankByChallenge(board())
+    const kickTo = (from: number, to: number) => ({
+      id: `${from}-${to}`,
+      attacker: ranked[from - 1].teamId,
+      attackerName: ranked[from - 1].ventureName,
+      defender: ranked[to - 1].teamId,
+      defenderName: ranked[to - 1].ventureName,
+      fromRank: from,
+      toRank: to,
+    })
+
+    act(() => root.render(<WeeklyGrid teams={board()} kick={kickTo(2, 1)} />))
+    expect(host.querySelectorAll('.tv-crown-off')).toHaveLength(1)
+    // On the crown itself, not on some other gold thing: there is one crown on
+    // this board and the class belongs to it.
+    expect(host.querySelector('.tv-crown-off')?.closest('.tv-crown')).not.toBeNull()
+
+    // A flip that leaves rank 1 alone leaves the crown alone. `rank === 1` can
+    // only ever be a defender — an attacker is climbing *into* the slot and a
+    // slide cue only ever goes to a rank below `toRank` — so this is the whole
+    // of the other case.
+    act(() => root.render(<WeeklyGrid teams={board()} kick={kickTo(12, 11)} />))
+    expect(host.querySelectorAll('.tv-crown')).toHaveLength(1)
+    expect(host.querySelectorAll('.tv-crown-off')).toHaveLength(0)
+
+    act(() => root.unmount())
+    host.remove()
+  })
 })
 
 describe('VentureCard', () => {

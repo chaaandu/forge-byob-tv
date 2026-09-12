@@ -1634,6 +1634,37 @@
   }
 }
 
+/* The drop's first frame, played forwards: the same distance, the same angle and
+   the same accelerating curve, so the crown that leaves and the crown that lands
+   a second later read as one object changing heads rather than as two crowns.
+
+   **The fade is front-loaded, and that was measured rather than chosen.** Fading
+   linearly over the whole run put a two-thirds-opaque crown on the masthead rule
+   at 180ms, parked there — because the travel is 180% of the crown's own height
+   and an ease-*out* spends most of its time at the far end of that. Photographed
+   at 1920, above `WEEKLY LEADERBOARD`, in the one band on this slide that is
+   nothing but type.
+
+   So the curve is the drop's fall — slow off the head, then away — and the crown
+   is at zero by 60%, which on that curve is 23% of the distance: about 11px, still
+   inside the mark's own overhang. It is only ever visible while it is near the
+   head it came off. The drop can cross that space opaque because it is arriving
+   and the eye is following it down; nothing is following this. */
+@keyframes tv-crown-lift {
+  from {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
+  }
+  60% {
+    opacity: 0;
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -180%, 0) rotate(16deg);
+  }
+}
+
 /* ── The glint, which loops, and is the one looping ornament on this wall ──
 
    Six sparks sit on the crown, **two lit at a time**, in three pairs that take
@@ -3103,6 +3134,39 @@
        sitting fully drawn for 280ms and then dropping from nowhere. */
     animation: tv-crown-drop 1.15s both 0.28s;
     will-change: transform, opacity;
+  }
+
+  /* ── And it comes off when its wearer is passed ──
+
+     The crown is drawn inside the mark's travelling seat, which is what welds
+     it to the head it sits on — and for as long as it had no exit, that weld
+     was the bug. Measured on a rank-2-takes-rank-1 flip at 1920: the crown rode
+     the departing leader's seat from x=106 to **x=290, which is rank 2's
+     slot**, at full opacity for 2.3 seconds, and for 1.5 of those it was
+     sitting on the Mesa card back — crowning the one object on this board that
+     is deliberately nobody. Then it cut out on the settle frame and a fresh one
+     dropped on the new leader. Nothing reported any of it.
+
+     So the crown leaves the way the next one arrives: the drop's `0%` frame,
+     played forwards. Up and out rather than down, because up is where it came
+     from and because a crown falling *down* lands on the card below it.
+
+     **The duration and the delay come in from the cue**, as inline custom
+     properties, because they are beats — `BEATS.baseOut`, shifted by this
+     card's `shift`, so the crown goes with the base of the card it is on and
+     is gone before that card is edge-on. `lib/flipTimeline.ts` stays the only
+     thing that says *when*; restating 0.32 here is how the crown ends up still
+     visible on a disc that has turned.
+
+     Specificity is doing real work in two places. It beats `.tv-crown-glyph`'s
+     drop, which is the point — and it also beats the reduced-motion block
+     below, which is *also* the point: that block switches off ornament, and
+     the overtake sequence is deliberately outside it. An animation's values
+     win over a normal declaration whatever the selector, so the lift plays
+     there too rather than being half-cancelled into a crown that stays put on
+     a leader who has just been passed. */
+  .tv-crown-glyph.tv-crown-off {
+    animation: tv-crown-lift var(--dur-crown-lift) var(--delay-crown-lift) both;
   }
 
   /* The sparks. `fill-box` first — see the keyframes for why that one line is

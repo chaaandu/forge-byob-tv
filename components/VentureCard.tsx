@@ -359,6 +359,21 @@ export function VentureCard({
             overtake into first place is a crown arriving on the new leader,
             which is exactly the event this board exists to show.
 
+            **And it comes off when this card is the one being passed.** A
+            crown with no exit does not stay behind; it rides the seat, and the
+            seat travels. Measured before `tv-crown-off` existed: it crossed to
+            rank 2's slot at full opacity and sat there on the Mesa card back
+            for a second and a half. `rank === 1` with a cue is only ever the
+            defender of an event whose `toRank` is 1 — an attacker is by
+            definition climbing into the slot, and a slide cue only ever goes to
+            a rank below `toRank` — so this class means exactly one thing: the
+            leader has just been overtaken, and the crown is leaving.
+
+            The two numbers are beats, handed in from the cue so
+            `lib/flipTimeline.ts` stays the only clock: the lift is `baseOut`
+            long and starts on this card's own `shift`, which puts the crown
+            off the head before the head turns edge-on.
+
             **`glint={false}`, and that is where the borrowing stops.** The
             sparks are a looping animation, and this board's one job is to say
             that a rank changed hands with a two-and-a-half-second interrupt
@@ -382,8 +397,21 @@ export function VentureCard({
         </div>
 
         {rank === 1 ? (
-          <span className="tv-crown">
-            <Crown className="tv-crown-glyph" glint={false} />
+          <span
+            className="tv-crown"
+            style={
+              cue === undefined
+                ? undefined
+                : ({
+                    '--dur-crown-lift': `${BEATS.baseOut[1] - BEATS.baseOut[0]}s`,
+                    '--delay-crown-lift': `${cue.shift}s`,
+                  } as React.CSSProperties)
+            }
+          >
+            <Crown
+              className={cue === undefined ? 'tv-crown-glyph' : 'tv-crown-glyph tv-crown-off'}
+              glint={false}
+            />
           </span>
         ) : null}
       </motion.div>
