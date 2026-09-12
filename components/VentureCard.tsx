@@ -1,16 +1,16 @@
-"use client";
+'use client'
 
-import { useEffect, useRef } from "react";
-import { motion, type Easing } from "motion/react";
+import { useEffect, useRef } from 'react'
+import { motion, type Easing } from 'motion/react'
 
-import { Crown } from "@/components/Crown";
-import { VentureDisc } from "@/components/VentureDisc";
-import { SOLID_RANKS } from "@/config";
-import { boardEarned } from "@/lib/board";
-import { formatRupees } from "@/lib/format";
-import { BEATS, TOTAL, at, type FlipCue } from "@/lib/flipTimeline";
-import { nameOf } from "@/lib/team";
-import type { BoardMode, Team } from "@/lib/types";
+import { Crown } from '@/components/Crown'
+import { VentureDisc } from '@/components/VentureDisc'
+import { SOLID_RANKS } from '@/config'
+import { boardEarned } from '@/lib/board'
+import { formatRupees } from '@/lib/format'
+import { BEATS, TOTAL, at, type FlipCue } from '@/lib/flipTimeline'
+import { nameOf } from '@/lib/team'
+import type { BoardMode, Team } from '@/lib/types'
 
 /**
  * One team's card: a solid Deep Forest object carrying rank, mark, venture name
@@ -83,7 +83,7 @@ import type { BoardMode, Team } from "@/lib/types";
  * were shared between them, and the reason dropping them had to be done on both
  * at once.
  */
-const LEAD_RANKS = 3;
+const LEAD_RANKS = 3
 
 /**
  * **The mark crosses to the other slot. The card does not move at all.**
@@ -103,10 +103,10 @@ const LEAD_RANKS = 3;
  * happens there. All three end exactly on the seat the re-sorted board is about
  * to give this mark, which is what makes the settle invisible.
  */
-const TRAVEL_EASE: Easing[] = ["linear", "easeInOut", "linear"];
+const TRAVEL_EASE: Easing[] = ['linear', 'easeInOut', 'linear']
 
 function travelMotion(cue: FlipCue) {
-  const window = at(BEATS.travel, cue.role === "defender" ? cue.shift : 0);
+  const window = at(BEATS.travel, cue.role === 'defender' ? cue.shift : 0)
   return {
     animate: {
       x: [0, 0, cue.dx, cue.dx],
@@ -118,37 +118,37 @@ function travelMotion(cue: FlipCue) {
       times: [0, ...window, 1],
       ease: TRAVEL_EASE,
     },
-  };
+  }
 }
 
 export function VentureCard({
   team,
   rank,
-  mode = "challenge",
+  mode = 'challenge',
   idle,
   delaySeconds,
   cue,
   onSettled,
   arriving,
 }: {
-  team: Team;
-  rank: number;
+  team: Team
+  rank: number
   /** Which contest is on, from `challenge_mode`. The figure below is the one
       the board sorted by — a card printing the other one turns every rank on
       the board into a visible lie, with nothing to report it. */
-  mode?: BoardMode;
+  mode?: BoardMode
   /** Set for one render on the two cards an overtake just settled, and on
       nobody else. It is what lets their details fade in after a remount without
       every unrelated re-sort doing the same. */
-  arriving?: boolean;
+  arriving?: boolean
   /** An idle timeline class. Only row 1 gets one; the other thirty hold still. */
-  idle?: string;
+  idle?: string
   /** Phase offset, so ten marks on one row never fall into step. */
-  delaySeconds?: number;
+  delaySeconds?: number
   /** Set only while this card is in a flip. Absent means an ordinary, inert card. */
-  cue?: FlipCue;
+  cue?: FlipCue
   /** Called once, by the attacker's card, when the last beat finishes. */
-  onSettled?: () => void;
+  onSettled?: () => void
 }) {
   /**
    * **Quiet is a fact about the slot now, not about the team.**
@@ -165,7 +165,7 @@ export function VentureCard({
    * happens on a Monday, when twenty cards are at zero and someone still holds
    * rank 1 — shows nothing rather than `₹0`.
    */
-  const quiet = rank > SOLID_RANKS;
+  const quiet = rank > SOLID_RANKS
 
   /**
    * ── Today is shown, or it is not ──
@@ -186,16 +186,16 @@ export function VentureCard({
    * it ranks against everyone else's day is what the board itself already shows
    * by putting them in order.
    */
-  const traded = team.todayRevenue > 0;
+  const traded = team.todayRevenue > 0
 
-  const flips = cue !== undefined && cue.role !== "slide";
+  const flips = cue !== undefined && cue.role !== 'slide'
   // `false`, not `undefined`, for a card with no cue: the reset to x/y 0 has to
   // land in the same commit as the settle's re-slot, or the board would be seen
   // reordering under a card that had already finished moving.
   const travel =
     cue === undefined
       ? { animate: { x: 0, y: 0, scale: 1 }, transition: { duration: 0 } }
-      : travelMotion(cue);
+      : travelMotion(cue)
 
   /**
    * The deadlock guard. `onSettled` is the only thing standing between the queue
@@ -220,14 +220,14 @@ export function VentureCard({
    * arms when this card becomes the attacker and disarms when it stops being
    * one, and unmount is the only other way out.
    */
-  const attacker = cue?.role === "attacker";
-  const settle = useRef(onSettled);
+  const attacker = cue?.role === 'attacker'
+  const settle = useRef(onSettled)
   // Declared before the guard so the ref is current by the time any cleanup can
   // read it. Written in an effect rather than during render, which is the rule
   // that keeps a ref from disagreeing with a discarded render.
   useEffect(() => {
-    settle.current = onSettled;
-  });
+    settle.current = onSettled
+  })
   /**
    * **And it has to be an unmount, not merely the end of a cue.**
    *
@@ -244,19 +244,19 @@ export function VentureCard({
    * order, so on a real unmount this one has already been marked and the guard
    * fires; on a cue simply clearing it has not, and the guard stays quiet.
    */
-  const mounted = useRef(true);
+  const mounted = useRef(true)
   useEffect(() => {
-    mounted.current = true;
+    mounted.current = true
     return () => {
-      mounted.current = false;
-    };
-  }, []);
+      mounted.current = false
+    }
+  }, [])
   useEffect(() => {
-    if (!attacker) return;
+    if (!attacker) return
     return () => {
-      if (!mounted.current) settle.current?.();
-    };
-  }, [attacker]);
+      if (!mounted.current) settle.current?.()
+    }
+  }, [attacker])
 
   return (
     <div
@@ -267,8 +267,8 @@ export function VentureCard({
       // never move; it is the card inside them that does.
       data-rank={rank}
       style={{
-        height: "100%",
-        position: "relative",
+        height: '100%',
+        position: 'relative',
         // **No z-index here, deliberately.** Lifting the whole cell was the
         // obvious fix for a travelling mark passing under its neighbours, and it
         // does not work: both cells in an exchange are in a flip, so both were
@@ -292,9 +292,7 @@ export function VentureCard({
           where it sits, how it tracks, that it is tabular — is shared by
           construction and cannot drift. */}
       <span
-        className={
-          rank <= LEAD_RANKS ? "tv-card-rank tv-card-rank-lead" : "tv-card-rank"
-        }
+        className={rank <= LEAD_RANKS ? 'tv-card-rank tv-card-rank-lead' : 'tv-card-rank'}
       >
         {rank}
       </span>
@@ -336,7 +334,7 @@ export function VentureCard({
           // squash rather than a mark tipping its face. Measured while it sat
           // on the cell: the disc's height was exactly cos(30°) of its width,
           // which is the signature of no perspective at all.
-          perspective: "900px",
+          perspective: '900px',
         }}
       >
         {/* ── The crown, on first place, on this slide too ──
@@ -369,10 +367,10 @@ export function VentureCard({
             it is the same one that removed row 1's idle. */}
         <div
           style={{
-            display: "grid",
-            placeItems: "center",
-            width: "100%",
-            height: "100%",
+            display: 'grid',
+            placeItems: 'center',
+            width: '100%',
+            height: '100%',
           }}
         >
           <VentureDisc
@@ -392,26 +390,26 @@ export function VentureCard({
 
       <motion.div
         className={[
-          quiet ? "tv-card tv-card-quiet" : "tv-card",
+          quiet ? 'tv-card tv-card-quiet' : 'tv-card',
           // Fades the details out while this card's mark is away, and back in
           // when the cue clears — which is the same commit the board re-sorts
           // in, so what fades back in is the *new* team's. A transition rather
           // than keyframes: the two ends are the two states, and nothing has to
           // agree about when the middle is.
-          cue === undefined ? undefined : "tv-card-away",
-          arriving === true ? "tv-card-arriving" : undefined,
+          cue === undefined ? undefined : 'tv-card-away',
+          arriving === true ? 'tv-card-arriving' : undefined,
         ]
           .filter(Boolean)
-          .join(" ")}
+          .join(' ')}
         style={{
           // **Not `inset: 0`.** The card starts `--h-mark-out` below the cell's
           // top, and the strip above it is where the mark's upper half floats.
-          position: "absolute",
-          top: "var(--h-mark-out)",
+          position: 'absolute',
+          top: 'var(--h-mark-out)',
           left: 0,
           right: 0,
           bottom: 0,
-          display: "grid",
+          display: 'grid',
           // ── FOUR ROWS, AND THE FIRST ONE IS HALF A MARK ──
           //
           // The mark is not in this grid at all any more. It sits on the cell,
@@ -427,56 +425,35 @@ export function VentureCard({
           //
           // No `gap`. Every one of these tracks carries its own separation, so
           // nothing leaves a gap behind if it ever stops being drawn.
-          gridTemplateRows: "1fr",
+          gridTemplateRows:
+            'var(--h-mark-in) var(--h-card-name) var(--h-card-fig) var(--h-card-today)',
+          justifyItems: 'center',
+          alignContent: 'start',
           minWidth: 0,
         }}
       >
-        {/* ── The well ──
+        {/* The strip the overhanging mark covers. Empty, and it has to be:
+            the mark is on the cell, a layer above every card, so a card that
+            tried to hold it would clip it at its own top edge. */}
+        <span aria-hidden="true" />
 
-            The rim above is one element and this is the other. Everything the
-            card says lives in here, on `--surface-sunken`, inset from the rim
-            on three sides with its top edge covered by the mark's halo — so the
-            card reads as one object with a recess in it rather than as two
-            stacked rectangles.
-
-            Its first track is the part of the mark's overhang that falls
-            *inside* the well; the rim's own 6px of that overhang is above this
-            box. So the stack below still starts at the mark's lower edge,
-            exactly as it did when the card was a single panel. */}
-        <div
-          className="tv-card-well"
-          style={{
-            display: "grid",
-            gridTemplateRows:
-              "calc(var(--h-mark-in) - var(--s-card-frame)) var(--h-card-name) var(--h-card-fig) var(--h-card-today)",
-            justifyItems: "center",
-            alignContent: "start",
-            padding: "0 var(--s-card-inset) var(--s-card-pad-y)",
-            minWidth: 0,
-          }}
-        >
-          {/* The strip the overhanging mark covers. Empty, and it has to be:
-              the mark is on the cell, a layer above every card, so a card that
-              tried to hold it would clip it at its own top edge. */}
-          <span aria-hidden="true" />
-
-          {/* **The name is back.** The mark identifies a venture to anyone who
+        {/* **The name is back.** The mark identifies a venture to anyone who
             already knows it; the name is what the other thirty-nine teams read.
             `nameOf` gives an unnamed team its team id rather than a blank — the
             wall names every card it draws. Two lines are reserved for it: five
             of forty do not fit on one at this width, and the fix for that is
             the report's to propose, not this component's to pick. */}
-          {/* The inner span is what carries the two-line clamp — see
+        {/* The inner span is what carries the two-line clamp — see
             `.tv-card-name > span`. The box outside it is what seats the block
             at a stated distance under the mark inside the height the rhythm
             reserves, and a `-webkit-box` cannot do both. It used to *centre*
             the block, which put every wrapped name half a line above its
             neighbours' — measured at 9px across row 1. */}
-          <div className="tv-card-name tv-card-detail">
-            <span>{nameOf(team)}</span>
-          </div>
+        <div className="tv-card-name tv-card-detail">
+          <span>{nameOf(team)}</span>
+        </div>
 
-          {/* The figure the board exists to show, **on every card, including a
+        {/* The figure the board exists to show, **on every card, including a
             challenge of zero and a challenge below zero**.
 
             It used to print nothing at all for a team that had not traded, on
@@ -496,42 +473,42 @@ export function VentureCard({
             collapse the two into one. The `-₹0` a sub-rupee shortfall used to
             print is fixed in `formatRupees`, where it belongs — it was a
             rounding bug, not a rule about this board. */}
-          <div
-            className={
-              // ── The ink follows the figure, not the rank ──
-              //
-              // `--card-fig-ink` is set by the card's tier: full ink on ranks
-              // 1-20, muted below. Which means rank 7's `₹0` is printed at full
-              // strength and rank 21's `₹0` is not, and the two are **the same
-              // fact**. Early in a week that is thirty-one identical zeroes, of
-              // which fourteen are the brightest type on the board, and the
-              // loudest repeated element on the wall is the one saying nothing
-              // happened.
-              //
-              // A zero takes the quiet ink wherever it ranks. The bright figures
-              // on the board are then exactly the teams that have traded, which
-              // is the thing a passer-by is actually looking for — and it costs
-              // the zeroes nothing they were carrying, because a zero says "not
-              // yet" at either weight.
-              //
-              // **Not `<= 0`.** A negative challenge figure is news — a team
-              // below the total it started on, proof revoked after the baseline
-              // was photographed — and it is the one figure on this board nobody
-              // should have to look twice at. `Math.round` rather than the raw
-              // value, so this agrees with what `formatRupees` decided to print
-              // rather than with what the sheet happens to hold; a team on ₹0.40
-              // prints `₹0` and reads as one. Negative zero rounds to `-0`, and
-              // `-0 === 0`, so a sub-rupee shortfall lands quiet with the zeroes
-              // it is indistinguishable from.
-              Math.round(boardEarned(mode, team)) === 0
-                ? "tv-figure tv-card-week tv-card-week-idle tv-card-detail"
-                : "tv-figure tv-card-week tv-card-detail"
-            }
-            style={{ font: "var(--t-tv-card-week)" }}
-          >
-            {formatRupees(boardEarned(mode, team))}
-          </div>
-          {/* ── Today, back on the card ──
+        <div
+          className={
+            // ── The ink follows the figure, not the rank ──
+            //
+            // `--card-fig-ink` is set by the card's tier: full ink on ranks
+            // 1-20, muted below. Which means rank 7's `₹0` is printed at full
+            // strength and rank 21's `₹0` is not, and the two are **the same
+            // fact**. Early in a week that is thirty-one identical zeroes, of
+            // which fourteen are the brightest type on the board, and the
+            // loudest repeated element on the wall is the one saying nothing
+            // happened.
+            //
+            // A zero takes the quiet ink wherever it ranks. The bright figures
+            // on the board are then exactly the teams that have traded, which
+            // is the thing a passer-by is actually looking for — and it costs
+            // the zeroes nothing they were carrying, because a zero says "not
+            // yet" at either weight.
+            //
+            // **Not `<= 0`.** A negative challenge figure is news — a team
+            // below the total it started on, proof revoked after the baseline
+            // was photographed — and it is the one figure on this board nobody
+            // should have to look twice at. `Math.round` rather than the raw
+            // value, so this agrees with what `formatRupees` decided to print
+            // rather than with what the sheet happens to hold; a team on ₹0.40
+            // prints `₹0` and reads as one. Negative zero rounds to `-0`, and
+            // `-0 === 0`, so a sub-rupee shortfall lands quiet with the zeroes
+            // it is indistinguishable from.
+            Math.round(boardEarned(mode, team)) === 0
+              ? 'tv-figure tv-card-week tv-card-week-idle tv-card-detail'
+              : 'tv-figure tv-card-week tv-card-detail'
+          }
+          style={{ font: 'var(--t-tv-card-week)' }}
+        >
+          {formatRupees(boardEarned(mode, team))}
+        </div>
+        {/* ── Today, back on the card ──
 
             The line the venture name occupied is today's again. The name went
             because the mark already identifies the venture at this size — forty
@@ -543,7 +520,7 @@ export function VentureCard({
             **It appears only when there is a day to report.** A permanent
             caption over an empty line would be apparatus describing absence, on
             all thirty-nine cards every morning before the first sale. */}
-          {/* ── A delta, not a capsule, and not a badge ──
+        {/* ── A delta, not a capsule, and not a badge ──
 
             This has been three things. A **bare line** in the same type as the
             week's figure, which failed for a stated reason: two centred rupee
@@ -577,30 +554,27 @@ export function VentureCard({
             decides whether anything renders here at all, so it was a modifier
             that could never appear on the thing it modified being absent. The
             element's existence is the state. */}
-          <div className="tv-card-today tv-card-detail">
-            {traded ? (
-              <span className="tv-day-delta">
-                {/* A shape, not a glyph: `▲` comes from whatever font in the
+        <div className="tv-card-today tv-card-detail">
+          {traded ? (
+            <span className="tv-day-delta">
+              {/* A shape, not a glyph: `▲` comes from whatever font in the
                   stack answers for it, at whatever weight and height that font
                   drew it. This is a box with a triangle clipped out of it, so it
                   is the same mark on every machine. */}
-                <span className="tv-day-mark" aria-hidden="true" />
-                {/* **The figure is its own element, and that is not cosmetic.**
+              <span className="tv-day-mark" aria-hidden="true" />
+              {/* **The figure is its own element, and that is not cosmetic.**
                   As a bare text node it was an *anonymous* flex item, which
                   `text-overflow` does not apply to — measured with a crore-scale
                   day, the figure drew straight out past the card's edge with
                   the ellipsis the CSS asks for never appearing. A real element
                   can shrink, clip and ellipsise. */}
-                <span className="tv-day-figure">
-                  {formatRupees(team.todayRevenue)}
-                </span>
-              </span>
-            ) : (
-              ""
-            )}
-          </div>
+              <span className="tv-day-figure">{formatRupees(team.todayRevenue)}</span>
+            </span>
+          ) : (
+            ''
+          )}
         </div>
       </motion.div>
     </div>
-  );
+  )
 }

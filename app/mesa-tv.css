@@ -396,37 +396,26 @@
      what puts it there. 0.4vw is 7.7px, which is what it was; the alignment
      that mattered when the box was invisible does not, now that the box is the
      thing the eye reads the numeral against. */
-  /* The rim's width — the band of `--surface-raised` showing around the well on
-     three sides. 6px at 1920: enough to read as a frame at six metres, small
-     enough that thirty-nine of them do not become the loudest thing on the
-     board. It is also the number the well's radius is derived from, so the two
-     corners stay concentric. */
-  --s-card-frame: 0.4167vw; /* 8px */
-  /* The plate's own horizontal padding, inside the chassis.
+  /* The card's horizontal padding. 10px, and it is the only horizontal inset
+     left: the chassis-and-plate construction spent 8px of frame *plus* 4px of
+     plate padding on every card — 24px of a 168px card — and the venture name
+     was what ran out first. One card, one padding, and the text column goes
+     from 144px back to 148. */
+  --s-card-inset: 0.5208vw; /* 10px */
+  /* ── The mark's halo ──
 
-     4px, not 6. The chassis already holds the type 8px off the card's outer
-     edge, so this is only the plate's internal margin and need not do the
-     separating twice — and the 4px it gives back is the difference between
-     printing `In Between Sips by Kaappitalism` and ellipsising it. Every pixel
-     of chassis and plate padding comes out of the same 168, and the name is
-     what runs out first. */
-  --s-card-inset: 0.2083vw; /* 4px */
-  /* ── The mark's halo, and why it is the frame's own width ──
+     A ring of the **card's own fill** around the disc, which is what makes the
+     card and the mark one shape instead of a circle sitting on a rectangle.
+     Drawn as a `box-shadow` spread, so the ring is a true circle and its union
+     with the rounded rectangle is a single silhouette: two tangent arcs where
+     they meet, and the card's top edge running on either side.
 
-     A ring of the **chassis colour** around the disc. It is not an outline on
-     the logo — it is the chassis continuing around it, and that difference is
-     the whole point. Drawn as a `box-shadow` spread, so the ring is a true
-     circle and its union with the card's rounded rectangle is one silhouette:
-     two tangent arcs where they meet, and the card's top edge running on either
-     side.
-
-     **Exactly `--s-card-frame`, not a value of its own.** The card has two
-     recesses — a round one holding the mark and a rectangular one holding
-     everything it says — and they are inset by the same amount, so the chassis
-     is a constant band wherever you look at it. A halo thicker or thinner than
-     the frame turns one shape back into a logo wearing a ring, which is the
-     thing this is not. */
-  --s-mark-halo: var(--s-card-frame);
+     It is the *card's* colour and nothing else's. Every attempt to give this
+     ring a value of its own — a lighter rim, a near-black chassis, a
+     desaturated grey band — produced an outline on the artwork, which is the
+     one thing a mark on this board must not have. One fill, two shapes, no
+     third colour. */
+  --s-mark-halo: 0.4167vw; /* 8px */
 
   /* ── The today delta ──
 
@@ -1868,58 +1857,15 @@
       min(
         calc(
           (
-              var(--h-row) - var(--s-card-frame) - var(--s-card-pad-y) -
-                var(--h-card-name) - var(--h-card-fig) - var(--h-card-today)
+              var(--h-row) - var(--s-card-pad-y) - var(--h-card-name) -
+                var(--h-card-fig) - var(--h-card-today)
             ) * var(--k-mark, 1)
         ),
         calc(var(--w-card) - 2 * var(--s-card-inset))
       )
     );
 
-    /* ── The chassis colour ──
-
-       A desaturated light, derived rather than named: the deepest surface
-       lifted most of the way to the ink. On Deep Aubergine that is a grey
-       lavender; on the light surface the identical expression runs the other
-       way and gives a mid grey, because `--ink` inverts with the surface. One
-       expression, both slides, no colour named.
-
-       **The value is solved, not chosen, and the constraint is the marks.** The
-       chassis is a band around thirty-nine venture discs, and the six mark
-       tints are all light — two cluster near luminance 0.31 and four between
-       0.51 and 0.62. A chassis anywhere in that range gives those teams a halo
-       the same lightness as their own disc, and the mark loses its edge on a
-       board where every other mark has one. Violet 300 and Violet 100 were both
-       photographed as candidates before this was understood, and both *are*
-       mark tints — `--mark-1` and `--mark-5` — so those cards would have had no
-       edge at all.
-
-       Swept in the browser against every rendered disc, 40% to 84% in steps of
-       four. The two constraints pull opposite ways: light enough to be seen
-       against the page, dark enough to be distinct from every mark.
-
-             40%   page 5.99:1   nearest mark 1.07:1   marks lose their edge
-             52%   page 4.14:1   nearest mark 1.30:1   pale discs lose theirs
-             60%   page 3.16:1   nearest mark 1.70:1   <- both hold
-             68%   page 2.37:1   nearest mark 2.27:1
-             84%   page 1.31:1   nearest mark 4.11:1   chassis invisible
-
-       60 is where both clear. Desaturating buys the rest: the marks are
-       saturated pastels, so a grey at a given luminance still separates by hue
-       where another pastel would not.
-
-       **Declared here, on the row, and never at `:root`** — with
-       `--d-card-logo`, for two different traps that land in the same place.
-       `--d-card-logo` is not defined at `:root`, so a `calc()` on it there is
-       guaranteed-invalid and inherits as invalid. This one is worse:
-       `--surface` and `--ink` *are* defined at `:root`, as the **light**
-       surface's defaults — so a mix written there resolves silently to the
-       light values and inherits them straight through `.surface-dark`. The
-       board would have drawn a mid-grey chassis on a dark page with nothing
-       reporting it. */
-    --card-chassis: color-mix(in srgb, var(--surface-sunken) 60%, var(--ink));
-
-    /* Declared here, with `--d-card-logo`, and never at `:root` — see the note
+      /* Declared here, with `--d-card-logo`, and never at `:root` — see the note
        on these tokens for the invalid-inheritance trap that forces it. */
     --h-mark-out: calc(var(--d-card-logo) * var(--k-mark-out));
     --h-mark-in: calc(var(--d-card-logo) - var(--h-mark-out));
@@ -2048,80 +1994,62 @@
      The row rules went for the same reason a moment earlier: a card has a
      bottom edge, and a hairline 11px below one is a second edge saying the
      same thing at a distance where neither of them resolves. */
-  /* ── THE CARD IS A CHASSIS WITH TWO RECESSES ──
+  /* ── ONE CARD, ONE FILL ──
 
-     One flat fill, one step lighter than the page, was the whole card for four
-     revisions. Then it became a lit rim around a sunken well — and this is that
-     construction with the two values **rotated**, which produces a different
-     object rather than the same one repainted.
+     Six revisions built this up and every one added a layer: a hairline, a
+     gradient, a halo, a rim, a sunken well, a nested radius, a chassis band.
+     Nothing was ever taken away. The card ended as 168 x 160px carrying two
+     shells and seven elements, viewed at six metres — and the mark, the only
+     thing on it legible at six metres, had gone from 113px to 78 paying for
+     nested corners nobody in a corridor can resolve.
 
-     Light rim, dark well: a frame catching light around a hole, with the mark
-     sitting in the frame's material. It works, and it leaves the logo wearing a
-     pale ring — an outline on the artwork, which is the one thing a mark on
-     this board is not allowed to have.
+     **All of it was compensating for a missing colour.** The three structural
+     purples measure 0.0054, 0.0163 and 0.0307 in luminance: every one in the
+     bottom 3% of the range, 0.014 apart. A card built from those cannot read as
+     an object, so each revision reached further for help, and the last one
+     reached outside the brand entirely — a 0.13-saturation grey on a palette
+     that runs 0.31 to 0.71.
 
-     Chassis and plate: a **body with two recesses cut into it** — a round one
-     holding the mark, a rectangular one holding everything the card says —
-     both inset by the same `--s-card-frame` on every side. The chassis is one
-     shape, the union of a rounded rectangle and a circle, and the plate and the
-     disc are two cuts in it. Nothing reads as an outline because nothing *is*
-     one: the band around the mark is the same band that runs down the card's
-     sides.
+     `--surface-solid` is the answer and it was already in the palette: Amethyst,
+     L 0.0715 at saturation 0.59, **1.83:1 against the page where
+     `--surface-raised` gives 1.22**. One saturated fill reads as a card on its
+     own, so the shells are gone — no chassis, no plate, no rim, no gradient, no
+     hairline. What is left is a card, its radius, and the inks the design
+     system already had for type on a filled surface.
 
-     **The chassis was `--surface-sunken` — near-black — and that failed for a
-     reason worth keeping.** A body a step *below* the page is the right physics
-     for a recess, and it is invisible: 1.22:1 against Deep Aubergine, so the
-     one shape the whole construction exists to make could not be traced. It is
-     a desaturated grey lavender now (`--card-chassis`), which reads at six
-     metres and still sits under every mark in lightness, so the discs stay the
-     brightest thing on the card and the band never competes with what it
-     frames.
+     The mark still crosses the top edge, because occlusion is the one depth cue
+     this palette can afford, and its halo is this same fill: card and mark are
+     one silhouette in one colour. That is what every intermediate version was
+     trying to buy with a second material.
 
-     Both fills are flat. The gradient the first lit rim carried solved a
-     different problem — a card one step from the page needs help not to look
-     stuck on — and a chassis this far from the page has its own separation.
-
-     Nothing here names a colour, and the light surface gets the identical
-     construction inverted for free. */
+     A card is no longer *the surface, slightly raised*; it is a filled object on
+     it, and the type set on it says so. */
   .tv-card {
-    --card-sub-ink: var(--ink-2);
+    --card-sub-ink: var(--ink-on-solid-2);
     --card-hot-ink: var(--accent);
-    --card-fig-ink: var(--ink);
+    --card-fig-ink: var(--ink-on-solid);
+    /* ── The quiet step, and a lighter card left less room for one ──
 
-    /* ── A gradient on the rim, and a narrow one ──
+       A filled Amethyst card is a smaller contrast budget than a near-black
+       one, and the old quiet inks did not survive the move: `--ink-muted` on
+       this fill measures **3.05:1**, which fails AA for 15px type on nineteen
+       of thirty-nine cards — the venture name, the thing a team scans for
+       itself with. It passed on every previous card because every previous card
+       was darker.
 
-       The rim is the lit part of the object, so it is the part that carries the
-       light. Two stops, both tokens, about a fifth of the way to the page
-       colour at the foot — under the threshold at which anyone would call it a
-       gradient from the corridor. What it does is stop thirty-nine bottom edges
-       being a hard value step against the page, which is what makes a flat
-       rectangle look stuck on rather than laid down. */
-    background: var(--card-chassis);
+       Swept against the rendered fill: 95% of `--ink-on-solid-2` gives 5.35:1,
+       85% gives 4.64, 80% gives 4.30. 85 is the last step that clears 4.5 with
+       any margin, and it sits a visible step under the solid tier's 5.73
+       without becoming the 3.05 that started this. */
+    --card-quiet-ink: color-mix(in srgb, var(--ink-on-solid-2) 85%, var(--surface-solid));
+
+    background: var(--surface-solid);
     border-radius: var(--r-card);
-    /* The frame, even on all four sides. The top band is mostly hidden behind
-       the mark's halo, but it has to be *there*: without it the well's top
-       corners sit flush with the rim's, and two rounded rectangles sharing a
-       corner with different radii is a visible kink at the one place a card's
-       silhouette is read. */
-    padding: var(--s-card-frame);
-  }
-
-  /* ── The well ──
-
-     Everything the card says lives in here: the rank, the name, the figure, the
-     day's delta. It is `--surface-raised`, the purple plate set into the
-     chassis, inset by `--s-card-frame` on every side — and its top edge is
-     covered by the mark's halo, so the two recesses read as one cut rather than
-     as a panel with a circle laid over it.
-
-     **Its radius is the chassis's less the frame**, which is the rule that keeps
-     nested corners concentric. Two rounded rectangles 8px apart with the *same*
-     radius do not share a centre of curvature, and the gap between them visibly
-     widens at each corner — the single most common way a nested card is got
-     wrong, and invisible until you look at a corner. */
-  .tv-card-well {
-    background: var(--surface-raised);
-    border-radius: calc(var(--r-card) - var(--s-card-frame));
+    /* **No top padding.** The card's first grid row is the part of the mark
+       that overhangs it, so the mark's own outset is the padding — see
+       `--h-mark-out`. The bottom is the only side that still needs air, since
+       the day delta ends the card. */
+    padding: 0 var(--s-card-inset) var(--s-card-pad-y);
   }
 
   /* ── The mark's seat ──
@@ -2167,7 +2095,7 @@
      `--surface-raised` and not a colour of its own: it *is* the rim, continued
      around the mark. */
   .tv-mark-seat .tv-disc {
-    box-shadow: 0 0 0 var(--s-mark-halo) var(--card-chassis);
+    box-shadow: 0 0 0 var(--s-mark-halo) var(--surface-solid);
   }
 
   /* ── The bottom half of the board is quieter, and it is the ink that says so ──
@@ -2184,9 +2112,9 @@
      from the corridor, and that is the right way round for a distinction that
      only matters once you have found your own card. */
   .tv-card-quiet {
-    --card-sub-ink: var(--ink-muted);
+    --card-sub-ink: var(--card-quiet-ink);
     --card-hot-ink: var(--accent-quiet);
-    --card-fig-ink: var(--ink-muted);
+    --card-fig-ink: var(--card-quiet-ink);
   }
 
   /* ── What a card does while its mark is away ──
@@ -2285,7 +2213,7 @@
        touched. See `--s-rank-drop`, where that is recorded with the numbers. */
     top: calc(var(--d-card-logo) / 2 + var(--s-rank-drop));
     /* Inside the well, so it clears the rim as well as the mark. */
-    left: calc(var(--s-card-frame) + var(--s-card-inset));
+    left: var(--s-card-inset);
     z-index: 2;
     font: var(--t-tv-card-rank);
     /* **No tracking and no tabular figures.** Both were the sans numeral doing
@@ -2474,7 +2402,7 @@
      board already prints, so on those nineteen cards this changes nothing and
      the two rules cannot disagree. */
   .tv-card-week-idle {
-    color: var(--ink-muted);
+    color: var(--card-quiet-ink);
   }
 
   /* ── Today's figure ──

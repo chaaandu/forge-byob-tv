@@ -318,7 +318,28 @@
      a component can say "recessed" without naming a colour, which is the whole
      point of this file owning them. */
   --surface-sunken: var(--aubergine-900);
-  --surface-solid: var(--aubergine-600);
+  /* ── The filled card, and the mid-tone this palette was missing ──
+
+     This was `--aubergine-600`, which is also `--surface-raised` — so "a filled
+     card ON the surface" and "the surface, raised" were the same colour, and a
+     card that wanted to be an *object* had nothing to be one with.
+
+     The numbers say how little room that left. Measured luminance: sunken
+     0.0054, page 0.0163, raised 0.0307. All three structural purples sit in the
+     bottom 3% of the range, 0.014 apart — which is why `/weekly`'s card spent
+     six revisions reaching for hairlines, gradients, halos and finally a
+     *desaturated grey* to be visible at all. It was compensating for a missing
+     colour instead of naming one.
+
+     Amethyst is that colour and it was already in the ramp at §1, described as
+     "secondary surfaces, fills", read by nothing. L 0.0715 at saturation 0.59:
+     **1.83:1 against the page where raised gives 1.22:1**, and fully in the
+     brand, where the grey was 0.13 saturation on a palette that runs 0.31 to
+     0.71. A card can be a material now without a second shell around it.
+
+     `--ink-on-solid` and `--ink-on-solid-2` are what type on a card like this
+     reads, and they already existed for exactly this case. */
+  --surface-solid: var(--amethyst);
   --ink: var(--white);
   --ink-2: var(--ink-on-dark-2);
   --ink-muted: var(--violet-300); /* 5.60:1. NOT --vivid-violet, which is 2.86:1 */
