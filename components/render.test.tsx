@@ -801,9 +801,9 @@ describe('VentureCard', () => {
     // traded draws no capsule, so its presence carries what the modifier did.
     const traded = markup(<VentureCard team={team({ todayRevenue: 900 })} rank={4} />)
     const quiet = markup(<VentureCard team={team({ todayRevenue: 0 })} rank={4} />)
-    expect(traded).toContain('tv-day-pill')
+    expect(traded).toContain('tv-day-delta')
     expect(traded).toContain('tv-day-mark')
-    expect(quiet).not.toContain('tv-day-pill')
+    expect(quiet).not.toContain('tv-day-delta')
     expect(quiet).not.toContain('tv-day-mark')
     // The row itself is reserved either way, so thirty-nine cards keep their
     // figures on one line as the day's first sales land.
@@ -906,20 +906,16 @@ describe('VentureCard', () => {
    * asserts the *structure* that guarantees it — the rendered geometry is
    * measured in a browser at 1920x1080, where a jsdom box has no size.
    *
-   * **The band holds the day capsule too**, at its right-hand end, which is
-   * what let the card drop from five rows to four and hand the whole of the
-   * old bottom row to the mark. So this also pins that there is no fifth row:
-   * a `--h-card-today` back in the template is the empty band under every `₹0`
-   * coming back, and it would cost every mark on the board 34px again.
+   * The band is the rank's alone. It held the day capsule at its right-hand end
+   * for one revision and that is recorded in `.tv-card-today` — a filled
+   * capsule in a top corner outshouted the figure the board sorts by, and read
+   * as a pair with a rank it has nothing to do with.
    */
   it('reserves the head band on every card, including the lead ranks', () => {
     for (const rank of [1, 4, COMPETING_SIZE]) {
-      const html = markup(<VentureCard team={team({})} rank={rank} />)
-      expect(html).toContain('var(--h-card-head)')
-      // Written without the `var(...)` wrapper on purpose: the declared-token
-      // scan above reads this file, and a live read of a token that no longer
-      // exists would be reported as the defect it is testing for.
-      expect(html).not.toContain('--h-card-today')
+      expect(markup(<VentureCard team={team({})} rank={rank} />)).toContain(
+        'var(--h-card-head)',
+      )
     }
   })
 

@@ -380,21 +380,14 @@
      thing the eye reads the numeral against. */
   --s-card-inset: 0.5208vw; /* 10px */
 
-  /* ── The today capsule ──
+  /* ── The today delta ──
 
-     `--r-pill` is a large constant rather than a `vw` share: a capsule's ends
-     are semicircles, and any radius at or above half the element's height gives
-     exactly that. A proportional radius would have to be re-derived every time
-     the row height moved, and would draw a rounded rectangle the first time
-     someone got it wrong. One number, correct at every size.
-
-     The inline padding is what makes it a capsule rather than a tag: the figure
-     needs air on both ends roughly equal to the radius, or the shape reads as a
-     rectangle with its corners filed off. The gap holds the direction mark off
-     the figure by less than a space, so the two read as one token. */
-  --r-pill: 999px;
-  --s-day-pill-x: 0.4688vw; /* 9px */
-  --s-day-pill-gap: 0.2083vw; /* 4px */
+     `--r-pill` and `--s-day-pill-x` are deleted with the capsule: a radius and
+     an inline padding are what an *object* needs, and this is a line of type.
+     What survives is the one value that was never about the shape — how far the
+     direction mark sits off the figure. Less than a space, so the two read as
+     one token rather than as a symbol and a number. */
+  --s-day-delta-gap: 0.2083vw; /* 4px */
 
   /* ── The card's corner ──
 
@@ -406,9 +399,8 @@
      to the *card*, and 8px was picked when the cards were shorter.
 
      14px is 8.3%, which is where a corner starts being a decision. Still well
-     under the ~20% at which a rectangle starts becoming a capsule, and the same
-     order as `--r-pill`'s intent at the other end of the scale: a shape that
-     knows what it is. */
+     under the ~20% at which a rectangle starts becoming a capsule — a shape
+     that knows what it is. */
   --r-card: 0.7292vw; /* 14px */
 
   /* The card's own padding. **There is no grid gap between the card's parts**:
@@ -570,22 +562,21 @@
      whatever the band does. */
   /* How tall the rank numeral's own line box is — not the band it sits in. */
   --h-rank-line: 1.25vw; /* 24px */
-  /* The card's head band: rank at the left, the day capsule at the right, and
-     24px is what the taller of the two needs. */
-  --h-card-head: 1.25vw; /* 24px */
+  /* The card's head band: the rank numeral, and nothing else. It held the day
+     capsule at its right-hand end for a while — see `.tv-card-today` for why
+     that came back out — so it needed the capsule's 24px. The numeral is
+     absolutely positioned and reserves its own line box in `--h-rank-line`, so
+     what is left here is only how far down the mark starts. */
+  --h-card-head: 0.625vw; /* 12px */
   /* 46.5px: two 17.25px lines and **6px before the figure**, with whatever a
      one-line name does not use falling *above* it. Which end of this box the
      slack lands on is the whole design of it — see `.tv-card-name`. */
   --h-card-name: 2.4219vw; /* 46.5px */
   --h-card-fig: 1.4583vw; /* 28px */
-  --h-day-pill: 1.25vw; /* 24px */
-  /* How much of the head band the capsule may take. The rank is 26.6px at two
-     digits and needs its own air, so the capsule stops 39px short of the card's
-     content edge — 109px at 1920, against a measured 107px for `₹1,04,500`.
-     Past roughly ₹11,00,000 **in a single day** the capsule ellipsises rather
-     than clipping, which is a figure this cohort will not reach and a failure
-     that says so rather than dropping a digit in silence. */
-  --w-day-pill-max: calc(100% - 2.0313vw);
+  /* The day figure's line, under the week's. 18px holds 15px of type with 1.5px
+     of leading either side — it is a line of text, not an object, so it needs a
+     line's height and not a capsule's. */
+  --h-card-today: 0.9375vw; /* 18px */
   /* How far the name's last line sits above the figure. Inside `--h-card-name`,
      not a grid gap — the card's parts each carry their own separation, which is
      the rule that keeps a line's spacing leaving with the line. */
@@ -1591,7 +1582,7 @@
         calc(
           (
               var(--h-row) - 2 * var(--s-card-pad-y) - var(--h-card-head) -
-                var(--h-card-name) - var(--h-card-fig)
+                var(--h-card-name) - var(--h-card-fig) - var(--h-card-today)
             ) * var(--k-mark, 1)
         ),
         calc(var(--w-card) - 2 * var(--s-card-inset))
@@ -2042,81 +2033,87 @@
      for, and a deepened mix on the pale one, where bright green measures 2.41:1
      against soft mint. Quiet by default, so an ordinary day sits under the
      week's figure rather than beside it in weight. */
-  /* ── The capsule's slot: the right-hand end of the head band ──
+  /* ── TODAY IS A LINE UNDER THE FIGURE, NOT A BADGE IN THE CORNER ──
 
-     It was a fifth row at the bottom of the card, 34px tall, reserved on all
-     thirty-nine cards and drawn on six — the empty band under every `₹0`. The
-     reservation could not be shortened away (see `--h-card-head` for the two
-     ways collapsing it inverts the mark ramp), so it moved into a band that was
-     already reserved for the rank and was spending 26.6px of 155.6.
+     It spent a version at the right-hand end of the head band, opposite the
+     rank, as a filled capsule. That was a *space* solution rather than a design
+     one — the head band was 155.6px wide and spending 26.6px of it, so putting
+     the capsule there cost nothing and returned a whole row to the mark. What
+     it cost instead was the card's hierarchy, in two ways that are only visible
+     once you stop counting pixels:
 
-     `justify-content: flex-end`, because the rank is absolutely positioned over
-     the left of this same band. The two share it and never touch: the capsule
-     stops `--w-day-pill-max` short of the card's left edge.
+     **It was the loudest thing on the card.** A filled capsule with a tinted
+     ground reads as an object where everything else on the card reads as type,
+     so the eye landed on it first — on the smallest number, on six cards in
+     thirty-nine, ahead of the figure the entire board is sorted by. Apple's own
+     vocabulary for a filled capsule in a top corner is a *badge*: an unread
+     count, an alert, something that wants dealing with. Today's takings are not
+     that.
 
-     Still reserved, still drawn only when a team has traded — the height is the
-     band's whether or not anything is in it, so nothing on the card moves as
-     the day's first sales land. */
+     **And it paired with the rank.** Two numbers at opposite ends of one 148px
+     line read as a pair, and these two have nothing to do with each other: the
+     rank is apparatus about the board's ordering, the day figure is money
+     belonging to the team. Neither explains the other.
+
+     Underneath the week's figure, it is what it actually is — **a delta**. Big
+     number, small coloured number beneath it, which is how Stocks, Fitness and
+     every Apple surface that carries a value and its change are built. The two
+     are adjacent, so relating them costs no eye travel, and the small one is
+     unmistakably secondary because it is smaller, lighter in ink and prefixed
+     by a direction mark rather than merely further away.
+
+     **The price is stated rather than buried.** It is a reserved line again —
+     18px on all thirty-nine cards, drawn on six — and that is 18px off every
+     mark on the board plus air under the figure of every card that has not
+     traded. The reservation cannot be avoided: collapsing it per card gives one
+     card in a row a bigger mark than its neighbours, collapsing it per row
+     gives the quiet bottom rows bigger marks than the busy top ones. What makes
+     it affordable is that the head band drops from 24px to 12 in the same move,
+     because the rank numeral never needed the capsule's height — so the true
+     cost is 6px of mark, not 18. */
   .tv-card-today {
-    height: var(--h-card-head);
+    height: var(--h-card-today);
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: center;
     width: 100%;
     min-width: 0;
     overflow: hidden;
   }
 
-  /* ── The capsule, and why its ink is white rather than the accent ──
+  /* ── The delta line, and why it has no ground ──
 
-     The obvious build is an accent-tinted ground with accent ink — the tag
-     pattern every design system ships. **Measured, it fails on this board.**
-     A card's `--card-hot-ink` is Orchid on ranks 1-20 and Violet 300 on the
-     quiet cards below them, and putting either over its own 18% tint costs
-     roughly a third of its contrast:
+     The capsule's tinted ground existed to solve a contrast problem it created
+     itself. The obvious build is accent ink on an accent tint, and measured on
+     this board that fails — Orchid over its own 18% tint drops 6.89:1 to 4.73,
+     and Violet 300 on the quiet cards drops 4.60:1 to 3.48, under the 4.5 this
+     wall holds small type to, on nineteen of thirty-nine cards. The answer was
+     to put `--ink` on the tint instead, at 9.53:1, and let the ground carry the
+     colour.
 
-       orchid      on card 6.89:1  →  on its own tint  4.73:1
-       violet-300  on card 4.60:1  →  on its own tint  3.48:1
+     **With no ground the problem does not arise.** Accent ink straight on the
+     card is 6.89:1 solid and 4.60:1 quiet — both pass, and the accent is back
+     on the glyph where it belongs rather than in a shape behind it. That is
+     also what stops this competing with the week's figure: type does not
+     out-shout type of twice its size, where an object does.
 
-     The second number is under the 4.5:1 this wall holds small type to, on
-     nineteen of thirty-nine cards, in the one element on the card that says
-     something is happening right now. A tag nobody can read from the corridor
-     is worse than the bare line it replaced.
-
-     So the ground carries the colour and the ink does not: `--ink` on an 18%
-     accent tint measures **9.53:1 on a solid card and 10.30:1 on a quiet one** —
-     better than the bare line managed on either. The accent is still the thing
-     you see; it has simply moved from the glyph to the shape behind it, which
-     is also what makes the capsule read as a tag rather than as a third figure.
-
-     `color-mix` against `transparent` rather than against the card's own fill,
-     deliberately: that yields the accent at 18% alpha, which composites over
-     whatever the card turns out to be. Mixing against a named card colour would
-     be a second place that has to be corrected the day `--surface-raised`
-     moves, and nothing would report it. */
-  .tv-day-pill {
+     `tabular-nums` because it sits directly under another figure and a
+     proportional `1` would put the two out of vertical register. */
+  .tv-day-delta {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--s-day-pill-gap);
-    height: var(--h-day-pill);
-    padding-inline: var(--s-day-pill-x);
-    border-radius: var(--r-pill);
-    background: color-mix(in srgb, var(--card-hot-ink) 18%, transparent);
+    gap: var(--s-day-delta-gap);
     font: var(--t-tv-card-today);
-    color: var(--ink);
+    color: var(--card-hot-ink);
     font-variant-numeric: tabular-nums;
-    /* The capsule hugs its figure. Without this it would stretch to the row's
-       full width on a flex parent and stop being a capsule at all — a tinted
-       band across the card, which is a different element entirely. */
     flex: none;
-    /* Not `100%`: the rank shares this band. See `--w-day-pill-max`. */
-    max-width: var(--w-day-pill-max);
+    max-width: 100%;
     white-space: nowrap;
     overflow: hidden;
   }
 
-  /* ── The figure inside the capsule ──
+  /* ── The figure inside the delta ──
 
      **An ellipsis, not a clip.** `overflow: hidden` alone cuts a rupee figure
      mid-glyph, which on this wall is a smaller number rendered perfectly —
