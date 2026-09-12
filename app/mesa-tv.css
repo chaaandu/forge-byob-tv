@@ -670,43 +670,33 @@
      plausible cards at the wrong height with no error anywhere. Measured, not
      noticed. */
 
-  /* How far below the **mark's centre line** the rank numeral starts.
 
-     The numeral and the mark compete for the card's top-left, and the circle is
-     at its widest exactly where the card's edge cuts it — so a numeral flush
-     with that edge has the least room it will ever have. Dropping it clears the
-     curve: the disc's half-width at depth `t` is `sqrt(r² - t²)`, so every pixel
-     of drop widens the corner the numeral sits in.
+  /* ── The rank ribbon ──
 
-     **The centre line, and not the card's top edge**, which is what this was
-     anchored to first and is a genuinely wrong anchor. The circle's geometry is
-     the whole constraint here and the circle does not know where the card's
-     edge is — so tuning `--k-mark-out` moved the numeral into the mark and the
-     clearance fell from 16.1px to 11.5 with nothing about the numeral changed.
-     Measured from the centre, the numeral's window is the half-diameter between
-     the circle's widest point and its lowest, and the split cannot touch it.
+     **The corner is the constraint, and it is what ruled out a chip.** Measured
+     on the card: the mark is 86.3px with an 8px halo, centred in 168px, so the
+     widest point of that circle leaves exactly **32.8px** of card to its left.
+     A 24px chip inset by the card's own 10px padding needs 34 — it only fitted
+     at all by being *dropped* 20px below the circle's equator, into the one
+     spot where the arc had curved away. That is placement by availability, and
+     it is why the chip never looked put there on purpose.
 
-     **It is bounded at both ends**, which is why it is 24 and not 40. Dropping
-     further buys horizontal clearance and spends vertical: the numeral's box
-     has to finish above where a *wrapped* venture name begins, and a wrapped
-     name starts 6px under the mark's bottom.
+     A ribbon flush to the edge pays no inset: at `left: 0` a 24px tab clears
+     the halo by 8.9px at its widest — more room than the chip had — and it can
+     start at the card's top corner, where the chip could not. Being attached
+     to an edge is also what makes it read as a fixed part of the card rather
+     than as a label that landed in a corner.
 
-     Measured at all four viewports rather than trusted. The worst case on the
-     board is rank 20 — two digits, and Fraunces' italic `2` and `0` are wide. */
-  --s-rank-drop: 1.0417vw; /* 20px */
-
-  /* ── The rank chip ──
-
-     24px, and the number sets the floor: two digits of 15px bold sans need
-     ~18px, so 24 leaves 3px of ring on each side — the least a circle can have
-     and still read as a circle rather than as a number with a stroke round it.
-
-     The ceiling is the card. The chip sits in the top-left between the mark's
-     circle to its right and a *wrapped* venture name below, and both move when
-     it grows: at 26px its foot landed 0.85px above where a two-line name
-     starts. 24 with a 20px drop clears the name by 7.5px and the mark by 9.1px
-     at the worst viewport. */
-  --d-card-rank: 1.25vw; /* 24px */
+     44 long against 24 wide is a 1.83 ratio, enough to read as hanging rather
+     than as a square. The number takes the top; the rest is shaft, and the
+     shaft is what says the thing hangs from somewhere. It ends 6.9px above the
+     venture name's box at 1920 and 5.6px at 1600, so nothing it does can reach
+     the type. */
+  --w-card-ribbon: 1.25vw; /* 24px */
+  --h-card-ribbon: 2.2917vw; /* 44px */
+  /* The notch cut out of the ribbon's foot — a bookmark's tail, and the one
+     detail that stops this being a plain tab. */
+  --h-card-ribbon-notch: 0.4167vw; /* 8px */
 
   /* How much of the mark stands above the card's top edge, as a fraction of its
      diameter. 0.41 rather than 0.5 — the argument is at `--h-mark-out`, and the
@@ -2216,49 +2206,68 @@
 
      `--ink-muted` by default: the rank is apparatus and the venture is the
      content. */
+  /* ── The rank hangs from the card's top edge ──
+
+     It has been a bare numeral in three faces and then a circular chip, and all
+     four shared one flaw: they lived in the top-left corner because the mark's
+     circle curves away there, not because anything put them there. The chip
+     made it worse by needing the card's 10px padding *and* a 20px drop below
+     the circle's equator to fit — 34px of demand against 32.8px of room.
+
+     A ribbon is attached to the edge instead, which is a different kind of
+     object. It pays no inset, so it starts at the card's top corner and clears
+     the halo by 8.9px at the widest point. And a thing fixed to an edge reads
+     as structural, where one floating in a corner reads as a label.
+
+     `--surface-sunken` is the fill, which gives that token a job again: 2.19:1
+     against the card, so the ribbon reads as cut *into* it, and white on it
+     measures **18.96:1** — the number is now the highest-contrast small type on
+     the board rather than the lowest. The chip could not do that; its
+     translucent lift raised the ground toward the ink, which is exactly what
+     put the accent at 3.71:1 there.
+
+     The top-left corner takes the card's own radius so the two curves are one
+     line. The foot is notched by a wedge in the card's colour — see `::after` —
+     because a square-ended tab is a tab, and the notch is the whole difference
+     between that and something hanging. */
   .tv-card-rank {
     position: absolute;
-    /* Below the mark's own centre line, half a diameter from the cell's top —
-       **not** below the card's top edge. The chip is dodging a circle, and a
-       circle's geometry is measured from its centre, so an anchor on the card's
-       edge makes this drift every time `--k-mark-out` is touched. */
-    top: calc(var(--d-card-logo) / 2 + var(--s-rank-drop));
-    left: var(--s-card-inset);
+    /* The card's top-left, exactly: `--h-mark-out` is where the card begins in
+       the cell, and `left: 0` is the point of a ribbon. */
+    top: var(--h-mark-out);
+    left: 0;
     z-index: 2;
+    width: var(--w-card-ribbon);
+    height: var(--h-card-ribbon);
+    background: var(--surface-sunken);
+    border-top-left-radius: var(--r-card);
 
-    /* ── A chip, and it is `/podium`'s chip ──
-
-       The bare numeral was the one element on this card placed opportunistically
-       rather than designed: it sat in the top-left because the mark's circle
-       curves away there, not because anything put it there. At 4.58:1 in muted
-       serif it was faint at two metres and gone at six.
-
-       A circle with a translucent lift, a hairline ring and the number inside is
-       what `/podium`'s list already uses for ranks 4-10. Reusing the
-       *construction* rather than its tokens is deliberate: `--stage-chip` and
-       `--stage-chip-edge` belong to that slide's stage, and a token shared
-       across two slides breaks silently when one of them is retuned. Built from
-       the surface interface instead — ink at 8% and `--hairline`, which on this
-       surface is the identical `rgba(255,255,255,0.14)` — so it composites over
-       whatever the card turns out to be and inverts with the surface for free.
-
-       **Alpha rather than a colour**, which is what makes it survive: the card's
-       fill has changed five times in this arc, and a solid chip would have had
-       to be re-picked against every one of them. A lift of the ink over the card
-       cannot be wrong. */
-    width: var(--d-card-rank);
-    height: var(--d-card-rank);
-    border-radius: 50%;
+    /* The number sits in the head of the ribbon, not centred in its length —
+       the shaft below is deliberately empty. */
     display: grid;
-    place-items: center;
-    background: color-mix(in srgb, var(--ink) 8%, transparent);
-    box-shadow: inset 0 0 0 var(--stroke-hair) var(--hairline);
+    justify-items: center;
+    align-content: start;
+    padding-top: 0.3125vw;
+
     font: var(--t-tv-card-rank);
-    color: var(--ink-2);
+    color: var(--ink);
     font-variant-numeric: tabular-nums;
-    /* Optically centred: digits sit high in the em box, the same correction
-       `/podium`'s chip and `VentureLogo`'s monogram both carry. */
-    padding-top: 0.08vw;
+  }
+
+  /* The notch. A wedge in the **card's** colour laid over the ribbon's foot
+     rather than a `clip-path` on the ribbon itself: the ribbon's top-left
+     corner has to carry the card's radius, and `clip-path` replaces the border
+     box outright, so a polygon foot and a rounded head cannot coexist on one
+     element. Two properties on two boxes instead of one fragile path. */
+  .tv-card-rank::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: var(--h-card-ribbon-notch);
+    background: var(--surface-solid);
+    clip-path: polygon(0 100%, 50% 0, 100% 100%);
   }
 
   /* ── There is no quiet rank ──
@@ -2275,37 +2284,17 @@
 
   /* ── Ranks 1, 2 and 3 ──
 
-     **The metals are gone.** They were the wall's one documented colour
-     exemption and they bought a real thing — a greyscale crop still ranked —
-     but they arrived here as a gold numeral straddling the card's top corner
-     with a lustre sweep travelling through the glyph, plus a metal foot under
-     the card with a sweep of its own, and that is four ornaments to say a number
-     that is already printed.
+     Nothing, now. Thirty-nine ribbons of one size, one fill and one ink is the
+     point of the device — and on `--surface-sunken` there is no headroom for a
+     brighter step anyway: white is already 18.96:1 and the accent *loses*
+     contrast against it. The top three are said by the crown on rank 1 and by
+     reading order, which is where a board of thirty-nine equals should say it.
 
-     Size and ink instead. The top three numerals are larger than the other
-     thirty-six and set in the surface's accent rather than in muted ink, which
-     is the same information in one device instead of four. `/podium` makes the
-     identical move, so the two boards still say "first" one way. */
-  /* ── Ranks 1, 2 and 3 ──
-
-     The chip's geometry is fixed for all thirty-nine — thirty-nine circles of
-     one size is the point of it — so the top three change their *ink* and
-     nothing else. The size step this used to carry went with the bare numeral:
-     a bigger chip on three cards would break the line of thirty-nine circles
-     the board reads across.
-
-     **It is `--ink`, and it was `--accent` until it was measured.** The accent
-     was the obvious choice and it fails: Orchid on the composited chip is
-     **3.71:1**, under the 4.5 this wall holds 15px type to, on the three cards
-     whose rank anybody actually looks for. The chip's translucent lift is what
-     does it — it raises the ground toward the ink, and the accent has the least
-     headroom of anything available. White measures 7.00:1 against the other
-     thirty-six's 5.31: a visible step, in the one direction that cannot fail.
-
-     It also leaves the accent spent on exactly one thing, the day's delta,
-     which is where this board's one saturated colour should stay. */
+     The class stays so `render.test.tsx` keeps pinning that only three cards
+     can ever carry it, and so the next lead treatment has a hook rather than
+     inventing a second one. */
   .tv-card-rank-lead {
-    color: var(--ink);
+    /* Deliberately empty. See above. */
   }
 
   /* ── The rule between two rows has gone ──
