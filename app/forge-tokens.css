@@ -159,6 +159,18 @@
 
   --surface: var(--lavender-mist);
   --surface-raised: var(--white);
+  /* The light surface's well: one step *down* from Lavender Mist, the way the
+     dark one steps down from Deep Aubergine. Nothing reads it today — both
+     slides are dark — and it is declared because a token that resolves on only
+     one surface is exactly the failure §5 exists to prevent: `/weekly`'s card
+     would come back as a frame around nothing. */
+  --surface-sunken: color-mix(in srgb, var(--lavender-mist) 88%, var(--royal-purple));
+  /* The light surface's well: one step *down* from Lavender Mist, the way the
+     dark one steps down from Deep Aubergine. Nothing reads it today — both
+     slides are dark — and it is declared because a token that resolves on only
+     one surface is exactly the failure §5 exists to prevent: `/weekly`'s card
+     would come back as a frame around nothing. */
+  --surface-sunken: color-mix(in srgb, var(--lavender-mist) 88%, var(--royal-purple));
   --surface-solid: var(--royal-purple); /* a filled card ON the surface */
   --ink: var(--ink-black);
   --ink-2: var(--royal-purple);
@@ -291,6 +303,21 @@
 .surface-dark {
   --surface: var(--aubergine);
   --surface-raised: var(--aubergine-600);
+  /* ── A surface *below* the page, for a card that is a frame around a well ──
+
+     `--surface-raised` is the only step this had: one value lighter than the
+     page, which is enough to bound a flat card and nothing more. `/weekly`'s
+     card is not flat any more — it is a lit rim with a recess inside it, and a
+     recess needs somewhere to recede *to*. There was no token for that, so
+     every card on the board was a frame around the page colour, which is a
+     border rather than a well.
+
+     Aubergine 900 is already in the ramp and already carries a derivation note
+     at §3; nothing new is invented here. What is new is that the two steps now
+     go both ways from the page — raised for the rim, sunken for the well — so
+     a component can say "recessed" without naming a colour, which is the whole
+     point of this file owning them. */
+  --surface-sunken: var(--aubergine-900);
   --surface-solid: var(--aubergine-600);
   --ink: var(--white);
   --ink-2: var(--ink-on-dark-2);
