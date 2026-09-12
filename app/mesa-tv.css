@@ -62,12 +62,24 @@
      if the wall's laptop has neither. Checked on the machine measuring this:
      see the QC note for which one is in use. */
   --font-serif: var(--font-mesa-serif), 'New York', ui-serif, Georgia, serif;
-  /* The rank numeral's face — Fraunces Italic, nine glyphs. See `app/layout.tsx`
-     for why a fifth family exists and why the italic is declared on the face
-     rather than asked for in CSS. The serif behind it is a fallback that should
-     never be reached, and would be visibly wrong if it were: this project's
-     serif ships no italic, so it would render a synthesised oblique. */
-  --font-rank: var(--font-rank-italic), var(--font-serif);
+  /* ── The rank numeral's face, and the fifth family is gone again ──
+
+     Fraunces Italic was bundled for this — nine glyphs, 7.2KB — on the argument
+     that a sans tabular numeral repeated thirty-nine times reads as a
+     spreadsheet's row index. The argument stands; the face did not. At 18px on
+     a lit plate its italic digits do far more than the job needs: the axis is a
+     display face's, the `2` and `0` are wide enough to become the card's
+     tightest clearance problem, and thirty-nine of them tilt a board whose
+     every other line is upright.
+
+     `--font-serif` instead, which this wall already loads. A roman serif
+     numeral is still unmistakably not a table cell, and it is upright,
+     narrower, and costs nothing. **Roman and not italic**, which is not a
+     preference: this project's serif ships no italic at all, so asking for one
+     returns a browser-synthesised oblique — measured, at advance widths
+     identical to the roman, which is the signature of a shear rather than a
+     face. That synthesis was the only reason a fifth family was ever needed. */
+  --font-rank: var(--font-serif);
   --font-sans: var(--font-mesa-body), ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
     Helvetica, Arial, sans-serif;
 
@@ -389,22 +401,32 @@
      enough that thirty-nine of them do not become the loudest thing on the
      board. It is also the number the well's radius is derived from, so the two
      corners stay concentric. */
-  --s-card-frame: 0.3125vw; /* 6px */
-  /* The well's own horizontal padding, inside the rim. */
-  --s-card-inset: 0.3125vw; /* 6px */
-  /* ── The mark's halo ──
+  --s-card-frame: 0.4167vw; /* 8px */
+  /* The plate's own horizontal padding, inside the chassis.
 
-     A ring of the **rim's own colour** around the disc, which is what fuses the
-     mark and the card into one silhouette instead of leaving a circle sitting
-     on a rectangle. It is drawn as a `box-shadow` spread on the disc, so the
-     ring is a true circle and its union with the card's rounded rectangle is
-     the shape the reference has: two tangent arcs where they meet, and the
-     card's top edge continuing either side.
+     4px, not 6. The chassis already holds the type 8px off the card's outer
+     edge, so this is only the plate's internal margin and need not do the
+     separating twice — and the 4px it gives back is the difference between
+     printing `In Between Sips by Kaappitalism` and ellipsising it. Every pixel
+     of chassis and plate padding comes out of the same 168, and the name is
+     what runs out first. */
+  --s-card-inset: 0.2083vw; /* 4px */
+  /* ── The mark's halo, and why it is the frame's own width ──
 
-     It is also what covers the well's top edge, which is what makes the recess
-     read as a recess the mark is emerging *from* rather than a panel it is
-     lying on. */
-  --s-mark-halo: 0.4167vw; /* 8px */
+     A ring of the **chassis colour** around the disc. It is not an outline on
+     the logo — it is the chassis continuing around it, and that difference is
+     the whole point. Drawn as a `box-shadow` spread, so the ring is a true
+     circle and its union with the card's rounded rectangle is one silhouette:
+     two tangent arcs where they meet, and the card's top edge running on either
+     side.
+
+     **Exactly `--s-card-frame`, not a value of its own.** The card has two
+     recesses — a round one holding the mark and a rectangular one holding
+     everything it says — and they are inset by the same amount, so the chassis
+     is a constant band wherever you look at it. A halo thicker or thinner than
+     the frame turns one shape back into a logo wearing a ring, which is the
+     thing this is not. */
+  --s-mark-halo: var(--s-card-frame);
 
   /* ── The today delta ──
 
@@ -849,12 +871,12 @@
      **No `tabular-nums` and no tracking.** Both were doing the table's job.
      Fraunces' italic digits are proportional by design and a `1` that takes a
      `1`'s width is the point of setting it this way. */
-  --t-tv-card-rank: italic 600 var(--fs-5) / 1 var(--font-rank);
+  --t-tv-card-rank: 600 var(--fs-5) / 1 var(--font-rank);
   /* Ranks 1-3. The one step up, and it replaces the metals outright. */
   /* The top three, one step larger and in the surface's accent. The face is
      the same — the distinction is size and ink, as it is everywhere else on
      this board. */
-  --t-tv-card-rank-lead: italic 600 var(--fs-4) / 1 var(--font-rank);
+  --t-tv-card-rank-lead: 600 var(--fs-4) / 1 var(--font-rank);
 
   /* ── The mark's legibility floor ──
 
@@ -1983,26 +2005,35 @@
      The row rules went for the same reason a moment earlier: a card has a
      bottom edge, and a hairline 11px below one is a second edge saying the
      same thing at a distance where neither of them resolves. */
-  /* ── THE CARD IS A RIM AND A WELL, NOT A PANEL ──
+  /* ── THE CARD IS A CHASSIS WITH TWO RECESSES ──
 
      One flat fill, one step lighter than the page, was the whole card for four
-     revisions. It bounds a cell and does nothing else, and on a board of
-     thirty-nine identical rectangles "does nothing else" is what makes the wall
-     look like a spreadsheet with rounded corners.
+     revisions. Then it became a lit rim around a sunken well — and this is that
+     construction with the two values **rotated**, which produces a different
+     object rather than the same one repainted.
 
-     Two shells instead, which is the structure of the reference this is built
-     from once you look past the colours: an outer frame, a 6px band of it
-     showing on three sides, and a **recessed well** inside holding everything
-     the card actually says. The frame catches light, the well falls away from
-     it, and the mark sits in the frame's own material at the top.
+     Light rim, dark well: a frame catching light around a hole, with the mark
+     sitting in the frame's material. It works, and it leaves the logo wearing a
+     pale ring — an outline on the artwork, which is the one thing a mark on
+     this board is not allowed to have.
 
-     **The well is what needed a new token.** `--surface-raised` was the only
-     step this palette had — one value *up* from the page — so every attempt at
-     a recess was a frame around the page colour, which is a border and reads as
-     one. `--surface-sunken` is the step down, declared in `forge-tokens.css`
-     beside its opposite so both surfaces answer it. The three values are now
-     `--surface-sunken` < `--surface` < `--surface-raised`, and a card that
-     spans all three has real depth rather than a hairline's worth of it.
+     Dark chassis, light plate: a **solid dark body with two recesses cut into
+     it** — a round one holding the mark, a rectangular one holding everything
+     the card says — both inset by the same `--s-card-frame` on every side. The
+     chassis is one shape, the union of a rounded rectangle and a circle, and
+     the two plates set into it are the only light on the card. Nothing reads as
+     an outline because nothing *is* one: the band around the mark is the same
+     band that runs down the card's sides.
+
+     It also puts the values in the right order physically. `--surface-sunken`
+     is below the page and `--surface-raised` above it, so a dark body with
+     light plates in it is an object you could pick up, where a light frame with
+     a dark hole is an object with a hole in it. On a wall that cannot use
+     shadow for depth, which of the two a card is matters.
+
+     Both fills are flat. The gradient the lit rim carried solved a different
+     problem — a card one step from the page needs help not to look stuck on —
+     and a chassis a step *below* the page has its own separation.
 
      Nothing here names a colour, and the light surface gets the identical
      construction inverted for free. */
@@ -2019,11 +2050,7 @@
        gradient from the corridor. What it does is stop thirty-nine bottom edges
        being a hard value step against the page, which is what makes a flat
        rectangle look stuck on rather than laid down. */
-    background: linear-gradient(
-      to bottom,
-      var(--surface-raised),
-      color-mix(in srgb, var(--surface-raised) 78%, var(--surface))
-    );
+    background: var(--surface-sunken);
     border-radius: var(--r-card);
     /* The frame, even on all four sides. The top band is mostly hidden behind
        the mark's halo, but it has to be *there*: without it the well's top
@@ -2036,17 +2063,18 @@
   /* ── The well ──
 
      Everything the card says lives in here: the rank, the name, the figure, the
-     day's delta. It is `--surface-sunken`, inset from the rim on three sides,
-     and its top edge is covered by the mark's halo — so the card reads as one
-     object with a recess in it rather than as two stacked rectangles.
+     day's delta. It is `--surface-raised`, the lit plate set into the dark
+     chassis, inset by `--s-card-frame` on every side — and its top edge is
+     covered by the mark's halo, so the two recesses read as one cut rather than
+     as a panel with a circle laid over it.
 
-     **Its radius is the rim's less the frame**, which is the rule that keeps
-     nested corners concentric. Two rounded rectangles 6px apart with the *same*
+     **Its radius is the chassis's less the frame**, which is the rule that keeps
+     nested corners concentric. Two rounded rectangles 8px apart with the *same*
      radius do not share a centre of curvature, and the gap between them visibly
      widens at each corner — the single most common way a nested card is got
      wrong, and invisible until you look at a corner. */
   .tv-card-well {
-    background: var(--surface-sunken);
+    background: var(--surface-raised);
     border-radius: calc(var(--r-card) - var(--s-card-frame));
   }
 
@@ -2093,7 +2121,7 @@
      `--surface-raised` and not a colour of its own: it *is* the rim, continued
      around the mark. */
   .tv-mark-seat .tv-disc {
-    box-shadow: 0 0 0 var(--s-mark-halo) var(--surface-raised);
+    box-shadow: 0 0 0 var(--s-mark-halo) var(--surface-sunken);
   }
 
   /* ── The bottom half of the board is quieter, and it is the ink that says so ──

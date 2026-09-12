@@ -603,7 +603,7 @@ it('declares every custom property that anything reads', () => {
 
   // `next/font` emits these into a class at build time, so they are declared in
   // generated CSS no source file contains. See app/layout.tsx.
-  const external = new Set(['--font-mesa-body', '--font-mesa-serif', '--font-rank-italic'])
+  const external = new Set(['--font-mesa-body', '--font-mesa-serif'])
 
   // `var(--x, fallback)` cannot fail — a missing token yields the fallback
   // rather than an invalid declaration — so only bare reads are checked.

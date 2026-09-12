@@ -109,50 +109,6 @@ const condensed = localFont({
   variable: '--font-condensed',
 })
 
-/**
- * Fraunces Italic, digits only, for the rank numeral on `/weekly` and nothing
- * else.
- *
- * **The fifth family, which the note above says has to be argued for rather
- * than assumed.** The argument is that the board's thirty-nine numerals are the
- * one element on it that is pure apparatus, repeated thirty-nine times, and a
- * tabular sans numeral repeated thirty-nine times is a spreadsheet's row index.
- * A serif italic is unmistakably a *label on an object* rather than a cell
- * reference — the same move an editorial page makes with a folio.
- *
- * **It costs 7.2KB, because it is nine glyphs.** The subset is `U+30-39` and
- * nothing else: no letters, no punctuation, no currency. Every other family
- * here carries a full latin subset because every other family sets words. This
- * one can never be asked to set a word, which also means it cannot silently
- * become the face for anything else — a stray `var(--font-rank)` on prose
- * renders as fallback immediately and visibly rather than quietly succeeding.
- *
- * The variable axes survive the subset (`400..900`, optical size folded in at
- * the API), so the weight is a token rather than a second file.
- *
- * Bundled, not linked, for the reason all four above are: a
- * `fonts.googleapis.com` request is a runtime network dependency on a wall that
- * runs unattended for weeks, and a font request that fails silently falls back
- * to Georgia on a screen nobody is watching closely enough to notice.
- *
- * `style: 'italic'` is declared on the face rather than left to CSS. Without
- * it the browser would treat this as a roman and **synthesise** the slant when
- * asked for italic — which is exactly what the project's own serif does today,
- * since `MesaSerif-Variable.woff2` ships no italic at all. A synthetic oblique
- * of a serif is a sheared roman: the `1` keeps its upright serif, the bowls
- * skew instead of being redrawn, and it renders convincingly enough that
- * nobody checks. Measured before this was added: `font-style: italic` on
- * `--font-serif` produced glyphs at *identical* advance widths to the roman,
- * which is the signature of a synthesis rather than a face.
- */
-const rankItalic = localFont({
-  src: './fonts/Fraunces-Italic-Digits.woff2',
-  weight: '400 900',
-  style: 'italic',
-  display: 'block',
-  variable: '--font-rank-italic',
-})
-
 export const metadata: Metadata = {
   title: 'BYOB Wall',
   description: 'Live leaderboard and Mesa Flea countdown for BYOB Cohort 2026.',
@@ -177,7 +133,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         mesaSerifVariable.variable,
         displayBlack.variable,
         condensed.variable,
-        rankItalic.variable,
       ].join(' ')}
     >
       <body>
