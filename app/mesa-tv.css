@@ -600,11 +600,33 @@
      91.25 — while the card itself is 47px shorter and reads as a caption block
      under an object rather than as a box with an object in it.
 
-     `--h-mark-out` is the half above the card and therefore the height of the
-     cell's headroom; `--h-mark-in` is the card's first grid row. They are the
-     same number by definition and are written as two names because they are
-     read in two different places, and a future crop that is not half-and-half
-     would move only one of them.
+     ── AND IT IS NOT CUT IN HALF ──
+
+     The first build put the mark's centre exactly on the card's edge, which is
+     the tidy arithmetic and the wrong picture. At 50% the edge passes through
+     the circle's **widest point**, so the card meets the mark along its longest
+     possible chord and the two read as one object *bisected* by a line. The
+     reference this is built from does not do that, and measuring it is what
+     said so: its sphere sits 41% above the card and 59% below.
+
+     Below the equator the chord shortens — the card's edge closes slightly
+     around the circle instead of running straight across its diameter — and the
+     card reads as a **socket holding the mark** rather than as a line drawn
+     through it. It is a small number and a large difference, which is why it is
+     a token rather than a literal.
+
+     It costs nothing in height. `--h-mark-out + --h-mark-in` is the diameter
+     whatever the split, so the row's arithmetic is untouched and the mark stays
+     90.3px. What moves is where the card's top edge sits, and everything it
+     buys is clearance: the rank numeral is measured against `sqrt(r² - t²)`
+     from the circle's centre, and a centre that has risen 9px above the card's
+     edge is 9px further from the numeral at every depth. The crown gains the
+     same 9px under the masthead rule.
+
+     `--h-mark-out` is the part above the card and therefore the height of the
+     cell's headroom; `--h-mark-in` is the card's first grid row. `--h-mark-in`
+     is stated as the remainder rather than as a second fraction, so the two can
+     never be tuned into disagreeing about the size of the disc.
 
      **Both are declared on `.tv-card-row`, not here**, and that is not a
      stylistic choice — it is this file's own documented trap, walked into once
@@ -618,7 +640,7 @@
      plausible cards at the wrong height with no error anywhere. Measured, not
      noticed. */
 
-  /* How far below the card's top edge the rank numeral starts.
+  /* How far below the **mark's centre line** the rank numeral starts.
 
      The numeral and the mark compete for the card's top-left, and the circle is
      at its widest exactly where the card's edge cuts it — so a numeral flush
@@ -626,18 +648,39 @@
      curve: the disc's half-width at depth `t` is `sqrt(r² - t²)`, so every pixel
      of drop widens the corner the numeral sits in.
 
-     **It is bounded at both ends**, which is why it is 26 and not 40. Dropping
+     **The centre line, and not the card's top edge**, which is what this was
+     anchored to first and is a genuinely wrong anchor. The circle's geometry is
+     the whole constraint here and the circle does not know where the card's
+     edge is — so tuning `--k-mark-out` moved the numeral into the mark and the
+     clearance fell from 16.1px to 11.5 with nothing about the numeral changed.
+     Measured from the centre, the numeral's window is the half-diameter between
+     the circle's widest point and its lowest, and the split cannot touch it.
+
+     **It is bounded at both ends**, which is why it is 24 and not 40. Dropping
      further buys horizontal clearance and spends vertical: the numeral's box
      has to finish above where a *wrapped* venture name begins, and a wrapped
-     name starts only 6px under the mark.
+     name starts 6px under the mark's bottom.
 
      Measured at all four viewports rather than trusted. The worst case on the
      board is rank 20 — two digits, and Fraunces' italic `2` and `0` are wide. */
-  --s-rank-drop: 1.3542vw; /* 26px */
-  /* 46.5px: two 17.25px lines and **6px before the figure**, with whatever a
-     one-line name does not use falling *above* it. Which end of this box the
-     slack lands on is the whole design of it — see `.tv-card-name`. */
-  --h-card-name: 2.4219vw; /* 46.5px */
+  --s-rank-drop: 1.25vw; /* 24px */
+
+  /* How much of the mark stands above the card's top edge, as a fraction of its
+     diameter. 0.41 rather than 0.5 — the argument is at `--h-mark-out`, and the
+     short form is that a circle cut at its equator reads as bisected while a
+     circle cut below it reads as seated. Measured off the reference. */
+  --k-mark-out: 0.41;
+  /* 50.5px: 10px under the mark at worst, two 17.25px lines, 6px before the
+     figure. Which end of this box a one-line name's spare line falls on is the
+     whole design of it — see `.tv-card-name`.
+
+     The first number is the one that moved. At 46.5 a *wrapped* name cleared
+     the mark's lower edge by 6px, which is the tightest pair on the card and
+     the only place the reference's own generous space under its object is
+     visibly missing. 10px costs 4px of mark and buys it back on the eight cards
+     in thirty-nine that need it; the thirty-one that do not already have 27px
+     there, because their spare line sits in the same gap. */
+  --h-card-name: 2.6302vw; /* 50.5px */
   --h-card-fig: 1.4583vw; /* 28px */
   /* The day figure's line, under the week's. 18px holds 15px of type with 1.5px
      of leading either side — it is a line of text, not an object, so it needs a
@@ -1123,49 +1166,54 @@
   --d-pod-disc: 10.9375vw; /* 210px */
   --d-pod-disc-rest: 8.8542vw; /* 170px */
 
-  /* ── The stage: three plinths, and the numbers that draw them ──
+  /* ── The stage: three slabs, and the numbers that draw them ──
 
-     Widths first. 330 · 280 · 280 with 24px between is 938px, inside a
-     1010px column with 36px either side — and the leader's figure at its
-     widest (`₹1,00,00,000`, twelve glyphs at 48px, ~300px) fits its 330px
-     block without touching the gaps. `--s-pod-gap` is the gap and is unchanged.
+     Widths first. 340 · 290 · 290 with 24px between is 968px, inside the
+     987px column the 1.25fr split gives the stage. The leader's figure at
+     its widest (`₹1,00,00,000`, twelve glyphs at 48px, ~300px) fits its
+     340px slab with room for the slab's own side padding.
 
-     Heights are the ranking, stated as a staircase a corridor can read: 320
-     · 230 · 170, so 1 stands 90px over 2 and 2 stands 60px over 3. Not equal
-     steps, on purpose — the leap to first place is the one the wall is
-     about, and a podium with three equal risers reads as a bar chart.
+     Heights are the ranking, stated as a staircase a corridor can read: 500
+     · 400 · 320. Not equal steps, on purpose — the leap to first place is
+     the one the wall is about, and three equal risers read as a bar chart.
+     The slab holds its own content: the lower half of the mark, the name,
+     the figure, and the numeral at the foot, so its height is a *minimum*
+     and the tokens below are what set it.
 
-     The top slab is drawn as a trapezoid seen from slightly above; 26px is
-     enough to read as a *face* at 1920 rather than as a border. */
-  --w-stage-1: 17.1875vw; /* 330px */
-  --w-stage-rest: 14.5833vw; /* 280px */
-  --h-stage-face-1: 16.6667vw; /* 320px */
-  --h-stage-face-2: 11.9792vw; /* 230px */
-  --h-stage-face-3: 8.8542vw; /* 170px */
-  --h-stage-top: 1.3542vw; /* 26px */
-  /* Between the figure and the slab it is printed over. Tighter than the
-     mark-to-name gap so the name and figure group with the block under them
-     rather than with the mark above. */
-  --s-stage-lift: 1.1458vw; /* 22px */
-  /* Air under the three blocks for the light they throw on the floor. It is
-     the only slack the stage keeps at the bottom: everything else goes above
-     the leader, which is where the cone of light is. */
-  --s-stage-floor: 2.9167vw; /* 56px */
-  /* The numeral on the face. First place's is a step up, like its figure. At
-     150px it is the largest glyph on either slide and it is meant to be —
-     the numeral is the one thing on this board legible from the far end of
-     the corridor. */
-  --t-stage-numeral: 800 7.8125vw / 1 var(--font-sans);
-  --t-stage-numeral-rest: 800 5.7292vw / 1 var(--font-sans);
-  /* The lip: the pale specular along the front edge of the slab. */
-  --h-stage-lip: 0.2083vw; /* 4px */
-  /* How far the three blocks rise, and how long they take. Seven tenths of a
-     second, staggered 3 · 2 · 1 by `--stage-delay` on each slot, so the last
-     block to settle is the leader's, at 0.86s; the mark and details fade in
-     over the top of that and the crown — whose own clock in `.tv-crown-glyph`
-     is untouched — lands at 1.43s on a stage that has been still for half a
-     second. **Lengthen the crown's delay before shortening this.** */
-  --dur-stage-rise: 0.7s;
+     The mark sits *on* the slab's top edge, its centre on the line — the
+     same device `/weekly`'s card uses, and the two slides now say "a mark
+     on its card" the same way. */
+  --w-stage-1: 17.7083vw; /* 340px */
+  --w-stage-rest: 15.1042vw; /* 290px */
+  --h-stage-1: 26.0417vw; /* 500px */
+  --h-stage-2: 20.8333vw; /* 400px */
+  --h-stage-3: 16.6667vw; /* 320px */
+  /* The cone's base, and the width of the bloom box behind the leader's mark. */
+  --w-stage-spot: 27vw; /* 518px */
+  /* The slab's corners, and the thick base band that makes it an object. */
+  --r-stage: 1.4583vw; /* 28px */
+  --h-stage-base: 0.7292vw; /* 14px */
+  /* Inside the slab: side padding, and the air between the mark's lower
+     edge and the name. */
+  --s-stage-pad: 1.25vw; /* 24px */
+  --s-stage-mark-name: 0.9375vw; /* 18px */
+  /* Air under the three slabs for the light they throw on the floor. */
+  --s-stage-floor: 2.0833vw; /* 40px */
+  /* The rank badge — a white pill at the slab's top-left — and the
+     watermark numeral at its foot. The badge is what is *read*; the
+     watermark is what is seen from the corridor. First place's watermark
+     is a step up, like its figure. */
+  --t-stage-badge: 800 var(--fs-3) / 1 var(--font-sans);
+  --h-stage-badge: 2.5vw; /* 48px */
+  --t-stage-watermark: 800 9.375vw / 0.85 var(--font-sans); /* 180px */
+  --t-stage-watermark-rest: 800 7.2917vw / 0.85 var(--font-sans); /* 140px */
+  /* How long a slab takes to pop up, staggered 3 · 2 · 1 by `--stage-delay`
+     on each slot, so the last to settle is the leader's, at 0.76s; the mark
+     and details fade in over the top of that and the crown — whose own
+     clock in `.tv-crown-glyph` is untouched — lands at 1.43s on a stage
+     that has been still for over half a second. **Lengthen the crown's
+     delay before shortening this.** */
+  --dur-stage-rise: 0.6s;
 
   /* ── The crown ──
 
@@ -1210,9 +1258,10 @@
   --y-crown: -25%;
   --r-crown: -20deg;
 
-  /* Air between the mark and the name under it, and between the name and the
-     figure. `--s-pod-num-gap` was here too — the numeral sat above the mark —
-     and went when the numeral moved onto the plinth's face. */
+  /* Between the name and the figure on the slab. `--s-pod-mark-gap` is read
+     by nothing on `/podium` now — the mark-to-name distance is the slab's
+     own padding, `--s-stage-mark-name` — and stays for the reason the token
+     test gives: it is declared, so it is not a silent `var()` failure. */
   --s-pod-mark-gap: 1.25vw; /* 24px */
   --s-pod-name-gap: 0.4167vw; /* 8px */
 
@@ -1657,12 +1706,14 @@
    `both`, no iteration count, and is over well before the crown lands. The
    board is then still.
 
-   **`scaleY` on the block, never a height.** A height animation relayouts the
-   column on every frame, and the column is what `useCentroidShift` and
+   **A transform on the slab, never a height.** A height animation relayouts
+   the column on every frame, and the column is what `useCentroidShift` and
    `measurePath` read — an overtake fired during the first second would be
    measured against a podium that was still growing. A transform changes no
    layout, so every measurement is right from the first frame whether or not
-   the block has finished rising.
+   the slab has finished rising. The mark band is a *sibling* of the slab,
+   not a child, for the same reason: inside it, the disc's rect would be
+   scaled for the first 0.6s and a path measured then would be wrong.
 
    The fades are opacity only, for the same reason and one more: a transform
    on the mark band would be a second transform under the crown, and the
@@ -1670,14 +1721,14 @@
 @keyframes tv-stage-rise {
   0% {
     opacity: 0;
-    transform: scaleY(0.04);
+    transform: translate3d(0, 6%, 0) scale(0.94);
   }
-  35% {
+  40% {
     opacity: 1;
   }
   100% {
     opacity: 1;
-    transform: scaleY(1);
+    transform: translate3d(0, 0, 0) scale(1);
   }
 }
 
@@ -1769,9 +1820,9 @@
     );
 
     /* Declared here, with `--d-card-logo`, and never at `:root` — see the note
-       on these two tokens for the invalid-inheritance trap that forces it. */
-    --h-mark-out: calc(var(--d-card-logo) / 2);
-    --h-mark-in: calc(var(--d-card-logo) / 2);
+       on these tokens for the invalid-inheritance trap that forces it. */
+    --h-mark-out: calc(var(--d-card-logo) * var(--k-mark-out));
+    --h-mark-in: calc(var(--d-card-logo) - var(--h-mark-out));
   }
 
   /* ── The floating disc ──
@@ -2074,11 +2125,12 @@
      content. */
   .tv-card-rank {
     position: absolute;
-    /* Below the card's top edge by `--s-rank-drop`, which is where the mark's
-       circle has curved far enough out of the corner to leave room — that token
-       carries the arithmetic. `--h-mark-out` is the card's own top, so this
-       moves with the mark rather than needing to be re-tuned beside it. */
-    top: calc(var(--h-mark-out) + var(--s-rank-drop));
+    /* Below the mark's own centre line, which is half a diameter from the top
+       of the cell — **not** below the card's top edge. The numeral is dodging a
+       circle and the circle's geometry is measured from its centre, so an
+       anchor on the card's edge makes this drift every time `--k-mark-out` is
+       touched. See `--s-rank-drop`, where that is recorded with the numbers. */
+    top: calc(var(--d-card-logo) / 2 + var(--s-rank-drop));
     left: var(--s-card-inset);
     z-index: 2;
     font: var(--t-tv-card-rank);
@@ -2674,74 +2726,79 @@
      place's metal and third place's height because two rules disagreed is
      the failure this shape prevents. */
   .tv-stage-1 {
-    --stage-metal: var(--stage-metal-1);
-    --stage-metal-deep: var(--stage-metal-1-deep);
-    --stage-metal-lit: var(--stage-metal-1-lit);
     --stage-face: var(--stage-face-1);
-    --h-stage-face: var(--h-stage-face-1);
-    --t-stage-numeral-here: var(--t-stage-numeral);
+    --stage-base: var(--stage-base-1);
+    --stage-glow: var(--stage-glow-1);
+    --h-stage: var(--h-stage-1);
+    --d-stage-disc: var(--d-pod-disc);
+    --t-stage-watermark-here: var(--t-stage-watermark);
     --stage-delay: 0.16s;
     flex-basis: var(--w-stage-1);
   }
 
   .tv-stage-2 {
-    --stage-metal: var(--stage-metal-2);
-    --stage-metal-deep: var(--stage-metal-2-deep);
-    --stage-metal-lit: var(--stage-metal-2-lit);
     --stage-face: var(--stage-face-2);
-    --h-stage-face: var(--h-stage-face-2);
-    --t-stage-numeral-here: var(--t-stage-numeral-rest);
+    --stage-base: var(--stage-base-2);
+    --stage-glow: var(--stage-glow-2);
+    --h-stage: var(--h-stage-2);
+    --d-stage-disc: var(--d-pod-disc-rest);
+    --t-stage-watermark-here: var(--t-stage-watermark-rest);
     --stage-delay: 0.08s;
   }
 
   .tv-stage-3 {
-    --stage-metal: var(--stage-metal-3);
-    --stage-metal-deep: var(--stage-metal-3-deep);
-    --stage-metal-lit: var(--stage-metal-3-lit);
     --stage-face: var(--stage-face-3);
-    --h-stage-face: var(--h-stage-face-3);
-    --t-stage-numeral-here: var(--t-stage-numeral-rest);
+    --stage-base: var(--stage-base-3);
+    --stage-glow: var(--stage-glow-3);
+    --h-stage: var(--h-stage-3);
+    --d-stage-disc: var(--d-pod-disc-rest);
+    --t-stage-watermark-here: var(--t-stage-watermark-rest);
     --stage-delay: 0s;
   }
 
   /* ── The light over first place ──
 
-     Two gradients in one box behind the leader's column: a bloom centred on
-     the mark, and a cone that opens from a point above the frame's top edge
-     down to the slab. `z-index: 0` under the slot's own stacking context,
-     so it is behind the disc, the details and the block, and in front of
-     the page. Static — it is a lamp, not a sweep.
-
-     The cone is a `clip-path` on the pseudo-element, not on the box, so the
-     bloom is not cut by the cone's edges: light spills, a beam does not. */
-  .tv-stage-spot {
+     A bloom behind the leader's mark, `z-index: 0` under the slot's own
+     stacking context so it is behind the disc and the slab and in front of
+     the page. Static — it is a lamp, not a sweep. The cone above it is the
+     row's; see `.tv-stage-spot`. */
+  .tv-stage-bloom {
     position: absolute;
     z-index: 0;
-    left: -45%;
-    right: -45%;
-    top: -34%;
-    bottom: calc(var(--h-stage-face) + var(--h-stage-top) - 2vw);
+    left: 50%;
+    bottom: calc(var(--h-stage) - var(--d-stage-disc) * 0.45);
+    width: var(--w-stage-spot);
+    height: calc(var(--d-stage-disc) * 1.9);
+    transform: translateX(-50%);
     pointer-events: none;
     background: radial-gradient(
-      ellipse 38% 26% at 50% 44%,
+      ellipse 40% 40% at 50% 50%,
       var(--stage-spot-core),
       transparent 72%
     );
   }
 
-  .tv-stage-spot::before {
-    content: '';
+  /* The cone is the row's, not the slot's. Its apex is the row's top edge —
+     which is the rule under the masthead, because the row is the column's
+     full height — and its base is the leader's slab. Centred on the middle
+     slot by the same width tokens the slots read: one rest-width, one gap,
+     half the leader's width. */
+  .tv-stage-spot {
     position: absolute;
-    inset: 0;
+    top: 0;
+    bottom: calc(var(--s-stage-floor) + var(--h-stage-1) - 1.5vw);
+    left: calc(var(--w-stage-rest) + var(--s-pod-gap) + var(--w-stage-1) / 2);
+    width: var(--w-stage-spot);
+    transform: translateX(-50%);
+    pointer-events: none;
     background: linear-gradient(180deg, var(--stage-spot) 0%, transparent 96%);
-    clip-path: polygon(44% 0, 56% 0, 100% 100%, 0 100%);
+    clip-path: polygon(45% 0, 55% 0, 100% 100%, 0 100%);
   }
 
   /* ── The floor ──
 
-     One pool of violet under all three blocks, drawn on the podium row
-     rather than on a slot so it spans the group. It sits in the
-     `--s-stage-floor` band the row keeps clear beneath the blocks. */
+     One pool of violet under all three slabs, drawn on the podium row so it
+     spans the group, in the `--s-stage-floor` band the row keeps clear. */
   .tv-stage-floor {
     position: absolute;
     left: -8%;
@@ -2752,133 +2809,137 @@
     background: radial-gradient(ellipse 50% 50% at 50% 50%, var(--stage-floor), transparent 70%);
   }
 
-  /* ── One plinth ──
+  /* ── The mark, on the slab's top edge ──
 
-     Slab, face, numeral, and the light it throws on the floor. It is
-     `z-index: 1` in the slot so it paints over the spot and under nothing.
+     The band is positioned against the *slot*, with its centre on the
+     slab's top line, so it is a sibling of the slab rather than a child:
+     the slab pops up under it on mount, the disc's rect is never inside a
+     transform, and `measurePath` reads a true box on every frame. It keeps
+     `.tv-pod-mark-band`'s own rule (the perspective, the grid) and adds the
+     placement. `z-index: 2` puts it over the slab. */
+  .tv-stage-mark {
+    position: absolute;
+    z-index: 2;
+    left: 50%;
+    bottom: calc(var(--h-stage) - var(--d-stage-disc) / 2);
+    transform: translateX(-50%);
+  }
 
-     **The rise is a `scaleY` about the bottom edge**, so the block grows out
-     of the floor. `both`, no iteration count: it runs once per mount and the
-     block is then a still object. See `@keyframes tv-stage-rise`. */
+  /* ── One slab ──
+
+     A saturated gradient block with rounded shoulders, a thick base band in
+     its own hue, a sheen along the top edge, and its end colour pooled on
+     the floor under it. Everything it says is printed on it: the name and
+     figure in its top half under the mark, the rank as a badge and a
+     watermark. `z-index: 1` in the slot so it paints over the bloom.
+
+     It pops up once on mount — `both`, no iteration count — and is then a
+     still object. See `@keyframes tv-stage-rise`. */
   .tv-stage-block {
     position: relative;
     z-index: 1;
     width: 100%;
-    margin-top: var(--s-stage-lift);
+    min-height: var(--h-stage);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* Room for the lower half of the mark, then the air to the name. */
+    padding: calc(var(--d-stage-disc) / 2 + var(--s-stage-mark-name)) var(--s-stage-pad)
+      var(--h-stage-base);
+    border-radius: var(--r-stage) var(--r-stage) calc(var(--r-stage) * 0.5)
+      calc(var(--r-stage) * 0.5);
+    background: var(--stage-face);
+    /* The base band, the sheen, and the pooled glow — in that order, because
+       the first shadow paints on top. The base is a solid offset shadow in
+       the slab's own dark, which is the "thick button" edge. */
+    box-shadow:
+      inset 0 var(--stroke-hair) 0 var(--stage-slab-sheen),
+      0 var(--h-stage-base) 0 var(--stage-base),
+      0 calc(var(--h-stage-base) + 1.2vw) 3vw calc(-0.6vw)
+        color-mix(in srgb, var(--stage-glow) 55%, transparent);
     transform-origin: 50% 100%;
-    animation: tv-stage-rise var(--dur-stage-rise) cubic-bezier(0.22, 1, 0.36, 1) both
+    animation: tv-stage-rise var(--dur-stage-rise) cubic-bezier(0.34, 1.4, 0.64, 1) both
       var(--stage-delay);
+    /* The same warning the old wrapper carried: no `filter` here, ever —
+       the mark band is a sibling now, but a filter on an ancestor of the
+       arriving disc's `scale` would still flatten it. */
   }
 
-  /* The metal on the floor under its own block. `z-index: -1` inside the
-     block's stacking context puts it under the face and over the page. It
-     scales with the block during the rise, which is right: a block that is
-     not there yet throws no light. */
+  /* The slab's own colour on the floor under it. */
   .tv-stage-block::after {
     content: '';
     position: absolute;
     z-index: -1;
-    left: -22%;
-    right: -22%;
-    bottom: calc(-1.1 * var(--s-stage-floor));
-    height: calc(1.9 * var(--s-stage-floor));
+    left: -18%;
+    right: -18%;
+    bottom: calc(-1.3 * var(--s-stage-floor));
+    height: calc(2 * var(--s-stage-floor));
     pointer-events: none;
     background: radial-gradient(
       ellipse 50% 50% at 50% 42%,
-      color-mix(in srgb, var(--stage-metal) var(--stage-metal-pool), transparent),
+      color-mix(in srgb, var(--stage-glow) var(--stage-glow-pool), transparent),
       transparent 70%
     );
   }
 
-  /* The top face, seen from a little above: a trapezoid, wider at the front
-     edge than the back, in the metal's full ramp with the specular just left
-     of centre so the three slabs share one light. It overhangs the face by
-     2% a side, which is what makes it a slab resting on the block rather
-     than a stripe painted across it. */
-  .tv-stage-top {
-    display: block;
-    height: var(--h-stage-top);
-    margin: 0 -2%;
-    background: linear-gradient(
-      90deg,
-      var(--stage-metal-deep) 0%,
-      var(--stage-metal) 22%,
-      var(--stage-metal-lit) 46%,
-      var(--stage-metal) 68%,
-      var(--stage-metal-deep) 100%
-    );
-    clip-path: polygon(6% 0, 94% 0, 100% 100%, 0 100%);
+  /* The name and figure, printed on the slab. Both white on the gradient's
+     top half — see §7 of `forge-tokens.css` for the measured ratios and
+     why nothing that is read is printed lower than this — with a shadow,
+     which on a saturated fill is the difference between type and stencil. */
+  .tv-stage-details {
+    position: relative;
+    width: 100%;
+    text-align: center;
+    color: var(--ink-on-solid);
+    text-shadow: 0 0.1vw 0.6vw var(--stage-type-shadow);
   }
 
-  /* The front face. The gradient is the place's own — see §7 of
-     `forge-tokens.css` for why all three are purple and only the top stop
-     differs. The inset shadow at the bottom is the block sinking into the
-     floor's light; the outer glow is the metal's edge lighting the page
-     around it. */
-  .tv-stage-face {
-    position: relative;
-    height: var(--h-stage-face);
+  .tv-stage-details .tv-pod-name,
+  .tv-stage-details .tv-figure {
+    color: var(--ink-on-solid);
+  }
+
+  /* The rank as a badge: a white pill at the slab's top-left, in the page's
+     ink, so it reads identically on all three gradients. It is the element
+     that carries `role="img"` and the `Rank N` label. */
+  .tv-pod-numeral {
+    position: absolute;
+    z-index: 3;
+    left: var(--s-stage-pad);
+    top: var(--s-stage-pad);
+    min-width: var(--h-stage-badge);
+    height: var(--h-stage-badge);
+    padding: 0 0.6vw;
+    border-radius: var(--radius-pill);
     display: grid;
     place-items: center;
-    background: var(--stage-face);
-    box-shadow:
-      inset 0 calc(-2.5 * var(--s-stage-lift)) calc(2 * var(--s-stage-lift)) calc(-1 * var(--s-stage-lift))
-        var(--stage-face-shade),
-      0 0 2.6vw color-mix(in srgb, var(--stage-metal) 18%, transparent);
-  }
-
-  /* The lip: the specular along the front edge of the slab, which is the
-     brightest line on the block and the thing that reads as metal from the
-     corridor. Pale metal, with its own bloom. */
-  .tv-stage-face::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: 0;
-    height: var(--h-stage-lip);
-    background: var(--stage-metal-lit);
-    box-shadow:
-      0 0 1.2vw 0.12vw color-mix(in srgb, var(--stage-metal-lit) 55%, transparent),
-      0 0.15vw 0 var(--stage-face-sheen);
-  }
-
-  /* The numeral, cut into the face in its own metal. It was above the mark
-     in `--accent`, one size for all three, on the argument that the mark
-     carried rank and a numeral ramp on top was the same fact twice. The
-     plinth is what carries rank now, and the numeral is its label — so it
-     is on the plinth, in the plinth's metal, at the plinth's scale.
-
-     The ramp is a gradient clipped to the glyph rather than a flat fill, for
-     the reason the crown's is: three steps interpolated read as a lit
-     surface, three flat regions read as paint. The `drop-shadow` is safe
-     here — this element is nowhere under the mark band's `perspective`, so
-     the flattening a `filter` forces has nothing to flatten. */
-  .tv-pod-numeral {
-    display: block;
-    font: var(--t-stage-numeral-here);
-    text-box: trim-both cap alphabetic;
+    font: var(--t-stage-badge);
     font-variant-numeric: tabular-nums;
     letter-spacing: var(--track-pod-fig);
-    background: linear-gradient(
-      172deg,
-      var(--stage-metal-lit) 0%,
-      var(--stage-metal) 48%,
-      var(--stage-metal-deep) 100%
-    );
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-    filter: drop-shadow(0 0 1vw color-mix(in srgb, var(--stage-metal) 38%, transparent));
-    animation: tv-stage-in 0.45s ease-out both calc(var(--stage-delay) + 0.38s);
+    color: var(--stage-badge-ink);
+    background: var(--stage-badge);
+    box-shadow: 0 0.15vw 0 color-mix(in srgb, var(--stage-base) 60%, transparent);
+    animation: tv-stage-in 0.4s ease-out both calc(var(--stage-delay) + 0.3s);
   }
 
-  /* The mark band and the details fade in over the risen block. Opacity
+  /* The same glyph, huge and translucent, at the slab's foot — what the
+     corridor sees. Decorative and `aria-hidden`; the badge is the numeral. */
+  .tv-stage-watermark {
+    display: block;
+    margin-top: auto;
+    font: var(--t-stage-watermark-here);
+    letter-spacing: var(--track-pod-fig);
+    color: var(--stage-watermark);
+    text-box: trim-both cap alphabetic;
+    padding-bottom: 0.4vw;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* The mark band and the details fade in over the risen slab. Opacity
      only — see the keyframes for why neither may carry a transform. */
   .tv-stage-in {
-    position: relative;
-    z-index: 1;
-    animation: tv-stage-in 0.55s ease-out both calc(var(--stage-delay) + 0.3s);
+    animation: tv-stage-in 0.5s ease-out both calc(var(--stage-delay) + 0.28s);
   }
 
   /* The mark's own band. **The riser is gone with the plinths** — a place's
@@ -3084,7 +3145,7 @@
     min-height: 0;
     display: grid;
     grid-template-rows: minmax(0, 1fr);
-    padding: 0.4167vw 1.6667vw;
+    padding: 0.4167vw 1.25vw;
     border-radius: var(--radius-lg);
     background: var(--stage-panel);
     box-shadow:
@@ -3204,6 +3265,9 @@
     .tv-pod-numeral {
       animation: none;
       opacity: 1;
+    }
+
+    .tv-stage-block {
       transform: none;
     }
 
