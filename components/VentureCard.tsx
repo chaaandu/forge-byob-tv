@@ -340,22 +340,10 @@ export function VentureCard({
             the placement percentages are `/podium`'s, unchanged, so the two
             boards cannot drift into crowning first place two ways.
 
-            Drawn **after** the disc, so it sits in front of the mark.
-
-            It was behind, on the argument that a crown overlapping the monogram
-            would cover the one thing on the card that identifies the venture.
-            Measured on the running board, behind was the worse failure: the
-            disc cut the crown's lower-right clean off, so what rank 1 actually
-            wore was a gold fragment peeking out beside its head — a sticker
-            stuck to the card rather than a crown on anything.
-
-            **The rim is what makes front work**, and the two changes arrived
-            together for that reason. `Crown`'s contact corner sits about 9% of
-            the diameter inside the disc's edge, which is exactly the band
-            `--mark-rim` paints; so the crown now rests on the mark's *edge*
-            rather than on its face, and covers no part of the monogram or the
-            artwork. In front of a flat disc it would have been a sticker over a
-            logo. In front of a rimmed one it is a crown on a head.
+            Drawn **before** the disc so it sits under the mark in paint order.
+            A crown overlapping the monogram would cover the one thing on the
+            card that identifies the venture; behind it, the mark stays whole
+            and the crown reads as resting against the rim.
 
             It lands on mount and stops — `Crown`'s drop is one run — so an
             overtake into first place is a crown arriving on the new leader,
@@ -367,6 +355,12 @@ export function VentureCard({
             against thirty-nine still cards. An interrupt only reads as one
             against a still frame. `Crown`'s own docblock carries the argument;
             it is the same one that removed row 1's idle. */}
+        {rank === 1 ? (
+          <span className="tv-crown">
+            <Crown className="tv-crown-glyph" glint={false} />
+          </span>
+        ) : null}
+
         <div style={{ display: 'grid', placeItems: 'center', width: '100%', height: '100%' }}>
           <VentureDisc
             team={team}
@@ -375,12 +369,6 @@ export function VentureCard({
             {...(flips ? { flipShift: cue.shift } : {})}
           />
         </div>
-
-        {rank === 1 ? (
-          <span className="tv-crown">
-            <Crown className="tv-crown-glyph" glint={false} />
-          </span>
-        ) : null}
       </motion.div>
 
       <motion.div
