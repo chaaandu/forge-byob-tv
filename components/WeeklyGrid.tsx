@@ -58,23 +58,28 @@ export const ROWS = 4
 
 
 /**
- * Four rows, four heights, descending.
+ * Four rows, one height — thirty-nine copies of one card.
  *
- * The board had one height for all four and therefore no direction: rank 1 and
- * rank 31 were the same object in different places. The ramp is back and the
- * *disc* absorbs it — every text line is the same size in row 4 as in row 1,
- * because a name and a figure have a legibility floor that does not care about
- * rank. The four values and the budget they must stay inside are documented in
- * app/mesa-tv.css.
+ * They descended for a while, 0.266 : 0.252 : 0.244 : 0.238, which put row 1's
+ * mark at 106.6px and row 4's at 82.2. The argument for the ramp was that one
+ * height for all four leaves the board with no direction: rank 1 and rank 31
+ * the same object in different places.
+ *
+ * **Direction is not this slide's job.** `/podium` is the hierarchy, `/weekly`
+ * is the cohort, and they rotate thirty seconds apart precisely so each can do
+ * one of those properly. Rank here is carried by reading order and by a
+ * numeral, both exact, and a 23% spread over four rows is too small to read as
+ * intent and too large to be invisible — it reads as thirty-nine cards that are
+ * nearly but not quite the same object. The arithmetic is in app/mesa-tv.css.
  *
  * This array is also what says there are four rows: `rowsOf` slices on its
  * length.
  */
 const ROW_HEIGHTS = [
-  'var(--h-row-1)',
-  'var(--h-row-2)',
-  'var(--h-row-3)',
-  'var(--h-row-4)',
+  'var(--h-row-each)',
+  'var(--h-row-each)',
+  'var(--h-row-each)',
+  'var(--h-row-each)',
 ] as const
 
 /**

@@ -482,8 +482,37 @@ export function VentureCard({
             print is fixed in `formatRupees`, where it belongs — it was a
             rounding bug, not a rule about this board. */}
         <div
-          className="tv-figure tv-card-week tv-card-detail"
-          style={{ font: 'var(--t-tv-card-week)', color: 'var(--card-fig-ink)' }}
+          className={
+            // ── The ink follows the figure, not the rank ──
+            //
+            // `--card-fig-ink` is set by the card's tier: full ink on ranks
+            // 1-20, muted below. Which means rank 7's `₹0` is printed at full
+            // strength and rank 21's `₹0` is not, and the two are **the same
+            // fact**. Early in a week that is thirty-one identical zeroes, of
+            // which fourteen are the brightest type on the board, and the
+            // loudest repeated element on the wall is the one saying nothing
+            // happened.
+            //
+            // A zero takes the quiet ink wherever it ranks. The bright figures
+            // on the board are then exactly the teams that have traded, which
+            // is the thing a passer-by is actually looking for — and it costs
+            // the zeroes nothing they were carrying, because a zero says "not
+            // yet" at either weight.
+            //
+            // **Not `<= 0`.** A negative challenge figure is news — a team
+            // below the total it started on, proof revoked after the baseline
+            // was photographed — and it is the one figure on this board nobody
+            // should have to look twice at. `Math.round` rather than the raw
+            // value, so this agrees with what `formatRupees` decided to print
+            // rather than with what the sheet happens to hold; a team on ₹0.40
+            // prints `₹0` and reads as one. Negative zero rounds to `-0`, and
+            // `-0 === 0`, so a sub-rupee shortfall lands quiet with the zeroes
+            // it is indistinguishable from.
+            Math.round(boardEarned(mode, team)) === 0
+              ? 'tv-figure tv-card-week tv-card-week-idle tv-card-detail'
+              : 'tv-figure tv-card-week tv-card-detail'
+          }
+          style={{ font: 'var(--t-tv-card-week)' }}
         >
           {formatRupees(boardEarned(mode, team))}
         </div>

@@ -309,10 +309,25 @@
       var(--s-board-bottom)
   );
   --h-rows: calc(var(--h-board) - 3 * var(--s-row-gap));
-  --h-row-1: calc(var(--h-rows) * 0.26625);
-  --h-row-2: calc(var(--h-rows) * 0.2517);
-  --h-row-3: calc(var(--h-rows) * 0.24443);
-  --h-row-4: calc(var(--h-rows) * 0.23762);
+  /* ── FOUR ROWS, ONE HEIGHT ──
+
+     The ramp was 0.266 : 0.252 : 0.244 : 0.238, which put row 1's mark at
+     106.6px and row 4's at 82.2. Its argument was that one height for all four
+     leaves the board with no direction — rank 1 and rank 31 being the same
+     object in different places.
+
+     **Direction is not this slide's job.** `/podium` is the hierarchy and
+     `/weekly` is the cohort; they rotate thirty seconds apart precisely so each
+     can do one of those properly. Rank here is already carried by reading order
+     and by a numeral, both exact. A 23% spread over four rows is too small to
+     read as intent and too large to be invisible, and what it actually reads as
+     is four rows rendering at slightly wrong sizes — thirty-nine cards that are
+     nearly but not quite the same object.
+
+     Equal, the board is a matrix: one card, thirty-nine times, and every mark
+     97.25px. The bottom half is what gains — row 4 is up 18% — and rank 31
+     stops being a smaller thing than rank 1 for a reason it cannot see. */
+  --h-row-each: calc(var(--h-rows) * 0.25);
 
   /* The grid's own spacing. Fixed px, and therefore the `--s-*` trap: these
      hold their size while every `vw` above shrinks, so the ramp has less room
@@ -331,18 +346,28 @@
      two edges 8px apart read as a seam rather than as two cards. `--w-card`
      below derives from this, so the cards narrow to 171.6px and the grid still
      ends exactly on the frame's margin. */
-  --s-card-gap: 0.625vw; /* 12px */
+  /* ── ONE GUTTER, BOTH WAYS ──
+
+     12px across and 20px down, tuned separately for reasons that stopped being
+     true: the row gap once held a hairline rule and the column gap was chosen
+     against cards that had no visible edge yet. Two numbers 8px apart on a
+     board of identical cards is not a rhythm, it is two tunings that never met.
+
+     16 both ways. It is a grid now — equal pitch, equal air — and a card's four
+     sides are the same distance from its four neighbours, which is the one
+     thing that makes thirty-nine identical objects read as a field rather than
+     as rows that happen to be stacked. The cards lose 3.6px of width to it and
+     gain 4px of height each, and the height is where this board is poor. */
+  --s-card-gap: 0.8333vw; /* 16px */
 
   /* The gap *between rows*, separate from the one between columns since the
      cards came down 5%. Shorter cards freed 51px of frame, and left at the
      column gap's 8px the board simply ended 80px above the bottom edge. The
      rows take the space instead, which keeps the board filling the frame while
      each card carries less height. */
-  /* **The row gap now holds a hairline**, so it is air-rule-air rather than
-     just air. 22px with a 1px rule centred in it gives each row 10px of
-     clearance, which is what keeps the rule reading as a separator rather than
-     as an underline belonging to the row above it. */
-  --s-row-gap: 1.0417vw; /* 20px */
+  /* The same 16. See `--s-card-gap`; these are one decision and must not drift
+     apart again. The hairline this once had to make room for is long gone. */
+  --s-row-gap: var(--s-card-gap);
 
   /* The card's horizontal padding. It went to zero while the cells were
      unbounded — with no card, all it did was push the rank numeral 8px in from
@@ -353,7 +378,7 @@
      what puts it there. 0.4vw is 7.7px, which is what it was; the alignment
      that mattered when the box was invisible does not, now that the box is the
      thing the eye reads the numeral against. */
-  --s-card-inset: 0.4167vw; /* 8px */
+  --s-card-inset: 0.5208vw; /* 10px */
 
   /* ── The today capsule ──
 
@@ -371,11 +396,20 @@
   --s-day-pill-x: 0.4688vw; /* 9px */
   --s-day-pill-gap: 0.2083vw; /* 4px */
 
-  /* The card's corner. Small — 8px at 1920 — because thirty-nine of them are on
-     screen at once and a radius that reads individually at that count reads as
-     a field of lozenges together. Enough to say "bounded", not enough to have a
-     shape of its own. */
-  --r-card: 0.4167vw; /* 8px */
+  /* ── The card's corner ──
+
+     8px on a 168 x 215.75 card is 4.8% of its width, which is the radius that
+     says nothing: too large to be a square corner and far too small to be a
+     rounded one, so the card reads as a rectangle that did not quite render.
+     The caution behind it was real — thirty-nine radii that read individually
+     become a field of lozenges — but that is a property of the radius relative
+     to the *card*, and 8px was picked when the cards were shorter.
+
+     14px is 8.3%, which is where a corner starts being a decision. Still well
+     under the ~20% at which a rectangle starts becoming a capsule, and the same
+     order as `--r-pill`'s intent at the other end of the scale: a shape that
+     knows what it is. */
+  --r-card: 0.7292vw; /* 14px */
 
   /* The card's own padding. **There is no grid gap between the card's parts**:
      each reserved line below includes its own separation, so a line that
@@ -384,7 +418,7 @@
      cell used: a visible edge needs clearance from its contents, where an
      invisible one only needed to not collide with the row gap. It costs each
      row ~7.7px of mark. */
-  --s-card-pad-y: 0.4167vw; /* 8px */
+  --s-card-pad-y: 0.5208vw; /* 10px */
 
   /* How far the card's contents sit above where the padding alone would put
      them. 0.31vw is 6px at 1920 and 5px at 1600 — inside the 7.7px and 6.4px of
@@ -539,28 +573,23 @@
   /* The card's head band: rank at the left, the day capsule at the right, and
      24px is what the taller of the two needs. */
   --h-card-head: 1.25vw; /* 24px */
-  /* 52px: 6px under the mark, two 17.25px lines, and **11.5px before the
-     figure**. The last number is the one this box exists for. At 36px the two
-     reserved lines had 0.75px under them, so the eight names in thirty-nine
-     that wrap ran into the figure; at 46 they had 5.5px, which was survivable
-     and still read as a collision from the corridor. The 6px it costs the mark
-     came out of the row the capsule vacated and is the best-spent 6px on the
-     card — a wrapped name is the only case on this board where two different
-     things are printed one under the other with nothing between them. */
-  --h-card-name: 2.7083vw; /* 52px */
+  /* 46.5px: two 17.25px lines and **6px before the figure**, with whatever a
+     one-line name does not use falling *above* it. Which end of this box the
+     slack lands on is the whole design of it — see `.tv-card-name`. */
+  --h-card-name: 2.4219vw; /* 46.5px */
   --h-card-fig: 1.4583vw; /* 28px */
   --h-day-pill: 1.25vw; /* 24px */
   /* How much of the head band the capsule may take. The rank is 26.6px at two
-     digits and needs its own air, so the capsule stops 46px short of the card's
-     left edge — 109.6px at 1920, against a measured 107px for `₹1,04,500`.
+     digits and needs its own air, so the capsule stops 39px short of the card's
+     content edge — 109px at 1920, against a measured 107px for `₹1,04,500`.
      Past roughly ₹11,00,000 **in a single day** the capsule ellipsises rather
      than clipping, which is a figure this cohort will not reach and a failure
      that says so rather than dropping a digit in silence. */
-  --w-day-pill-max: calc(100% - 2.3958vw);
-  /* How far a name's first line sits under the mark. Inside `--h-card-name`,
+  --w-day-pill-max: calc(100% - 2.0313vw);
+  /* How far the name's last line sits above the figure. Inside `--h-card-name`,
      not a grid gap — the card's parts each carry their own separation, which is
      the rule that keeps a line's spacing leaving with the line. */
-  --s-card-name-top: 0.3125vw; /* 6px */
+  --s-card-name-gap: 0.3125vw; /* 6px */
 
   /* The card's own width, spelled out because the mark needs it as a *length*
      and the grid only ever expresses it as a fraction. Ten columns and nine
@@ -596,6 +625,25 @@
      currently in a spreadsheet is a fact about the spreadsheet, and a venture
      can be renamed from it on any given Tuesday. */
   --t-tv-card-name: 700 var(--fs-6) / 1.15 var(--font-sans);
+  /* ── The name's tracking, and why it is not `--track-overline` ──
+
+     The system's 0.12em is an *overline* value: two or three uppercase words
+     over a heading, where the tracking is the whole effect. A venture name is
+     not that. At 15px, 0.12em is 1.8px between every pair of letters, so
+     `ATC (All Things Camphor)` spends 43px of a 148px card on inter-letter
+     space alone — 29% of the line, before a single glyph is drawn.
+
+     Measured, that is not a refinement but a correctness question: at 0.12em
+     exactly two names in the cohort need a third line and get an ellipsis
+     instead; at 0.08em none do, at the same size in the same box. A name the
+     board could print and chose not to is the worse of the two failures, and
+     tracking is the cheapest 8px on the card.
+
+     0.08em is still unmistakably a tracked uppercase label — the system's own
+     `--track-wide` is in that neighbourhood — and it is stated here rather than
+     changed in `colors_and_type.css`, which owns `.overline` and the rank
+     numeral and should keep its value. */
+  --track-card-name: 0.08em;
   /* Reduced 20% from clamp(15px, 1.45vw, 30px). Still the largest thing on the
      card, and still the figure the board exists to show. */
   --t-tv-card-week: 700 var(--fs-4) / 1 var(--font-sans);
@@ -1649,16 +1697,31 @@
      ten cells across a 1824px row read as one continuous band of marks rather
      than as ten entries.
 
-     **Now:** a flat card. One fill, one hairline, one radius; no gradient, no
-     shadow, no second variant. It bounds the cell so the rank has an inside to
+     **Now:** a flat card. One fill, one radius; no gradient, no shadow, no
+     stroke, no second variant. It bounds the cell so the rank has an inside to
      sit in and the ten entries in a row are ten objects — and it does that with
      a single value of contrast against the page rather than with lighting.
      `--surface-raised` is 1.22:1 against Deep Aubergine, which the token's own
      note calls "deliberately almost nothing": enough to bound, not enough to
      compete.
 
-     The row rules are gone with it. A card already has a bottom edge, and a
-     hairline 11px below one is a second edge saying the same thing. */
+     ── AND THE HAIRLINE WENT, BECAUSE OF WHERE THIS IS READ ──
+
+     It carried `inset 0 0 0 1px var(--hairline)` as well as the fill — two
+     devices saying one boundary, which is already one too many. What settles
+     it is the viewing distance rather than the taste. **A 1px stroke on a 55"
+     panel at six metres subtends 0.36 arcmin**, against roughly 1 arcmin of
+     human acuity: it is not a subtle edge at the wall, it is an edge that is
+     not there. Every pixel of it was being drawn for whoever happened to be
+     looking at a screenshot.
+
+     So the fill carries the card alone, which is also the honest test of
+     whether the fill is strong enough — with a stroke over it, a fill that had
+     quietly become invisible would never have reported itself.
+
+     The row rules went for the same reason a moment earlier: a card has a
+     bottom edge, and a hairline 11px below one is a second edge saying the
+     same thing at a distance where neither of them resolves. */
   .tv-card {
     --card-sub-ink: var(--ink-2);
     --card-hot-ink: var(--accent);
@@ -1666,7 +1729,6 @@
 
     background: var(--surface-raised);
     border-radius: var(--r-card);
-    box-shadow: inset 0 0 0 var(--stroke-hair) var(--hairline);
     padding: var(--s-card-pad-y) var(--s-card-inset);
   }
 
@@ -1869,35 +1931,59 @@
      below; with two lines in them, 0.75px — so the one case that needed
      separation from the figure was the one case that had none.
 
-     `flex-start` and a stated `padding-top` instead. **Every name's first line
-     now begins exactly `--s-card-name-top` under the mark**, wrapped or not,
-     and the spare line on a one-line card falls below the name where it reads
-     as the gap between the venture and its figure rather than as a name
-     floating loose of the mark it labels. That gap is doing real work: the card
-     says two things — who this is, and what they made — and nothing else on it
-     groups them.
+     ── AND THE SLACK GOES ABOVE THE NAME, UNDER THE MARK ──
+
+     Two lines are reserved and thirty-one names of thirty-nine use one, so
+     17.25px of slack sits somewhere: above the name, below it, or split. All
+     three were built and measured. The choice is not a preference — it is about
+     where a 17px rag across ten columns is *visible*.
+
+     **Below (`flex-start`)** puts it between the name and the figure, two
+     pieces of type at a different distance on every card. It is the most
+     visible of the three and it breaks proximity outright: measured, the figure
+     ended up 28.75px from its own name and 38px from the next row's rank, a
+     ratio of 1.3:1. The board's most important element was very nearly
+     equidistant between the thing it belongs to and the thing it does not.
+
+     **Split (`center`)** halves it to 8.6px each side and was the original. It
+     rags the name's first line against the figures — measured across row 1,
+     `DOSA CRISPS` began at y=172 and `THE UGLY MUGLING` at y=163.
+
+     **Above (`flex-end`, this)** puts the rag between the mark and the name,
+     where the thing above it is a circle. A circle's lower edge is a curve, so
+     the distance from mark to name varies optically across the width of every
+     card already and 17px between neighbours does not register. The name is
+     then a fixed 6px off the figure on all thirty-nine, wrapped or not, which
+     binds the two into the one unit a card actually has below its mark: this
+     venture, this money.
+
+     It has a second effect worth stating, because it is what makes the card's
+     width cheap. A narrower card wraps more names — and with the slack above,
+     a wrapped name costs *nothing on screen*: it grows up into air that was
+     empty. Card width can be spent on the gutters without a legibility
+     argument.
 
      `box-sizing` is stated rather than inherited. The padding is load-bearing
      for the rhythm, `--h-card-name` is subtracted from the mark's height in
      `.tv-card-row`, and under `content-box` that subtraction would be 6px short
-     with the card overflowing its row to make up the difference — which is a
-     row of marks quietly 6px smaller than the ramp says, reported by nothing.
+     with the card overflowing its row to make up the difference — a row of
+     marks quietly 6px smaller than the grid says, reported by nothing.
      Tailwind's preflight happens to set it globally; this does not depend on
      that staying true. */
   .tv-card-name {
     font: var(--t-tv-card-name);
-    letter-spacing: var(--track-overline);
+    letter-spacing: var(--track-card-name);
     text-transform: uppercase;
     color: var(--card-sub-ink);
     text-align: center;
     box-sizing: border-box;
     height: var(--h-card-name);
-    padding-top: var(--s-card-name-top);
+    padding-bottom: var(--s-card-name-gap);
     width: 100%;
     min-width: 0;
     overflow: hidden;
     display: flex;
-    align-items: flex-start;
+    align-items: flex-end;
     justify-content: center;
   }
 
@@ -1934,6 +2020,18 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    /* Moved off the element's inline style so the modifier below can win it
+       without `!important` — an inline `color` beats every class there is. */
+    color: var(--card-fig-ink);
+  }
+
+  /* A figure of zero, at any rank. The argument is in `VentureCard`: the tier's
+     ink made rank 7's `₹0` the brightest type on the board and rank 21's the
+     dimmest, for the same fact. `--ink-muted` is what the quiet half of the
+     board already prints, so on those nineteen cards this changes nothing and
+     the two rules cannot disagree. */
+  .tv-card-week-idle {
+    color: var(--ink-muted);
   }
 
   /* ── Today's figure ──
