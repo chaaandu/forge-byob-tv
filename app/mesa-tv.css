@@ -414,7 +414,7 @@
      desaturated grey band — produced an outline on the artwork, which is the
      one thing a mark on this board must not have. One fill, two shapes, no
      third colour. */
-  --s-mark-halo: 0.4167vw; /* 8px */
+  --s-mark-halo: 0.3125vw; /* 6px */
 
   /* ── The today delta ──
 
@@ -671,32 +671,27 @@
      noticed. */
 
 
-  /* ── The rank ribbon ──
+  /* ── The rank tag ──
 
-     **The corner is the constraint, and it is what ruled out a chip.** Measured
-     on the card: the mark is 86.3px with an 8px halo, centred in 168px, so the
-     widest point of that circle leaves exactly **32.8px** of card to its left.
-     A 24px chip inset by the card's own 10px padding needs 34 — it only fitted
-     at all by being *dropped* 20px below the circle's equator, into the one
-     spot where the arc had curved away. That is placement by availability, and
-     it is why the chip never looked put there on purpose.
+     **The corner is the constraint.** Measured: the mark is 86.3px with its
+     halo, centred in 168px, so the widest point of that circle leaves ~34.8px
+     of card to its left. A chip inset by the card's own 10px padding needed 34
+     and only fitted by dropping below the circle's equator — placement by
+     availability, which is why it never looked deliberate. A tag flush to the
+     edge pays no inset and starts at the card's top corner.
 
-     A ribbon flush to the edge pays no inset: at `left: 0` a 24px tab clears
-     the halo by 8.9px at its widest — more room than the chip had — and it can
-     start at the card's top corner, where the chip could not. Being attached
-     to an edge is also what makes it read as a fixed part of the card rather
-     than as a label that landed in a corner.
+     28 wide rather than 24, and that width is what made the type possible: the
+     halo gives up 2px (8 to 6, still enough to union the two shapes) and the
+     tag takes 4. It clears the circle by 6.9px at 1920 and 5.0 at 1600.
 
-     44 long against 24 wide is a 1.83 ratio, enough to read as hanging rather
-     than as a square. The number takes the top; the rest is shaft, and the
-     shaft is what says the thing hangs from somewhere. It ends 6.9px above the
-     venture name's box at 1920 and 5.6px at 1600, so nothing it does can reach
-     the type. */
-  --w-card-ribbon: 1.25vw; /* 24px */
+     44 long against 28 wide is a 1.57 ratio — hanging rather than square — and
+     the number takes the head while the shaft stays empty, which is the part
+     that says it hangs from something. 48 was built first and its foot came
+     within **2.9px** of the venture name's box; the name is what this must
+     never reach, so the length is bounded by the name rather than by the
+     ratio. */
+  --w-card-ribbon: 1.4583vw; /* 28px */
   --h-card-ribbon: 2.2917vw; /* 44px */
-  /* The notch cut out of the ribbon's foot — a bookmark's tail, and the one
-     detail that stops this being a plain tab. */
-  --h-card-ribbon-notch: 0.4167vw; /* 8px */
 
   /* How much of the mark stands above the card's top edge, as a fraction of its
      diameter. 0.41 rather than 0.5 — the argument is at `--h-mark-out`, and the
@@ -862,12 +857,22 @@
      **No `tabular-nums` and no tracking.** Both were doing the table's job.
      Fraunces' italic digits are proportional by design and a `1` that takes a
      `1`'s width is the point of setting it this way. */
-  --t-tv-card-rank: 700 var(--fs-6) / 1 var(--font-sans);
+  /* 26px, and **off the `--fs-*` scale on purpose.** That scale is built
+     against the sans, and Bebas is a different width per point entirely: at the
+     scale's own steps the widest numeral on the board — `10` — measures 17.6px
+     at `--fs-4` and 22.4 at `--fs-3`, inside a 28px tag. The first leaves the
+     number small in its own head; the second leaves 2.8px of margin and looks
+     crammed. 26 puts it at 20.8 with 3.6px each side, which is the optical
+     margin a tag this size wants.
+
+     A condensed face cannot share a size scale with the sans and have both read
+     right. What it shares is the box, and the box is what this is derived
+     against. */
+  --t-tv-card-rank: 400 1.3542vw / 1 var(--font-condensed);
   /* Ranks 1-3. The one step up, and it replaces the metals outright. */
   /* The top three, one step larger and in the surface's accent. The face is
      the same — the distinction is size and ink, as it is everywhere else on
      this board. */
-  --t-tv-card-rank-lead: 700 var(--fs-6) / 1 var(--font-sans);
 
   /* ── The mark's legibility floor ──
 
@@ -2208,66 +2213,65 @@
      content. */
   /* ── The rank hangs from the card's top edge ──
 
-     It has been a bare numeral in three faces and then a circular chip, and all
-     four shared one flaw: they lived in the top-left corner because the mark's
-     circle curves away there, not because anything put them there. The chip
-     made it worse by needing the card's 10px padding *and* a 20px drop below
-     the circle's equator to fit — 34px of demand against 32.8px of room.
+     It has been a bare numeral in three faces, a circular chip, and a notched
+     bookmark. The first four shared one flaw — they lived in the top-left
+     corner because the mark's circle curves away there, not because anything
+     put them there. A tag fixed to the edge reads as structural where a label
+     floating in a corner reads as one that landed.
 
-     A ribbon is attached to the edge instead, which is a different kind of
-     object. It pays no inset, so it starts at the card's top corner and clears
-     the halo by 8.9px at the widest point. And a thing fixed to an edge reads
-     as structural, where one floating in a corner reads as a label.
+     ── THREE THINGS THE BOOKMARK GOT WRONG, AND THEY ARE ONE THING ──
 
-     `--surface-sunken` is the fill, which gives that token a job again: 2.19:1
-     against the card, so the ribbon reads as cut *into* it, and white on it
-     measures **18.96:1** — the number is now the highest-contrast small type on
-     the board rather than the lowest. The chip could not do that; its
-     translucent lift raised the ground toward the ink, which is exactly what
-     put the accent at 3.71:1 there.
+     **It was cut, not placed.** The fill was `--surface-sunken`, which is
+     *darker than the page* — so the tag read as a hole punched through the card
+     to something behind it rather than as an object sitting on it. No amount of
+     tuning a near-black fixes that: below the page, a shape is a void. It is a
+     **lift** now — the card's own fill mixed toward the ink — 1.78:1 above the
+     card, which reads as raised. A lift is also the one thing that cannot be
+     wrong on a card whose fill has changed five times in this arc.
 
-     The top-left corner takes the card's own radius so the two curves are one
-     line. The foot is notched by a wedge in the card's colour — see `::after` —
-     because a square-ended tab is a tab, and the notch is the whole difference
-     between that and something hanging. */
+     **The notch was literal.** A V-cut tail is a paper bookmark; this is a
+     marker on a screen. The foot is a semicircle instead — one shape, and no
+     wedge-shaped pseudo-element in the card's colour faking a cut-out.
+
+     **And the type was the sans at the only size that fitted.** Measured: two
+     digits of 22px sans need 25.8px inside a 24px tag, which is why the number
+     was 15px and the smallest type on the board. `--font-condensed` — already
+     bundled for `/podium`'s venture names — is 17.6px at that same 22, and 20.8
+     at 26. A condensed face in a narrow vertical tag is not a style choice; it
+     is the only category of face whose proportions match the box, and it reads
+     taller at the same size because Bebas' cap height is most of its em.
+
+     **400 only, and that is load-bearing** — the face ships one weight, so any
+     heavier value makes the browser smear the outlines into a fake bold, which
+     on a condensed numeral closes the counters and turns `8` into a blob. */
   .tv-card-rank {
     position: absolute;
     /* The card's top-left, exactly: `--h-mark-out` is where the card begins in
-       the cell, and `left: 0` is the point of a ribbon. */
+       the cell, and `left: 0` is the point of a tag. */
     top: var(--h-mark-out);
     left: 0;
     z-index: 2;
     width: var(--w-card-ribbon);
     height: var(--h-card-ribbon);
-    background: var(--surface-sunken);
-    border-top-left-radius: var(--r-card);
 
-    /* The number sits in the head of the ribbon, not centred in its length —
-       the shaft below is deliberately empty. */
+    /* The lift. `color-mix` toward the ink, so it follows the card's fill and
+       inverts with the surface — on the light slide the identical expression
+       darkens instead. Nothing here names a colour. */
+    background: color-mix(in srgb, var(--surface-solid) 78%, var(--ink));
+
+    /* Head tucked into the card's corner, foot a semicircle: half the width, so
+       the arc meets both sides tangentially at every viewport. */
+    border-radius: var(--r-card) 0 calc(var(--w-card-ribbon) / 2)
+      calc(var(--w-card-ribbon) / 2);
+
+    /* The number sits in the head; the shaft below is deliberately empty. */
     display: grid;
     justify-items: center;
     align-content: start;
-    padding-top: 0.3125vw;
+    padding-top: 0.2083vw;
 
     font: var(--t-tv-card-rank);
     color: var(--ink);
-    font-variant-numeric: tabular-nums;
-  }
-
-  /* The notch. A wedge in the **card's** colour laid over the ribbon's foot
-     rather than a `clip-path` on the ribbon itself: the ribbon's top-left
-     corner has to carry the card's radius, and `clip-path` replaces the border
-     box outright, so a polygon foot and a rounded head cannot coexist on one
-     element. Two properties on two boxes instead of one fragile path. */
-  .tv-card-rank::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    height: var(--h-card-ribbon-notch);
-    background: var(--surface-solid);
-    clip-path: polygon(0 100%, 50% 0, 100% 100%);
   }
 
   /* ── There is no quiet rank ──
