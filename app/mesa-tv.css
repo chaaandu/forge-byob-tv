@@ -1876,6 +1876,49 @@
       )
     );
 
+    /* ── The chassis colour ──
+
+       A desaturated light, derived rather than named: the deepest surface
+       lifted most of the way to the ink. On Deep Aubergine that is a grey
+       lavender; on the light surface the identical expression runs the other
+       way and gives a mid grey, because `--ink` inverts with the surface. One
+       expression, both slides, no colour named.
+
+       **The value is solved, not chosen, and the constraint is the marks.** The
+       chassis is a band around thirty-nine venture discs, and the six mark
+       tints are all light — two cluster near luminance 0.31 and four between
+       0.51 and 0.62. A chassis anywhere in that range gives those teams a halo
+       the same lightness as their own disc, and the mark loses its edge on a
+       board where every other mark has one. Violet 300 and Violet 100 were both
+       photographed as candidates before this was understood, and both *are*
+       mark tints — `--mark-1` and `--mark-5` — so those cards would have had no
+       edge at all.
+
+       Swept in the browser against every rendered disc, 40% to 84% in steps of
+       four. The two constraints pull opposite ways: light enough to be seen
+       against the page, dark enough to be distinct from every mark.
+
+             40%   page 5.99:1   nearest mark 1.07:1   marks lose their edge
+             52%   page 4.14:1   nearest mark 1.30:1   pale discs lose theirs
+             60%   page 3.16:1   nearest mark 1.70:1   <- both hold
+             68%   page 2.37:1   nearest mark 2.27:1
+             84%   page 1.31:1   nearest mark 4.11:1   chassis invisible
+
+       60 is where both clear. Desaturating buys the rest: the marks are
+       saturated pastels, so a grey at a given luminance still separates by hue
+       where another pastel would not.
+
+       **Declared here, on the row, and never at `:root`** — with
+       `--d-card-logo`, for two different traps that land in the same place.
+       `--d-card-logo` is not defined at `:root`, so a `calc()` on it there is
+       guaranteed-invalid and inherits as invalid. This one is worse:
+       `--surface` and `--ink` *are* defined at `:root`, as the **light**
+       surface's defaults — so a mix written there resolves silently to the
+       light values and inherits them straight through `.surface-dark`. The
+       board would have drawn a mid-grey chassis on a dark page with nothing
+       reporting it. */
+    --card-chassis: color-mix(in srgb, var(--surface-sunken) 60%, var(--ink));
+
     /* Declared here, with `--d-card-logo`, and never at `:root` — see the note
        on these tokens for the invalid-inheritance trap that forces it. */
     --h-mark-out: calc(var(--d-card-logo) * var(--k-mark-out));
@@ -2017,23 +2060,26 @@
      pale ring — an outline on the artwork, which is the one thing a mark on
      this board is not allowed to have.
 
-     Dark chassis, light plate: a **solid dark body with two recesses cut into
-     it** — a round one holding the mark, a rectangular one holding everything
-     the card says — both inset by the same `--s-card-frame` on every side. The
-     chassis is one shape, the union of a rounded rectangle and a circle, and
-     the two plates set into it are the only light on the card. Nothing reads as
-     an outline because nothing *is* one: the band around the mark is the same
-     band that runs down the card's sides.
+     Chassis and plate: a **body with two recesses cut into it** — a round one
+     holding the mark, a rectangular one holding everything the card says —
+     both inset by the same `--s-card-frame` on every side. The chassis is one
+     shape, the union of a rounded rectangle and a circle, and the plate and the
+     disc are two cuts in it. Nothing reads as an outline because nothing *is*
+     one: the band around the mark is the same band that runs down the card's
+     sides.
 
-     It also puts the values in the right order physically. `--surface-sunken`
-     is below the page and `--surface-raised` above it, so a dark body with
-     light plates in it is an object you could pick up, where a light frame with
-     a dark hole is an object with a hole in it. On a wall that cannot use
-     shadow for depth, which of the two a card is matters.
+     **The chassis was `--surface-sunken` — near-black — and that failed for a
+     reason worth keeping.** A body a step *below* the page is the right physics
+     for a recess, and it is invisible: 1.22:1 against Deep Aubergine, so the
+     one shape the whole construction exists to make could not be traced. It is
+     a desaturated grey lavender now (`--card-chassis`), which reads at six
+     metres and still sits under every mark in lightness, so the discs stay the
+     brightest thing on the card and the band never competes with what it
+     frames.
 
-     Both fills are flat. The gradient the lit rim carried solved a different
-     problem — a card one step from the page needs help not to look stuck on —
-     and a chassis a step *below* the page has its own separation.
+     Both fills are flat. The gradient the first lit rim carried solved a
+     different problem — a card one step from the page needs help not to look
+     stuck on — and a chassis this far from the page has its own separation.
 
      Nothing here names a colour, and the light surface gets the identical
      construction inverted for free. */
@@ -2050,7 +2096,7 @@
        gradient from the corridor. What it does is stop thirty-nine bottom edges
        being a hard value step against the page, which is what makes a flat
        rectangle look stuck on rather than laid down. */
-    background: var(--surface-sunken);
+    background: var(--card-chassis);
     border-radius: var(--r-card);
     /* The frame, even on all four sides. The top band is mostly hidden behind
        the mark's halo, but it has to be *there*: without it the well's top
@@ -2063,7 +2109,7 @@
   /* ── The well ──
 
      Everything the card says lives in here: the rank, the name, the figure, the
-     day's delta. It is `--surface-raised`, the lit plate set into the dark
+     day's delta. It is `--surface-raised`, the purple plate set into the
      chassis, inset by `--s-card-frame` on every side — and its top edge is
      covered by the mark's halo, so the two recesses read as one cut rather than
      as a panel with a circle laid over it.
@@ -2121,7 +2167,7 @@
      `--surface-raised` and not a colour of its own: it *is* the rim, continued
      around the mark. */
   .tv-mark-seat .tv-disc {
-    box-shadow: 0 0 0 var(--s-mark-halo) var(--surface-sunken);
+    box-shadow: 0 0 0 var(--s-mark-halo) var(--card-chassis);
   }
 
   /* ── The bottom half of the board is quieter, and it is the ink that says so ──
