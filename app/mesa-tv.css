@@ -705,6 +705,18 @@
      ratio. */
   --w-card-ribbon: 1.6146vw; /* 31px */
   --h-card-ribbon: 2.2917vw; /* 44px */
+  /* ── The fold ──
+
+     How deep the shading at the tag's head runs. A ribbon looped over an edge
+     *bends* there, and a bend turns away from the light — so the head is darker
+     and resolves to the tag's own face a few pixels down. 8px reads as a bend
+     at six metres and is short enough never to look like a second colour band.
+     Measured, the shade is 1.95:1 against the face.
+
+     This is the whole of the fold. No wedge, no clipped triangle, no second
+     element: a gradient is what a curved surface does to light, where a
+     hard-edged triangle is a drawing of one. */
+  --h-card-ribbon-fold: 0.4167vw; /* 8px */
 
   /* How much of the mark stands above the card's top edge, as a fraction of its
      diameter. 0.41 rather than 0.5 — the argument is at `--h-mark-out`, and the
@@ -873,15 +885,16 @@
   /* 26px, and **off the `--fs-*` scale on purpose.** That scale is built
      against the sans, and Bebas is a different width per point entirely: at the
      scale's own steps the widest numeral on the board — `10` — measures 17.6px
-     at `--fs-4` and 22.4 at `--fs-3`, inside a 28px tag. The first leaves the
-     number small in its own head; the second leaves 2.8px of margin and looks
-     crammed. 26 puts it at 20.8 with 3.6px each side, which is the optical
-     margin a tag this size wants.
+     at `--fs-4` and 22.4 at `--fs-3`. 24 puts it at 19.2 — 5.9px of margin each
+     side in a 31px tag, which is the optical margin a tag this size wants now
+     the tag is wider. It was 26 while the tag was 28; the tag grew and the
+     number came down, because a condensed numeral wants air around it rather
+     than to fill its box.
 
      A condensed face cannot share a size scale with the sans and have both read
      right. What it shares is the box, and the box is what this is derived
      against. */
-  --t-tv-card-rank: 400 1.3542vw / 1 var(--font-condensed);
+  --t-tv-card-rank: 400 1.25vw / 1 var(--font-condensed);
   /* Ranks 1-3. The one step up, and it replaces the metals outright. */
   /* The top three, one step larger and in the surface's accent. The face is
      the same — the distinction is size and ink, as it is everywhere else on
@@ -2298,10 +2311,36 @@
     width: var(--w-card-ribbon);
     height: var(--h-card-ribbon);
 
-    /* The lift. `color-mix` toward the ink, so it follows the card's fill and
-       inverts with the surface — on the light slide the identical expression
-       darkens instead. Nothing here names a colour. */
-    background: color-mix(in srgb, var(--surface-solid) 78%, var(--ink));
+    /* The lift, named once so the fold below shades *it* rather than
+       re-deriving the mix and drifting from it. `color-mix` toward the ink, so
+       it follows the card's fill and inverts with the surface — on the light
+       slide the identical expression darkens instead. Nothing names a colour. */
+    --tag-face: color-mix(in srgb, var(--surface-solid) 78%, var(--ink));
+
+    /* The fold: the tag's own face shaded at the head, resolving to itself 8px
+       down. The number's cap begins at exactly that 8px, so it always sits on
+       the flat face and never in the bend. */
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--tag-face) 55%, var(--surface-sunken)) 0,
+      var(--tag-face) var(--h-card-ribbon-fold)
+    );
+
+    /* ── And a shadow, which is new information about this palette ──
+
+       A shadow was tried on this board once and photographed as **invisible**:
+       one works by being darker than its ground, and Deep Aubergine at
+       luminance 0.0163 has almost nothing below it. That finding is recorded
+       elsewhere in this file and it is still true — *of the page*.
+
+       It is not true of the card. Amethyst is 0.0715, four and a half times the
+       page, so a near-black shadow measures **2.19:1 on the card** against
+       1.20:1 on the page. A shadow cast by something sitting *on a card* reads;
+       one cast onto the page does not. Hence offset down and to the right,
+       where it lands on card, with a negative spread so the bloom does not
+       reach past the tag's left edge onto the page. */
+    box-shadow: 0.1042vw 0.1563vw 0.3125vw -0.0521vw
+      color-mix(in srgb, var(--surface-sunken) 70%, transparent);
 
     /* ── Three corners, and the fourth is square on purpose ──
 
@@ -2320,11 +2359,23 @@
        actually looks like. */
     border-radius: var(--r-card) 0 calc(var(--w-card-ribbon) / 2) 0;
 
-    /* The number sits in the head; the shaft below is deliberately empty. */
+    /* ── The number is centred in the tag ──
+
+       It sat in the head with the shaft below deliberately empty, on the idea
+       that an empty shaft is what says a thing hangs. On a 44px tag with a 24px
+       numeral that reads as top-heavy rather than as hanging: the eye centres a
+       bounded shape whatever the intent behind it, and a number pinned to one
+       end of one looks like it slipped.
+
+       The padding is an optical correction, not a layout one. Bebas' digits sit
+       high in their em box — the same thing `/podium`'s chip and
+       `VentureLogo`'s monogram both correct for — so geometric centring lands
+       the visual mass about a pixel high. Measured: the glyph's centre is
+       22.5px down a 44px tag. */
     display: grid;
     justify-items: center;
-    align-content: start;
-    padding-top: 0.2083vw;
+    align-content: center;
+    padding-top: 0.1042vw;
 
     font: var(--t-tv-card-rank);
     color: var(--ink);
