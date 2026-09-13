@@ -6,18 +6,18 @@ import { Rotator } from '@/components/Rotator'
 import './globals.css'
 
 /**
- * All four faces are self-hosted, so the wall makes **no runtime request to a
+ * All three faces are self-hosted, so the wall makes **no runtime request to a
  * font CDN**. That matters more here than in a normal app: this runs unattended for
  * weeks, and a font request that fails silently falls back to Georgia or
  * Helvetica on a screen nobody is watching closely enough to notice.
  *
- * Neither family may be named after the face it carries. `next/font` derives
- * its CSS family name from the const below, and `colors_and_type.css` already
- * declares seven static `Manrope` rules and four `MesaSerif` ones. CSS family
- * names match case-insensitively, so a collision merges the two sets and the
- * browser picks between them by weight — fetching a static face as well as the
- * variable one, or preferring a `local()` system font over the self-hosted
- * file. Hence `mesaBody` and `mesaSerifVariable`.
+ * No const here may be named after a family `colors_and_type.css` already
+ * declares. `next/font` derives its CSS family name from the const, and that
+ * file declares seven static `Manrope` rules and four `MesaSerif` ones. CSS
+ * family names match case-insensitively, so a collision merges the two sets and
+ * the browser picks between them by weight — fetching a static face as well as
+ * the variable one, or preferring a `local()` system font over the self-hosted
+ * file. Hence `mesaBody`, and hence `wallSerif` rather than `mesaSerif`.
  */
 const mesaBody = localFont({
   src: './fonts/MesaBody-Variable.ttf',
@@ -27,30 +27,40 @@ const mesaBody = localFont({
 })
 
 /**
- * Source Serif 4, self-hosted, standing in for New York.
+ * Zodiak, self-hosted, and it is the wall's only serif.
  *
- * **The generated family cannot be called `MesaSerif`, however much the design
- * language calls it that.** `next/font/local` derives its CSS family name from
- * this const — confirmed in the built stylesheet, which emits `mesaBody` and
- * this face, not the filenames — and `colors_and_type.css` already declares
- * four `@font-face` rules for a family named `MesaSerif` whose `src` begins
- * `local("New York")`. CSS family matching is case-insensitive, so a const
- * named `mesaSerif` would merge with those rules, and the browser would then
- * choose between a self-hosted Source Serif 4 and whatever New York the
- * machine happens to have. Every Mac has New York. Two TVs would set the same
- * heading in two different serifs and nobody would think to check.
+ * It replaced Source Serif 4, which stood in for New York and **drew nothing**.
+ * Measured with `getComputedStyle` over every element on both slides: the wall
+ * rendered in two families, neither of them the serif. `--font-serif` had one
+ * declaration and no reader — the serif ranks that used it went to a chip, and
+ * the heading that used it went to Manrope — so 119KB of woff2 was preloaded
+ * on every rotation to paint nothing.
  *
- * So the file is `MesaSerif-Variable.woff2` and the token is
- * `--font-mesa-serif` — the name the design language uses — while the family
- * this generates stays deliberately distinct from it.
+ * Rather than delete the serif, it changes hands and gets the job the brand
+ * book always gave it. `mesa_forge_design_system/design_system.md` is explicit:
+ * "Headers in New York (serif) for a classy editorial feel; everything else in
+ * Manrope." The wall had dropped that half entirely and set its masthead in the
+ * same face as its labels. Zodiak is the substitute the brand book itself
+ * invites — it names Newsreader and Fraunces as free stand-ins for New York —
+ * and it reaches 900, which is what a masthead over a thirty-nine card grid
+ * needs and which neither New York nor Source Serif 4 can do.
+ *
+ * **The family-name hazard the old docblock was built around does not apply,
+ * and that is worth stating rather than assuming.** `colors_and_type.css`
+ * declares four `@font-face` rules for a family called `MesaSerif` whose `src`
+ * begins `local("New York")`; CSS family matching is case-insensitive, so a
+ * const named `mesaSerif` would have merged with them and let a machine with
+ * New York installed set the heading in a different serif from a machine
+ * without. `wallSerif` collides with nothing — not `MesaSerif`, not `Manrope`,
+ * and not any face a Mac or a Windows laptop ships. The guarantee is the same
+ * one, kept by a name that no longer has to pretend.
  */
-const mesaSerifVariable = localFont({
-  src: './fonts/MesaSerif-Variable.woff2',
-  weight: '200 900',
+const wallSerif = localFont({
+  src: './fonts/Zodiak-Variable.woff2',
+  weight: '100 900',
   display: 'block',
-  variable: '--font-mesa-serif',
+  variable: '--font-wall-serif',
 })
-
 /**
  * Bebas Neue, for venture names on `/podium` and nothing else.
  *
@@ -99,7 +109,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       lang="en-IN"
       className={[
         mesaBody.variable,
-        mesaSerifVariable.variable,
+        wallSerif.variable,
         condensed.variable,
       ].join(' ')}
     >

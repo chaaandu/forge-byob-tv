@@ -61,7 +61,23 @@
      face the heading used before, and it is the one that will actually render
      if the wall's laptop has neither. Checked on the machine measuring this:
      see the QC note for which one is in use. */
-  --font-serif: var(--font-mesa-serif), 'New York', ui-serif, Georgia, serif;
+  /* **Zodiak, and `'New York'` is deliberately not in this stack.**
+
+     The old value listed the self-hosted face first and `local("New York")`
+     second, which is the right order for making every screen render alike but
+     still leaves a second serif reachable. It is unreachable now: the bundled
+     face is the only real entry, and what follows it is a generic. That is what
+     makes two TVs driven from two laptops set the masthead identically, which
+     is the property the whole self-hosting rule exists for.
+
+     `colors_and_type.css` declares its own `--font-serif` whose first entry is
+     a `MesaSerif` family with a **`fonts.gstatic.com` `src`**. This declaration
+     is unlayered and that one is inside `layer(components)`, so this wins — and
+     that is load-bearing rather than incidental. Delete this line and the
+     masthead acquires a runtime CDN dependency on a wall that runs unattended
+     for weeks, with a `local("New York")` in front of it so the machine that
+     has New York never even reveals the fetch. */
+  --font-serif: var(--font-wall-serif), ui-serif, Georgia, serif;
   /* ── The rank's face has been three things, and the chip settles it ──
 
      A sans tabular figure first, which read as a spreadsheet's row index.
@@ -1124,27 +1140,84 @@
 
   /* ── The slide heading ──
 
-     **Manrope 800, and the reason is that it is bundled.** This token resolved
-     through `--font-impact`, a stack whose first entry is the *system* Impact.
-     Measured on the machine this was tuned on, the wall was setting its masthead
-     in Impact; a laptop without it falls through to Archivo Black, which is a
-     different face at a different width. Nothing reports the substitution, and
-     a display driven from whichever machine is free that afternoon would change
-     mastheads between one day and the next. Manrope is self-hosted from
-     `app/fonts` at a 200–800 variable range, so every screen sets this
-     identically — and it is already the voice of every number, name and label
-     on both slides.
+     **Zodiak 900, and the serif is the point.**
 
-     **2.05vw, down from 3.65.** 39px at 1920 against the old 70. The heading
-     was 973px of a 1920px frame — half the width of the wall to say which of
-     two contests is on — and a masthead does not have to shout to be a
-     masthead. At 39px/800 it reads at six metres with room to spare, and the
-     apparatus on the right of the rule is no longer a footnote beside it.
+     This token has now been three faces and the first two were the same
+     mistake at different sizes. It resolved through `--font-impact` — a stack
+     whose first entry was the *system* Impact — and measured on the machine it
+     was tuned on the wall was setting its masthead in Impact, while a laptop
+     without it fell through to a bundled Archivo Black: a different face, a
+     different width, and nothing anywhere reporting the substitution. The fix
+     was Manrope 800, self-hosted, so every screen set the line identically.
 
-     Tracking drops with it: 0.22em was there to *fill* a band, and there is no
-     band to fill. 0.06em is the amount a heavy sans wants at display size. */
-  --t-tv-heading: 800 var(--fs-2) / 1 var(--font-sans);
-  --track-tv-heading: 0.06em;
+     That fixed the right problem and left a different one standing. Manrope is
+     the voice of every number, name and label on both slides, so putting the
+     masthead in it too meant **the only static line on the frame was set in the
+     same face, and one weight step away from, the figures underneath it.** A
+     masthead that is a bolder version of a label is not a masthead; it is the
+     largest label. The wall had no editorial voice at all.
+
+     `mesa_forge_design_system/design_system.md` is explicit that it should:
+     "Headers in New York (serif) for a classy editorial feel; everything else
+     in Manrope." That half had simply been dropped. Zodiak is the free stand-in
+     the brand book itself invites — it names Newsreader and Fraunces for the
+     same job — and unlike either of those it reaches 900, which is what a
+     single line has to be to hold its own over thirty-nine cards.
+
+     Self-hosted like everything else here, so the substitution failure above
+     cannot come back in a new face.
+
+     **Size is unchanged at `--fs-2`.** The 2.05vw argued below was measured
+     against this frame and nothing about the frame has changed; only the voice
+     has. Zodiak's cap height is 0.700em against Manrope's 0.720, so the caps
+     land 0.8px shorter at 40px — under the 1.2px the scale calls a difference,
+     and the lockup beside it is sized to the heading's caps, so this was
+     measured rather than assumed. See the QC note at `.tv-mast-title`.
+
+     ── What the size argument below still says ──
+
+     2.05vw is 39px at 1920, down from 3.65vw / 70px. The heading was 973px of a
+     1920px frame — half the width of the wall to say which of two contests is
+     on — and a masthead does not have to shout to be a masthead.
+
+     **Tracking drops to 0.02em, and that is a face change rather than a taste
+     one.** 0.22em was there to fill a band that no longer exists; 0.06em is the
+     amount a heavy *sans* wants at display size. A serif is already spaced by
+     its serifs — they close the gaps a sans leaves open — so the same 0.06em on
+     Zodiak reads as letter-spaced small caps rather than as a title.
+
+     ── The width this costs, measured rather than waved through ──
+
+     `WEEKLY LEADERBOARD` at 1920, from `.tv-mast-title`'s own rect:
+
+       Manrope 800 @ 0.06em   494.6px   (what this replaced)
+       Zodiak  900 @ 0.06em   607.0px
+       Zodiak  900 @ 0.02em   578.1px   (now)
+
+     So the tracking recovers 29px and **the line still runs 83px wider than the
+     sans one did.** That is the face, not the tracking: a 900 serif is simply a
+     wider thing than an 800 geometric sans at the same size, and no amount of
+     negative tracking buys it back without closing the counters.
+
+     The frame has the room, which is why this is a note rather than a problem.
+     Clearance from the title's right edge to the leftmost piece of masthead
+     apparatus is **936px on `/podium` at 1920** and 755px at 1600; `/weekly`
+     carries no apparatus at all unless `challenge_mode` is on. `measure-fit`
+     reports zero overflow at all four viewports.
+
+     **Challenge mode is the arrangement to check and it is not the tight one**,
+     which is worth recording because the opposite is the obvious guess. It is
+     the only state where `/weekly` has a heading and apparatus on the line at
+     once — but the heading it switches to is *shorter*: `10-DAY CHALLENGE`
+     right-edges at 640px against `WEEKLY LEADERBOARD`'s 762, and the `DAY 9 OF
+     10` chip still leaves 1113px between them. Measured by flipping
+     `challenge_mode` in the fixture, not reasoned about.
+
+     So the widest this line ever gets is the plain weekly masthead with an
+     empty right-hand side, and the binding constraint on `--fs-2` is
+     `/podium`'s Flea countdown at 936px of clearance. */
+  --t-tv-heading: 900 var(--fs-2) / 1 var(--font-serif);
+  --track-tv-heading: 0.02em;
   /* ── The Mesa lockup, sized to the masthead's cap height ──
 
      It was 3.5vw — 67px — because it had a filled 82px band to fill and would
@@ -3163,18 +3236,27 @@
 
      ── The title is set in the bundled face, deliberately ──
 
-     `--t-tv-heading` resolved through `--font-impact`, whose stack begins with
-     the *system* Impact. Measured here: the wall rendered in Impact, because
-     this Mac has it. A laptop without it renders Archivo Black instead — a
-     different face, different width, different colour on the page — and nothing
-     anywhere reports the substitution. On a display driven from whichever
-     machine is free that afternoon, that is a masthead that changes identity
-     between one day and the next.
+     `--t-tv-heading` once resolved through `--font-impact`, whose stack began
+     with the *system* Impact. Measured at the time: the wall rendered in
+     Impact, because that Mac had it. A laptop without it rendered the bundled
+     Archivo Black instead — a different face, different width, different colour
+     on the page — and nothing anywhere reported the substitution. On a display
+     driven from whichever machine is free that afternoon, that is a masthead
+     that changes identity between one day and the next.
 
-     Manrope at 800 is self-hosted from `app/fonts`, so every screen sets this
-     line identically. It is also simply the right face: the wall's numbers,
-     names and labels are all Manrope, and the heading was the only thing on
-     either slide speaking in a voice nothing else used. */
+     Zodiak at 900 is self-hosted from `app/fonts`, so every screen sets this
+     line identically, and `--font-serif` carries no `local()` entry that could
+     put a second serif in front of it. The face argument — why a serif here and
+     a sans everywhere else — is at `--t-tv-heading`.
+
+     The half of the old note that does *not* survive is worth keeping visible,
+     because it was the reasoning for Manrope: "the wall's numbers, names and
+     labels are all Manrope, and the heading was the only thing on either slide
+     speaking in a voice nothing else used." That is true, and it is now the
+     argument *for* the serif rather than against it. A masthead is supposed to
+     be the one thing on the frame speaking in a voice nothing else uses; what
+     made Impact wrong was that nobody could predict which face would arrive,
+     not that it was a face of its own. */
   .tv-mast {
     display: grid;
     /* Lockup, rule, title, then everything else against the right edge. The
