@@ -1,12 +1,15 @@
 'use client'
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { motion } from 'motion/react'
+
+import Image from 'next/image'
 
 import { Crown } from '@/components/Crown'
 import { PodiumTravel, type TravelPath } from '@/components/PodiumTravel'
-import { VentureLogo } from '@/components/VentureLogo'
+import { VentureLogo, tintFor } from '@/components/VentureLogo'
 import { formatRupees } from '@/lib/format'
+import { BLOCKS as ANCHORS, BLOCK_IMAGE } from '@/lib/podiumBlocks'
 import { BEATS, TOTAL, at, entersPodium } from '@/lib/podiumFlip'
 import { nameOf } from '@/lib/team'
 import type { OvertakeEvent, Team } from '@/lib/types'
@@ -77,30 +80,26 @@ const PODIUM_PLACES = 3
 const PLACE_ORDER: readonly number[] = [2, 1, 3]
 
 /**
- * Everything that differs between the three cards, in one table.
+ * ── There is no per-place table any more ──
  *
- * The alternative is three branches on `place` scattered through the render, and
- * the failure mode there is a card that picks up second place's metal and third
- * place's padding because two of the branches disagreed.
+ * There used to be one, and it has been four different tables: a card fill and
+ * a metal and two riser counts; then one mark diameter; then a metal ramp, a
+ * face, a height and an entrance delay. Every version existed because the three
+ * places were drawn in CSS and something had to say how they differed.
+ *
+ * They are drawn in a render now — `scripts/render-podium.mjs` — and
+ * `lib/podiumBlocks.ts` is what says where the three blocks are. So the only
+ * thing this file needs is which of the three a card is, and the anchors do the
+ * rest. The type sizes fall out of it too: the name, the figure and the
+ * numeral are all container units against the block's own face, so first
+ * place's figure is larger than second's *because first place's block is
+ * wider*, and no token has to state the ratio.
  */
-const PLACES = {
-  // Rank 1 centre and largest, 2 to its left, 3 to its right.
-  //
-  // **One property each, where there were four.** A place used to carry a card
-  // fill, a metal, a riser count and a mark-foot count — because it was a
-  // filled card of a stated height standing on a plinth under a metal numeral.
-  // It is a mark, a name and a figure sharing a baseline with two others, so
-  // the only thing that differs is how big the mark is.
-  //
-  // The `--d-pod-disc` / `--d-pod-disc-rest` pair is what draws the staircase.
-  // See the token: the ratio is the podium, because a shared text baseline
-  // turns a wider mark into a higher one at no further cost.
-  1: { disc: 'var(--d-pod-disc)', fig: 'var(--t-pod-fig)', lead: true },
-  2: { disc: 'var(--d-pod-disc-rest)', fig: 'var(--t-pod-fig-rest)', lead: false },
-  3: { disc: 'var(--d-pod-disc-rest)', fig: 'var(--t-pod-fig-rest)', lead: false },
-} as const
+type Place = 1 | 2 | 3
 
-type Place = keyof typeof PLACES
+/** How far the mark rises above the centre of the top face it stands on, as a
+    share of its own diameter. Zero would bury it in the platform. */
+const MARK_LIFT = 0.17
 
 /**
  * ── `MARK_IN_DISC` moved into `VentureLogo` ──
@@ -162,7 +161,27 @@ function PodiumCard({
   /** The venture taking this place, shown once the seat is visibly empty. */
   arriving?: Team
 }) {
-  const p = PLACES[place]
+  /* ── Where this place is on the rendered image ──
+   *
+   * Every number here is read from the manifest the renderer wrote, converted
+   * once from *fractions of the image* into *fractions of this slot*, because
+   * the slot is the positioned box and everything inside it is laid out
+   * against that. **Nothing is re-derived.** The renderer's camera is the only
+   * thing that knows where a block's top face projects to, and a second
+   * opinion about it here is how a mark ends up hovering off its platform at
+   * one viewport and looking fine at another.
+   */
+  const a = ANCHORS[place]!
+  const aspect = BLOCK_IMAGE.width / BLOCK_IMAGE.height
+  /* The mark's diameter is given against the image's *width*; its height as a
+     share of the image is therefore scaled by the aspect, which is what makes
+     the two axes below comparable. */
+  const markH = a.mark * aspect
+  const markPct = (a.mark / a.front.w) * 100
+  const markLeft = ((a.top.x - a.front.x) / a.front.w) * 100
+  const markTop = ((a.top.y - markH * MARK_LIFT - a.front.y) / a.front.h) * 100
+  /* Where the face's type starts: under the mark, which overhangs the block. */
+  const faceTop = markTop + ((markH / 2 / a.front.h) * 100)
 
   /* ── Who wears the crown ──
    *
@@ -194,127 +213,58 @@ function PodiumCard({
      cannot appear over the departing venture's — see the note below. */
   const details = (of: Team | undefined) => (
     <>
-      <span className="tv-pod-name" style={{ marginTop: 'var(--s-pod-mark-gap)' }}>
-        {of === undefined ? '' : nameOf(of)}
-      </span>
-      <span
-        className="tv-figure"
-        style={{
-          display: 'block',
-          marginTop: 'var(--s-pod-name-gap)',
-          font: p.fig,
-          letterSpacing: 'var(--track-pod-fig)',
-          color: 'var(--ink)',
-          textAlign: 'center',
-        }}
-      >
-        {revenueOf(of)}
-      </span>
+      <span className="tv-pod-name">{of === undefined ? '' : nameOf(of)}</span>
+      <span className="tv-figure tv-stage-figure">{revenueOf(of)}</span>
     </>
   )
 
   return (
-    <div className="tv-pod-slot">
-      {/* Above the mark, and still. It used to dance on the same repertoire the
-          marks use — measured, it was the largest moving object on the slide,
-          the `2` swinging 13.8px sideways with its box stretching 29.7px. This
-          board has exactly one thing it needs to be able to say, a rank changed
-          hands, and it says it with an interrupt; an interrupt only reads as one
-          against a still frame.
-
-          What it no longer keeps is `tv-metal-sweep`. That was allowed to stay
-          on the argument that a sweep describing a *material* costs the
-          interrupt nothing — true, and moot, because there is no metal left for
-          it to describe. */}
-      <span className="tv-pod-numeral-slot">
-        <span
-          className={p.lead ? 'tv-pod-numeral' : 'tv-pod-numeral tv-pod-numeral-rest'}
-          role="img"
-          aria-label={`Rank ${place}`}
-        >
-          {place}
-        </span>
+    /* ── One place, laid over the render ──
+     *
+     * The slot *is* the block's front face: the manifest gives that face as a
+     * rectangle, which it genuinely is, because the render's camera is
+     * off-axis. So the venture's name and its figure are ordinary flat type at
+     * ordinary sizes, sitting on a lit 3D object. That is the whole reason this
+     * approach beat five attempts at building the blocks in CSS — those either
+     * had no lighting, or had a pitched camera that raked the type.
+     *
+     * `.tv-pod-slot` stays the class `measurePath` finds a place by, and the
+     * three are still drawn 2 · 1 · 3 so `PLACE_ORDER` still indexes them.
+     */
+    <div
+      // `tv-stage-rest` is the whole of what still differs between the three
+      // places: how much air sits between a mark and the name under it. See
+      // `--s-stage-mark-gap-rest`.
+      className={place === 1 ? 'tv-pod-slot' : 'tv-pod-slot tv-stage-rest'}
+      style={{
+        left: `${a.front.x * 100}%`,
+        top: `${a.front.y * 100}%`,
+        width: `${a.front.w * 100}%`,
+        height: `${a.front.h * 100}%`,
+      }}
+    >
+      {/* The rank, once, as a watermark low on the face — tone on tone, the way
+          the reference's numeral is a shade of its own block. It was solid
+          white for a pass and competed with the figure above it; it was a
+          badge *and* a watermark for another, and "why 1, 2, 3 again?" was the
+          review. It carries `role="img"` and the `Rank N` label. */}
+      <span className="tv-pod-numeral" role="img" aria-label={`Rank ${place}`}>
+        {place}
       </span>
 
-      <div className="tv-pod-mark-band" style={{ width: p.disc, height: p.disc }}>
-        {/* The band renders whether or not there is a team, so the place holds
-            its size through the first paint rather than assembling itself on
-            the wall. Empty rather than a placeholder mark — a grey circle is
-            filler, and this wall carries none. */}
-        {/* This box carried the idle, on its own layer rather than on the disc
-            inside it — a CSS animation beats an inline style, so sharing an
-            element with the flip's `transform` would have let the idle simply
-            win and the mark would never have turned over during an overtake.
-            The layer is kept now that the idle is gone, because it is also the
-            crown's frame of reference and the flip still writes a `transform`
-            one level down. `VentureDisc` carries the same three-layer split on
-            `/weekly` and says so at length.
-
-            **`position: relative` is what anchors the crown**, and it used to
-            be inherited rather than stated: a transformed element is already a
-            containing block for absolute descendants, so while the idle was
-            here the crown positioned correctly for free. Removing the idle
-            removed the transform, and with it the containing block — the crown
-            would have silently re-parented to the band and moved. It was
-            already declared for exactly that reason; this is the day that
-            mattered. */}
-        <div
-          style={{ width: '100%', aspectRatio: 1, position: 'relative' }}
-        >
-          {/* Drawn before the disc so it sits *under* the mark in paint order.
-              A crown overlapping the monogram's edge would cover the one thing
-              on the card that identifies the venture; behind it, the mark stays
-              whole and the crown reads as resting against the rim. */}
-          {crowned ? (
-            <span className="tv-crown">
-              <Crown className="tv-crown-glyph" />
-            </span>
-          ) : null}
-
-          {/* **Hidden rather than unmounted while it travels.** The travelling
-              disc is measured against this element's box, and an unmounted
-              element has no box — the path would be measured from nothing on
-              the very frame it is needed. */}
-          <div
-            className="tv-pod-disc"
-            style={{ width: '100%', height: '100%', opacity: departing ? 0 : 1 }}
-          >
-            {team === undefined ? null : (
-              <VentureLogo team={team} size={p.disc} />
-            )}
-          </div>
-
-          {/* The promoted venture, arriving last. It is drawn over the empty
-              mount rather than replacing the place's own mark, because the data
-              behind the board is frozen for the length of the sequence — what
-              puts this venture here permanently is the next snapshot. */}
-          {arriving === undefined ? null : (
-            <motion.div
-              className="tv-pod-disc"
-              style={{ position: 'absolute', inset: 0 }}
-              initial={false}
-              animate={{ opacity: [0, 0, 1, 1], scale: [0.72, 0.72, 1, 1] }}
-              transition={{
-                duration: TOTAL,
-                times: [0, ...at(BEATS.arrive), 1],
-                ease: ['linear', 'easeOut', 'linear'],
-              }}
-            >
-              <VentureLogo team={arriving} size={p.disc} />
-            </motion.div>
-          )}
-        </div>
-      </div>
-
       {/* **The details cross with the mark, not after it.** The data behind the
-          board is frozen for the sequence, so the place would otherwise announce
-          the arriving venture's logo above the departing venture's name and
-          figure — which is a worse lie than showing nothing. Both blocks are
-          stacked and their opacity is swapped on the same beat. */}
-      <div style={{ width: '100%', textAlign: 'center', position: 'relative' }}>
+          board is frozen for the sequence, so the place would otherwise
+          announce the arriving venture's logo above the departing venture's
+          name and figure — which is a worse lie than showing nothing. Both
+          blocks are stacked and their opacity is swapped on the same beat. */}
+      <div className="tv-stage-face tv-stage-in" style={{ top: `${faceTop}%` }}>
         {arriving === undefined ? null : (
           <motion.div
-            style={{ position: 'absolute', inset: 0, zIndex: 1 }}
+            // **Anchored to the top, not `inset: 0`.** A name can run to two
+            // lines, so the arriving block and the departing block may not be
+            // the same height. Pinned to the top, both start under the mark and
+            // a taller name grows down the face, which has room.
+            style={{ position: 'absolute', left: 0, right: 0, top: 0, zIndex: 1 }}
             initial={false}
             animate={{ opacity: [0, 0, 1, 1] }}
             transition={{
@@ -335,12 +285,12 @@ function PodiumCard({
           // venture arrives. The details were still in the DOM and still
           // correct; they were simply invisible, and they never came back.
           //
-          // It compounded. Every overtake blanked one more place, so after three
-          // the whole podium was three logos with no name and no figure under
-          // any of them — on a wall nobody is watching closely enough to notice
-          // a number going missing. Measured with the dev triggers: 4→1 blanked
-          // rank 1, then 4→3 blanked rank 3, then 5→2 blanked rank 2, and
-          // nothing ever restored them.
+          // It compounded. Every overtake blanked one more place, so after
+          // three the whole podium was three logos with no name and no figure
+          // under any of them — on a wall nobody is watching closely enough to
+          // notice a number going missing. Measured with the dev triggers: 4→1
+          // blanked rank 1, then 4→3 blanked rank 3, then 5→2 blanked rank 2,
+          // and nothing ever restored them.
           //
           // The reset has to be a *value*, so it lands in the same commit that
           // drops `arriving`. `components/VentureCard.tsx` carries the same
@@ -354,6 +304,72 @@ function PodiumCard({
         >
           {details(team)}
         </motion.div>
+      </div>
+
+      {/* ── The mark, standing on the block's top face ──
+
+          Last in the slot so it paints over the face's type, which it overhangs.
+          **`100%`, and it used to be `100cqw`.** The mark's interior is sized
+          in container units against its own box, which `VentureLogo` declares
+          on itself — see the note there. It was declared in the stylesheet one
+          level up for a while, and when that rule failed to arrive from a
+          stale dev build the unit fell back to the viewport and one venture's
+          mark rendered across the whole wall. A percentage cannot do that. */}
+      <div
+        className="tv-pod-mark-band tv-stage-in"
+        style={{ left: `${markLeft}%`, top: `${markTop}%`, width: `${markPct}%` }}
+      >
+        {/* The band renders whether or not there is a team, so the place holds
+            its size through the first paint rather than assembling itself on
+            the wall. Empty rather than a placeholder mark — a grey circle is
+            filler, and this wall carries none.
+
+            **`position: relative` is what anchors the crown.** It was inherited
+            from a transform for a long time and is stated here because the
+            transform has come and gone three times; the crown re-parenting to
+            the band silently is not a thing to leave to luck. */}
+        <div style={{ width: '100%', aspectRatio: 1, position: 'relative' }}>
+          {/* Drawn before the disc so it sits *under* the mark in paint order.
+              A crown overlapping the monogram's edge would cover the one thing
+              on the card that identifies the venture; behind it, the mark stays
+              whole and the crown reads as resting against the rim. */}
+          {crowned ? (
+            <span className="tv-crown">
+              <Crown className="tv-crown-glyph" />
+            </span>
+          ) : null}
+
+          {/* **Hidden rather than unmounted while it travels.** The travelling
+              disc is measured against this element's box, and an unmounted
+              element has no box — the path would be measured from nothing on
+              the very frame it is needed. */}
+          <div
+            className="tv-pod-disc"
+            style={{ width: '100%', height: '100%', opacity: departing ? 0 : 1 }}
+          >
+            {team === undefined ? null : <VentureLogo team={team} size="100%" />}
+          </div>
+
+          {/* The promoted venture, arriving last. It is drawn over the empty
+              mount rather than replacing the place's own mark, because the data
+              behind the board is frozen for the length of the sequence — what
+              puts this venture here permanently is the next snapshot. */}
+          {arriving === undefined ? null : (
+            <motion.div
+              className="tv-pod-disc"
+              style={{ position: 'absolute', inset: 0 }}
+              initial={false}
+              animate={{ opacity: [0, 0, 1, 1], scale: [0.72, 0.72, 1, 1] }}
+              transition={{
+                duration: TOTAL,
+                times: [0, ...at(BEATS.arrive), 1],
+                ease: ['linear', 'easeOut', 'linear'],
+              }}
+            >
+              <VentureLogo team={arriving} size="100%" />
+            </motion.div>
+          )}
+        </div>
       </div>
     </div>
   )
@@ -385,12 +401,15 @@ function PodiumCard({
 function Strip({
   ranked,
   fromRank,
+  above,
   kick = null,
   vacating = null,
   incoming,
 }: {
   ranked: readonly Team[]
   fromRank: number
+  /** The venture on the podium's lowest step, which row one is measured against. */
+  above: Team | undefined
   kick?: OvertakeEvent | null
   /** A rank in this list whose venture is on its way to the podium. */
   vacating?: number | null
@@ -457,33 +476,22 @@ function Strip({
   // filler as a "no data" message, in a smaller typeface.
   if (teams.length === 0) return null
 
+  /* ── A bare numeral, and the tab it replaced needed an edge ──
+   *
+   * This has been right-aligned type, then a round chip, then `/weekly`'s tag.
+   * The tag is the one worth recording, because it was asked for and it was
+   * wrong for a structural reason: on a card that shape works because its
+   * square side *is* the card's edge, so it reads as a tab fixed to something.
+   * A row inside a pane has no edge to fix it to, so seven of them floated with
+   * a square side against nothing.
+   *
+   * **Ornament scales with singularity.** One object can wear a crown; seven
+   * cannot wear badges. What keeps the two boards one system is the condensed
+   * face and the ink, which this keeps — the shape was never the part doing
+   * that work.
+   */
   const rank = (index: number) => (
-    <span
-      className="tv-figure"
-      style={{
-        font: 'var(--t-pod-rank-row)',
-        letterSpacing: 'var(--track-pod-fig)',
-        // `--ink-muted`, which is what `/weekly` inks its rank numerals with.
-        // It was `--pod-rank-ink`, a podium-only token that resolved to Mint
-        // 300 on dark — chosen when this numeral was 15px and Violet 300 was
-        // measurably too thin for it. At 23px Violet 300 is 5.6:1 and
-        // comfortable, and the two boards now say "rank" in one ink.
-        color: 'var(--ink-muted)',
-        // **Right, not centre.** These are tabular figures in a vertical column
-        // of ranks, and centring them puts the unit digit of `10` at a
-        // different x from the unit digit of `4` — measured, the `10` hangs
-        // 13px left of the single digits above it. Right-aligned, the units
-        // line up and the gap to the mark beside them is constant, which is the
-        // whole reason a list of numbers is set in tabular figures at all.
-        //
-        // `/weekly`'s ranks stay left-aligned: there they are a label on a
-        // card's own top-left corner rather than a column of numbers, and they
-        // align with the card's edge instead of with each other.
-        textAlign: 'right',
-      }}
-    >
-      {fromRank + index}
-    </span>
+    <span className="tv-figure tv-pod-row-rank">{fromRank + index}</span>
   )
 
   /* The mark of a venture on its way up is hidden, not removed: the travelling
@@ -535,6 +543,33 @@ function Strip({
     textAlign: 'right',
   }
 
+  /**
+   * How far this venture is behind the one directly above it.
+   *
+   * **The gap to the row above, not to the leader.** Both were on the table.
+   * Against first place every row reads as hopelessly behind and the number is
+   * the same story seven times; against the row above it is the distance a team
+   * would actually have to close this week, and it changes every day.
+   *
+   * It also answers the criticism that this list said *order* and never
+   * *distance* — rank 4 is nearly double rank 10 and nothing on the board
+   * showed it. The share bars that used to say it were removed because their
+   * scale was never stated anywhere on the frame; a gap needs no scale, it is
+   * denominated in rupees like everything beside it.
+   *
+   * The first row on this list has a row above it — third place, on the podium
+   * — so every one of the seven carries one. Nothing is shown where either
+   * figure is missing or the gap is not positive, which is the tie case: two
+   * ventures level is not "+₹0", it is nothing to say.
+   */
+  const behind = (index: number): string | null => {
+    const here = teams[index]
+    const ahead = index === 0 ? above : teams[index - 1]
+    if (here === undefined || ahead === undefined) return null
+    const gap = ahead.totalRevenue - here.totalRevenue
+    return gap > 0 ? formatRupees(gap) : null
+  }
+
   const figure = (team: Team, rowRank: number) =>
     rowRank === vacating && incoming !== undefined ? (
       <span style={{ display: 'grid' }}>
@@ -563,34 +598,48 @@ function Strip({
       </span>
     )
 
+  /* The grid the rows sit in, and the grid the rules sit in, are the same
+     grid — `--s-pod-row-gap` and seven equal tracks, declared once here and
+     handed to both. Two grids that merely agreed would be two grids that
+     stop agreeing. */
+  const track: React.CSSProperties = {
+    display: 'grid',
+    // ── `1fr` rows with a real gap, and the rules are why ──
+    //
+    // This was `auto` rows with `alignContent: space-between`, so the slack
+    // went into the gaps and the rows sat flush to the column's top and
+    // bottom edges. That was right when a row was a stack over a bar and
+    // nothing was drawn *between* two rows.
+    //
+    // A rule seated at `-0.5 * --s-pod-row-gap` assumes the gap **is**
+    // `--s-pod-row-gap`, and under `space-between` it is not: measured at
+    // 1920 the rows were 59.6px tall in a 131.1px pitch, so the real gap was
+    // 71.6px against the token's 28.8px and every rule landed 21px above
+    // the middle of its gap.
+    //
+    // Equal fractional rows make the gap the token again.
+    gridTemplateRows: `repeat(${teams.length}, minmax(0, 1fr))`,
+    rowGap: 'var(--s-pod-row-gap)',
+    height: '100%',
+    minHeight: 0,
+  }
+
   return (
-    <div
-      ref={stripRef}
-      style={{
-        display: 'grid',
-        // ── `1fr` rows with a real gap, and the rules are why ──
-        //
-        // This was `auto` rows with `alignContent: space-between`, so the slack
-        // went into the gaps and the rows sat flush to the column's top and
-        // bottom edges. That was right when a row was a stack over a bar and
-        // nothing was drawn *between* two rows.
-        //
-        // A rule seated at `-0.5 * --s-pod-row-gap` assumes the gap **is**
-        // `--s-pod-row-gap`, and under `space-between` it is not: measured at
-        // 1920 the rows were 59.6px tall in a 131.1px pitch, so the real gap was
-        // 71.6px against the token's 28.8px and every rule landed 21px above
-        // the middle of its gap — hugging the row above it, which is exactly the
-        // "reads as an underline rather than a separator" failure the rule is
-        // written to avoid.
-        //
-        // Equal fractional rows make the gap the token again. Each row then
-        // centres its content in its own track, which is also what puts a row's
-        // content equidistant from the rules above and below it.
-        gridTemplateRows: `repeat(${teams.length}, minmax(0, 1fr))`,
-        rowGap: 'var(--s-pod-row-gap)',
-        height: '100%',
-      }}
-    >
+    <div style={{ position: 'relative', display: 'grid', minHeight: 0 }}>
+      {/* ── The separators are gone, and a band is why ──
+
+          They were an `::after` on each row, then a static layer of their own
+          on this same grid — which fixed a real fault, that a rule seated half
+          a gap under a row's *content* box sat 16px under one row and 50px over
+          the next, and put every row high in its segment.
+
+          A row with its own four edges does not need a line drawn between it
+          and the next one. `/weekly` retired its row rules on the identical
+          argument the day its cells became cards: a hairline in the gap is a
+          second horizontal edge a few pixels from thirty-nine first ones. The
+          measurement that fix was built on is kept in `.tv-pod-row`, because
+          the *pane's* padding is still half a row gap for the same reason. */}
+      <div ref={stripRef} style={track}>
       {/* **A deliberate render-phase ref read, not an oversight.**
 
           `restingTops` is a cache of measured layout, written by the
@@ -658,9 +707,7 @@ function Strip({
         <motion.div
           key={team.teamId}
           style={{
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
+            display: 'grid',
             // A moving row is drawn over the still ones for the length of the
             // move, so it is never half-hidden behind a bar it is passing.
             zIndex: moving ? 2 : undefined,
@@ -741,80 +788,71 @@ function Strip({
               be changed together or an overtake into the podium measures its
               path from nothing.
 
-              The rule under each row is drawn by the row itself, seated in the
-              middle of the row gap. The last row does not draw one: the frame's
-              own rule above the footer is the board's bottom edge. */}
+              It fills its track rather than sitting in the middle of it, so a
+              row's box and its segment are the same box. The separators are a
+              layer above; see the note there. */}
+          {/* ── The row is a band, and the band is what pairs the two ends ──
+
+              It was four items on a hairline grid, and the venture's name
+              finished up to 388px short of its own figure — measured, on
+              `AARA`. Nothing aligns across a void that wide at six metres.
+              A shared surface does the pairing that alignment could not: the
+              gap stops being space *between two things* and becomes space
+              *inside one*.
+
+              It is also what closes the split between the two halves of this
+              slide. The left was a lit, modelled object and the right was flat
+              glass with hairlines, which read as a render parked beside a
+              spreadsheet. The band answers the render's own key light — a pale
+              top edge, a shadow beneath — at a fraction of its amplitude.
+
+              **The wash is the venture's own tint**, from the same hash that
+              colours its mark, so the 44px disc beside it is the row's colour
+              source rather than a coloured dot that identifies nothing. */}
           <div
-            className={
-              index < teams.length - 1 ? 'tv-pod-row tv-pod-row-rule' : 'tv-pod-row'
-            }
+            className="tv-pod-row"
+            style={{ '--row-tint': tintFor(team.teamId) } as React.CSSProperties}
           >
             {rank(index)}
             {mark(team, rowRank)}
             {name(team, rowRank)}
-            {figure(team, rowRank)}
+            {/* The figure, and under it the distance to the row above —
+                prefixed, unlabelled, with real air between them. See
+                `.tv-pod-row-behind` for why it is here rather than in a column
+                of its own. */}
+            <span className="tv-pod-row-figures">
+              {figure(team, rowRank)}
+              {behind(index) === null ? null : (
+                <span className="tv-pod-row-behind">+{behind(index)}</span>
+              )}
+            </span>
           </div>
         </motion.div>
         )
       })}
+      </div>
     </div>
   )
 }
 
 /**
- * How far right the podium has to move so its *mass* is centred, not its box.
+ * ── `useCentroidShift` is gone, and what it was for is worth keeping ──
  *
- * ── Why a bounding box is the wrong thing to centre ──
+ * The three places are arranged 2 · 1 · 3 with heights descending 1 > 2 > 3, so
+ * the left column carries more ink than the right one. Its bounding box was
+ * perfectly symmetric — measured at 0.0px off centre — and the group still read
+ * left, because the eye weighs ink rather than edges. The hook measured the
+ * area-weighted centroid off the rendered pillars and nudged the row right by
+ * it: 17.9px at 1920, 14.9px at 1600, 18.6px at 2000, not a constant and so not
+ * something the stylesheet could hold.
  *
- * The arrangement is 2-1-3 with heights descending 1 > 2 > 3, so the left pillar
- * is taller than the right one and carries more dark area. The bounding box is
- * perfectly symmetric — measured at 0.0px off the channel centre — and the group
- * still reads left, because the eye weighs ink rather than edges.
- *
- * Measured on the running board, the area-weighted centroid sits **17.9px left**
- * of the box centre at 1920, 14.9px at 1600 and 18.6px at 2000. It is not a
- * constant, so it cannot be a constant in the stylesheet.
- *
- * ── Why this is measured rather than derived in CSS ──
- *
- * With equal widths the closed form is `pitch × (hLeft − hRight) / Σh`, and
- * `Σh` depends on the pillars' content height — which CSS knows only after
- * layout. So the heights are read back from the rendered pillars, which is the
- * same thing `WeeklyGrid` does for the flip's travel.
- *
- * Transform rather than margin: it moves the group without moving the layout, so
- * observing the row's size cannot feed back into it.
+ * It has nothing to do now. The three blocks are one image composed in
+ * `scripts/render-podium.mjs`, and the imbalance is answered there, in the
+ * scene, where it belongs — the view is symmetric about the leader and the
+ * eye is looking at a rendered object rather than at three boxes that happen to
+ * be adjacent. **If the blocks are ever re-arranged asymmetrically, this is the
+ * argument to re-read**, and the fix goes in the renderer's `VIEW`, not here.
  */
-function useCentroidShift(): [React.RefObject<HTMLDivElement | null>, number] {
-  const row = useRef<HTMLDivElement | null>(null)
-  const [shift, setShift] = useState(0)
-
-  const measure = useCallback(() => {
-    const el = row.current
-    if (el === null) return
-    const slots = [...el.children].map((child) => child.getBoundingClientRect())
-    if (slots.length !== 3) return
-    const areas = slots.map((s) => s.width * s.height)
-    const total = areas.reduce((sum, a) => sum + a, 0)
-    if (total <= 0) return
-    const centroid = slots.reduce((sum, s, i) => sum + (s.left + s.width / 2) * areas[i], 0) / total
-    const box = (slots[0].left + slots[2].right) / 2
-    setShift(box - centroid)
-  }, [])
-
-  useLayoutEffect(() => {
-    measure()
-    const el = row.current
-    if (el === null || typeof ResizeObserver === 'undefined') return
-    // Only fires when the frame itself changes, which on a wall is close to
-    // never — this is not a loop, it is a re-measure after a resize.
-    const observer = new ResizeObserver(measure)
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [measure])
-
-  return [row, shift]
-}
 
 /**
  * Where the travelling disc starts and ends, measured off the rendered board.
@@ -855,7 +893,6 @@ export function Podium({
   kick?: OvertakeEvent | null
   onSettled?: () => void
 }) {
-  const [row, shift] = useCentroidShift()
   const board = useRef<HTMLDivElement | null>(null)
   const [path, setPath] = useState<TravelPath | null>(null)
 
@@ -892,7 +929,7 @@ export function Podium({
     return () => clearTimeout(done)
   }, [kick, onSettled])
 
-  return <PodiumBoard {...{ ranked, kick, row, shift, board, path, podiumEntry }} />
+  return <PodiumBoard {...{ ranked, kick, board, path, podiumEntry }} />
 }
 
 /** Split out so the hooks above read as one block rather than being threaded
@@ -900,16 +937,12 @@ export function Podium({
 function PodiumBoard({
   ranked,
   kick,
-  row,
-  shift,
   board,
   path,
   podiumEntry,
 }: {
   ranked: readonly Team[]
   kick: OvertakeEvent | null
-  row: React.RefObject<HTMLDivElement | null>
-  shift: number
   board: React.RefObject<HTMLDivElement | null>
   path: TravelPath | null
   podiumEntry: boolean
@@ -951,8 +984,18 @@ function PodiumBoard({
         // will not reach this programme.
         //
         // The slack came out of the two gaps instead — see `--w-pod-half-gap`
-        // and `--s-pod-gap` — which is space neither column was reading.
-        gridTemplateColumns: 'minmax(0, 1.32fr) minmax(0, 1fr)',
+        // — which is space neither column was reading.
+        //
+        // **1.25 now, because the list sits in a pane.** The glass takes 24px
+        // of padding a side, and at 1.32 the list column went from 766px to
+        // 702 of usable width — `ATC (ALL THINGS CAMPHOR)` ellipsised at 1920,
+        // which is the exact regression the note above records for 1.45.
+        //
+        // The stage gives the width back rather than losing anything: the
+        // blocks are a rendered image laid in at the column's full width, so
+        // this number changes how large the podium is drawn and nothing about
+        // how it is composed. `scripts/render-podium.mjs` owns the latter.
+        gridTemplateColumns: 'minmax(0, 1.25fr) minmax(0, 1fr)',
         gridTemplateRows: 'minmax(0, 1fr)',
         columnGap: 'var(--w-pod-half-gap)',
         padding: 'var(--s-pod-top) 0 var(--s-pod-bottom)',
@@ -964,65 +1007,38 @@ function PodiumBoard({
         minWidth: 0,
       }}
     >
-      {/* ── The caption is gone ──
+      {/* ── The stage ──
 
-          It read `TOTAL REVENUE, ALL TIME` above this column, and it was
-          `PodiumMasthead`'s own "Total revenue" line restored — that
-          component's docblock had recorded its removal as a real loss, "the one
-          line telling a passer-by that these figures are all-time where
-          `/weekly`'s are the week's, on two slides that rotate on one screen
-          minutes apart."
+          One rendered image with three places laid over it. The image is the
+          form — lit, shadowed, occluded — and everything on it is live type at
+          its ordinary size and angle. `scripts/render-podium.mjs` draws it and
+          `lib/podiumBlocks.ts` says where its blocks are.
 
-          **Removed by decision, and the ambiguity it covered is uncovered
-          again.** The same venture shows ₹2,42,546 here and ₹1,06,630 on
-          `/weekly` thirty seconds later, and nothing on either slide now says
-          why. The judgement is that the audience is thirty-nine teams who live
-          this programme daily and already read the two boards as what they are;
-          that is a call about the audience rather than about the layout, and it
-          is not this file's to make.
+          **`alignSelf: end`.** The image is wider than it is tall and the
+          column is not, so the blocks sit on the column's floor with the slack
+          above them, which is where the marks overhang. Centred instead, the
+          blocks float and the marks crowd the masthead's rule.
 
-          It also gave the column a top edge, which is why the podium below is
-          centred rather than bottom-aligned — see `alignSelf`. */}
-
-      {/* `flex-end`, so three places of three sizes share one text baseline.
-          That shared floor is the whole idea: without it they are three marks of
-          arbitrary size, and with it they are steps. Drawn 2-1-3 so first place
-          is centre, which is where a podium puts it and where nobody has to work
-          the order out. */}
+          `overflow: visible` is implied and load-bearing: the marks are
+          positioned against their slots and reach well above the image's own
+          top edge. Anything that clips this box decapitates first place. */}
       <div
-        ref={row}
-        style={{
-          display: 'flex',
-          alignItems: 'flex-end',
-          // ── `center`, and the alternative was measured before it was
-          //    rejected ──
-          //
-          // `end` looks like the right answer: the list beside this runs the
-          // column's full height, so sitting the podium on the same floor gives
-          // the frame one baseline instead of two. Measured at 1920x1080 it
-          // gives the frame one baseline and a **400px void of empty aubergine
-          // above the podium** — the group is 447px tall in an 852px column and
-          // bottom-aligning it puts every pixel of the slack in one place, at
-          // the top left of the frame, which is where the eye enters.
-          //
-          // That is the same fault the old layout had, mirrored: it had 200px
-          // of nothing *below* the podium because the mover panel pushed the
-          // list down. Moving the mover to the footer fixed the cause; `end`
-          // reintroduced it upside down.
-          //
-          // Centred, the slack is 202px above and 202px below, which reads as a
-          // group placed in a field rather than as a group that has fallen to
-          // the bottom of one. The two floors are the price and they are worth
-          // it — a centred block does not look like it is resting on anything,
-          // so there is nothing for the list's floor to disagree with.
-          alignSelf: 'center',
-          gap: 'var(--s-pod-gap)',
-          minWidth: 0,
-          minHeight: 0,
-          // Centres the group's mass rather than its box — see `useCentroidShift`.
-          transform: `translateX(${shift.toFixed(2)}px)`,
-        }}
+        className="tv-stage"
+        style={{ alignSelf: 'end' }}
       >
+        {/* Decorative. Every word on this slide is in the DOM beside it —
+            `unoptimized` for the same reason every other image here is: the
+            wall must not depend on an optimiser endpoint being up. */}
+        <Image
+          className="tv-stage-art"
+          src={BLOCK_IMAGE.src}
+          alt=""
+          width={BLOCK_IMAGE.width}
+          height={BLOCK_IMAGE.height}
+          priority
+          unoptimized
+        />
+
         <PodiumCard
           team={second}
           place={2}
@@ -1049,17 +1065,28 @@ function PodiumBoard({
           y=881 against the list's y=1029, with 200px of empty page beneath the
           podium. The mover is a line in the frame's footer; see
           `components/MoverPanel.tsx`. */}
-      <Strip
-        ranked={visible}
-        fromRank={PODIUM_PLACES + 1}
-        kick={kick}
-        vacating={podiumEntry && kick !== null ? kick.fromRank : null}
-        incoming={
-          podiumEntry && kick !== null
-            ? podiumTeams(ranked).find((t) => t.teamId === kick.defender)
-            : undefined
-        }
-      />
+      {/* In a pane of glass — see `.tv-stage-list`. The pane is the grid item;
+          the strip inside it still takes the full height and lays its seven
+          rows out exactly as before, so `restingTops` and the swap's travel
+          are measured off the same geometry they always were. */}
+      <div className="tv-stage-list">
+        <Strip
+          ranked={visible}
+          fromRank={PODIUM_PLACES + 1}
+          // Row one is measured against third place, which is on the podium
+          // beside it — so every row in the list carries a gap, including the
+          // first. Reading `visible` rather than `ranked` keeps it the same
+          // frozen ordering the rest of the board is rendering.
+          above={visible[PODIUM_PLACES - 1]}
+          kick={kick}
+          vacating={podiumEntry && kick !== null ? kick.fromRank : null}
+          incoming={
+            podiumEntry && kick !== null
+              ? podiumTeams(ranked).find((t) => t.teamId === kick.defender)
+              : undefined
+          }
+        />
+      </div>
 
       {path === null ? null : <PodiumTravel path={path} />}
     </div>

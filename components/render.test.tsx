@@ -5,7 +5,7 @@ import { createRoot } from 'react-dom/client'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { FleaDial } from '@/components/FleaDial'
-import { monogramFor } from '@/components/VentureLogo'
+import { VentureLogo, monogramFor } from '@/components/VentureLogo'
 import { Podium, podiumTeams } from '@/components/Podium'
 import { VentureCard } from '@/components/VentureCard'
 import { pagesOf } from '@/components/VentureName'
@@ -213,13 +213,70 @@ describe('Podium', () => {
     expect(host.querySelectorAll('.tv-pod-foot')).toHaveLength(0)
     expect(host.querySelectorAll('.tv-pod-underbar')).toHaveLength(0)
 
+    // ── And the argument was made, so the plinth is back under a new name ──
+    //
+    // `tv-stage-*` is the plinth of 12 September 2026: a metal slab over a
+    // purple face with the numeral on it, one per place, and the leader's lit
+    // from above. The three assertions above still hold — the old card, foot
+    // and share bar are not what returned — and these pin what did. One block
+    // per place, the numeral *on the block's face* rather than above the mark,
+    // and exactly one per place — a badge-and-watermark pass printed it twice
+    // and "why 1, 2, 3 again?" was the review.
+    expect(host.querySelectorAll('.tv-stage-face')).toHaveLength(3)
+    const slots = [...host.querySelectorAll('.tv-pod-slot')]
+    expect(slots.every((s) => s.querySelectorAll('.tv-pod-numeral').length === 1)).toBe(true)
+
+    /* ── The blocks are a picture, and exactly one of them ──
+     *
+     * Five CSS podiums preceded this and each was a pile of elements per
+     * place: a card and a plinth, a slab and a lip, a drum and a top, a box
+     * and three faces. They are one `<img>` now, drawn by
+     * `scripts/render-podium.mjs`, and the assertion worth keeping is that
+     * there is *one* of it. A second would mean a place had started drawing
+     * its own furniture again.
+     */
+    const art = [...host.querySelectorAll('.tv-stage-art')]
+    expect(art).toHaveLength(1)
+    // Decorative, because every word on the slide is in the DOM beside it.
+    expect(art[0]!.getAttribute('alt')).toBe('')
+
+    /* Each place is positioned from the manifest the renderer wrote, never
+     * from a number restated here. The check is that it is *reading* it: a
+     * slot with no inline geometry is a slot stacked at the image's top-left
+     * corner, which renders, and which no other assertion in this file
+     * notices. */
+    expect(
+      slots.every((s) => {
+        const style = s.getAttribute('style') ?? ''
+        return ['left:', 'top:', 'width:', 'height:'].every((prop) => style.includes(prop))
+      }),
+    ).toBe(true)
+
     // One row per rank 4-10. `.tv-pod-row` is also the class `measurePath`
     // queries to find where a promoted venture's mark starts from, so a rename
     // here silently breaks an overtake into the podium — see `PodiumBoard`.
     expect(host.querySelectorAll('.tv-pod-row')).toHaveLength(7)
-    // Six rules, not seven: the last row does not draw one, because the frame's
-    // own rule above the footer is the board's bottom edge.
-    expect(host.querySelectorAll('.tv-pod-row-rule')).toHaveLength(6)
+    /* ── The rows are bands, and they draw no separators ──
+     *
+     * There were six hairlines, one per boundary, and they were twice wrong
+     * before they were removed: seated half a gap under a row's *content* box
+     * they sat 16px under one row and 50px over the next, and drawn by a row
+     * they rode that row's transform during a swap.
+     *
+     * A band has four edges of its own, which is the argument `/weekly` retired
+     * its own row rules on. Zero is the assertion, because a rule creeping back
+     * between two bounded objects is a second horizontal edge a few pixels from
+     * fourteen first ones, and it reads as a fault rather than as structure.
+     */
+    expect(host.querySelectorAll('.tv-pod-rule')).toHaveLength(0)
+
+    /* Every band carries its venture's own tint, from the same hash that
+     * colours the mark standing on it. Set inline because it is per-team; the
+     * check is that all seven are set, since a band that lost it falls back to
+     * an untinted slot that looks deliberate. */
+    const bands = [...host.querySelectorAll('.tv-pod-row')]
+    expect(bands).toHaveLength(7)
+    expect(bands.every((b) => (b.getAttribute('style') ?? '').includes('--row-tint'))).toBe(true)
     act(() => root.unmount())
     host.remove()
   })
@@ -434,6 +491,30 @@ describe('Podium', () => {
   })
 })
 
+  /**
+   * ── A mark can never be larger than the box it is given ──
+   *
+   * `VentureLogo` sizes its monogram, its optical offset and its artwork inset
+   * in container units, and it declares the container **on itself, inline**.
+   * That is a safety property rather than a style: when the declaration lived
+   * in the stylesheet one level up and a stale build failed to deliver it,
+   * `cqw` fell back to the viewport and one venture's mark rendered 1920px
+   * wide across the entire wall. Twice.
+   *
+   * The assertion is that the component still ships its own container. Moving
+   * it back into CSS renders identically on a good build and catastrophically
+   * on a bad one, which is exactly the class of change this suite exists to
+   * stop — and a screenshot of a working build cannot tell the difference.
+   */
+  it('declares its own container, so a lost stylesheet cannot resize it', () => {
+    const html = markup(<VentureLogo team={team({})} size="100%" />)
+    expect(html).toContain('container-type: inline-size')
+    // And nothing inside is derived from the `size` string, which is what
+    // forced every caller to pass a length in the first place.
+    expect(html).toContain('36cqw')
+    expect(html).not.toContain('calc(100%')
+  })
+
 describe('podiumTeams', () => {
   it('never shows more than ten', () => {
     const all = teams().map((row, index) => ({ ...row, totalRevenue: 1000 * (42 - index) }))
@@ -495,9 +576,9 @@ describe('WallHeader', () => {
     const text = render(<WallHeader snapshot={snapshotAt(...WINDOW)} label="2-Week Challenge" />)
     expect(text).toContain('2-Week Challenge')
     expect(text).not.toContain('Day')
-    // No provenance stamp — it is not in the masthead and it is no longer
-    // anywhere. See the dedicated test below for why that is pinned.
-    expect(text).not.toContain('Updated')
+    // The stamp is beside it and unaffected: what expires here is the day
+    // count, not the provenance. See the dedicated test below.
+    expect(text).toContain('Updated')
   })
 
   /**
@@ -519,27 +600,63 @@ describe('WallHeader', () => {
     )
     expect(text).toContain('Weekly Leaderboard')
     expect(text).not.toContain('Day')
-    expect(text).not.toContain('Updated')
   })
 
   /**
-   * ── There is no provenance stamp anywhere on the wall ──
+   * ── The provenance stamp, and it is the only thing that can report a dead wall ──
    *
-   * There was, and this pinned that exactly one of the masthead or the footer
-   * carried it. The footers are gone and the stamp went with them, by decision.
+   * It has been in the masthead, then the footer, then nowhere — removed with
+   * the footers on 11 September 2026 — and it is back in the masthead on the
+   * 13th, after a review that asked what on this wall could make it state
+   * something false.
    *
-   * The assertion is kept, inverted, because **the thing it guards is now a
-   * silence rather than a presence.** This wall shows no error state: a failed
-   * fetch keeps the last good data and renders perfectly healthy stale numbers
-   * for days. The stamp was the only tell, and a future change that quietly
-   * reinstates it in one place and not the other would recreate the drift this
-   * test caught last time — a wall stamping itself twice is as much a bug as
-   * one that does not stamp at all, and neither is visible across a room.
+   * **This wall shows no error state, by design.** A failed fetch keeps the
+   * last good data and goes on rendering perfectly healthy stale numbers for
+   * days. Without the stamp a board frozen on Tuesday is pixel-identical to a
+   * working one, on a screen nobody is watching, for a fortnight.
+   *
+   * Asserted on `WallHeader` rather than on a page, because **both slides get
+   * it from here** — which is the property that matters. It drifted once
+   * before, into one slide and not the other, and a wall that stamps half of
+   * itself is no more use than one that stamps none of itself.
    */
-  it('carries no provenance stamp in the masthead', () => {
+  it('stamps the masthead with when the data was written', () => {
     const text = render(<WallHeader snapshot={snapshotAt(...WINDOW)} label="Weekly Leaderboard" />)
     expect(text).toContain('Weekly Leaderboard')
-    expect(text).not.toContain('Updated')
+    expect(text).toContain('Updated')
+  })
+
+  /**
+   * And renders nothing at all before there is data.
+   *
+   * Empty is a valid state on this wall and a stamp with no figures beside it
+   * would be stating the provenance of nothing. It is also the first paint of
+   * every rotation, so a stamp that rendered `Updated` with an empty date
+   * would be on screen twice a minute.
+   */
+  it('stamps nothing when there is no data yet', () => {
+    expect(render(<WallHeader snapshot={null} label="Weekly Leaderboard" />)).not.toContain(
+      'Updated',
+    )
+  })
+
+  /**
+   * ── What the figures are measured over, said once ──
+   *
+   * The same venture reads ₹2,42,546 on `/podium` and ₹12,400 on `/weekly`
+   * thirty seconds later. `/podium` says `All time` beside its name; `/weekly`
+   * says nothing, because its day chip and its `Revenue since` caption already
+   * bound its window. The assertion is that the prop is what decides, so a
+   * slide cannot come to carry the wrong one.
+   */
+  it('says what a board is measured over, only when told', () => {
+    const withScope = render(
+      <WallHeader snapshot={snapshotAt(...WINDOW)} label="BYOB Leaderboard" scope="All time" />,
+    )
+    expect(withScope).toContain('All time')
+    expect(render(<WallHeader snapshot={snapshotAt(...WINDOW)} label="Weekly Leaderboard" />)).not.toContain(
+      'All time',
+    )
   })
 })
 
@@ -601,9 +718,28 @@ it('declares every custom property that anything reads', () => {
     ].map((m) => m[1]),
   )
 
-  // `next/font` emits these into a class at build time, so they are declared in
-  // generated CSS no source file contains. See app/layout.tsx.
-  const external = new Set(['--font-mesa-body', '--font-mesa-serif'])
+  /* `next/font` emits these into a class at build time, so they are declared
+     in generated CSS that no source file contains.
+   *
+   * **Read out of `app/layout.tsx` rather than listed here.** It was a literal
+   * pair — `--font-mesa-body` and `--font-mesa-serif` — and the wall has five
+   * faces, so the other three were one `var()` away from failing this test for
+   * being correctly declared. It happened: a rank numeral moved back onto
+   * `--font-condensed` and the suite went red on a change that was right.
+   *
+   * Every one of them is declared the same way, `variable: '--x'` on a
+   * `localFont` call, so the layout is the authority and a sixth face is
+   * covered the moment it is added. */
+  const layout = readFileSync('app/layout.tsx', 'utf8')
+  const external = new Set(
+    [...layout.matchAll(/variable:\s*'(--[a-z0-9-]+)'/g)].map((m) => m[1]),
+  )
+  /* One token per bundled face, or the scan has silently stopped finding them
+     and this whole allowance quietly becomes an empty set — which fails the
+     test loudly, but for the wrong reason and after a confusing hour. Counted
+     against the calls rather than against a number, so adding or dropping a
+     face needs no edit here. */
+  expect(external.size).toBe([...layout.matchAll(/localFont\(/g)].length)
 
   // `var(--x, fallback)` cannot fail — a missing token yields the fallback
   // rather than an invalid declaration — so only bare reads are checked.

@@ -74,13 +74,21 @@ npm run build        # next build
   defined, every token still resolves on it, and nothing in either page tree
   names a colour — which is what keeps this one line to change back, and what
   makes the paragraph above still binding rather than historical.
-- **No borrowed artwork.** `LOGOS` in `config.ts` is empty, so every mark on the
-  wall is `VentureLogo`'s two-letter monogram on a tinted disc. It listed all 39
-  for a while and every one of those files was the *previous* cohort's logo,
-  renamed — `VBC101` wearing Dosa Crisps' mark. A monogram says "this venture has
-  not drawn a mark yet"; borrowed artwork says something false about who a team
-  is. Adding a real logo is one commit: the file in `public/logos/` and the id in
-  that list, together.
+- **No borrowed artwork, and the test is who drew it.** `LOGOS` in `config.ts`
+  is empty, so every mark on the wall is `VentureLogo`'s two-letter monogram on
+  a tinted disc. It listed all 39 for a while and every one of those files was
+  the *previous* cohort's logo, renamed — `VBC101` wearing Dosa Crisps' mark. A
+  monogram says "this venture has not drawn a mark yet"; borrowed artwork says
+  something false about who a team is. Adding a real logo is one commit: the
+  file in `public/logos/` and the id in that list, together.
+
+  **`public/podium/blocks.png` is not an exception to this.** It is an image
+  and this project drew it: the geometry, the palette, the camera and the
+  lights are parameters in `scripts/render-podium.mjs`, the output is
+  reproducible from them, and it claims to be nobody's mark. The rule is about
+  a venture wearing a logo that is not its own. `public/lottie/ganesha.json`
+  *is* the exception, and it carries its notice.
+
 - **Nothing moves at rest, on either slide.** Not one of the thirty-nine cards,
   not the list of seven, not the three podium marks, not a masthead or a
   numeral. No sweeps and no dance; those went with the metals. The only motion
@@ -110,6 +118,15 @@ npm run build        # next build
   onto rank 1 and *stops* — one run, on mount, `animation: … both` with no
   iteration count. What this rule bans is motion **at rest**, and a thing that
   is over 1.4 seconds after the slide arrives is not at rest, it is an entrance.
+
+  **The stage arriving is the same kind of thing.** `/podium`'s marks, names,
+  figures and numerals fade in over the three blocks when the slide mounts —
+  `tv-stage-in`, once, `both`, no iteration count, 3 · 2 · 1 — done by the time
+  the crown lands, and then still. **The blocks themselves never move**, and
+  that is no longer even a decision: they are one rendered image, so there is
+  nothing to animate and nothing whose measured rect an overtake could catch
+  mid-flight. The three CSS podiums that preceded this each had to argue the
+  point. Nothing on the stage loops.
 
   **And then one ornament did loop, so this rule is narrower than it reads.**
   The line above used to end by saying the board is completely still thirty
@@ -156,6 +173,41 @@ npm run build        # next build
   this one. Components read `--crown-ink`, never the metal token, because gold
   measures 8.59:1 on Deep Aubergine and **1.61:1 on Lavender Mist**, so the
   light surface answers with Royal Purple instead.
+
+  **And on 12 September 2026 the plinths came back — as a render.**
+  `/podium`'s three places stand on blocks that are one image,
+  `public/podium/blocks.png`, drawn by `scripts/render-podium.mjs`. Asked for
+  directly, with nine reference podiums, as "more graphical and colourful ...
+  how Airbnb or Duolingo would design it".
+
+  **Five attempts at building them in CSS came first, and all five failed the
+  same way**: metal plinths, gradient slabs, cylinders, 3D boxes, leaning 3D
+  boxes. The references are rendered illustrations — real lights, soft
+  shadows, ambient occlusion, material — and CSS 3D gives the geometry with
+  none of the materials, so the result signals "three dimensional" and cannot
+  pay it off. That is worse than staying flat. **Anything proposing to rebuild
+  these blocks in CSS is proposing the sixth attempt.**
+
+  The gold exemption is untouched: the crown is still the one gold object, and
+  silver and bronze are still read by nothing.
+
+  Three things this costs, stated rather than argued away:
+
+  - **The blocks' colour is baked**, which is the one thing the hex rule
+    exists to prevent. Changing it is a script edit and a re-render, not a
+    token edit, and it cannot follow a surface flip. Everything printed *on*
+    the blocks still reads a token and still flips. §7 of `forge-tokens.css`
+    records the ramps.
+  - **`lib/podiumBlocks.ts` is generated**, and it is what says where the
+    blocks are. Nothing may re-derive those numbers; a second opinion about
+    where a top face projects to is how a mark ends up hovering off its
+    platform at one viewport and looking right at another.
+  - **The render's camera must stay off-axis.** It is what makes every block's
+    front face an exact rectangle, which is what lets the venture name and its
+    figure be ordinary flat type. Pitching the camera rakes the type, and this
+    wall is read at six metres. That was the fault that killed the fifth CSS
+    attempt, and it is available to a renderer too.
+
 - **One looping Lottie is on the wall, for three days, and it is the borrowed
   artwork exception too.** `components/Ganesha.tsx` puts an 80px Ganesha in the
   bottom-left corner of both slides from **14 to 16 September 2026** and renders
@@ -208,14 +260,34 @@ npm run build        # next build
   argument, not an extension of this one.**
 - **No filler content.** Empty is a valid state. The wall being quiet is what makes it
   loud when something happens. No spinners, ever — first paint reads cached CSV.
-- **There is no footer and no `as_of` stamp**, on either slide. Both were removed
-  by decision. The cost is recorded rather than argued: this wall shows no error
-  state, so a failed fetch keeps the last good data and renders perfectly healthy
-  stale numbers for days — and the stamp was the only thing that made that
-  visible. `docs/DESIGN.md` §2 added it for that reason and called it a
-  deliberate exception. **A board frozen on Tuesday now looks exactly like a
-  working one.** If it returns, it goes in the right of the masthead;
-  `components/AsOf.tsx` is in git.
+- **There is no footer. The `as_of` stamp is back, at the right of the
+  masthead, on both slides.** The footers went on 11 September 2026 and took
+  the stamp with them; the stamp returned on the 13th, after a design review
+  that asked what on this wall could make it state something false.
+
+  It is the only answer to that question that the wall can give. **This wall
+  shows no error state, by design** — a failed fetch keeps the last good data
+  and goes on rendering perfectly healthy stale numbers for days, because a red
+  banner on a screen nobody is watching helps nobody. Without the stamp, a
+  board frozen on Tuesday is pixel-identical to a working one. `docs/DESIGN.md`
+  §2 added it for exactly this reason and called it a deliberate exception to
+  the brief's layout; it still is.
+
+  `components/WallHeader.tsx` renders it, so **both slides get it from one
+  place**. That is the property to protect: it drifted once into one slide and
+  not the other, and a wall that stamps half of itself is no more use than one
+  that stamps none of itself. It renders nothing before there is data, because
+  empty is a valid state here and a stamp with no figures beside it states the
+  provenance of nothing.
+
+- **A board says what its figures are measured over.** `/podium` carries
+  `All time` beside its name; `/weekly` carries nothing, because its day chip
+  and its `Revenue since` caption already bound its window. The same venture
+  reads ₹2,42,546 on one slide and ₹12,400 on the other thirty seconds later,
+  and the old argument for saying nothing — that the audience is thirty-nine
+  teams who live the programme daily — is a claim about the people in the
+  corridor rather than about the board. It costs one word not to rely on it.
+
 - **No trigger types beyond the 15 in the design.** The list was deliberately narrowed.
 - **The rotation between the two slides is ours, and it is the only rotation logic
   here.** `components/Rotator.tsx`, thirty seconds a slide, by soft navigation. That

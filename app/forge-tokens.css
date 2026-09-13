@@ -77,6 +77,7 @@
      that still binds. */
   --aubergine-900: #150b26;
   --aubergine-800: #1a0f2e;
+  --aubergine-950: #0e0719; /* the page's darkest corner */
   /* One step lighter, for a card that has to read as raised *on* aubergine.
      1.22:1 against the page — deliberately almost nothing, because the
      separation is carried by shadow and hairline. A card that differs from its
@@ -152,6 +153,16 @@
   --forge-metal-silver: #c6c9d6;
   --forge-metal-bronze: #d08a5a;
 
+  /* ── Gold as a three-step ramp: shadow, body, specular ──
+
+     Declared here rather than inside `.surface-dark`, where the crown's own
+     block used to hold the two hexes, so the ramp has one home. The crown
+     block still points at these. Metal is a short hue rotation, warm in
+     shadow and pale in the highlight — see §3 for the argument. Silver and
+     bronze have no ramp: nothing reads them. */
+  --gold-deep: #c3881c;
+  --gold-lit: #f7e3ab;
+
   /* ── §2 · The semantic surface interface ─────────────────────────────────
         Defaults are the light surface, so a component that forgets to declare
         one is legible rather than invisible. Failing toward "readable on the
@@ -159,17 +170,11 @@
 
   --surface: var(--lavender-mist);
   --surface-raised: var(--white);
-  /* The light surface's well: one step *down* from Lavender Mist, the way the
-     dark one steps down from Deep Aubergine. Nothing reads it today — both
-     slides are dark — and it is declared because a token that resolves on only
-     one surface is exactly the failure §5 exists to prevent: `/weekly`'s card
-     would come back as a frame around nothing. */
-  --surface-sunken: color-mix(in srgb, var(--lavender-mist) 88%, var(--royal-purple));
-  /* The light surface's well: one step *down* from Lavender Mist, the way the
-     dark one steps down from Deep Aubergine. Nothing reads it today — both
-     slides are dark — and it is declared because a token that resolves on only
-     one surface is exactly the failure §5 exists to prevent: `/weekly`'s card
-     would come back as a frame around nothing. */
+  /* The light surface's well: one step *down* from Lavender Mist, the way
+     the dark one steps down from Deep Aubergine. Nothing reads it today —
+     both slides are dark — and it is declared so that `.surface-light` keeps
+     resolving every token a component asks for, which is the condition
+     AGENTS.md attaches to keeping that half alive. */
   --surface-sunken: color-mix(in srgb, var(--lavender-mist) 88%, var(--royal-purple));
   --surface-solid: var(--royal-purple); /* a filled card ON the surface */
   --ink: var(--ink-black);
@@ -283,7 +288,7 @@
    reconsider** — not `globals.css`, which only reads it.
    ───────────────────────────────────────────────────────────────────────── */
 :root {
-  --page-ground: var(--aubergine);
+  --page-ground: var(--aubergine-900);
   /* And the ink to match. Nothing outside `<main>` renders text today, so this
      is read by nothing — but `--fg1` is near-black, and leaving near-black
      declared as the default ink on a near-black ground is a contradiction
@@ -332,13 +337,14 @@
      colour instead of naming one.
 
      Amethyst is that colour and it was already in the ramp at §1, described as
-     "secondary surfaces, fills", read by nothing. L 0.0715 at saturation 0.59:
-     **1.83:1 against the page where raised gives 1.22:1**, and fully in the
-     brand, where the grey was 0.13 saturation on a palette that runs 0.31 to
-     0.71. A card can be a material now without a second shell around it.
+     "secondary surfaces, fills", unread by anything. L 0.0715 at saturation
+     0.59: **1.83:1 against the page where raised gives 1.22:1**, and fully in
+     the brand where the grey was at 0.13 saturation against a palette that runs
+     0.31 to 0.71. A card can be a material now without a second shell around
+     it.
 
-     `--ink-on-solid` and `--ink-on-solid-2` are what type on a card like this
-     reads, and they already existed for exactly this case. */
+     `--ink-on-solid` and `--ink-on-solid-2` are what a card on this reads, and
+     they already existed for exactly this case. */
   --surface-solid: var(--amethyst);
   --ink: var(--white);
   --ink-2: var(--ink-on-dark-2);
@@ -415,9 +421,9 @@
      Measured on Deep Aubergine — metal 5.18 / 7.17 / 12.47:1, gems 4.05 / 8.39
      / 11.74:1. The gem floor is the only figure under 4.5 and it is interior
      shading on a 9px shape, not ink. */
-  --crown-deep: #c3881c;
+  --crown-deep: var(--gold-deep);
   --crown-ink: var(--forge-metal-gold);
-  --crown-lit: #f7e3ab;
+  --crown-lit: var(--gold-lit);
   --crown-gem-deep: #c644e6;
   --crown-gem: var(--orchid);
   --crown-gem-lit: #f2d4f9;
@@ -475,6 +481,11 @@
 .surface-light {
   --surface: var(--lavender-mist);
   --surface-raised: var(--white);
+  /* The well, one step *down* from the page as `.surface-dark`'s is. Nothing
+     reads it while both slides are dark; it is declared because a token that
+     resolves on only one surface is exactly the failure §5 exists to prevent —
+     `/weekly`'s card would come back as a frame around nothing. */
+  --surface-sunken: color-mix(in srgb, var(--lavender-mist) 88%, var(--royal-purple));
   --surface-solid: var(--royal-purple);
   --ink: var(--ink-black);
   --ink-2: var(--royal-purple);
@@ -499,12 +510,17 @@
 
 :root {
   /* The dark page. Light source top-left, so the frame has a direction. */
+  /* **Darker, and lit from the top-right.** It was lit top-left in Royal 700
+     over an Aubergine-to-Aubergine-900 fall; the podium's coloured boxes
+     wanted a deeper ground under them, and the light moved to the right so
+     the leaderboard side of the frame has the glow and the boxes have the
+     dark. Both slides share this, on purpose: one wall, one room. */
   --grad-surface-dark: radial-gradient(
-      120% 90% at 12% 0%,
-      var(--royal-700) 0%,
-      transparent 62%
+      75% 70% at 100% 0%,
+      color-mix(in srgb, var(--vivid-violet) 42%, transparent) 0%,
+      transparent 60%
     ),
-    linear-gradient(168deg, var(--aubergine) 0%, var(--aubergine-900) 100%);
+    linear-gradient(168deg, var(--aubergine-800) 0%, var(--aubergine-950) 100%);
 
   /* The light page. Barely there — 1.14:1 corner to corner — because its job
      is to stop a 1920px flat fill reading as a printing error, not to be seen.
@@ -591,4 +607,96 @@
 
    **The exemption is now spent rather than open.** A second gold object on this
    wall is a new argument to be made from scratch, not a precedent this one
-   grants. */
+   grants.
+
+   ── And on 12 September 2026 the plinths came back — as colour, not metal ──
+
+   `/podium`'s three places stand on slabs again, and the slabs are painted
+   rather than plated: three saturated gradients, see §7. Silver and bronze
+   stay read by nothing, and the gold exemption is still exactly one object,
+   the crown. The first pass of that day put gold, silver and bronze slabs
+   on the stage; it was replaced the same day, because the brief was a
+   colourful podium and three metals on a purple wall is a trophy cabinet. */
+
+/* ── §7 · The stage ────────────────────────────────────────────────────────
+
+   `/podium`'s three slabs, the light over first place, the floor under the
+   three, and the glass the list of seven sits in. Every colour the stage
+   reads is here; `app/mesa-tv.css` holds only its geometry and its rules.
+
+   ── Three gradients, three hues, and purple is where each one starts ──
+
+   This is the one place on the wall the single-hue-per-fill rule of §4 is
+   set aside, by decision: the brief for this slide was a podium that is
+   *colourful*, with reference boards whose pillars run violet to orange to
+   lavender across one frame. So each slab is a hue rotation, and the rule
+   that survives is narrower — **every one of the three starts at the wall's
+   own violet at the top and rotates away from it going down**, so the
+   stage is still a purple wall with three coloured objects on it, and rank
+   is the temperature it rotates to:
+
+     1  violet → fuchsia → coral    the hottest, under the crown
+     2  violet → indigo → sky       cool, the runner-up
+     3  violet → orchid → pink      soft, the third
+
+   Every hex below is new to this file and the palette; they are here and
+   nowhere else, which is the discipline that did not change.
+
+   ── The bases are boxes, in real 3D ──
+
+   Each is a CSS 3D box under one shared perspective: a front face in the
+   gradient, a top face in a paler pair of the same hue that recedes toward
+   a vanishing point above the leader, and on the two outer boxes the side
+   that faces the centre, in the front's gradient under shadow. The
+   reference is a rendered scene of exactly this, and building it in three
+   dimensions rather than faking it with skews is what makes the three
+   tops converge on one point instead of three. Nothing is drawn under the
+   boxes; the foot fades over its last sixth so it sits into the floor.
+
+   ── White type on these, measured ──
+
+   The name and the figure sit on the top 40% of each body, which is the
+   violet-to-mid stretch; the numeral sits below them and is the only thing
+   printed lower. White on the mid stops: fuchsia 4.9:1, indigo 5.2:1,
+   orchid 3.1:1 — the third is the floor, and it is under 40px-and-up bold
+   type with a shadow, not body copy. The side shading adds to all three
+   where the type is; the centre shine takes a little away, which is why
+   the shine is 13% and not more. */
+:root {
+  /* ── The three blocks' colour lives in the renderer now ──
+
+     Nine tokens stood here: a three-stop gradient and a top-face pair for each
+     place, plus the side shading and the lit front edge. They are parameters
+     in `scripts/render-podium.mjs` and they are baked into
+     `public/podium/blocks.png`.
+
+     **That is the stated cost of rendering the blocks**, and it is the one
+     thing this file's whole discipline exists to prevent: a colour that cannot
+     be changed by editing a token. Changing a block's colour is now a script
+     edit and a re-render, and the palette cannot follow a surface flip — the
+     blocks are the same object on either page, which is true of an object and
+     was never true of ink. Everything printed *on* them still reads a token
+     and still flips.
+
+     The ramps, for the record, each start at the wall's own violet and rotate
+     away from it going down, hottest for first place:
+
+       1   #7c3ad0 → #c026d3 → #ff6a7f
+       2   #5b3bc4 → #4a63ef → #3fb9f0
+       3   #63309f → #9b56cf → #e79bd8 */
+
+  --stage-type-shadow: rgba(21, 11, 38, 0.38);
+  --stage-numeral: rgba(255, 255, 255, 0.16);
+
+  /* The list of seven. */
+  /* A row band's own fill, over the page. It was a pane's fill for a pass and
+     four tokens went with it — `--stage-panel-edge`, `--stage-panel-sheen`,
+     `--stage-chip` and `--stage-chip-edge` — all of which belonged to a
+     bordered container holding the seven rows and a chip around each rank.
+     The pane is gone: a band has four edges of its own, and a second box
+     around a set of objects that are already boxed is the noise this list was
+     reviewed for. */
+  --stage-panel: rgba(255, 255, 255, 0.045);
+  --stage-row-sheen: rgba(255, 255, 255, 0.09);
+  --stage-row-shade: rgba(10, 5, 20, 0.34);
+}

@@ -1,5 +1,6 @@
 import Image from 'next/image'
 
+import { AsOf } from '@/components/AsOf'
 import { ChallengeDay } from '@/components/ChallengeDay'
 import { cohortInstant } from '@/lib/feed'
 import type { BoardMode, Snapshot } from '@/lib/types'
@@ -54,6 +55,7 @@ import type { BoardMode, Snapshot } from '@/lib/types'
 export function WallHeader({
   snapshot,
   label,
+  scope,
   mode = 'challenge',
   tone = 'light',
   trailing,
@@ -74,6 +76,13 @@ export function WallHeader({
   mode?: BoardMode
   /** Which lockup to draw. The surface the masthead is sitting on. */
   tone?: 'light' | 'dark'
+  /**
+   * What the board's figures are measured over, set beside its name.
+   *
+   * `/podium` passes `All time`; `/weekly` passes nothing, because its own day
+   * chip and its `Revenue since` caption already say what its window is.
+   */
+  scope?: string
   /**
    * Slide-specific apparatus, drawn between the heading and the stamp.
    * `/podium` hands its Flea countdown in here; `/weekly` hands nothing and
@@ -100,10 +109,32 @@ export function WallHeader({
 
       {/* An empty cell when there is no heading, so the right-hand group still
           lands in the last column rather than sliding left. */}
-      {label === undefined ? <span /> : <h1 className="tv-mast-title">{label}</h1>}
+      {label === undefined ? (
+        <span />
+      ) : (
+        <h1 className="tv-mast-title">
+          {label}
+          {/* ── What the figures below are measured over ──
+
+              The same venture reads ₹2,42,546 on `/podium` and ₹12,400 on
+              `/weekly` thirty seconds later, and until this line neither slide
+              said why. The wall's audience is thirty-nine teams who live the
+              programme daily and know the difference, which is the argument
+              that removed the old caption — but it is an argument about the
+              people in the corridor rather than about the board, and it costs
+              one word to stop relying on it.
+
+              Inside the heading rather than beside it, so it reads as part of
+              what the board is called and cannot drift into the apparatus at
+              the masthead's right, which is the slide's own furniture. */}
+          {scope === undefined ? null : <span className="tv-mast-scope">{scope}</span>}
+        </h1>
+      )}
 
       <div className="tv-mast-meta">
         {trailing}
+        {/* Last, always. It is provenance rather than content — see `AsOf`. */}
+        <AsOf snapshot={snapshot} />
         {mode === 'challenge' ? (
           <ChallengeDay
             start={snapshot === null ? null : cohortInstant(snapshot.cohort, 'challenge_start_iso')}

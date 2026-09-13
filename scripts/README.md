@@ -124,6 +124,43 @@ enough for colour and silhouette, not for a word.
 
 A logo faint at *every* size is an artwork problem, not a framing one.
 
+## `render-podium.mjs` — the three blocks on `/podium`
+
+```bash
+node scripts/render-podium.mjs
+```
+
+Renders `/podium`'s three blocks as one lit 3D image and writes
+`public/podium/blocks.png` and the generated module `lib/podiumBlocks.ts`.
+**Re-run it after changing any block's size, colour, the camera or the view,
+and commit both outputs with the change.**
+
+No dependencies: it ray-marches signed distance fields and encodes the PNG
+itself, because this machine has neither Blender nor numpy and the wall ships
+five runtime packages. About thirteen seconds.
+
+**Reach for it when the podium's form changes.** Type, spacing and everything
+live still belong to CSS — the image is only the lit form.
+
+Three things it is easy to get wrong:
+
+- **The camera must stay off-axis.** The image plane is parallel to the fronts
+  and the frustum is shifted down, which is what a tilt-shift lens does: every
+  front face projects to an exact rectangle, and that is what lets the venture
+  name and its figure sit on the image as ordinary flat type. Pitch the camera
+  and the type rakes, on a wall read at six metres.
+- **The manifest is the only authority on where the blocks are.** It is
+  computed by the same projection that rendered them. `components/Podium.tsx`
+  reads it and re-derives nothing.
+- **Lighting is done in linear light**, sRGB in and sRGB out. Shading straight
+  in sRGB produces the muddy mid-tones that make a render look like a gradient.
+
+The floor is a shadow catcher and nothing else — it contributes alpha, never
+colour — so the page's own gradient shows through and no seam can appear
+between a rendered floor and a CSS one. The cast shadow is deliberately faint
+and the contact occlusion carries the weight: this page runs from `#1a0f2e` to
+`#0e0719`, and darkening that returns a muddy blob rather than a shadow.
+
 ## `prepare-logos.py` — the asset pipeline
 
 ```bash

@@ -62,10 +62,14 @@ describe('ordinal', () => {
 /**
  * ── THE WIDEST FIGURE THIS WALL IS SIZED FOR ──
  *
- * `--fs-1` on `/podium` and the 1.45fr column split are both sized against a
- * *twelve-glyph* figure, because `en-IN` groups by lakh and crore and so
- * separators arrive faster than digits: `₹2,42,546` is 9 glyphs, `₹10,00,000`
- * is 10, and `₹1,00,00,000` is 12.
+ * `--t-stage-figure` on `/podium` and the board's column split are both sized
+ * against a *twelve-glyph* figure, because `en-IN` groups by lakh and crore
+ * and so separators arrive faster than digits: `₹2,42,546` is 9 glyphs,
+ * `₹10,00,000` is 10, and `₹1,00,00,000` is 12.
+ *
+ * `--fs-1` carried this on `/podium` until the three places moved onto a
+ * rendered image and their type became container units against a block's own
+ * face. The bound did not move; what is measured against it did.
  *
  * **Twelve is a bound, not a maximum.** This function has no ceiling — the
  * sheet can hold any number — and the first value that needs thirteen is

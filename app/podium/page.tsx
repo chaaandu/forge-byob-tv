@@ -119,6 +119,7 @@ export default function PodiumPage() {
       <WallHeader
         snapshot={snapshot}
         label="BYOB Leaderboard"
+        scope="All time"
         mode="week"
         tone="dark"
         trailing={<FleaCountdown at={snapshot === null ? null : fleaInstant(snapshot.cohort)} />}
