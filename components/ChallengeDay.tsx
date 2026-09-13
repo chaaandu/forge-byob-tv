@@ -59,11 +59,19 @@ export function ChallengeDay({ start, end }: { start: Date | null; end: Date | n
   // now a 39px heading would make a chip of apparatus compete with the
   // masthead.
   //
-  // It is one line of tracked caps at label size, with the *figure* carrying
-  // the emphasis and nothing else: the same size as the words around it, one
-  // weight up, in the surface's accent. `--accent` rather than Tangerine Glow,
-  // because this component draws on both surfaces now and a fixed hue would
-  // die on one of them.
+  // So it is one line of tracked caps at label size with the *figure* carrying
+  // all of the emphasis: `--t-tv-mast-figure`, two steps up and one weight up,
+  // in the surface's accent. That token's own comment has the argument for how
+  // far up — the short form is that the ceiling is the heading, because a day
+  // count that matches `10-DAY CHALLENGE` is a masthead with two titles in it.
+  //
+  // `--accent` rather than Tangerine Glow, because this component draws on both
+  // surfaces now and a fixed hue would die on one of them.
+  //
+  // **The baseline is what holds the line together at two sizes.** The words
+  // and the numeral sit on `align-items: baseline`, so the numeral grows upward
+  // out of a shared baseline rather than centring itself and dragging `DAY` and
+  // `OF 10` off their own. Centre these and the labels float.
   const label: React.CSSProperties = {
     font: 'var(--t-tv-mast-label)',
     letterSpacing: 'var(--track-overline)',

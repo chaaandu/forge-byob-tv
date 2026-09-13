@@ -1128,16 +1128,38 @@
   /* ── The masthead's apparatus scale ──
 
      Everything to the right of the heading — the day chip on `/weekly`, the
-     Flea countdown on `/podium` — is set at one size, with weight and ink
-     carrying the difference between a label and its figure. One size, because
-     the right of the masthead is a *line*, and a line with three type sizes in
-     it is a group of objects.
+     Flea countdown on `/podium` — sets its *labels* at one size, with weight
+     and ink carrying the difference between a label and its figure. One size
+     for the words, because the right of the masthead is a *line*, and a line
+     with three type sizes of running text in it is a group of objects.
 
-     The figure is a step heavier and takes the accent; the words around it are
-     muted. That is the whole emphasis, and it is deliberately much less than
-     the 39px tangerine numeral the band used to give the day count. */
+     ── The day numeral is the one exception, and it was asked for ──
+
+     It sat at `--fs-5` — one step up from its labels, a step heavier, in the
+     accent — and that was argued as "the whole emphasis, deliberately much
+     less than the 39px tangerine numeral the band used to give the day count."
+     The band is still gone and that restraint still holds against the *band's*
+     numeral. What it did not hold against is the question actually being
+     asked of this chip: on a board whose figures are a fortnight's earnings
+     against a hard close, **which day it is** is the one piece of apparatus
+     that changes what a team does today, and at one step over its own label it
+     was reading as punctuation inside `DAY 9 OF 10` rather than as the number.
+
+     `--fs-3` against the heading's `--fs-2`: 28px beside 40px at 1920, so it
+     is unmistakably the second thing on the line and unmistakably not the
+     first. The ceiling is the heading — a day count that matches or beats
+     `10-DAY CHALLENGE` is a masthead with two titles in it.
+
+     **This unpairs it from `/podium`'s Flea figure**, which is `--t-pod-count`
+     and still `--fs-5`. Those two were the same size on purpose: they are the
+     same slot on two slides that rotate on one screen, and `WallHeader`'s
+     docblock is about sharing the furniture so the rotation reads as one wall.
+     Matching them again is one token — set `--t-pod-count` to `--fs-3` too. It
+     is deliberately *not* done here, because a countdown to an event five
+     weeks out and a day counter inside a live contest are not carrying the
+     same weight of news, and only one of them was asked to get louder. */
   --t-tv-mast-label: 700 var(--fs-6) / 1 var(--font-sans);
-  --t-tv-mast-figure: 800 var(--fs-5) / 1 var(--font-sans);
+  --t-tv-mast-figure: 800 var(--fs-3) / 1 var(--font-sans);
 
   --t-tv-strip-label: 800 var(--fs-6) / 1 var(--font-sans);
   --h-tv-cal: clamp(26px, 2.3vw, 48px);
