@@ -414,9 +414,9 @@
      in this expression the board would simply have stopped 37px short of the
      frame, which is the quiet half of the same failure. */
   --h-board: calc(
-    100vh - 2 * var(--s-safe-y) - var(--h-mast) - var(--s-mast-rule) -
-      var(--stroke-hair) - var(--s-rule-board) - var(--s-board-top) -
-      var(--s-board-bottom)
+    100vh - var(--s-mast-top) - var(--s-safe-y) - var(--h-mast) -
+      var(--s-mast-rule) - var(--stroke-hair) - var(--s-rule-board) -
+      var(--s-board-top) - var(--s-board-bottom)
   );
   --h-rows: calc(var(--h-board) - 3 * var(--s-row-gap));
   /* ── FOUR ROWS, ONE HEIGHT ──
@@ -657,6 +657,26 @@
      at the size this wall is actually driven at, there is one rhythm and
      nothing on the frame is off it. */
   --s-safe-y: 2.0833vw; /* 40px */
+  /* ── The frame's top is 20px and its bottom is 40, deliberately ──
+
+     **This is under the overscan floor the note above sets, knowingly.** 20px
+     at 1080 is 1.85% and a consumer panel crops 2.5–5%, so on a panel that
+     overscans, the tops of the masthead's capitals are what it takes. It was
+     asked for directly: 20px of air above and below the heading, without the
+     hairline moving down to pay for it.
+
+     The bottom keeps `--s-safe-y`'s 40, and the asymmetry is the point rather
+     than an oversight. What sits against the top edge is one line of type that
+     the eye reads as a masthead whether or not its very tops are clipped; what
+     sits against the bottom edge is the last row of `/weekly`'s cards and the
+     Ganesha, where a crop takes a figure. The protection is spent where it buys
+     the most.
+
+     **It is a token rather than a literal because `--h-board` subtracts it.**
+     The board's height is the frame minus every band above and below it, and
+     `app/podium/page.tsx` and `app/weekly/page.tsx` both state the same padding;
+     the three are one layout written three times and they move together. */
+  --s-mast-top: 1.0417vw; /* 20px */
   --s-safe-x: var(--s-12); /* 48px — unchanged, so the columns do not move */
 
   /* ── The masthead's own height, and it is the title's *ink* now ──
@@ -697,22 +717,27 @@
      28px to 57px in a day. The imbalance was always there and only became
      visible when the type got large enough to notice it.
 
-     **Centred against the screen's top edge, not the safe area's.** That is
-     what a person looking at the wall sees, and it is what was asked for. The
-     caps themselves cannot move up to meet the rule instead: `--s-safe-y` is
-     40px / 3.7% of 1080 and a consumer panel overscans 2.5–5%, so type above it
-     is type the display may crop. If a panel does overscan, this heading reads
-     slightly high rather than losing its tops — the correct way round.
+     **20px, and the hairline did not move down to get it.** This was 40 for one
+     commit, matching the frame's old top margin, and it centred the heading by
+     pushing the rule 24px into the board — which on `/weekly` is six pixels off
+     each of four card rows and made the cards read short. The air came out of
+     the frame's top instead: see `--s-mast-top`, which is 20 and carries the
+     overscan cost that decision takes on.
 
-     **`--s-rule-board` stays at 20 and the hierarchy it stated is now
-     inverted.** The old note said the rule "belongs to the masthead, so it sits
-     nearer to it than to the board it introduces"; at 40 above and 20 below, it
-     now sits nearer the board. Preserving that would mean pushing
-     `--s-rule-board` past 40 as well, and the whole of it comes out of
-     `--h-board` — 52px rather than 24, which is 13px off each of `/weekly`'s
-     four rows instead of 6. The board is what the wall is for. Recorded rather
-     than quietly reversed. */
-  --s-mast-rule: var(--s-safe-y); /* 40px — equal to the air above the caps */
+     **The board is 40px taller than it was one commit ago and 3.2px taller than
+     before any of this**, which is the honest arithmetic rather than the
+     flattering one. Everything above the board was 40 + 44 + 16 = 100px this
+     morning and is 20 + 56.8 + 20 = 96.8px now: the top margin gave 20 and the
+     rule gap gave 20, and the masthead's own cap band took 12.8 of it back on
+     the way from 44px to 57. Raising the heading three times cost the board
+     nothing in the end, but it did not fund it either.
+
+     **`--s-rule-board` stays at 20, so the rule is now equidistant.** The
+     original note wanted it nearer the masthead than the board — 16 against 20 —
+     and that hierarchy is neutral rather than inverted now, which is nearer the
+     intent than the 40-against-20 it briefly had. Restoring it means taking the
+     air below the caps back to 16, and 20 is the number that was asked for. */
+  --s-mast-rule: var(--s-mast-top); /* 20px — equal to the air above the caps */
   --s-rule-board: 1.0417vw; /* 20px */
   /* How long a card's details take to leave and to come back.
 

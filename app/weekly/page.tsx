@@ -144,7 +144,9 @@ export default function WeeklyPage() {
         // the legend. See `--h-board`, which subtracts exactly these terms and
         // has to move in the same commit.
         gridTemplateRows: 'auto auto minmax(0, 1fr)',
-        padding: 'var(--s-safe-y) var(--s-safe-x)',
+        // Top and bottom differ — 20px over the masthead, 40 under the board.
+        // `--s-mast-top` carries why, and `--h-board` subtracts both terms.
+        padding: 'var(--s-mast-top) var(--s-safe-x) var(--s-safe-y)',
         rowGap: 0,
       }}
     >

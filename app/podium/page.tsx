@@ -105,7 +105,9 @@ export default function PodiumPage() {
         // Three bands: masthead, rule, board — `/weekly`'s exactly. It was
         // five until the footer line was removed; see the note there.
         gridTemplateRows: 'auto auto minmax(0, 1fr)',
-        padding: 'var(--s-safe-y) var(--s-safe-x)',
+        // Top and bottom differ — 20px over the masthead, 40 under the board.
+        // `--s-mast-top` carries why, and `--h-board` subtracts both terms.
+        padding: 'var(--s-mast-top) var(--s-safe-x) var(--s-safe-y)',
         rowGap: 0,
       }}
     >
