@@ -817,13 +817,14 @@ function Strip({
             {mark(team, rowRank)}
             {name(team, rowRank)}
             {/* The figure, and under it the distance to the row above —
-                prefixed, unlabelled, with real air between them. See
-                `.tv-pod-row-behind` for why it is here rather than in a column
-                of its own. */}
+                labelled, with real air between them. **The word is back and
+                the `+` is gone**; `.tv-pod-row-behind` carries the reversal and
+                the board that forced it. See it too for why this is here rather
+                than in a column of its own. */}
             <span className="tv-pod-row-figures">
               {figure(team, rowRank)}
               {behind(index) === null ? null : (
-                <span className="tv-pod-row-behind">+{behind(index)}</span>
+                <span className="tv-pod-row-behind">{behind(index)} behind</span>
               )}
             </span>
           </div>

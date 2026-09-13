@@ -148,6 +148,42 @@ describe('Podium', () => {
     expect(text).not.toContain('Venture 11')
   })
 
+  /**
+   * ── The gap says which direction it goes in ──
+   *
+   * It was `+₹1,592`, on the motorsport convention: a competitor's figure, then
+   * their distance from the one ahead, prefixed and quiet. The convention
+   * assumes a *populated* column, which teaches the format in a second — and
+   * production on 13 September 2026 had only the top three trading, so ranks 5
+   * to 10 were tied on ₹0, a tie prints nothing, and exactly one row on the
+   * whole list carried a gap. A lone `+₹1,592` on a row whose own figure is an
+   * em dash reads the way a plus reads everywhere else: the team with no
+   * revenue appeared to have made the most money on the board.
+   *
+   * Nothing failed and nothing reported it. This is where a change that takes
+   * the word back off has to fail.
+   */
+  it('says the gap is a distance behind, never a gain', () => {
+    const all = teams().map((row, index) => ({ ...row, totalRevenue: 1_000 * (42 - index) }))
+    const text = render(<Podium ranked={rankTeams(competingTeams(all))} />)
+    expect(text).toContain(`${formatRupees(1_000)} behind`)
+    // The sign is the whole bug: `+` on a leaderboard is read as a gain, and
+    // `−` would be read as a loss. Neither is what this number is.
+    expect(text).not.toContain(`+${formatRupees(1_000)}`)
+    expect(text).not.toContain(`\u2212${formatRupees(1_000)}`)
+  })
+
+  /**
+   * A tie is not a gap, and `+₹0` is not a thing to say. This is also what kept
+   * the production board from printing six meaningless lines under six dashes
+   * on the morning the fault above was spotted.
+   */
+  it('prints no gap at all where two ventures are level', () => {
+    const level = teams().map((row) => ({ ...row, totalRevenue: 0 }))
+    const text = render(<Podium ranked={rankTeams(competingTeams(level))} />)
+    expect(text).not.toContain('behind')
+  })
+
   it('renders the waiting board when nobody has traded', () => {
     const text = render(<Podium ranked={rankTeams(teams())} />)
     // The structure still reads as "the leaderboard, waiting" — never a "no

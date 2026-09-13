@@ -3476,23 +3476,50 @@
 
   /* ── How far behind ──
 
-     It was captioned `BEHIND`, crammed against the figure above it. Both
-     faults, and neither was the stacking. The word did no work — every number
-     on this board is rupees and the label is identical on all seven rows — and
-     the cramping is what made two numbers read as a block of noise rather than
-     as a figure with a footnote.
+     It was captioned `BEHIND`, crammed against the figure above it, then it
+     became a bare `+₹1,592`, and the word is now back. The reversal is worth
+     the space it takes, because the argument for the `+` was a good one and it
+     still lost to a real board.
 
-     **`+` is the convention this information already has.** Motorsport timing
-     boards have set it this way for fifty years: a competitor's own figure,
-     then their distance from the one ahead, prefixed and quiet. It needs no
-     label because its position is the label.
+     **The case for the prefix.** Motorsport timing boards have set this
+     information the same way for fifty years: a competitor's own figure, then
+     their distance from the one ahead, prefixed and quiet. It needs no label
+     because its position is the label, the label would be identical on all
+     seven rows, and every number on this board is rupees anyway.
+
+     **What that convention assumes, and this board does not supply.** A timing
+     tower's gap column is *populated* — every row carries one, so the column
+     itself teaches the format within a second of looking at it. Photographed in
+     production on 13 September 2026, with only the top three trading: ranks 5
+     to 10 were all tied on ₹0, so a tie shows nothing and **exactly one row on
+     the list carried a gap at all**. A lone `+₹1,592`, on a row whose own
+     figure is an em dash, has no column to be read against. It is read the way
+     a plus sign is read everywhere else on a leaderboard — as a gain — so the
+     board stated that the team with no revenue had made the most money on it.
+
+     Worse in the same frame: while everyone below the podium is on zero, the
+     gap is *numerically identical* to the row-above's total. Third place read
+     `₹1,592` and fourth read `+₹1,592`, which looks like a figure copied onto
+     the wrong row rather than like a distance.
+
+     Nothing reported any of it. It was right, it passed, and on a wall read at
+     six metres for a few seconds it said the opposite of what it meant — which
+     is the failure this project is built around, arriving through a convention
+     rather than through a bug.
+
+     **And the word's first outing was not a fair trial.** It was set as a
+     caption crammed against the figure, with none of the air `--s-pod-behind`
+     now gives it; the note that removed it said in the same breath that the
+     cramping was the fault. A label that prevents a sign inversion is not
+     doing "no work", whatever it does on the other six rows.
 
      **Under the figure rather than beside it**, which was tried and cost more
      than it bought: a fifth column took 150px out of the venture name, and
      `ATC (ALL THINGS CAMPHOR)` started ellipsising at 1920 — the exact
      regression this file records twice before, from widening the podium and
      from putting the list in a pane. A footnote belongs under the thing it
-     annotates, where it costs no width at all. */
+     annotates, where it costs no width at all. The word rides in that footnote
+     for the same reason, so it still takes nothing from the name. */
   .tv-pod-row-figures {
     display: grid;
     justify-items: end;
