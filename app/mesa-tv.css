@@ -2940,30 +2940,117 @@
      them — and only the leading chevron is load-bearing: it measures 8.39:1 on
      the band, where the second and third are 3.4:1 and 1.7:1. Those two are a
      trail, deliberately under the 3:1 a graphic would need if it were carrying
-     the meaning on its own. The one at full strength is. */
+     the meaning on its own. The one at full strength is.
+
+     ── It is Material's `chevron-triple-up` now, not three clipped boxes ──
+
+     Same mark, better drawn, and the swap is worth being exact about because
+     the two are easy to mistake for each other. The clipped boxes were 9 x 5
+     with a 1.5px gap, a ratio of 1.8 to 1, and the argument for that flatness
+     was that a chevron as tall as it is wide reads as an arrowhead where the
+     point here is the shoulder. This artwork is 1.617 to 1 — flatter than an
+     arrowhead, still a shoulder — and it **nests** where the boxes stacked,
+     which is what a trail does and a stack does not.
+
+     What the boxes could not do is the corner. A `clip-path` polygon meets its
+     own outer apex at a hard point, so at 9px the tip rendered as a two-pixel
+     stair; the path has the same joins the icon was drawn with. The old rule's
+     reason for choosing shapes over glyphs is untouched and is why this is an
+     inline path rather than a font character: `▲` and `»` are drawn by whichever
+     font in the stack answers for them, at whatever weight that font chose.
+
+     `fill: currentColor` on the paths, not on the `<svg>`, so a path is free to
+     carry its own opacity without the element above it having one to multiply
+     against. */
   .tv-day-mark {
-    display: grid;
-    gap: var(--s-day-chev-gap);
+    display: block;
+    width: var(--w-day-mark);
+    /* Height comes from the viewBox, so the artwork's proportion is stated in
+       exactly one place and it is the path's own. `height: auto` on a
+       replaced-ish element with an aspect-ratio is what makes that true; a
+       stated height here would be a second opinion about the icon's shape. */
+    height: auto;
     flex: none;
+    /* The band is a flex row and the figure is allowed to ellipsise. Without
+       this the mark is a flex item that can be squeezed, and a crore-scale day
+       would compress the chevrons rather than shortening the figure — which is
+       the wrong thing to sacrifice, because the mark is the same 10.2px on
+       every card and a squeezed one on six of them reads as a rendering fault
+       rather than as a long number. */
+    flex-shrink: 0;
   }
 
+  /* Each chevron's resting opacity, named, because the arrival's `to` keyframe
+     has to land on it. Writing `opacity: 1` in the keyframes would make the
+     leading chevron's fade correct and quietly flatten the other two to full
+     strength for the length of the animation — three identical chevrons, which
+     is the one thing the trail is not. */
   .tv-day-chev {
-    width: var(--w-day-chev);
-    height: var(--h-day-chev);
-    background: currentColor;
-    /* Outer apex at the top, inner apex at 48% — the 4% between them is the
-       chevron's stroke. A polygon rather than two rotated borders: a rotated
-       border lands on a fractional device pixel and renders soft, and there are
-       eighteen of these on a busy board. */
-    clip-path: polygon(50% 0%, 100% 52%, 100% 100%, 50% 48%, 0 100%, 0 52%);
+    fill: currentColor;
+    opacity: var(--chev-rest, 1);
   }
 
   .tv-day-chev:nth-child(2) {
-    opacity: 0.55;
+    --chev-rest: 0.55;
   }
 
   .tv-day-chev:nth-child(3) {
-    opacity: 0.3;
+    --chev-rest: 0.3;
+  }
+
+  /* ── The one thing this mark is allowed to do, and when ──
+
+     The stack fades up — bottom, middle, leading, 90ms apart — on exactly two
+     occasions: when the slide arrives, and when *this team's* day figure goes
+     up. Nothing else. It is not an idle and it must never become one; thirty-nine
+     cards pulsing at rest is the failure `AGENTS.md` bans on both slides, and
+     the reason is that a board where something is always moving cannot say that
+     something happened.
+
+     **These two triggers are the same event, seen twice.** The figure beside
+     the mark is money that arrived today, and the mark is its direction; so the
+     mark is drawn at the moment the wall first shows you the figure, whether
+     that is because the slide came round or because the sale just landed. A
+     card that has been sitting at ₹12,400 since 11am does not redraw.
+
+     **Neither trigger is a mount**, and that distinction is the whole of the
+     wiring in `WeeklyGrid`. A card remounts whenever it crosses a row boundary,
+     for any reason — including being *pushed down* by somebody else's sale. If
+     the animation lived on the base rule it would run on that remount, and the
+     board would announce a sale on the one card that had not made one. That is
+     precisely the bug `.tv-card-detail` records three hundred lines up, where
+     figures blinked at ranks nobody was watching; it is the same trap and the
+     grid answers it the same way, by deciding centrally and handing each card a
+     boolean.
+
+     `both`, so a chevron sits at zero through its own delay rather than
+     appearing and then fading in. */
+  .tv-day-rising .tv-day-chev {
+    animation: tv-day-rise var(--t-day-rise) var(--ease-out) both
+      var(--chev-beat, calc(2 * var(--s-day-rise-step)));
+  }
+
+  .tv-day-rising .tv-day-chev:nth-child(2) {
+    --chev-beat: var(--s-day-rise-step);
+  }
+
+  .tv-day-rising .tv-day-chev:nth-child(3) {
+    --chev-beat: 0s;
+  }
+
+  /* Opacity only, and no lift. A `translateY` on an SVG path resolves in the
+     **path's own user units**, not in CSS pixels — on a 12-unit-wide viewBox a
+     `3px` lift would travel 3 user units, about 2.5 rendered pixels, and the
+     number in the source would be a lie about what moved. `transform-box:
+     fill-box` fixes that and buys a lift the mark does not need: the cascade
+     already travels upward, because the order it fades in is the direction. */
+  @keyframes tv-day-rise {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: var(--chev-rest, 1);
+    }
   }
 
 
@@ -3709,6 +3796,19 @@
     .tv-stage-list {
       animation: none;
       opacity: 1;
+    }
+
+    /* The stack is simply drawn. Same trap a third time, and worse here than
+       anywhere else: the rise's `from` keyframe is `opacity: 0` and its `to` is
+       `var(--chev-rest)`, so cancelling it returns each chevron to its own
+       computed style. That is the *correct* value — the resting opacity is on
+       the element, which is exactly why it was put there — but it is restated
+       because "correct by accident" is not a state to leave a wall in, and
+       because the accident here would be three invisible marks on six cards
+       rather than something anyone would notice. */
+    .tv-day-rising .tv-day-chev {
+      animation: none;
+      opacity: var(--chev-rest, 1);
     }
 
     /* The glints go entirely, and this is the half of the block that now

@@ -128,6 +128,36 @@ npm run build        # next build
   mid-flight. The three CSS podiums that preceded this each had to argue the
   point. Nothing on the stage loops.
 
+  **`/weekly`'s day mark is the third arrival, and it is the first one that
+  fires on something other than a slide mount.** The three chevrons beside a
+  day figure fade up bottom-to-top, 90ms apart, 380ms each — once, `both`, no
+  iteration count — and they do it on exactly two occasions: the slide arriving,
+  and *that team's* `todayRevenue` going up. Nothing else, and never at rest.
+
+  The second trigger is the interesting one, and it is why this is an arrival
+  rather than an ornament: a sale landing **is** a thing that happened, in the
+  same sense an overtake is. The board's whole discipline is that movement means
+  something changed hands, and this moves precisely when money did. It is also
+  the first motion on this wall that is not about rank — a team can sell ₹40,000
+  and not pass anybody, and until now the wall had no way to say so.
+
+  **Both triggers are decided in `WeeklyGrid`, and a card is never allowed to
+  decide for itself.** That is not tidiness; it is the whole correctness
+  argument. A card is remounted whenever it crosses a row boundary, for any
+  reason including being *pushed down* by somebody else's sale — so an animation
+  on the card's own mount would announce a sale on the one card that had not
+  made one, convincingly, with nothing to report it. `.tv-card-detail` already
+  carries that scar. The grid compares two polls, and it compares with `>`
+  rather than `!==`: midnight takes thirty-nine day figures to zero at once, and
+  that is the loudest non-event on the wall. `render.test.tsx` pins all of it,
+  including that the board is still afterwards.
+
+  What it costs is the quiet board between polls being interrupted by up to
+  thirty-nine cascades at once on arrival. That is the entrance, it is over in
+  576ms, and it is the same trade `/podium` made with `tv-stage-in`. **A fourth
+  arrival is a new argument, not an extension of this one** — and an idle
+  version of this one is not an arrival at all.
+
   **And then one ornament did loop, so this rule is narrower than it reads.**
   The line above used to end by saying the board is completely still thirty
   seconds later, and that a twinkle, a sheen or a pulse does not get in on the

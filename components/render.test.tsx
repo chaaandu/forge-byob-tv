@@ -13,6 +13,7 @@ import { WallHeader } from '@/components/WallHeader'
 import { ROW_LENGTH, WeeklyGrid, rowsOf } from '@/components/WeeklyGrid'
 import { SOLID_RANKS, SPARE_TEAM_IDS } from '@/config'
 import type { CountdownState } from '@/lib/countdown'
+import type { Team } from '@/lib/types'
 import { formatRupees, ordinal } from '@/lib/format'
 import { competingTeams, rankByChallenge, rankTeams } from '@/lib/ranking'
 import { COMPETING_SIZE, cohort, team, teams } from '@/test/fixtures'
@@ -525,6 +526,134 @@ describe('Podium', () => {
     expect(host.querySelectorAll('.tv-crown-glint')).toHaveLength(0)
     act(() => root.unmount())
     host.remove()
+  })
+
+  /**
+   * ── WHEN THE RISING STACK IS DRAWN, AND WHEN IT IS NOT ──
+   *
+   * The chevrons beside a day figure fade up on two occasions and no others:
+   * the slide arriving, and *this team's* day figure going up. The CSS is
+   * measured in a browser; what is pinned here is the only part a class name
+   * can carry, which is **which cards the grid decided to draw** — and that is
+   * the part with a trap under it.
+   *
+   * The trap is that a card is remounted whenever it crosses a row boundary,
+   * for any reason at all, including being pushed *down* a rank by somebody
+   * else's sale. A mount-triggered animation would therefore fire on the one
+   * card that had not sold anything, and it would look exactly like the card
+   * that had. That is the same failure `.tv-card-detail` carries three hundred
+   * lines of comment about in `app/mesa-tv.css` — figures blinking at ranks
+   * nobody was watching — and it is why the decision lives in the grid, which
+   * can compare two polls, rather than in the card, which knows only that it is
+   * new.
+   *
+   * Fake timers, because the window that takes the class back off is a
+   * `setTimeout` and the whole assertion is about a board that has gone quiet
+   * again.
+   */
+  describe('the rising stack', () => {
+    // The eleventh team is what makes this test mean anything: ten cards to a
+    // row, so rank 11 is the first card in row 2 and any move across that line
+    // is a real React remount rather than a re-render.
+    const LADDER = Array.from({ length: 11 }, (_, i) => ({
+      teamId: `VBC1${String(i + 1).padStart(2, '0')}`,
+      ventureName: `Venture ${i + 1}`,
+      challengeRevenue: 110_000 - i * 10_000,
+      todayRevenue: 500,
+    }))
+
+    /** The venture names whose mark is mid-cascade, whatever rank they hold. */
+    function risingNames(host: HTMLElement): string[] {
+      return [...host.querySelectorAll('.tv-day-rising')]
+        .map((mark) => mark.closest('[data-rank]')?.textContent ?? '')
+        .map((text) => text.match(/Venture \d+/)?.[0] ?? '?')
+        .sort()
+    }
+
+    function mount(rows: Partial<Team>[]) {
+      const host = document.createElement('div')
+      document.body.append(host)
+      const root = createRoot(host)
+      act(() => root.render(<WeeklyGrid teams={teams(rows)} />))
+      return { host, root }
+    }
+
+    afterEach(() => {
+      vi.useRealTimers()
+    })
+
+    it('draws every mark when the slide arrives, then stops', () => {
+      vi.useFakeTimers()
+      const { host, root } = mount(LADDER)
+      // Eleven cards have traded, so eleven marks exist and all eleven are
+      // mid-cascade. The slide arriving is the whole board arriving.
+      expect(host.querySelectorAll('.tv-day-mark')).toHaveLength(LADDER.length)
+      expect(host.querySelectorAll('.tv-day-rising')).toHaveLength(LADDER.length)
+
+      // And then the board is still. This is the assertion the motion rule
+      // actually rests on: the entrance is an arrival, so it has to end. A
+      // change that made this an idle fails here rather than on a wall.
+      act(() => vi.advanceTimersByTime(2_000))
+      expect(host.querySelectorAll('.tv-day-rising')).toHaveLength(0)
+
+      act(() => root.unmount())
+      host.remove()
+    })
+
+    it('draws the card that sold, and not the one it pushed down a row', () => {
+      vi.useFakeTimers()
+      const { host, root } = mount(LADDER)
+      act(() => vi.advanceTimersByTime(2_000))
+      expect(host.querySelectorAll('.tv-day-rising')).toHaveLength(0)
+
+      // Venture 11 was last and sells: its day figure jumps and it climbs to
+      // rank 2, which moves it out of row 2 and into row 1. Venture 10 is
+      // pushed from rank 10 to rank 11 and crosses the same line the other
+      // way — remounted, with its own figure untouched.
+      const after = LADDER.map((row) =>
+        row.teamId === 'VBC111' ? { ...row, challengeRevenue: 105_000, todayRevenue: 96_000 } : row,
+      )
+      act(() => root.render(<WeeklyGrid teams={teams(after)} />))
+
+      expect(risingNames(host)).toEqual(['Venture 11'])
+
+      act(() => vi.advanceTimersByTime(2_000))
+      expect(host.querySelectorAll('.tv-day-rising')).toHaveLength(0)
+
+      act(() => root.unmount())
+      host.remove()
+    })
+
+    it('says nothing on the first poll it ever sees', () => {
+      // A wall plugged in mid-afternoon finds thirty-nine figures already
+      // standing and must not read them as thirty-nine sales that just landed.
+      // The only thing it may draw on arrival is the arrival itself — so once
+      // that window has closed, a board that has not changed is silent.
+      vi.useFakeTimers()
+      const { host, root } = mount(LADDER)
+      act(() => vi.advanceTimersByTime(2_000))
+      act(() => root.render(<WeeklyGrid teams={teams(LADDER)} />))
+      expect(host.querySelectorAll('.tv-day-rising')).toHaveLength(0)
+      act(() => root.unmount())
+      host.remove()
+    })
+
+    it('is silent when a day figure falls', () => {
+      // Midnight takes every day figure to zero at once, which is the most
+      // emphatic non-event on this wall. The comparison is `>` rather than
+      // `!==` for exactly that, and a correction downward is the same case with
+      // a mark still on screen to check.
+      vi.useFakeTimers()
+      const { host, root } = mount(LADDER)
+      act(() => vi.advanceTimersByTime(2_000))
+      const corrected = LADDER.map((row) =>
+        row.teamId === 'VBC101' ? { ...row, todayRevenue: 100 } : row,
+      )
+      act(() => root.render(<WeeklyGrid teams={teams(corrected)} />))
+      expect(host.querySelectorAll('.tv-day-rising')).toHaveLength(0)
+      act(() => root.unmount())
+      host.remove()
+    })
   })
 })
 

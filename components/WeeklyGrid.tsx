@@ -33,6 +33,25 @@ export const ROW_LENGTH = 10
 export const ROWS = 4
 
 /**
+ * How long the rising stack takes, end to end: three chevrons 90ms apart, the
+ * last of them fading for 380ms. It is the CSS's `--t-day-rise` plus twice its
+ * `--s-day-rise-step`, and the two have to agree — this is only the timer that
+ * takes the class *off*, so a value shorter than the animation cuts the cascade
+ * mid-fade and a longer one merely leaves an inert class on a card.
+ *
+ * **The two must not agree exactly, and that is what the margin is for.** A
+ * `setTimeout` is armed in the commit; the animation starts at the next paint,
+ * which is up to a frame later, and it can be descheduled further on a laptop
+ * driving a TV over HDMI. Equal values are therefore a race the timer wins
+ * about half the time, and winning it means snapping the leading chevron the
+ * last few percent to full strength. One frame of slack settles it in the only
+ * direction that costs nothing: an inert class sitting on a card for 16ms
+ * changes no pixel, because the animation's end state and the element's resting
+ * style are the same value by construction.
+ */
+const RISE_TOTAL_MS = 380 + 2 * 90 + 16
+
+/**
  * ── ROW 1'S IDLE IS GONE, AND THE BOARD IS STILL AT REST ──
  *
  * Ten marks on the top row carried one of three looping timelines each, offset
@@ -192,6 +211,64 @@ export function WeeklyGrid({
    * Keyed by team id rather than by rank, because the whole point of the commit
    * this reads is that the ranks have just changed.
    */
+  /**
+   * ── When the rising stack is drawn ──
+   *
+   * Two occasions and no others: the slide arriving, and a team's day figure
+   * going **up**. Both are decided here rather than in the card, and that is
+   * the whole point of the wiring — a card is remounted whenever it crosses a
+   * row boundary, so an animation on its own mount would fire on the card that
+   * got *pushed down* by somebody else's sale and announce a sale it did not
+   * make. The `arriving` set fifteen lines up exists for the same reason and
+   * this follows it deliberately: the grid knows who did what, a card knows
+   * only that it is new.
+   *
+   * **Up, not changed.** `todayRevenue` returns to zero at every day rollover,
+   * and a rollover is thirty-nine figures falling to nothing at once — the most
+   * emphatic non-event on the wall. `>` is what keeps the board silent through
+   * it. It also, on purpose, catches the day's first sale: 0 to ₹4,200 is an
+   * increase, and it is the one that most deserves to be drawn.
+   *
+   * **The first poll after a mount says nothing.** `seen` starts null and is
+   * filled without comparing, so a wall plugged in mid-afternoon records the
+   * board it finds rather than treating all thirty-nine figures as sales that
+   * just landed. Same shape as `detect`'s `prev === null` in `lib/overtake.ts`,
+   * and for the same reason.
+   */
+  const seen = useRef<Record<string, number> | null>(null)
+  const [rising, setRising] = useState<ReadonlySet<string>>(() => new Set())
+  const [entering, setEntering] = useState(true)
+
+  /**
+   * The entrance clock starts when there is a board to draw, not when this
+   * component mounts. First paint reads cached CSV and the fetch lands after
+   * it, so on a cold slide the cards appear some milliseconds into a window
+   * that had already started — and if the feed were slower than the window, the
+   * entrance would be over before anything existed to run it.
+   */
+  const populated = teams.length > 0
+  useEffect(() => {
+    if (!populated) return
+    const done = setTimeout(() => setEntering(false), RISE_TOTAL_MS)
+    return () => clearTimeout(done)
+  }, [populated])
+
+  useEffect(() => {
+    const now: Record<string, number> = {}
+    for (const team of teams) now[team.teamId] = team.todayRevenue
+    const before = seen.current
+    seen.current = now
+    if (before === null) return
+    const sold = Object.keys(now).filter((id) => before[id] !== undefined && now[id] > before[id])
+    if (sold.length === 0) return
+    setRising(new Set(sold))
+    // Cleared once the cascade has run, exactly as `arriving` is: the class
+    // carries nothing but an animation, so dropping it changes no pixel — it
+    // exists so the next poll does not inherit a reason to draw.
+    const done = setTimeout(() => setRising(new Set()), RISE_TOTAL_MS)
+    return () => clearTimeout(done)
+  }, [teams])
+
   const lastKick = useRef<OvertakeEvent | null>(null)
   const [arriving, setArriving] = useState<ReadonlySet<string>>(() => new Set())
   useEffect(() => {
@@ -356,6 +433,7 @@ export function WeeklyGrid({
                 rank={rank}
                 mode={mode}
                 arriving={arriving.has(team.teamId)}
+                rise={entering || rising.has(team.teamId)}
                 cue={cue}
                 onSettled={cue?.role === 'attacker' ? onSettled : undefined}
                 // **Row 1 no longer idles**, so no card is handed a timeline.

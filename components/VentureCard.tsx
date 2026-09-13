@@ -130,6 +130,7 @@ export function VentureCard({
   cue,
   onSettled,
   arriving,
+  rise,
 }: {
   team: Team
   rank: number
@@ -141,6 +142,12 @@ export function VentureCard({
       nobody else. It is what lets their details fade in after a remount without
       every unrelated re-sort doing the same. */
   arriving?: boolean
+  /** Draw the rising stack, once. Set while the slide is arriving, and again
+      on the one card whose day figure just went up — and on nobody else. The
+      grid decides both, because a card cannot: this one remounts every time it
+      crosses a row boundary, including when somebody *else's* sale pushes it
+      down, and a mount is not a sale. */
+  rise?: boolean
   /** An idle timeline class. Only row 1 gets one; the other thirty hold still. */
   idle?: string
   /** Phase offset, so ten marks on one row never fall into step. */
@@ -598,11 +605,35 @@ export function VentureCard({
                   are drawn by whichever font in the stack answers for them, at
                   whatever weight that font chose. Three boxes with one polygon
                   clipped out of each are the same mark on every machine. */}
-              <span className="tv-day-mark" aria-hidden="true">
-                <span className="tv-day-chev" />
-                <span className="tv-day-chev" />
-                <span className="tv-day-chev" />
-              </span>
+              {/* The mark is Material's `chevron-triple-up`, cropped to its
+                  ink. The icon's own `0 0 24 24` artboard carries 6 units of
+                  air either side and 2 above, which on a 10.2px mark is 2.5px
+                  of nothing pushing the figure along; `6 2 12 19.42` is the
+                  box the three chevrons actually occupy, which is what lets
+                  the width token mean the width of the mark.
+
+                  **Document order is the stack, top to bottom, and the
+                  cascade runs against it.** `nth-child` carries both the
+                  resting opacities and the animation beats, and the two read
+                  in opposite directions — child 1 is the leading chevron at
+                  full strength and fades in *last*, child 3 is the faintest
+                  and goes first. Reorder these three and the mark at rest is
+                  identical while the trail drains downward instead of
+                  climbing, which is the class of change nothing here reports.
+
+                  The three `d`s are the icon's own subpaths, split apart so
+                  each can hold an opacity of its own; concatenated they are
+                  the single path Material ships. */}
+              <svg
+                className={`tv-day-mark${rise ? ' tv-day-rising' : ''}`}
+                aria-hidden="true"
+                viewBox="6 2 12 19.42"
+                focusable="false"
+              >
+                <path className="tv-day-chev" d="M16.59 9.42L12 4.83L7.41 9.42L6 8l6-6l6 6z" />
+                <path className="tv-day-chev" d="M16.59 15.42L12 10.83l-4.59 4.59L6 14l6-6l6 6z" />
+                <path className="tv-day-chev" d="M16.59 21.42L12 16.83l-4.59 4.59L6 20l6-6l6 6z" />
+              </svg>
               {/* **The figure is its own element, and that is not cosmetic.**
                   As a bare text node it was an *anonymous* flex item, which
                   `text-overflow` does not apply to — measured with a crore-scale
