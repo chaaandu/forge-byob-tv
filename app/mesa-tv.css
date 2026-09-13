@@ -747,19 +747,20 @@
      See `--s-card-pad-y`; the mark is unchanged, because both are subtracted
      from the same remainder. */
   --h-card-today: 1.4583vw; /* 28px */
-  /* ── The day tag ──
+  /* ── The day band ──
 
-     26px of body and 12 hanging past the card's foot. The overhang is the point
-     and it is bounded by the row gap: 40px of gap less the 6px the next row's
-     halo reaches above its cell leaves 34, so 12 keeps 22px clear of the mark
-     below — 18.3px at the tightest viewport. On row 4 it hangs into the frame's
-     44px bottom margin and clears by 32. */
-  --h-day-tag: 1.3542vw; /* 26px */
-  --h-day-tag-out: 0.625vw; /* 12px */
+     It hung 12px past the card's foot for one revision so the six movers could
+     be told by silhouette at six metres. That worked, and it is gone: edge to
+     edge does the same job without leaving the card. A full-width band turns
+     the card's *foot* from purple to Orchid, which is more changed area than a
+     93px tab was and reads at the same distance — and it drops the ragged
+     bottom edge, six cards poking into the row gap, and the coupling to that
+     gap's size.
+
+     The band fills `--h-card-today` exactly and reaches both card edges, so it
+     needs no height or width of its own. What is left is the inline padding
+     that keeps a crore-scale figure off the corners. */
   --s-day-tag-x: 0.4688vw; /* 9px */
-  /* The free end's corners. Half the body's height would make it a capsule;
-     8px makes it a tag, which is the rank's corner language. */
-  --r-day-tag: 0.4167vw; /* 8px */
   /* How far the name's last line sits above the figure. Inside `--h-card-name`,
      not a grid gap — the card's parts each carry their own separation, which is
      the rule that keeps a line's spacing leaving with the line. */
@@ -2670,44 +2671,56 @@
      spent on exactly one thing now — the teams that traded today — rather than
      tinting a line nobody can read. */
   .tv-day-delta {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    /* Hangs past the card's foot. `--h-card-today`'s bottom is the card's
-       bottom, so this offset is measured from the card's own edge. */
-    bottom: calc(-1 * var(--h-day-tag-out));
-    height: calc(var(--h-day-tag) + var(--h-day-tag-out));
+    /* ── End to end, and the fold is at the bottom ──
 
-    display: inline-flex;
+       It was a tag hugging its figure, centred, hanging past the card's foot.
+       Edge to edge instead: the band spans the card's full width, sits inside
+       it, and its bottom corners take the card's own radius — so on the days a
+       team has traded, the card's foot *is* the band.
+
+       `left`/`right` are negative because this element lives inside the card's
+       10px horizontal padding and has to escape it to reach the edges. That is
+       the one place on this card where breaking out of the padding is right:
+       everything else in there is type, which the padding exists for.
+
+       **The crease is at the bottom now.** On the rank tag the fold is at the
+       head, because that ribbon bends over the card's *top* edge; this one
+       folds up from the *bottom* edge, so the crease is at the foot and the
+       shading runs the other way. Same 55% shade, same 8px depth, `to top`
+       instead of `to bottom` — a gradient's direction is the whole difference
+       between a thing folded down and a thing folded up.
+
+       The shadow casts upward for the same reason: the flap lies over the card,
+       so what it shades is the card above it. Downward it would fall on the
+       page, where a shadow measures 1.20:1 and does nothing. */
+    position: absolute;
+    left: calc(-1 * var(--s-card-inset));
+    right: calc(-1 * var(--s-card-inset));
+    top: 0;
+    bottom: 0;
+
+    display: flex;
     align-items: center;
     justify-content: center;
     gap: var(--s-day-delta-gap);
     padding-inline: var(--s-day-tag-x);
-    /* Square where it leaves the card, rounded at the free end — the rank tag's
-       corners, upside down, because this one hangs the other way. */
-    border-radius: 0 0 var(--r-day-tag) var(--r-day-tag);
+    border-radius: 0 0 var(--r-card) var(--r-card);
 
-    /* The fold, at the top, where it comes out of the card. Same construction
-       and the same 55% shade as the rank's; only the direction differs, because
-       a bend is always at the attached end. */
     background: linear-gradient(
-      to bottom,
+      to top,
       color-mix(in srgb, var(--accent) 55%, var(--surface-sunken)) 0,
       var(--accent) var(--h-card-ribbon-fold)
     );
-
-    /* The shadow the rank tag gave up, and this one earns it: the object
-       crosses the card's edge, so the half still on the card casts onto
-       Amethyst at 2.19:1. The finding is that a shadow reads on the card and
-       not on the page — half of this is on the card. */
-    box-shadow: 0 0.1563vw 0.3125vw -0.0521vw
+    box-shadow: 0 -0.1042vw 0.3125vw -0.0521vw
       color-mix(in srgb, var(--surface-sunken) 70%, transparent);
 
     font: var(--t-tv-card-today);
+    /* The page colour as ink on the accent: 8.39:1 on dark, 4.85:1 on light.
+       Checked on both surfaces rather than assumed — a token that is a surface
+       in one place and ink in another is the failure AGENTS.md names, and it
+       survives here only because the accent inverts with the surface too. */
     color: var(--surface);
     font-variant-numeric: tabular-nums;
-    flex: none;
-    max-width: 100%;
     white-space: nowrap;
     overflow: hidden;
   }
