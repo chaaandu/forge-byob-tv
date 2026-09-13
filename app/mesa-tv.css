@@ -685,10 +685,34 @@
      leading hands 5.6px back to `/weekly`'s four rows even as the type goes up
      1.3x, which is the whole of what the board pays for this change. */
   --h-mast: calc(var(--fs-2) * 0.7); /* 57px — Figtree's cap height at --fs-2 */
-  /* Air between the masthead's baseline and its rule, and between that rule and
-     row 1. Deliberately unequal — the rule belongs to the masthead, so it sits
-     nearer to it than to the board it introduces. */
-  --s-mast-rule: 0.8333vw; /* 16px */
+  /* ── The heading is centred in the header band, and this is how ──
+
+     Air under the masthead's caps, and it is **`--s-safe-y` stated as itself**
+     rather than a number that happens to match: the air above the caps is the
+     frame's top margin, this is the air below them, and equal is the whole
+     point. Anything that edits one and not the other un-centres the heading.
+
+     16px before, which read as the heading sitting on its own rule — 40px of
+     margin above the caps against 16 below, at a cap height that has gone from
+     28px to 57px in a day. The imbalance was always there and only became
+     visible when the type got large enough to notice it.
+
+     **Centred against the screen's top edge, not the safe area's.** That is
+     what a person looking at the wall sees, and it is what was asked for. The
+     caps themselves cannot move up to meet the rule instead: `--s-safe-y` is
+     40px / 3.7% of 1080 and a consumer panel overscans 2.5–5%, so type above it
+     is type the display may crop. If a panel does overscan, this heading reads
+     slightly high rather than losing its tops — the correct way round.
+
+     **`--s-rule-board` stays at 20 and the hierarchy it stated is now
+     inverted.** The old note said the rule "belongs to the masthead, so it sits
+     nearer to it than to the board it introduces"; at 40 above and 20 below, it
+     now sits nearer the board. Preserving that would mean pushing
+     `--s-rule-board` past 40 as well, and the whole of it comes out of
+     `--h-board` — 52px rather than 24, which is 13px off each of `/weekly`'s
+     four rows instead of 6. The board is what the wall is for. Recorded rather
+     than quietly reversed. */
+  --s-mast-rule: var(--s-safe-y); /* 40px — equal to the air above the caps */
   --s-rule-board: 1.0417vw; /* 20px */
   /* How long a card's details take to leave and to come back.
 
