@@ -446,7 +446,12 @@
      cell used: a visible edge needs clearance from its contents, where an
      invisible one only needed to not collide with the row gap. It costs each
      row ~7.7px of mark. */
-  --s-card-pad-y: 0.5208vw; /* 10px — the card's *bottom* only; see .tv-card */
+  /* **Zero, and the day tag is why.** The card's foot is what that tag hangs
+     from, so the last row has to reach the card's own bottom edge — a padding
+     under it would leave the tag folding out of thin air 10px above the card.
+     The 10px moves into `--h-card-today`, which keeps the mark to the pixel:
+     both terms come out of the same subtraction. */
+  --s-card-pad-y: 0px;
 
   /* How far the card's contents sit above where the padding alone would put
      them. 0.31vw is 6px at 1920 and 5px at 1600 — inside the 7.7px and 6.4px of
@@ -738,7 +743,23 @@
   /* The day figure's line, under the week's. 18px holds 15px of type with 1.5px
      of leading either side — it is a line of text, not an object, so it needs a
      line's height and not a capsule's. */
-  --h-card-today: 0.9375vw; /* 18px */
+  /* 28px — the 18 this held plus the 10 that was the card's bottom padding.
+     See `--s-card-pad-y`; the mark is unchanged, because both are subtracted
+     from the same remainder. */
+  --h-card-today: 1.4583vw; /* 28px */
+  /* ── The day tag ──
+
+     26px of body and 12 hanging past the card's foot. The overhang is the point
+     and it is bounded by the row gap: 40px of gap less the 6px the next row's
+     halo reaches above its cell leaves 34, so 12 keeps 22px clear of the mark
+     below — 18.3px at the tightest viewport. On row 4 it hangs into the frame's
+     44px bottom margin and clears by 32. */
+  --h-day-tag: 1.3542vw; /* 26px */
+  --h-day-tag-out: 0.625vw; /* 12px */
+  --s-day-tag-x: 0.4688vw; /* 9px */
+  /* The free end's corners. Half the body's height would make it a capsule;
+     8px makes it a tag, which is the rank's corner language. */
+  --r-day-tag: 0.4167vw; /* 8px */
   /* How far the name's last line sits above the figure. Inside `--h-card-name`,
      not a grid gap — the card's parts each carry their own separation, which is
      the rule that keeps a line's spacing leaving with the line. */
@@ -2326,21 +2347,12 @@
       var(--tag-face) var(--h-card-ribbon-fold)
     );
 
-    /* ── And a shadow, which is new information about this palette ──
-
-       A shadow was tried on this board once and photographed as **invisible**:
-       one works by being darker than its ground, and Deep Aubergine at
-       luminance 0.0163 has almost nothing below it. That finding is recorded
-       elsewhere in this file and it is still true — *of the page*.
-
-       It is not true of the card. Amethyst is 0.0715, four and a half times the
-       page, so a near-black shadow measures **2.19:1 on the card** against
-       1.20:1 on the page. A shadow cast by something sitting *on a card* reads;
-       one cast onto the page does not. Hence offset down and to the right,
-       where it lands on card, with a negative spread so the bloom does not
-       reach past the tag's left edge onto the page. */
-    box-shadow: 0.1042vw 0.1563vw 0.3125vw -0.0521vw
-      color-mix(in srgb, var(--surface-sunken) 70%, transparent);
+    /* **No shadow.** One was fitted here and measured at a genuine 2.19:1 on
+       the card — a shadow does read on Amethyst where it does not on the page,
+       and that finding is kept alive at `.tv-day-delta`, which uses it. On this
+       tag it was doing nothing the fold was not already doing: the bend at the
+       head is what gives the ribbon depth, and a cast shadow under a 31px
+       object is detail below the distance this board is read from. */
 
     /* ── Three corners, and the fourth is square on purpose ──
 
@@ -2378,7 +2390,16 @@
     padding-top: 0.1042vw;
 
     font: var(--t-tv-card-rank);
-    color: var(--ink);
+    /* **`--ink-on-solid`, not `--ink`, and this was a live bug.** The tag's face
+       is the card's fill lifted *toward the ink* — so on the light surface the
+       lift runs toward near-black and the face goes darker, while `--ink` is
+       itself near-black. Measured on `.surface-light`: **1.34:1**. Invisible.
+       Identical on dark (4.86 either way) and 12.69:1 on light, so the repair
+       costs nothing and restores the half of the machinery AGENTS.md requires
+       to keep resolving. The rule it broke is the one that file states
+       outright: a token that is a *surface* in one place and *ink* in another
+       cannot survive the flip. */
+    color: var(--ink-on-solid);
   }
 
   /* ── There is no quiet rank ──
@@ -2596,41 +2617,94 @@
      it affordable is that the head band drops from 24px to 12 in the same move,
      because the rank numeral never needed the capsule's height — so the true
      cost is 6px of mark, not 18. */
+  /* The slot the day tag hangs from. It reserves its height whether or not
+     anything is drawn in it, so nothing on the card moves as the day's first
+     sales land — and it is the card's last row with no padding under it, so its
+     bottom *is* the card's bottom edge.
+
+     **No `overflow: hidden`.** It had it, to clip an over-wide figure; the tag
+     deliberately hangs past this box, so clipping here would cut the overhang
+     off. Width is handled where it belongs instead — `max-width` on the tag and
+     an ellipsis on the figure inside it. */
   .tv-card-today {
+    position: relative;
     height: var(--h-card-today);
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 100%;
     min-width: 0;
-    overflow: hidden;
   }
 
-  /* ── The delta line, and why it has no ground ──
+  /* ── THE DAY FOLDS OUT OF THE CARD'S FOOT ──
 
-     The capsule's tinted ground existed to solve a contrast problem it created
-     itself. The obvious build is accent ink on an accent tint, and measured on
-     this board that fails — Orchid over its own 18% tint drops 6.89:1 to 4.73,
-     and Violet 300 on the quiet cards drops 4.60:1 to 3.48, under the 4.5 this
-     wall holds small type to, on nineteen of thirty-nine cards. The answer was
-     to put `--ink` on the tint instead, at 9.53:1, and let the ground carry the
-     colour.
+     This has been four things: a bare line under the figure, a filled capsule,
+     that capsule moved into the head band beside the rank, and a bare line
+     again. The last was right about hierarchy — a filled badge in a top corner
+     outshouted the figure the board is sorted by — and wrong about the one job
+     this element has. **It is the only thing on the wall that says who is
+     moving right now**, and at six metres a line of 15px type says nothing.
+     Six of thirty-nine cards carry it and a passer-by could not tell which six.
 
-     **With no ground the problem does not arise.** Accent ink straight on the
-     card is 6.89:1 solid and 4.60:1 quiet — both pass, and the accent is back
-     on the glyph where it belongs rather than in a shape behind it. That is
-     also what stops this competing with the week's figure: type does not
-     out-shout type of twice its size, where an object does.
+     A tag that hangs past the card's foot *can* be told at six metres, because
+     it is read in **silhouette** rather than in type: the card's outline
+     changes shape on exactly the cards where something happened. That is the
+     only channel that survives the distance this wall is actually looked at
+     from. Same construction as the rank's — a tag, a fold where it leaves the
+     card, a rounded free end — so the two read as one family: apparatus at the
+     head, event at the foot.
 
-     `tabular-nums` because it sits directly under another figure and a
-     proportional `1` would put the two out of vertical register. */
+     ── WHY THIS ONE IS ACCENT AND THE RANK IS NOT ──
+
+     Not decoration; it is the only combination that passes. Measured on the
+     rank tag's lifted face, accent ink is **2.57:1** — a tag in the family's
+     own material cannot carry the accent at all, and a white-inked one carries
+     no colour and stops being a signal. An accent *face* with the page colour
+     as ink is 8.39:1 on dark and 4.85:1 on light, and reads 4.58:1 against the
+     card.
+
+     Using `--surface` as ink is the pattern AGENTS.md warns about — a token
+     that is a surface in one place and ink in another died at 1.00:1 once — so
+     both surfaces were measured rather than assumed. It inverts correctly here
+     because the accent inverts with it: dark page on light Orchid, light page
+     on dark Vivid Violet.
+
+     It also settles where the board's one saturated colour goes. `--accent` is
+     spent on exactly one thing now — the teams that traded today — rather than
+     tinting a line nobody can read. */
   .tv-day-delta {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    /* Hangs past the card's foot. `--h-card-today`'s bottom is the card's
+       bottom, so this offset is measured from the card's own edge. */
+    bottom: calc(-1 * var(--h-day-tag-out));
+    height: calc(var(--h-day-tag) + var(--h-day-tag-out));
+
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: var(--s-day-delta-gap);
+    padding-inline: var(--s-day-tag-x);
+    /* Square where it leaves the card, rounded at the free end — the rank tag's
+       corners, upside down, because this one hangs the other way. */
+    border-radius: 0 0 var(--r-day-tag) var(--r-day-tag);
+
+    /* The fold, at the top, where it comes out of the card. Same construction
+       and the same 55% shade as the rank's; only the direction differs, because
+       a bend is always at the attached end. */
+    background: linear-gradient(
+      to bottom,
+      color-mix(in srgb, var(--accent) 55%, var(--surface-sunken)) 0,
+      var(--accent) var(--h-card-ribbon-fold)
+    );
+
+    /* The shadow the rank tag gave up, and this one earns it: the object
+       crosses the card's edge, so the half still on the card casts onto
+       Amethyst at 2.19:1. The finding is that a shadow reads on the card and
+       not on the page — half of this is on the card. */
+    box-shadow: 0 0.1563vw 0.3125vw -0.0521vw
+      color-mix(in srgb, var(--surface-sunken) 70%, transparent);
+
     font: var(--t-tv-card-today);
-    color: var(--card-hot-ink);
+    color: var(--surface);
     font-variant-numeric: tabular-nums;
     flex: none;
     max-width: 100%;
