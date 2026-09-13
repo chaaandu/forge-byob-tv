@@ -73,7 +73,17 @@ const TINTS = [
   'var(--mark-6)',
 ] as const
 
-function tintFor(teamId: string): string {
+/**
+ * A venture's tint.
+ *
+ * **Exported, because the podium's list rows are keyed by it.** A row that
+ * carries a whisper of its venture's own colour is a row whose 44px mark is
+ * doing something rather than sitting there as a coloured dot — and the tint
+ * has to come from *here*, because the assignment is a hash of the team id and
+ * a second implementation of that hash is a row whose wash disagrees with the
+ * mark sitting on it.
+ */
+export function tintFor(teamId: string): string {
   return TINTS[hashTeamId(teamId) % TINTS.length]
 }
 
@@ -142,12 +152,42 @@ export function monogramFor(team: Team): string {
 export function VentureLogo({ team, size }: { team: Team; size: number | string }) {
   const dim = typeof size === 'number' ? `${size}px` : size
 
+  /**
+   * ── The mark is its own container, and that is a safety property ──
+   *
+   * Everything inside a mark used to be derived from `size` with `calc()`: the
+   * monogram at `size * 0.36`, its optical offset at `size * 0.035`, the
+   * artwork's inset at `size * 0.93`. That is correct arithmetic and it forced
+   * every caller to pass a **length**, because a percentage in a `font-size`
+   * resolves against the parent's font size rather than against the disc.
+   *
+   * `/podium` therefore passed `100cqw`, leaning on a `container-type` declared
+   * in the stylesheet one level up — and **when that declaration did not
+   * arrive, `cqw` fell back to the viewport and one venture's mark rendered
+   * 1920px wide, over the entire wall.** Twice, from a stale dev build. The
+   * board is unattended for weeks and this project's stated bar is that a bug
+   * which renders convincingly is the dangerous kind; a bug that renders
+   * catastrophically off a *missing* rule is worse, because nothing about the
+   * component said it needed one.
+   *
+   * So the container is declared **here, inline, on the element the units
+   * measure** — it cannot be absent, because it ships with the thing that
+   * reads it. `100%` is now a safe `size`, the disc can never exceed its
+   * holder, and the only thing a lost stylesheet can cost is the letters being
+   * the wrong size inside a correctly-sized circle.
+   */
+  const box: React.CSSProperties = {
+    width: dim,
+    height: dim,
+    containerType: 'inline-size',
+  }
+
   if (LOGOS.includes(team.teamId)) {
     return (
       <div
         style={{
           width: dim,
-          height: dim,
+          ...box,
           borderRadius: '50%',
           // The white ground, here rather than on the holder. Artwork is the
           // only thing that needs it: several of these files are drawn dark on
@@ -168,9 +208,11 @@ export function VentureLogo({ team, size }: { team: Team; size: number | string 
           width={200}
           height={200}
           style={{
-            // The inset that used to live at every call site.
-            width: `calc(${dim} * 0.93)`,
-            height: `calc(${dim} * 0.93)`,
+            // The inset that used to live at every call site. Container units,
+            // so it is a share of the disc rather than of whatever `size` was
+            // written as — see the note at `box`.
+            width: '93cqw',
+            height: '93cqw',
             // A disc, because the source artwork is one. `prepare-logos.py`
             // masks every logo to a circle with transparent corners, so a
             // rounded-square radius here would draw a square ring around a
@@ -189,8 +231,7 @@ export function VentureLogo({ team, size }: { team: Team; size: number | string 
       aria-label={team.ventureName || team.teamId}
       role="img"
       style={{
-        width: dim,
-        height: dim,
+        ...box,
         // A disc, so a venture that has drawn a mark and one that has not sit in
         // the same shape. A rounded square beside a circle reads as a missing
         // logo; the same disc in a brand tint reads as a venture that has not
@@ -206,20 +247,36 @@ export function VentureLogo({ team, size }: { team: Team; size: number | string 
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        // Optically centred: capitals sit high in their em box, so centring the
-        // box leaves the letters looking a touch above centre in a circle.
-        lineHeight: 1,
-        paddingTop: `calc(${dim} * 0.035)`,
-        fontFamily: 'var(--font-sans)',
-        fontWeight: 800,
-        // 0.36, where a single initial took 0.52. Two letters in a circle are
-        // bound by the *chord* at the letters' own height rather than by the
-        // diameter, and at 0.52 a two-letter monogram overran its disc.
-        fontSize: `calc(${dim} * 0.36)`,
-        letterSpacing: '0.01em',
       }}
     >
-      {monogramFor(team)}
+      {/* ── The letters are a child, and that is not cosmetic ──
+       *
+       * **An element cannot query its own container.** `cqw` resolves against
+       * the nearest *ancestor* that declares one, so a `font-size: 36cqw` on
+       * the same div that carries `container-type` looks straight past it —
+       * and with no container above, it falls back to the viewport. Measured:
+       * 36vw is a 691px monogram, which rendered as letterforms lying across
+       * the whole wall on both slides.
+       *
+       * One `<span>` fixes it, because a child of the container is exactly
+       * what the unit is for. Everything sized off the disc lives here. */}
+      <span
+        style={{
+          // Optically centred: capitals sit high in their em box, so centring
+          // the box leaves the letters looking a touch above centre in a circle.
+          lineHeight: 1,
+          paddingTop: '3.5cqw',
+          fontFamily: 'var(--font-sans)',
+          fontWeight: 800,
+          // 0.36, where a single initial took 0.52. Two letters in a circle are
+          // bound by the *chord* at the letters' own height rather than by the
+          // diameter, and at 0.52 a two-letter monogram overran its disc.
+          fontSize: '36cqw',
+          letterSpacing: '0.01em',
+        }}
+      >
+        {monogramFor(team)}
+      </span>
     </div>
   )
 }
