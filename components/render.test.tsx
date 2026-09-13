@@ -923,6 +923,60 @@ it('declares every custom property that anything reads', () => {
   expect(missing).toEqual([])
 })
 
+/**
+ * Two guards on the faces, both for failures that render convincingly.
+ *
+ * The type tokens are `font` shorthands, so the face and the weight travel
+ * together in one string. That is what makes both of these greppable, and it is
+ * why they are pinned here rather than left to a code review that has to hold
+ * four families in its head.
+ */
+describe('the numeral and name faces', () => {
+  const css = readFileSync('app/mesa-tv.css', 'utf8')
+  const tokens = (family: string) =>
+    [...css.matchAll(/^[ \t]*(--t-[a-z0-9-]+):[ \t]*([^;]+);/gm)]
+      .map(([, name, value]) => ({ name, value: value.replace(/\s+/g, ' ').trim() }))
+      .filter((t) => t.value.includes(`var(${family})`))
+
+  /**
+   * **Clash Display's axis stops at 700.** Ask a variable font for a weight
+   * outside its range and nothing fails — the browser synthesises one by
+   * smearing the outlines, which closes the counters and turns `8` into a blob
+   * at six metres. Bebas Neue carried the identical trap at 400 and the
+   * identical warning, in a comment, which is where it stayed until a token
+   * moved.
+   *
+   * Every numeral on both slides reads this face, so the blast radius is every
+   * figure on the wall.
+   */
+  it('never asks the numeral face for a weight it does not have', () => {
+    const numerals = tokens('--font-numeral')
+    expect(numerals.length).toBeGreaterThan(0)
+    for (const { name, value } of numerals) {
+      const weight = Number(value.match(/^(\d{3})\b/)?.[1])
+      expect(weight, `${name}: ${value}`).toBeGreaterThanOrEqual(200)
+      expect(weight, `${name}: ${value}`).toBeLessThanOrEqual(700)
+    }
+  })
+
+  /**
+   * **Satoshi has no U+20B9.** That is safe only because the tokens it owns
+   * draw venture names, and a venture name has no rupee in it — a claim about
+   * the data rather than about the font. `--font-name` lists Excon second so a
+   * venture *named* `₹99 Store` still draws its rupee in a face on this wall,
+   * and this is the other half: a figure token drifting onto the name face
+   * would put every `₹` on the board into the fallback, and look entirely
+   * deliberate doing it.
+   */
+  it('lets only venture names read the name face', () => {
+    expect(tokens('--font-name').map((t) => t.name).sort()).toEqual([
+      '--t-pod-name-row',
+      '--t-stage-name',
+      '--t-tv-card-name',
+    ])
+  })
+})
+
 describe('WeeklyGrid', () => {
   const board = () =>
     competingTeams(teams().map((row, index) => ({ ...row, challengeRevenue: 1_000 * (42 - index) })))

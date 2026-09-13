@@ -434,9 +434,18 @@ not by reading source.
   fail — the browser silently falls to the next entry in the stack for that one
   glyph, so the digits are the chosen face and the rupee sign is Helvetica, at a
   different weight and width, on every number on the wall. Checked against the
-  cmap before a face is bundled, never assumed: **Satoshi, Switzer, Chillax,
-  Plein and Panchang all lack it**, and the first of those is the most-downloaded
-  sans on Fontshare. Excon, Zodiak and Bebas Neue carry it.
+  cmap before a face is bundled, never assumed: **Satoshi, Switzer, Red Hat
+  Display, Be Vietnam Pro, Chillax, Plein and Panchang all lack it**, and the
+  first of those is the most-downloaded sans on Fontshare. Excon, Zodiak and
+  Clash Display carry it.
+
+  **Satoshi is the documented exception and it shows how the rule is scoped.**
+  It lacks U+20B9 and it is on the wall, because the three tokens it owns are
+  venture names and a venture name has no rupee in it. That is a claim about the
+  data, not the font, so it is guarded twice: `--font-name` lists Excon second
+  so a venture actually *named* `₹99 Store` draws its rupee in a face already on
+  the wall, and `render.test.tsx` fails if any token but the three name ones
+  reads that face. **A face without the rupee may only ever draw names.**
 
   The same check covers venture names, which come from a spreadsheet this
   project does not control. `YŌKI` is on the board today and needs U+014C, which

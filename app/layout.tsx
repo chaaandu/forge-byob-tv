@@ -102,40 +102,79 @@ const wallSerif = localFont({
 })
 
 /**
- * Bebas Neue, for the rank numerals and nothing else.
+ * Satoshi, for venture names and nothing else.
  *
- * **It is the third family now, and it is the one with the weakest claim to be
- * here.** This docblock used to open by warning that the wall carried four
- * faces and that a fifth should be argued for rather than assumed. Two of those
- * four drew nothing and have gone; the remaining question is this one.
+ * The names were in Excon and read **too sharp** — Excon's terminals are flat,
+ * its apertures tight and its x-height the highest of anything measured here
+ * (0.557em), which is what makes it good at a figure and hard at a word. A
+ * venture's name is the one thing on the card that belongs to a person.
  *
- * Its stated reason for being bundled was `/podium`'s venture names, and that
- * consumer no longer exists — `--t-stage-name` reads `--font-sans`. What it
- * draws today is `--t-tv-card-rank`: two digits in a corner tag on `/weekly`,
- * and the same figure in `/podium`'s list. One static weight, no real
- * lowercase, so it cannot grow into any other job, and it is the only thing on
- * either slide speaking in a voice nothing else uses — which is the exact
- * criticism this project made of the Impact masthead before replacing it.
+ * **It does not carry the rupee, and that is genuinely fine here.** U+20B9 is
+ * the gate that this project applies to any face that draws a figure — it is
+ * why Switzer, Chillax, Plein and Panchang were all rejected — and Satoshi
+ * fails it. It is safe anyway because the three tokens below it own are venture
+ * names, and a venture name has no rupee in it.
  *
- * It stays for now because the numerals read and nothing is broken. If it goes,
- * it goes to whichever face the figures are already in, and the wall drops to
- * two.
+ * That is a claim about the data rather than about the font, so it is guarded
+ * rather than trusted:
  *
- * Bundled, not linked, for the same reason as the others: a
- * `fonts.googleapis.com` request is a runtime network dependency on a wall that
- * runs unattended for weeks.
+ * - `--font-name` lists **Excon second**, so if a venture is ever *named* with
+ *   a `₹` — "₹99 Store" is not a far-fetched student venture — the glyph is
+ *   drawn by the wall's own sans instead of by Helvetica.
+ * - `render.test.tsx` pins that only the three name tokens read `--font-name`.
+ *   A figure token drifting onto this face is the failure mode, and it is the
+ *   kind that renders convincingly and reports nothing.
  *
- * **One weight, and no real lowercase** — Bebas Neue maps lowercase to capitals
- * by design, which suits a name that was already being uppercased in CSS. It
- * also means every token that sets it must ask for 400: at 800 the browser
- * synthesises a fake bold by smearing the outlines, which on a condensed face
- * closes the counters and turns a name into a block at six metres.
+ * Fit was measured before it was chosen, across all forty-one names in the
+ * feed, in the real 148px card at 15px/700/0.06em: 33 on one line, 8 on two,
+ * **none needing a third**. Four faces that were on the shortlist do need one —
+ * Synonym, Red Hat Display and Work Sans each break `IN BETWEEN SIPS BY
+ * KAAPPITALISM`, and Be Vietnam Pro breaks `ATC (ALL THINGS CAMPHOR)` too.
  */
-const condensed = localFont({
-  src: './fonts/BebasNeue-Regular.woff2',
-  weight: '400',
+const wallName = localFont({
+  src: './fonts/Satoshi-Variable.woff2',
+  weight: '300 900',
   display: 'block',
-  variable: '--font-condensed',
+  variable: '--font-wall-name',
+})
+
+/**
+ * Clash Display, for every numeral on the wall.
+ *
+ * **This is the split the board was missing.** Until now the venture and the
+ * money were the same face one weight apart, on a leaderboard whose entire job
+ * is *who* and *how much*. Now the two are different species of type: names in
+ * a soft geometric sans, figures in a display grotesk with actual character.
+ *
+ * It takes `--t-tv-card-rank` as well, which **retires Bebas Neue** — the
+ * fourth face, whose stated reason for being bundled (`/podium`'s venture
+ * names) had not existed for some time and which was drawing two digits in a
+ * corner tag. One face now owns every number on both slides: the `₹` figures,
+ * the ranks, the podium's 1/2/3, the day count and the Flea count.
+ *
+ * **It stops at 700, and that is load-bearing.** Bebas had the identical trap
+ * and the identical note: ask a face for a weight it does not have and the
+ * browser synthesises one by smearing the outlines, which closes the counters
+ * and turns `8` into a blob at six metres. Every figure token that was `800`
+ * is `700` here for that reason, and `render.test.tsx` fails if any token
+ * reading `--font-numeral` asks for more than 700.
+ *
+ * Fit was the open question and it went the other way from the guess. Clash is
+ * a wide face, but at 700 against the Excon 800 it replaces it is **narrower**
+ * on the widest figure this wall can print, `₹9,99,99,999`:
+ *
+ *   card figure    129.1px → 111.7px   (box 168px)
+ *   podium figure  245.1px → 209.8px   (block face 259px)
+ *   list figure    212.8px → 189.2px   (column 253px)
+ *
+ * Its one genuine cost is at the rank tag, where the condensed face it replaces
+ * was chosen precisely for being condensed — see `--t-tv-card-rank`.
+ */
+const wallNumeral = localFont({
+  src: './fonts/ClashDisplay-Variable.woff2',
+  weight: '200 700',
+  display: 'block',
+  variable: '--font-wall-numeral',
 })
 
 export const metadata: Metadata = {
@@ -160,7 +199,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={[
         wallBody.variable,
         wallSerif.variable,
-        condensed.variable,
+        wallName.variable,
+        wallNumeral.variable,
       ].join(' ')}
     >
       <body>
