@@ -454,8 +454,42 @@
 
      14px is 8.3%, which is where a corner starts being a decision. Still well
      under the ~20% at which a rectangle starts becoming a capsule — a shape
-     that knows what it is. */
-  --r-card: 0.7292vw; /* 14px */
+     that knows what it is.
+
+     ── 26px, and it is the same corner ──
+
+     The corner is a **squircle** now — `corner-shape: squircle`, which computes
+     to `superellipse(2)` and draws |x|⁴ + |y|⁴ = r⁴ where the circle draws the
+     squared exponent. Apple's continuous corner. **The number had to move with
+     the shape, and that is the whole of this change.**
+
+     A superellipse hugs the box corner harder than a circular arc of the same
+     radius. At the 45° point the curve stands `√2·r·(1 − 2^(−1/k))` off the
+     corner — 0.293·√2·r at k=2, **0.159·√2·r at k=4**, so a squircle is 0.54 as
+     deep as the circle it replaces. `corner-shape: squircle` left at 14px is
+     therefore not a smoother 14px corner, it is a 7.6px one: rendered side by
+     side at 4x the card goes visibly *square*, which is the opposite of what
+     was asked for. That is the trap here, and it is the usual kind — it
+     renders, it passes everything, and it makes the corner worse.
+
+     26px is where the squircle's depth returns to the circle's at 14: 5.85px
+     against 5.80. **The card is exactly as rounded as it has always been**;
+     what changed is how the curvature gets there, which is all a continuous
+     corner ever is. 15.5% of the card's width reads alarming against the ~20%
+     capsule line above and is not — that line was drawn for circular radii, and
+     this corner is by construction no deeper than the 8.3% one it replaces.
+
+     **The two must move together.** 26px on its own is a genuinely rounder
+     card, and that is what a browser with no `corner-shape` will draw. Chrome
+     has had the property since 139 and the wall runs 152, so that is the
+     graceful end of a fallback rather than a second design — but anyone
+     changing one of these two lines is changing the shape, not the smoothing.
+
+     Honest about what it buys: 2.6px of corner fill, which at 1920 across a
+     55" panel at six metres subtends about **1 arcmin** — the acuity limit this
+     file invokes to delete hairlines. This reads on the laptop and in a
+     screenshot. At the wall it is a corner either way. */
+  --r-card: 1.3542vw; /* 26px */
 
   /* The card's own padding. **There is no grid gap between the card's parts**:
      each reserved line below includes its own separation, so a line that
@@ -1405,7 +1439,20 @@
   /* Inside a band, and its corner. The corner is the blocks' language one step
      down — they are 26 units on a 460-unit face, this is 14 on a 740px row. */
   --s-pod-row-pad: 1.1458vw; /* 22px */
-  --r-pod-row: 0.7292vw; /* 14px */
+  /* **26px of squircle, which is 14px of circle.** The arithmetic is at
+     `--r-card`; the short form is that a superellipse corner is 0.54 as deep as
+     a circular one at the same radius, so the value had to grow by that factor
+     for the band's corner to stay where it was. The sentence above still holds
+     — one step down from the blocks' 26 units — because it was always a claim
+     about the corner rather than about the number.
+
+     **The blocks themselves stay circular, and cannot follow.** Their corner is
+     a 26-unit rounded-box SDF in `scripts/render-podium.mjs`, exact so the
+     sphere trace converges in a handful of steps; a superellipse has no
+     closed-form distance and would cost exactly that. What keeps the two halves
+     of this slide agreeing is that the *depth* did not move. Only the curvature
+     profile of a 5.8px corner differs, on a slide read at six metres. */
+  --r-pod-row: 1.3542vw; /* 26px */
   /* The rank column is the tag that stands in it — see `.tv-pod-row-rank`,
      which is `/weekly`'s. Stated as that token rather than as 31px, so the
      two boards' ranks cannot come to differ by a pixel nobody chose. */
@@ -2153,6 +2200,11 @@
     --card-quiet-ink: color-mix(in srgb, var(--ink-on-solid-2) 85%, var(--surface-solid));
 
     background: var(--surface-solid);
+    /* A continuous corner, and `--r-card` is the number that makes it one —
+       read that token before touching either line. Every other corner that has
+       to agree with this card's silhouette carries the same pair:
+       `.tv-card-rank` at the head, `.tv-day-delta` at the foot. */
+    corner-shape: squircle;
     border-radius: var(--r-card);
     /* **No top padding.** The card's first grid row is the part of the mark
        that overhangs it, so the mark's own outset is the padding — see
@@ -2392,7 +2444,22 @@
        fixed to the card and started reading as floating beside it. Square, the
        left side runs straight down the card's edge and the rounding happens
        only where the tag ends — which is what a thing hanging off an edge
-       actually looks like. */
+       actually looks like.
+
+       ── And only the head is a squircle ──
+
+       Same order, top-left first. The head *is* the card's corner, so it takes
+       the card's shape as well as its radius or the two stop being one line.
+       The two zero corners are shapeless by definition.
+
+       **The foot stays round, and it is not an inconsistency.** It is not a
+       corner, it is a tail: its radius is already half the tag's width, which
+       is the largest value a corner can hold before the browser scales it back
+       — so there is no bigger number available to restore a squircle's lost
+       depth with, the way `--r-card` restores the card's. A superellipse there
+       is simply a blunter tail. Rendered both ways at 4x, and the round one is
+       the one that still reads as hanging. */
+    corner-shape: squircle round round round;
     border-radius: var(--r-card) 0 calc(var(--w-card-ribbon) / 2) 0;
 
     /* ── The number is centred in the tag ──
@@ -2730,6 +2797,10 @@
     justify-content: center;
     gap: var(--s-day-delta-gap);
     padding-inline: var(--s-day-tag-x);
+    /* On the days a team has traded this band *is* the card's foot, so it takes
+       the card's shape as well as its radius. Leave it round and the two bottom
+       corners disagree by 2.6px each on nineteen cards. */
+    corner-shape: squircle;
     border-radius: 0 0 var(--r-card) var(--r-card);
 
     background: linear-gradient(
@@ -3452,6 +3523,9 @@
     height: 100%;
     position: relative;
     padding: 0 var(--s-pod-row-pad);
+    /* A continuous corner, matching `/weekly`'s cards. `--r-pod-row` is the
+       number that keeps it the same depth — the two lines move together. */
+    corner-shape: squircle;
     border-radius: var(--r-pod-row);
     /* Standing on the page now rather than inside a pane, so the corner is one
        step nearer the blocks' own. */

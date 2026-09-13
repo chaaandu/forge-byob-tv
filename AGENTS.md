@@ -372,6 +372,14 @@ not by reading source.
   `italic`, `antialiased`.
 - **A non-existent Tailwind step emits no rule and no warning.** `opacity-16` does
   nothing. Use a real step or an explicit arbitrary value, then confirm the computed one.
+- **`corner-shape: squircle` at an unchanged radius makes a corner *squarer*.** A
+  superellipse stands `0.159·√2·r` off the box corner where a circular arc stands
+  `0.293·√2·r`, so it is 0.54 as deep at the same number — Apple's continuous corner
+  needs the radius multiplied by ~1.85 to land where the old one was. Both corners on
+  this wall carry the pair: `corner-shape` beside `--r-card` / `--r-pod-row`, both 26px
+  standing in for the 14px circles they replaced, argued at `--r-card`. Move one without
+  the other and the shape changes rather than the smoothing. Chrome has had the property
+  since 139; the graceful fallback is a genuinely rounder corner, not a missing one.
 - **Motion `layout` transforms are ignored by `<tr>`.** Reordering rows must use grid
   rows with ARIA table roles. Measured in the dashboard: 30 animation frames with the
   transform present and the row at exactly one position throughout.
