@@ -208,18 +208,16 @@
      38px into the gaps either side of first place with nothing reporting it.
      `scripts/measure-figures.mjs` exists because of that day and is still the
      check; what it measures now is `--t-stage-figure` against a block. */
-  /* **3.25vw / 62px**, which is 2.0833vw / 40px the morning of 13 September
-     2026, then 2.5vw / 48px when the lockup came off, then 1.3x that by
+  /* **4.225vw / 81px**, which is 2.0833vw / 40px the morning of 13 September
+     2026, then 2.5vw / 48px when the lockup came off, then 1.3x twice by
      request. This step is the masthead's alone — `--t-tv-heading` is its only
      reader, which is what makes the size a one-line change. Argued there, along
      with the face and the tracking it moved with.
 
-     **`--h-mast` is the second line and it is not optional.** The mast is the
-     title's line box, `--h-board` subtracts the mast, and `/weekly`'s four rows
-     of cards are what `--h-board` divides up. Raise this without raising that
-     and a 62px line sits in a 48px box, centred, overhanging the hairline under
-     it by 7px at either end. */
-  --fs-2: clamp(36px, 3.25vw, 83px);
+     **`--h-mast` is the second line and it is derived from this one now.** It
+     was stated independently and that was a standing invitation to raise one
+     without the other; it is `--fs-2` times Figtree's cap height instead. */
+  --fs-2: clamp(47px, 4.225vw, 108px);
   --fs-3: clamp(17px, 1.4583vw, 39px);
   --fs-4: clamp(14px, 1.1458vw, 31px);
   --fs-5: clamp(12px, 0.9375vw, 25px);
@@ -661,18 +659,32 @@
   --s-safe-y: 2.0833vw; /* 40px */
   --s-safe-x: var(--s-12); /* 48px — unchanged, so the columns do not move */
 
-  /* The masthead's own height. It was "the lockup's cap plus the title's,
-     whichever is taller"; there is no lockup, so it is the title's line box and
-     nothing else — `--fs-2` at a line-height of 1. Stated rather than derived
-     so the hairline under it cannot move when a heading changes length, and so
-     the two are visibly one number when the heading's size moves.
+  /* ── The masthead's own height, and it is the title's *ink* now ──
 
-     **`--h-board` is the other half of this and subtracts it.** 44 → 48 → 62
-     across two changes on 13 September 2026 takes 18px off `/weekly`'s four
-     rows of cards — four or five pixels a row, measured rather than assumed.
-     Anything that raises the heading again pays the same way, out of the board,
-     and the board is the thing the wall is for. */
-  --h-mast: 3.25vw; /* 62px — `--fs-2` at line-height 1 */
+     It was "the lockup's cap plus the title's, whichever is taller", then the
+     title's **line box** once the lockup came off. A line box is the wrong
+     measurement for this heading and the error was visible: at `--fs-2` 62px,
+     40px of safe area above the mast rendered as **49.3px above the caps**,
+     and the 16px between the mast and its hairline rendered as **25.4px**. The heading is all capitals with no descenders, so the half-
+     leading at each end of the line box is dead space — and it is a share of
+     the font size, so every size bump made the header top-heavy by more.
+
+     `.tv-mast-title` carries `text-box: trim-both cap alphabetic`, which makes
+     its box the cap band exactly. 0.7 is Figtree's cap height, measured off the
+     rendered element rather than read from the file: 43.7px at 62.4px. So the
+     40px above the header and the 16px below it are now the numbers that
+     actually appear on the wall.
+
+     **Derived rather than stated**, which reverses the old note. That note said
+     stating it kept the hairline from moving when a heading changed *length* —
+     still true, and a `calc` on the size does not threaten it. What it did not
+     protect against was the size changing, which happened three times in one
+     day and needed two edits every time.
+
+     **`--h-board` is the other half of this and subtracts it.** Trimming the
+     leading hands 5.6px back to `/weekly`'s four rows even as the type goes up
+     1.3x, which is the whole of what the board pays for this change. */
+  --h-mast: calc(var(--fs-2) * 0.7); /* 57px — Figtree's cap height at --fs-2 */
   /* Air between the masthead's baseline and its rule, and between that rule and
      row 1. Deliberately unequal — the rule belongs to the masthead, so it sits
      nearer to it than to the board it introduces. */
@@ -1352,7 +1364,7 @@
      line because title case puts an x-height beside the wordmark rather than
      an unbroken run of caps. A fifth face should re-measure rather than trust
      this paragraph. */
-  /* ── 13 September 2026: Figtree 900, capitals, centred, 62px ──
+  /* ── 13 September 2026: Figtree 900, capitals, centred, 81px ──
 
      Everything above this line is the record of four faces and it is kept
      because the traps in it are live. What changed: the lockup was removed from
@@ -1389,20 +1401,22 @@
      **The two are one decision.** Put title case back and this goes to 0 with
      it, or the masthead is a tracked run of lowercase at a capital's spacing.
 
-     `--fs-2` goes 2.0833vw → 2.5vw → 3.25vw, 40px → 48px → 62px, the last step
-     asked for as "1.3x". The note above says raising it touches nothing else
+     `--fs-2` goes 2.0833vw → 2.5vw → 3.25vw → 4.225vw, 40px → 48px → 62px →
+     81px, the last two steps asked for as "1.3x". The note above says raising it touches nothing else
      because it has exactly one reader, and that this token is the reader —
      still true — and that if it goes up the Mesa lockup goes with it. The
      lockup went instead.
 
-     **What bounds it is the apparatus, not the frame.** The masthead is three
-     columns with matched `1fr`s, so the title is centred only while each `1fr`
-     still clears the slide's apparatus: `/podium`'s Flea countdown measures
-     254px of content and `/weekly`'s day chip less. At 62px the wider heading,
-     `WEEKLY LEADERBOARD`, leaves 500px a side at 1920 — twice what the widest
-     apparatus needs. The next step up should re-measure that number rather than
-     trust this sentence, because the failure is not an overflow, it is the
-     heading quietly sliding off centre. */
+     **What bounds it is the apparatus, not the frame**, and the number is
+     getting close. The masthead is three columns with matched `1fr`s, so the
+     title is centred only while each `1fr` still clears the slide's apparatus:
+     `/podium`'s Flea countdown measures 254px of content and `/weekly`'s day
+     chip less. At 62px the wider heading left 500px a side; at 81px it leaves
+     **382px**, so one more 1.3x leaves about 220px and the countdown starts
+     pushing the title off centre. The failure is not an overflow — it is the
+     heading quietly sliding left on one slide of two. Re-measure rather than
+     trust this sentence; `/tmp` is not where that check lives, the element's
+     own rect is. */
   --t-tv-heading: 900 var(--fs-2) / 1 var(--font-sans);
   --track-tv-heading: 0.05em;
   /* `--h-tv-logo` stood here: the Mesa lockup at 1.72vw / 33px, tuned so its
@@ -3523,6 +3537,14 @@
     letter-spacing: var(--track-tv-heading);
     text-transform: uppercase;
     text-align: center;
+    /* **The box is the cap band, not the line box.** These are capitals with no
+       descenders, so a line box pads them with half-leading at both ends — 9.3px
+       each at 62px — which is invisible, is a share of the font size, and was
+       silently spending the frame's top margin. Measured before this line: 40px
+       of safe area read as 49.3px above the caps and 16px to the hairline read
+       as 25.4px. `--h-mast` is the same decision from the other side. Chrome has
+       had `text-box` since 133 and `.tv-pod-numeral` already relies on it. */
+    text-box: trim-both cap alphabetic;
     color: var(--ink);
     white-space: nowrap;
   }
