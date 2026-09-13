@@ -19,6 +19,11 @@ import { computeCountdownState, mastheadCountdown } from '@/lib/countdown'
  * exactly like `/weekly`'s day chip. The spine existed partly to give this
  * somewhere to be large, and the spine is gone.
  *
+ * "Exactly like `/weekly`'s day chip" is now enforced rather than described:
+ * `--t-pod-count` is deleted and both chips read `--t-tv-mast-figure`. It was
+ * only a description for one commit, during which the day numeral went to 28px
+ * and this stayed at 18px.
+ *
  * Stated plainly because it is the one thing the editorial pass made *quieter*
  * that arguably wanted to stay loud: the Flea is the programme's horizon, and on
  * a wall in a corridor a six-weeks-to-go figure is the sort of thing that gets
@@ -80,9 +85,17 @@ export function FleaCountdown({ at }: { at: Date | null }) {
   return (
     <p style={{ display: 'flex', alignItems: 'baseline', gap: 'var(--s-2)', margin: 0 }}>
       <span style={label}>Mesa Flea</span>
+      {/* ── The same token `ChallengeDay` reads, deliberately ──
+
+          `--t-tv-mast-figure`, not a countdown-specific size. These two chips
+          are the same slot on two slides that rotate on one screen every thirty
+          seconds, and they were `--fs-5` each in two separate declarations until
+          the day numeral was asked up to `--fs-3` and this one stayed behind at
+          18px. Sharing the token is what makes the match structural instead of
+          a coincidence maintained by hand. */}
       <span
         className="tv-figure"
-        style={{ ...label, font: 'var(--t-pod-count)', color: 'var(--accent)' }}
+        style={{ ...label, font: 'var(--t-tv-mast-figure)', color: 'var(--accent)' }}
       >
         {text.figure}
       </span>

@@ -832,13 +832,38 @@
   --s-day-tag-x: 0.4688vw; /* 9px */
   /* ── The rising stack ──
 
-     Three chevrons, 9 x 5 with 1.5px between them: 18px of stack in a 28px
-     band, which leaves 5px of air top and bottom. Wider than tall by nearly two
-     to one, because a chevron that is as tall as it is wide reads as an
-     arrowhead and the point here is the shoulder. */
-  --w-day-chev: 0.4688vw; /* 9px */
-  --h-day-chev: 0.2604vw; /* 5px */
-  --s-day-chev-gap: 0.0781vw; /* 1.5px */
+     One width, and the rest is the artwork's own proportion. The mark is an
+     SVG on a `6 2 12 19.42` box — the tight ink box of Material's
+     `chevron-triple-up` — so stating the width states the height: 10.2 x 16.5
+     in a 28px band, 5.7px of air top and bottom.
+
+     **10.2px is not a taste value; it is the old stroke, solved for.** The
+     previous mark was three clipped boxes at 9 x 5, whose chevron stroke
+     measured 2.4px vertically. This artwork carries 2.83 units of stroke on a
+     24-unit box, so holding the stroke at 2.4px fixes the scale at 0.848 and
+     the width at 10.2. Change this number and the stroke changes with it —
+     the thing that has to survive is the weight at six metres, not the
+     footprint. It costs the figure beside it 1.2px of ellipsis budget against
+     the old mark, which is inside the 9px of inline padding either side.
+
+     The three chevrons **overlap** on this box rather than sitting on a gap:
+     the second's outer apex is 1.42 units above the first's trailing edge. So
+     there is no gap token any more, and there is nothing for one to control —
+     the nesting is drawn into the path. */
+  --w-day-mark: 0.5313vw; /* 10.2px */
+  /* ── How the stack arrives ──
+
+     Bottom chevron first, then the middle, then the leading one: 90ms apart,
+     380ms each, so the whole cascade is over in 560ms. The direction is the
+     meaning. A simultaneous fade is three shapes appearing; a fade that climbs
+     is the trail being *drawn*, and the trail is what the mark is for.
+
+     380ms rather than something quicker because this fires on up to
+     thirty-nine cards at once when the slide arrives, and thirty-nine fast
+     fades read as a flicker on the band rather than as thirty-nine marks
+     arriving. */
+  --t-day-rise: 380ms;
+  --s-day-rise-step: 90ms;
   /* How far the name's last line sits above the figure. Inside `--h-card-name`,
      not a grid gap — the card's parts each carry their own separation, which is
      the rule that keeps a line's spacing leaving with the line. */
@@ -1150,14 +1175,21 @@
      first. The ceiling is the heading — a day count that matches or beats
      `10-DAY CHALLENGE` is a masthead with two titles in it.
 
-     **This unpairs it from `/podium`'s Flea figure**, which is `--t-pod-count`
-     and still `--fs-5`. Those two were the same size on purpose: they are the
-     same slot on two slides that rotate on one screen, and `WallHeader`'s
-     docblock is about sharing the furniture so the rotation reads as one wall.
-     Matching them again is one token — set `--t-pod-count` to `--fs-3` too. It
-     is deliberately *not* done here, because a countdown to an event five
-     weeks out and a day counter inside a live contest are not carrying the
-     same weight of news, and only one of them was asked to get louder. */
+     **`/podium`'s Flea countdown reads this token too, and that is the whole
+     point of it.** For one commit it did not: this went to `--fs-3` while the
+     Flea's own `--t-pod-count` stayed at `--fs-5`, and the rotation showed a
+     `9` at 28px and a `7` at 18px in the same slot thirty seconds apart. The
+     argument for leaving it was that a countdown to an event five weeks out is
+     not carrying the same news as a day counter inside a live contest. That
+     was overruled, and correctly: the two chips are the same furniture, and
+     `WallHeader` exists so the rotation reads as one wall rather than as two
+     designs that happen to agree.
+
+     `--t-pod-count` is deleted rather than re-pointed. Two declarations holding
+     the same number are equal only until someone edits one — which is exactly
+     how the mismatch arrived. **Anything that wants a different figure size in
+     this line is proposing to break the pair again**, and should move this
+     token, which moves both. */
   --t-tv-mast-label: 700 var(--fs-6) / 1 var(--font-sans);
   --t-tv-mast-figure: 800 var(--fs-3) / 1 var(--font-sans);
 
@@ -1526,10 +1558,21 @@
      and third figure, which the list must stay under. */
   --t-pod-fig-row: 800 1.7708vw / 1 var(--font-sans);
 
-  /* The masthead's Flea countdown, and the footer's mover. Both are apparatus
-     in a line of apparatus — see `--t-tv-mast-label` for why the right of the
-     masthead is one size. */
-  --t-pod-count: 800 var(--fs-5) / 1 var(--font-sans);
+  /* `--t-pod-count` stood here for the masthead's Flea countdown, at the same
+     `--fs-5` the day chip's numeral used. **Deleted rather than re-pointed.**
+
+     The two were equal by coincidence, in two declarations, and the moment one
+     moved they stopped being equal — which is exactly what happened when the
+     day numeral went to `--fs-3` and left the Flea's `7` at 18px beside a `9`
+     at 28px, in the same slot, thirty seconds apart in one rotation. Setting
+     this token to `--fs-3` as well would have restored the match and kept the
+     mechanism that broke it.
+
+     `FleaCountdown` now reads `--t-tv-mast-figure`, which is what `ChallengeDay`
+     reads. One token owns the size of a figure in the masthead's apparatus line,
+     both slides read it, and the next change to it moves both. That is the point
+     of `WallHeader` being one component: the rotation reads as one wall because
+     the furniture is shared, not because two numbers were typed the same. */
   /* ── The venture, and it has to hold its own against the figure ──
 
      1.25vw is 24px, up from 0.94vw / 18px. The figure on this line is 27.8px,
