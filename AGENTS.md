@@ -260,25 +260,41 @@ npm run build        # next build
   argument, not an extension of this one.**
 - **No filler content.** Empty is a valid state. The wall being quiet is what makes it
   loud when something happens. No spinners, ever — first paint reads cached CSV.
-- **There is no footer. The `as_of` stamp is back, at the right of the
-  masthead, on both slides.** The footers went on 11 September 2026 and took
-  the stamp with them; the stamp returned on the 13th, after a design review
-  that asked what on this wall could make it state something false.
+- **There is no footer and there is no `as_of` stamp. This wall now cannot
+  say that it has stopped.** The footers went on 11 September 2026 and took the
+  stamp with them; the stamp returned to the right of the masthead on the 13th
+  after a design review; it was removed again the same day, asked for directly
+  and twice, with the case below put first and overruled.
 
-  It is the only answer to that question that the wall can give. **This wall
-  shows no error state, by design** — a failed fetch keeps the last good data
-  and goes on rendering perfectly healthy stale numbers for days, because a red
-  banner on a screen nobody is watching helps nobody. Without the stamp, a
-  board frozen on Tuesday is pixel-identical to a working one. `docs/DESIGN.md`
-  §2 added it for exactly this reason and called it a deliberate exception to
-  the brief's layout; it still is.
+  State the cost rather than arguing it away, because it is the largest single
+  one on this wall. **This wall shows no error state, by design** — a failed
+  fetch, a revoked sheet, a stalled consolidator or a sleeping laptop all keep
+  the last good data and go on rendering perfectly healthy stale numbers for
+  days, because a red banner on a screen nobody is watching helps nobody. The
+  stamp was the only element on either slide that made that visible.
+  `docs/DESIGN.md` §2 added it for exactly that reason and called it a
+  deliberate exception to the brief's layout. **So a board frozen on Tuesday is
+  now pixel-identical to a working one**, and nothing in the product will tell
+  anybody. `Sync Status` in the master will, which is where a suspected freeze
+  gets diagnosed now; what is gone is the passer-by who was not suspecting one.
 
-  `components/WallHeader.tsx` renders it, so **both slides get it from one
-  place**. That is the property to protect: it drifted once into one slide and
-  not the other, and a wall that stamps half of itself is no more use than one
-  that stamps none of itself. It renders nothing before there is data, because
-  empty is a valid state here and a stamp with no figures beside it states the
-  provenance of nothing.
+  **The reason given does not survive contact and the decision stands anyway.**
+  It was that the wall refreshes every ten minutes so the stamp is redundant. A
+  fast cadence is what gives a stamp its teeth — `10:00` on a 4pm wall is
+  obvious in a way no figure on this board can be — so if the cadence argument
+  is ever what brings it back, it should be known that it is the wrong one in
+  both directions. What carries the removal is the same thing that carried the
+  footers: this is a display, and a line of provenance apparatus is furniture
+  on a slide that is meant to be figures.
+
+  **If it returns, it returns to one place.** `components/WallHeader.tsx` is
+  what both slides get their masthead from, and that is the property to
+  protect: the stamp drifted once into one slide and not the other, and a wall
+  that stamps half of itself is no more use than one that stamps none of
+  itself. `AsOf.tsx` and `.tv-mast-stamp` are in git at `b01eb5d`; it goes back
+  as the last child of `.tv-mast-meta`, and it must render nothing before there
+  is data, because empty is a valid state here and a stamp with no figures
+  beside it states the provenance of nothing.
 
 - **Neither board states its window now, and `/podium` is the one that lost
   it.** It carried `All time` beside its name until 13 September 2026; removal

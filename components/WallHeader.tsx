@@ -1,6 +1,5 @@
 import Image from 'next/image'
 
-import { AsOf } from '@/components/AsOf'
 import { ChallengeDay } from '@/components/ChallengeDay'
 import { cohortInstant } from '@/lib/feed'
 import type { BoardMode, Snapshot } from '@/lib/types'
@@ -12,20 +11,43 @@ import type { BoardMode, Snapshot } from '@/lib/types'
  * then whatever apparatus the slide carries pushed hard against the right edge.
  * A rule underneath it, drawn by the page.
  *
- * ── There is no provenance stamp on this wall ──
+ * ── There is no provenance stamp on this wall, and this is the second time ──
  *
- * It sat here, then moved to the footer on both slides, then left with the
- * footers. Recorded rather than forgotten, because of what it was carrying:
- * **this wall shows no error state by design.** A failed fetch keeps the last
- * good data and goes on rendering perfectly healthy stale numbers for days, and
- * the `as_of` stamp was the only thing that made that visible.
- * `docs/DESIGN.md` §2 added it for exactly that reason and called it a
- * deliberate exception to the brief's layout.
+ * It sat here, moved to the footer on both slides, left with the footers on 11
+ * September 2026, came back here on the 13th after a design review, and was
+ * removed again on the 13th. Recorded at this length rather than forgotten,
+ * because it will be proposed a third time and whoever proposes it should get
+ * the argument rather than have to rediscover it.
  *
- * So a board frozen on Tuesday's figures now looks identical to a working one.
- * If it comes back, the right of this masthead is where it goes — one
- * `<AsOf snapshot={snapshot} />` inside `.tv-mast-meta`, and `AsOf.tsx` is in
- * git.
+ * **What it was carrying: this wall shows no error state by design.** A failed
+ * fetch, a revoked sheet, a stalled consolidator or a sleeping laptop all keep
+ * the last good data and go on rendering perfectly healthy stale numbers for
+ * days. `as_of` was the only thing on either slide that made that visible, and
+ * `docs/DESIGN.md` §2 added it for exactly that reason, calling it a deliberate
+ * exception to the brief's layout. So **a board frozen on Tuesday's figures is
+ * now pixel-identical to a working one.** That is the cost, and it is the whole
+ * of it.
+ *
+ * ── Why it went anyway ──
+ *
+ * Asked for directly, twice, with the case above put first and overruled. The
+ * reason given is that the wall refreshes on a ten-minute cycle. **That is not
+ * the argument that wins it** — a fast cadence is what gives the stamp its
+ * teeth, since `10:00` showing at 4pm is obvious in a way that nothing else on
+ * this board can be. The argument that wins it is the one the stamp's own
+ * removal in September already made: this is a display, the corridor is
+ * thirty-nine teams who live the programme daily, and a line of provenance
+ * apparatus is furniture on a slide that is meant to be figures.
+ *
+ * **The stamp is not the only defence and it was never the best one.** A wall
+ * that has genuinely stopped is visible from the consolidator's own `Sync
+ * Status` tab, which is where someone who suspects a freeze should look. What
+ * the stamp did was make it visible to a passer-by who was not suspecting
+ * anything, and that is the capability being given up here — knowingly.
+ *
+ * If it comes back a third time, the right of this masthead is where it goes:
+ * one `<AsOf snapshot={snapshot} />` as the last child of `.tv-mast-meta`.
+ * `AsOf.tsx` and `.tv-mast-stamp` are both in git at `b01eb5d`.
  *
  * ── What this replaced ──
  *
@@ -137,8 +159,6 @@ export function WallHeader({
 
       <div className="tv-mast-meta">
         {trailing}
-        {/* Last, always. It is provenance rather than content — see `AsOf`. */}
-        <AsOf snapshot={snapshot} />
         {mode === 'challenge' ? (
           <ChallengeDay
             start={snapshot === null ? null : cohortInstant(snapshot.cohort, 'challenge_start_iso')}

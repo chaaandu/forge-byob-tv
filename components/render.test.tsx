@@ -603,19 +603,21 @@ describe('WallHeader', () => {
    * Challenge 1 closes at 09:00 on 31 August and challenge 2 opens at midnight,
    * so the wall spends the rest of the 31st with the challenge over and the
    * figures frozen. The day count leaves rather than sticking on "Day 14 of 14",
-   * and the band has to stay a band without it — heading and provenance both
-   * still present, nothing collapsed into the hole it left.
+   * and the masthead has to stay a masthead without it — the heading still
+   * present, nothing collapsed into the hole it left.
+   *
+   * This used to also assert the provenance stamp was beside it and unaffected,
+   * which is what made it a *band* rather than a lone heading. The stamp went on
+   * 13 September 2026, so the day count is now the only thing in
+   * `.tv-mast-meta` on this slide and what expires here empties it.
    */
-  it('drops the day count once the deadline passes, and stays a band', () => {
+  it('drops the day count once the deadline passes, and keeps the heading', () => {
     vi.useFakeTimers({ toFake: ['Date'] })
     // 14:00 on 31 August: five hours after the close, seventeen before the next.
     vi.setSystemTime(new Date('2026-08-31T14:00:00+05:30'))
     const text = render(<WallHeader snapshot={snapshotAt(...WINDOW)} label="2-Week Challenge" />)
     expect(text).toContain('2-Week Challenge')
     expect(text).not.toContain('Day')
-    // The stamp is beside it and unaffected: what expires here is the day
-    // count, not the provenance. See the dedicated test below.
-    expect(text).toContain('Updated')
   })
 
   /**
@@ -640,38 +642,35 @@ describe('WallHeader', () => {
   })
 
   /**
-   * ── The provenance stamp, and it is the only thing that can report a dead wall ──
+   * ── There is no provenance stamp, and this pins the absence ──
    *
-   * It has been in the masthead, then the footer, then nowhere — removed with
-   * the footers on 11 September 2026 — and it is back in the masthead on the
-   * 13th, after a review that asked what on this wall could make it state
-   * something false.
+   * The inverse of the test that stood here. `as_of` was in the masthead, then
+   * the footer, then nowhere with the footers on 11 September 2026, then back
+   * in the masthead on the 13th after a design review — and removed again the
+   * same day, asked for directly and twice.
    *
-   * **This wall shows no error state, by design.** A failed fetch keeps the
-   * last good data and goes on rendering perfectly healthy stale numbers for
-   * days. Without the stamp a board frozen on Tuesday is pixel-identical to a
-   * working one, on a screen nobody is watching, for a fortnight.
+   * **The cost is real and is recorded rather than tested away.** This wall
+   * shows no error state by design: a failed fetch keeps the last good data and
+   * goes on rendering perfectly healthy stale numbers for days, and the stamp
+   * was the only thing on either slide that made that visible. A board frozen
+   * on Tuesday is now pixel-identical to a working one. `AGENTS.md` carries the
+   * argument; `WallHeader`'s docblock carries the route back.
    *
-   * Asserted on `WallHeader` rather than on a page, because **both slides get
-   * it from here** — which is the property that matters. It drifted once
-   * before, into one slide and not the other, and a wall that stamps half of
-   * itself is no more use than one that stamps none of itself.
+   * Asserted here rather than deleted, and asserted on `WallHeader` rather than
+   * on a page, because **both slides get their masthead from this one
+   * component** — which is the property that mattered in both directions. The
+   * stamp drifted once into one slide and not the other, and a wall that stamps
+   * half of itself is no more use than one that stamps none of itself. The same
+   * is true of a wall that half-unstamps: this is what stops it coming back in
+   * one place only.
+   *
+   * `as_of` is still required in `COHORT_KEYS` and still published, so the
+   * snapshot below genuinely carries a timestamp. Nothing renders it.
    */
-  it('stamps the masthead with when the data was written', () => {
+  it('renders no provenance stamp, with data or without', () => {
     const text = render(<WallHeader snapshot={snapshotAt(...WINDOW)} label="Weekly Leaderboard" />)
     expect(text).toContain('Weekly Leaderboard')
-    expect(text).toContain('Updated')
-  })
-
-  /**
-   * And renders nothing at all before there is data.
-   *
-   * Empty is a valid state on this wall and a stamp with no figures beside it
-   * would be stating the provenance of nothing. It is also the first paint of
-   * every rotation, so a stamp that rendered `Updated` with an empty date
-   * would be on screen twice a minute.
-   */
-  it('stamps nothing when there is no data yet', () => {
+    expect(text).not.toContain('Updated')
     expect(render(<WallHeader snapshot={null} label="Weekly Leaderboard" />)).not.toContain(
       'Updated',
     )

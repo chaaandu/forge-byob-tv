@@ -3064,23 +3064,15 @@
     white-space: nowrap;
   }
 
-  /* ── The provenance stamp ──
+  /* The right-hand group: whatever apparatus the slide has — `/podium`'s Flea
+     countdown, `/weekly`'s day chip. It carried the provenance stamp as its
+     last child until 13 September 2026; `WallHeader`'s docblock has why that
+     went and where it goes if it returns.
 
-     The quietest thing on either slide, and the only one that can tell a
-     passer-by the board has stopped. It is deliberately not an error state:
-     this wall shows none, because a red banner on a screen nobody is watching
-     helps nobody. What it does is make a frozen board distinguishable from a
-     working one, which it otherwise is not. */
-  .tv-mast-stamp {
-    font: var(--t-tv-mast-label);
-    letter-spacing: var(--track-overline);
-    text-transform: uppercase;
-    color: var(--ink-muted);
-    white-space: nowrap;
-  }
-
-  /* The right-hand group: whatever apparatus the slide has, then provenance,
-     always in that order and always last. */
+     `align-items: baseline` rather than `center`, and that is load-bearing now
+     that the day numeral is `--fs-3` against its own `--fs-6` labels. Centred,
+     a 28px figure in a 15px line drags `DAY` and `OF 10` off the baseline the
+     heading sits on and the masthead stops reading as one line. */
   .tv-mast-meta {
     display: flex;
     align-items: baseline;

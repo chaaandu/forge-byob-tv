@@ -132,12 +132,18 @@ correction to the winner does not replay, which is right, because a correction i
 client only knows *current* rank, which drifts after the week closes, so a client-side
 floor would give a different answer on Wednesday than on Monday.
 
-Plus `as_of` — a text stamp the client renders **verbatim**, small, on both slides beside
-the ticker. **Decided**, as a deliberate exception to §10's "nothing else on the countdown
-slide": without it, an unpublished or permanently short feed freezes every wall on stale
-numbers that look perfectly healthy, for days. Zero client logic and immune to clock skew,
-since the sheet writes the string. This is provenance, and it matches the dashboard's rule
-that every displayed figure carries its as-of time.
+Plus `as_of` — **still published, no longer displayed.** It was a text stamp the client
+rendered verbatim, small, on both slides, decided here as a deliberate exception to §10's
+"nothing else on the countdown slide": without it, an unpublished or permanently short
+feed freezes every wall on stale numbers that look perfectly healthy, for days. That
+reasoning was never refuted — the stamp was removed on 13 September 2026 because a display
+should be figures rather than apparatus, and the freeze it exposed is now diagnosed from
+`Sync Status` in the master instead of from the wall. `AGENTS.md` carries the full cost
+and `WallHeader.tsx` carries the route back.
+
+**Keep the key in `TV_Cohort` regardless.** `COHORT_KEYS` requires it, so deleting the row
+throws the whole snapshot away on every poll — and it is what any future stamp, or any
+staleness check that never renders, would read.
 
 Any value may be an empty string, and the client handles empty by not firing. Keys may
 not be *missing* — that throws.
@@ -406,8 +412,9 @@ timer for 8s. Nothing else on this slide — no cohort stats.
 the entire wall on day one and is a first-class element, not a fallback afterthought.
 Logo presence comes from the `config.ts` list, so no broken image is ever requested.
 
-Both slides carry the `as_of` stamp, small, beside the ticker — the only element on
-either page that isn't in the brief's list, and the reason is in §2.
+Neither slide carries the `as_of` stamp any more — it was the only element on either page
+that was not in the brief's list, and it was removed on 13 September 2026. §2 has what
+that costs.
 
 ---
 
