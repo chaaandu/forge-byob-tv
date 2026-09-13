@@ -436,31 +436,42 @@ not by reading source.
   different weight and width, on every number on the wall. Checked against the
   cmap before a face is bundled, never assumed. Shortlisted faces that **lack
   it**: Satoshi, Switzer, Outfit, Onest, Instrument Sans, Instrument Serif,
-  Gabarito, Red Hat Display, Be Vietnam Pro, Chillax, Plein, Panchang, and **DM
-  Serif Display, which this wall ships** — the first of those is the
-  most-downloaded sans on Fontshare. Figtree, which draws every figure, carries
-  it.
+  Gabarito, Red Hat Display, Be Vietnam Pro, Chillax, Plein, Panchang, and DM
+  Serif Display — the first of those is the most-downloaded sans on Fontshare.
+  **The wall ships exactly one face and it is Figtree, which carries the
+  rupee.**
 
-  **The masthead face is the one permitted exception and the scope is what makes
-  it safe.** `--font-serif` has exactly one reader, `--t-tv-heading`, and that
-  draws three strings — `BYOB Leaderboard`, `Weekly Leaderboard`, `10-Day
-  Challenge` — every one of them a constant in this repo and none of them a
-  figure. **A face without the rupee may never be given a second reader.** The
-  moment `--font-serif` is put on anything that can carry a number, the check
-  above applies to it in full.
+  **There was one permitted exception and it is retired, not widened.** DM Serif
+  Display drew the masthead and lacked U+20B9; it was safe because
+  `--font-serif` had exactly one reader, `--t-tv-heading`, and that reader drew
+  three strings — `BYOB Leaderboard`, `Weekly Leaderboard`, `10-Day Challenge` —
+  every one a constant in this repo and none a figure. The masthead is Figtree
+  800 now and no bundled face on this wall lacks the rupee. `--font-serif`
+  survives as generics pointed at nothing, purely to keep the design system's
+  own `fonts.gstatic.com` declaration unreachable; **giving it a real face again
+  re-opens this whole check**, and giving a face without the rupee a second
+  reader is not available at any scope.
 
   The same check covers venture names, which come from a spreadsheet this
   project does not control. `YŌKI` is on the board today and needs U+014C, which
-  is why **Figtree ships whole rather than latin-subset**. The masthead face is
-  subset, and the difference is the point: it draws headings that are constants
-  in this repo, never a spreadsheet value.
+  is why **Figtree ships whole rather than latin-subset**. The retired masthead
+  face was subset, and the difference was the point: it drew headings that are
+  constants in this repo, never a spreadsheet value. A second face, if one is
+  ever argued for, inherits that split.
 
-- **Nothing on this wall is set in all caps by CSS any more, and the venture
-  names are cased in code instead.** `text-transform: uppercase` used to sit on
-  the masthead and on all three name rules, which made the board look consistent
-  while hiding that the data is not: of the 41 names in the feed, **10 are
-  written ALL CAPS in the sheet and 3 are lowercase**. Deleting the declarations
-  alone would have put `BLUNNT` next to `snackerly`.
+- **No venture name is set in all caps by CSS, and they are cased in code
+  instead.** `text-transform: uppercase` used to sit on the masthead and on all
+  three name rules, which made the board look consistent while hiding that the
+  data is not: of the 41 names in the feed, **10 are written ALL CAPS in the
+  sheet and 3 are lowercase**. Deleting the declarations alone would have put
+  `BLUNNT` next to `snackerly`.
+
+  **The masthead is the exception and it is the only one.** `.tv-mast-title`
+  carries `text-transform: uppercase` again from 13 September 2026, asked for
+  directly. It is allowed because the distinction this rule is about does not
+  apply to it: it draws three strings that are constants in this repo — a name
+  that cannot arrive mis-cased needs no rule to protect it. **A name from the
+  sheet may never be shouted by CSS, at any size, on either slide.**
 
   `titleCase` in `lib/team.ts` owns it, and the rule is **per name, not per
   word**: a name containing both an uppercase and a lowercase letter is printed
@@ -476,28 +487,42 @@ not by reading source.
   would read it as un-cased and print `Sle-c407`.
 
   **Every tracking value on a name was tuned for capitals and has come down
-  with them** — `--track-card-name` 0.06 → 0.01em, both podium names likewise,
-  `--track-tv-heading` to 0. Positive tracking opens up capitals; lowercase is
-  already spaced by its own ascenders. Put a `text-transform` back and the
-  tracking has to go back up with it.
+  with them** — `--track-card-name` 0.06 → 0.01em, both podium names likewise.
+  Positive tracking opens up capitals; lowercase is already spaced by its own
+  ascenders. Put a `text-transform` back and the tracking has to go back up with
+  it — which is exactly what the masthead did: `--track-tv-heading` went to 0
+  with title case and back to 0.05em with the capitals, in the same commit both
+  times. **The pair moves together or the line is wrong in one direction or the
+  other.**
 
 - **A weight outside a variable font's axis is synthesised, not refused.** The
   browser smears the outlines into a fake bold, which closes the counters and
   turns `8` into a blob at six metres. Four faces here have had a different
   range — Bebas Neue was 400 only, Clash Display stopped at 700, DM Serif
-  Display is 400 only, Figtree starts at 300 — and the trap springs when a token that
-  was fine under the old face is left alone through a swap. A comment never
+  Display was 400 only, Figtree starts at 300 — and the trap springs when a token that
+  was fine under the old face is left alone through a swap. **It is what forced
+  the masthead's face**: asked for a bold heading, `800 … var(--font-serif)`
+  would not have failed, it would have smeared; the guard is why that was caught
+  before it shipped rather than after. A comment never
   caught it; `render.test.tsx` reads each `localFont` call's range out of
   `app/layout.tsx` and fails any type token that exceeds it.
 
-- **Two faces, and adding a third is a design argument rather than a token.**
+- **One face, and adding a second is a design argument rather than a token.**
   The wall ran four for a while — serif masthead, sans for labels, a second sans
   for venture names, a display face for numerals — each scoped to one job and
   each locally defensible. It read as designed *at* rather than designed. Notion,
   Slack and Duolingo all ship one family and take hierarchy from weight, size,
   colour and shape; Duolingo's weekly leaderboard is very nearly this product.
-  Hierarchy here is 700 for names and ranks, 800 for money, and `--ink` against
-  `--ink-muted`. That ladder is the whole system.
+  Hierarchy here is 700 for names and ranks, 800 for money and the masthead, and
+  `--ink` against `--ink-muted`. That ladder is the whole system.
+
+  It went four → two → **one** on 13 September 2026, and the last step was
+  forced rather than chosen: the masthead was asked to be bold and DM Serif
+  Display has a single weight. The serif's own defence — that a masthead should
+  be the one thing on the frame speaking in a voice nothing else uses — had
+  already been half-spent by the same request, because all-caps hides the
+  lowercase a display serif is chosen for. A second face has to beat one face,
+  not beat nothing.
 
 - **`cache: 'no-store'` on both fetches.** Without it the browser HTTP cache serves one
   body for the life of a page that never manually reloads, and the wall freezes silently.

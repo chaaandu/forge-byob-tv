@@ -72,26 +72,25 @@
      caught by that twice — a masthead that rendered in the system Impact on one
      Mac and in a bundled fallback everywhere else, and a serif stack with
      `local("New York")` in front of the file it shipped. */
-  /* **Newsreader, and `'New York'` is deliberately not in this stack.**
+  /* **Nothing on this wall reads this token, and it must not be deleted.**
 
-     The value this replaced listed the self-hosted face first and
-     `local("New York")` second, which is the right order for making every
-     screen render alike but still leaves a second serif reachable. It is
-     unreachable now: the bundled face is the only real entry, and what follows
-     it is a generic. That is what makes two TVs driven from two laptops set the
-     masthead identically, which is the property the whole self-hosting rule
-     exists for — and it matters more here than usual, because the face this
-     stack points at is the very one the design system reaches for New York to
-     provide.
+     It listed a bundled serif first — Newsreader, then DM Serif Display — with
+     `local("New York")` deliberately kept out, so two TVs driven from two
+     laptops could not set the masthead differently. The masthead is Figtree 800
+     now; see `--t-tv-heading`. There is no bundled serif left to name, so this
+     is generics all the way down.
 
-     `colors_and_type.css` declares its own `--font-serif` whose first entry is
-     a `MesaSerif` family with a **`fonts.gstatic.com` `src`**. This declaration
-     is unlayered and that one is inside `layer(components)`, so this wins — and
-     that is load-bearing rather than incidental. Delete this line and the
-     masthead acquires a runtime CDN dependency on a wall that runs unattended
-     for weeks, with a `local("New York")` in front of it so the machine that
-     has New York never even reveals the fetch. */
-  --font-serif: var(--font-wall-serif), ui-serif, Georgia, serif;
+     The declaration stays because of what it *blocks*, which was always the
+     other half of its job. `colors_and_type.css` declares its own
+     `--font-serif` whose first entry is a `MesaSerif` family with a
+     **`fonts.gstatic.com` `src`**, behind a `local("New York")` so the machine
+     that has New York never even reveals the fetch. This declaration is
+     unlayered and that one is inside `layer(components)`, so this wins. Delete
+     this line and the wall acquires a runtime CDN dependency — on a display
+     that runs unattended for weeks, for a token nothing reads, discovered by
+     nobody. An empty stack pointed at generics is the cheapest possible way to
+     keep that shut. */
+  --font-serif: ui-serif, Georgia, serif;
   /* ── The rank's face has been three things, and the chip settles it ──
 
      A sans tabular figure first, which read as a spreadsheet's row index.
@@ -209,7 +208,11 @@
      38px into the gaps either side of first place with nothing reporting it.
      `scripts/measure-figures.mjs` exists because of that day and is still the
      check; what it measures now is `--t-stage-figure` against a block. */
-  --fs-2: clamp(24px, 2.0833vw, 56px);
+  /* **2.5vw / 48px, up from 2.0833vw / 40px**, and this step is the masthead's
+     alone — `--t-tv-heading` is its only reader, which is what makes the size a
+     one-line change. Argued there, along with the face and the tracking it
+     moved with. */
+  --fs-2: clamp(28px, 2.5vw, 64px);
   --fs-3: clamp(17px, 1.4583vw, 39px);
   --fs-4: clamp(14px, 1.1458vw, 31px);
   --fs-5: clamp(12px, 0.9375vw, 25px);
@@ -651,10 +654,17 @@
   --s-safe-y: 2.0833vw; /* 40px */
   --s-safe-x: var(--s-12); /* 48px — unchanged, so the columns do not move */
 
-  /* The masthead's own height: the lockup's cap plus the title's, whichever is
-     taller. Stated rather than derived so the hairline under it cannot move
-     when a heading changes length. */
-  --h-mast: 2.2917vw; /* 44px */
+  /* The masthead's own height. It was "the lockup's cap plus the title's,
+     whichever is taller"; there is no lockup, so it is the title's line box and
+     nothing else — `--fs-2` at a line-height of 1. Stated rather than derived
+     so the hairline under it cannot move when a heading changes length, and so
+     the two are visibly one number when the heading's size moves.
+
+     **`--h-board` is the other half of this and subtracts it.** Going 44 → 48
+     takes 4px off `/weekly`'s four rows of cards — about a pixel a row, and
+     measured rather than assumed. Anything that raises the heading again pays
+     the same way, out of the board. */
+  --h-mast: 2.5vw; /* 48px — `--fs-2` at line-height 1 */
   /* Air between the masthead's baseline and its rule, and between that rule and
      row 1. Deliberately unequal — the rule belongs to the masthead, so it sits
      nearer to it than to the board it introduces. */
@@ -1334,20 +1344,49 @@
      line because title case puts an x-height beside the wordmark rather than
      an unbroken run of caps. A fifth face should re-measure rather than trust
      this paragraph. */
-  --t-tv-heading: 400 var(--fs-2) / 1 var(--font-serif);
-  --track-tv-heading: 0;
-  /* ── The Mesa lockup, sized to the masthead's cap height ──
+  /* ── 13 September 2026: Figtree 800, capitals, centred, 48px ──
 
-     It was 3.5vw — 67px — because it had a filled 82px band to fill and would
-     have read as a footnote inside it. There is no band; the lockup now sits on
-     the page beside a 39px heading, and a 67px lockup next to that is the brand
-     shouting over the thing it is introducing.
+     Everything above this line is the record of four faces and it is kept
+     because the traps in it are live. What changed: the lockup was removed from
+     both mastheads, the heading was centred on the frame, and it was asked to
+     be bigger, bold and in capitals.
 
-     1.72vw is 33px, which puts the lockup's wordmark and the heading's caps at
-     very nearly the same visual weight — the two read as one line of masthead,
-     which is what the band version was reaching for and could not have while
-     one of them was twice the size of the other. */
-  --h-tv-logo: clamp(22px, 1.72vw, 44px);
+     **The face had to change to do that and there was no way around it.** DM
+     Serif Display ships Regular and Italic — 400 is the whole family — so
+     `800 … var(--font-serif)` does not fail, it makes the browser smear the
+     outlines into a synthetic bold that closes the counters at six metres.
+     `render.test.tsx` reads the range out of `app/layout.tsx` and fails the
+     token, which is the only reason that has ever been caught. Figtree's axis
+     is 300–900 and 800 is a weight it actually draws.
+
+     The wall is **one face** now, which is where the four-faces note above was
+     always pointing: hierarchy is weight, size, colour and shape, and the
+     masthead's 800 at 48px against a venture name's 700 at 22px is a wider gap
+     than any second family was buying. The serif's own argument — that a
+     masthead should speak in a voice nothing else uses — was the one thing lost
+     here, and it was already half-spent, because all-caps hides the lowercase
+     that was the entire reason for choosing a display serif.
+
+     **Tracking goes back up, and the note below is why it has to.** 0 was a
+     value for *title case*: lowercase is spaced by its own ascenders, capitals
+     are drawn to sit tight and want opening up. The four all-caps settings this
+     line has carried took 0.22em, 0.06em, 0.02em and 0.02em; 0.05em is the
+     heavy-sans figure, one notch under the 0.06em Manrope took, because this is
+     8px larger and tracking is a share of the size.
+
+     **The two are one decision.** Put title case back and this goes to 0 with
+     it, or the masthead is a tracked run of lowercase at a capital's spacing.
+
+     `--fs-2` goes 2.0833vw → 2.5vw, 40px → 48px. The note above says raising it
+     touches nothing else because it has exactly one reader, and that this token
+     is the reader — still true — and that if it goes up the Mesa lockup goes
+     with it. The lockup went instead. */
+  --t-tv-heading: 800 var(--fs-2) / 1 var(--font-sans);
+  --track-tv-heading: 0.05em;
+  /* `--h-tv-logo` stood here: the Mesa lockup at 1.72vw / 33px, tuned so its
+     wordmark and the heading's caps read as one line of masthead. There is no
+     lockup on either slide. `--h-mast` was the other half of that measurement
+     and carries what replaced it. */
 
   /* The Mesa Flea dial. The label sits above it, so the stack has to clear the
      3.4vw header band: label + gap + ring ≤ the band, which is what caps the
@@ -3393,64 +3432,75 @@
      driven from whichever machine is free that afternoon, that is a masthead
      that changes identity between one day and the next.
 
-     Zodiak at 900 is self-hosted from `app/fonts`, so every screen sets this
-     line identically, and `--font-serif` carries no `local()` entry that could
-     put a second serif in front of it. The face argument — why a serif here and
-     a sans everywhere else — is at `--t-tv-heading`.
+     Every face that has held this line since is self-hosted from `app/fonts`,
+     so every screen sets it identically, and no stack the heading resolves
+     through carries a `local()` entry that could put a system face in front of
+     the bundled one. It is Figtree 800 today — `--font-sans`, the same face as
+     everything else on both slides — and why is at `--t-tv-heading`.
 
      The half of the old note that does *not* survive is worth keeping visible,
      because it was the reasoning for Manrope: "the wall's numbers, names and
      labels are all Manrope, and the heading was the only thing on either slide
-     speaking in a voice nothing else used." That is true, and it is now the
-     argument *for* the serif rather than against it. A masthead is supposed to
-     be the one thing on the frame speaking in a voice nothing else uses; what
+     speaking in a voice nothing else used." That was the argument against a
+     dedicated masthead face, then the argument *for* one, and the wall has now
+     landed back on the first: one family, hierarchy from weight and size. What
      made Impact wrong was that nobody could predict which face would arrive,
      not that it was a face of its own. */
   .tv-mast {
     display: grid;
-    /* Lockup, rule, title, then everything else against the right edge. The
-       heading is *not* centred on the frame: a masthead made of type reads from
-       the left, and centring it here would leave the lockup and the heading as
-       two unrelated objects with a gap between them. */
-    grid-template-columns: auto auto auto minmax(0, 1fr);
+    /* **Three columns, and the two outer ones are equal on purpose.** An empty
+       counterweight, the title, then the slide's apparatus against the right
+       edge. Two matched `1fr`s are what put the title on the *frame's* centre
+       line; centring it in the remainder instead would move it every time the
+       apparatus changed width, and the apparatus is a Flea countdown on
+       `/podium`, a day chip on `/weekly` in challenge mode, and nothing on
+       `/weekly` out of it — three x positions for one heading, on two slides
+       that rotate every thirty seconds.
+
+       It was `auto auto auto minmax(0, 1fr)` — lockup, tick, title, apparatus —
+       under a note arguing that a masthead made of type reads from the left and
+       that centring would leave the lockup and the title as two unrelated
+       objects. That note was right about the lockup and the lockup is gone;
+       one object cannot be two unrelated ones. */
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
     gap: var(--s-5);
     height: var(--h-mast);
   }
 
-  /* The vertical hairline between the lockup and the board's name. It is what
-     makes them one lockup-plus-title rather than two things that happen to be
-     near each other. */
-  .tv-mast-tick {
-    width: var(--stroke-hair);
-    height: 62%;
-    background: var(--hairline-strong);
-  }
+  /* `.tv-mast-tick` stood here: a vertical hairline between the lockup and the
+     board's name, there to make them one masthead rather than two things that
+     happened to be near each other. It went with the lockup on 13 September
+     2026. A tick with type on one side of it is a stray mark. */
 
-  /* **No `text-transform` here, and the strings were always right.**
+  /* **`text-transform: uppercase` is back, and it is the one on this wall.**
 
-     This carried `text-transform: uppercase` through four faces, so every
-     heading on the wall was shouted. The source strings have been title case
-     the whole time — `lib/board.ts` returns `Weekly Leaderboard` and `10-Day
-     Challenge`, `app/podium/page.tsx` passes `BYOB Leaderboard` — which means
-     the acronym was already cased correctly and the CSS was flattening the
-     distinction between `BYOB` and `Leaderboard` into one undifferentiated
-     run of capitals.
+     The note that stood here argued it out: the strings are already cased
+     correctly — `lib/board.ts` returns `Weekly Leaderboard` and `10-Day
+     Challenge`, `app/podium/page.tsx` passes `BYOB Leaderboard` — so the
+     transform flattens the distinction between `BYOB` as an acronym and
+     `Leaderboard` as a word into one undifferentiated run of capitals, and it
+     hid the whole character of the display serif that was setting it. Both
+     halves were true. It was asked for anyway, directly, and the serif went
+     with it — see `--t-tv-heading`, which is a heavy sans now and is drawn for
+     exactly this setting.
 
-     Setting it in title case is what lets `BYOB` read *as* an acronym, and it
-     is the case a display serif is drawn for: DM Serif Display's whole
-     character is in its lowercase — the ball terminals on `a` and `y`, the
-     bracketed serifs, the thick-thin transition — and all-caps hides every bit
-     of it behind twenty-six shapes that any serif draws similarly.
+     It is a transform rather than three capitalised strings because the strings
+     are what `lib/board.ts` and the tests read. `render.test.tsx` asserts on
+     `Weekly Leaderboard` and `10-Day Challenge`; shouting in the source would
+     put the case decision in three places and the wall's own scar tissue on
+     that is `titleCase` in `lib/team.ts`, which exists because casing in two
+     places is how `BLUNNT` ended up next to `snackerly`.
 
-     **Anything that wants to shout again should change the string, not this
-     rule.** A heading the board decides to capitalise is a content decision
-     that belongs with the other three strings, where `BYOB` can stay an
-     acronym while the rest goes up. */
+     **The venture names are not this, and must not follow.** `AGENTS.md`'s
+     no-caps-by-CSS rule is about names that arrive from a spreadsheet in three
+     different casings. These three strings are constants in this repo. */
   .tv-mast-title {
     margin: 0;
     font: var(--t-tv-heading);
     letter-spacing: var(--track-tv-heading);
+    text-transform: uppercase;
+    text-align: center;
     color: var(--ink);
     white-space: nowrap;
   }

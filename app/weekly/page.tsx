@@ -166,7 +166,7 @@ export default function WeeklyPage() {
 
           `openWeek` is still read: it is what the dev trigger stamps into an
           event id, whichever contest is on. */}
-      <WallHeader snapshot={snapshot} label={boardHeading(mode)} mode={mode} tone="dark" />
+      <WallHeader snapshot={snapshot} label={boardHeading(mode)} mode={mode} />
 
       <div className="tv-rule" style={{ marginTop: 'var(--s-mast-rule)' }} />
 

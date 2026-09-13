@@ -1,5 +1,3 @@
-import Image from 'next/image'
-
 import { ChallengeDay } from '@/components/ChallengeDay'
 import { cohortInstant } from '@/lib/feed'
 import type { BoardMode, Snapshot } from '@/lib/types'
@@ -7,9 +5,29 @@ import type { BoardMode, Snapshot } from '@/lib/types'
 /**
  * The masthead, and **both slides use it**.
  *
- * One row, left to right: the Mesa lockup, a hairline tick, the board's name,
- * then whatever apparatus the slide carries pushed hard against the right edge.
- * A rule underneath it, drawn by the page.
+ * One row of three columns: an empty cell, the board's name, then whatever
+ * apparatus the slide carries pushed hard against the right edge. A rule
+ * underneath it, drawn by the page.
+ *
+ * ── The Mesa lockup is gone, and the heading is centred on the frame ──
+ *
+ * Asked for directly on 13 September 2026: no lockup, the heading centred,
+ * larger, bold and in capitals. The tick went with the lockup rather than
+ * being left behind — it existed to bind two objects into one masthead, and
+ * one object does not need binding.
+ *
+ * **The two outer columns are equal `1fr`s and that is the whole centring
+ * mechanism.** The heading is centred on the *frame*, not inside whatever the
+ * slide's apparatus leaves over — `/podium` carries a Flea countdown on the
+ * right and `/weekly` carries a day chip or nothing at all, so a heading
+ * centred in the remainder would sit at three different x positions across the
+ * rotation, on two slides thirty seconds apart. The empty cell is doing work.
+ *
+ * What it costs is the brand. Mesa is named nowhere on either slide now; the
+ * wall says `BYOB LEADERBOARD` and the corridor is expected to know whose
+ * corridor it is. Recorded rather than argued away — it is one `<Image>` back
+ * in the first column if that turns out to be wrong, and the first column
+ * exists.
  *
  * ── There is no provenance stamp on this wall, and this is the second time ──
  *
@@ -65,21 +83,26 @@ import type { BoardMode, Snapshot } from '@/lib/types'
  * principle stopped one step short. Sharing the furniture is what makes the
  * rotation read as one wall rather than as two designs.
  *
- * ── The lockup picks itself off the surface ──
+ * ── `tone` went with the lockup, and nothing branches on the surface now ──
  *
- * `/weekly` is light and `/podium` is dark, so the same file cannot serve both:
- * the green-on-white lockup vanishes on aubergine and the reversed one vanishes
- * on lavender. This is the **one** place in the tree that branches on which
- * surface it is sitting on, and it does it with an explicit prop rather than by
- * reading a class — a component that guesses its own surface is a component
- * that guesses wrong the first time it is reused.
+ * This was the **one** place in the tree that knew which surface it was sitting
+ * on: `/weekly` is light in the design and `/podium` is dark, the green-on-white
+ * lockup vanishes on aubergine and the reversed one vanishes on lavender, so the
+ * lockup picked itself with an explicit `tone` prop rather than by reading a
+ * class — a component that guesses its own surface guesses wrong the first time
+ * it is reused.
+ *
+ * With no lockup there is nothing left to pick. Everything this file draws is a
+ * token away from naming a colour, which is the rule the whole wall runs on, and
+ * the branch is deleted rather than kept dark. **If an image comes back here it
+ * needs the prop back with it** — that is the lesson worth keeping, not the
+ * prop.
  */
 export function WallHeader({
   snapshot,
   label,
   scope,
   mode = 'challenge',
-  tone = 'light',
   trailing,
 }: {
   snapshot: Snapshot | null
@@ -96,8 +119,6 @@ export function WallHeader({
    * window still exists; this board is simply not the one measuring against it.
    */
   mode?: BoardMode
-  /** Which lockup to draw. The surface the masthead is sitting on. */
-  tone?: 'light' | 'dark'
   /**
    * What the board's figures are measured over, set beside its name.
    *
@@ -118,20 +139,11 @@ export function WallHeader({
 }) {
   return (
     <header className="tv-mast">
-      <Image
-        src={tone === 'dark' ? '/brand/logo-pg-white.png' : '/brand/logo-pg-green.png'}
-        alt="Mesa School of Business"
-        width={448}
-        height={128}
-        style={{ height: 'var(--h-tv-logo)', width: 'auto' }}
-        unoptimized
-      />
-
-      {/* The tick is what binds the lockup and the heading into one masthead
-          rather than two objects that happen to be near each other. It is
-          `--hairline-strong`, so it is dark on the light slide and light on the
-          dark one without this file naming a colour. */}
-      <span className="tv-mast-tick" aria-hidden="true" />
+      {/* The left counterweight. It draws nothing and it is not optional: it is
+          the `1fr` that matches the apparatus column's `1fr`, and the pair is
+          what puts the heading on the frame's centre line rather than on the
+          centre of whatever the apparatus leaves. */}
+      <span aria-hidden="true" />
 
       {/* An empty cell when there is no heading, so the right-hand group still
           lands in the last column rather than sliding left. */}

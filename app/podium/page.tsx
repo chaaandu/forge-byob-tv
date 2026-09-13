@@ -120,7 +120,6 @@ export default function PodiumPage() {
         snapshot={snapshot}
         label="BYOB Leaderboard"
         mode="week"
-        tone="dark"
         trailing={<FleaCountdown at={snapshot === null ? null : fleaInstant(snapshot.cohort)} />}
       />
 
