@@ -952,40 +952,48 @@
      currently in a spreadsheet is a fact about the spreadsheet, and a venture
      can be renamed from it on any given Tuesday. */
   --t-tv-card-name: 700 var(--fs-6) / 1.15 var(--font-sans);
-  /* ── The name's tracking, and why it is not `--track-overline` ──
+  /* ── The name's tracking, and the case change is what finally settled it ──
 
-     The system's 0.12em is an *overline* value: two or three uppercase words
-     over a heading, where the tracking is the whole effect. A venture name is
-     not that. At 15px, 0.12em is 1.8px between every pair of letters, so
-     `ATC (All Things Camphor)` spends 43px of a 148px card on inter-letter
-     space alone — 29% of the line, before a single glyph is drawn.
+     **0.01em, and everything before it was a value for capitals.**
 
-     Measured, that is not a refinement but a correctness question: at 0.12em
-     exactly two names in the cohort need a third line and get an ellipsis
-     instead; at 0.08em none do, at the same size in the same box. A name the
-     board could print and chose not to is the worse of the two failures, and
-     tracking is the cheapest 8px on the card.
+     This token has been retuned four times and the first three were the same
+     kind of correction. The design system's 0.12em is an *overline* value: two
+     or three uppercase words over a heading, where the tracking is the whole
+     effect. A venture name is not that. At 15px, 0.12em is 1.8px between every
+     pair of letters, so `ATC (All Things Camphor)` spent 43px of a 148px card
+     on inter-letter space alone — 29% of the line before a glyph was drawn.
 
-     0.06em is still unmistakably a tracked uppercase label, and it is stated
-     here rather than changed in `colors_and_type.css`, which owns `.overline`
-     and should keep its value.
+     Measured, that was never a refinement but a correctness question: at 0.12em
+     exactly two names in the cohort needed a third line and got an ellipsis
+     instead; at 0.08em none did, in the same box. So 0.12 → 0.08 when the card
+     gained gutters, and 0.08 → 0.06 when the well took 8px more of the line.
+     Each step bought a name back that the board could print and had chosen not
+     to, which is the worse of the two failures every time.
 
-     **It has now been retuned twice by the same measurement, and that is the
-     point of taking it.** 0.12 → 0.08 when the card gained gutters, 0.08 →
-     0.06 when the well took 8px more of the line for its rim and padding. The
-     check is one probe: no name in the cohort may need a third line. At 0.08
-     and 144px exactly one did — `In Between Sips by Kaappitalism` — and a name
-     the board could print and chose to ellipsise instead is the worse of the
-     two failures every time.
+     ── And then the names stopped being capitals ──
 
-     **The probe is also what a face change has to pass, and it has now been
-     run for four of them without this value moving.** Line boxes counted per name across all
-     thirty-nine, on the same board, under both faces: the maximum is 2 under
-     each, nothing is clipped under either, and exactly one name changed —
-     `Nature's Nibbles`, 2 lines to 1. So 0.06em was retuned against the card
-     rather than against Manrope, which is why it survived the swap. Re-run the
-     count before changing the face again; a name is what this board is for. */
-  --track-card-name: 0.06em;
+     `.tv-card-name` no longer sets `text-transform: uppercase`; `nameOf` casts
+     the casing instead, and the board reads `Dosa Crisps` rather than `DOSA
+     CRISPS`. Positive tracking exists to open up capitals, which are drawn to
+     sit tight. Lowercase is already spaced by its own ascenders and descenders,
+     and 0.06em on it is a designer's fitting being overridden by a value
+     inherited from a label style.
+
+     0.01em rather than 0 — a hair, because this is still small type read at six
+     metres and the extra 0.15px per pair survives that where it would be fussy
+     on a page.
+
+     **The probe is unchanged and it is what every one of these passed.** No
+     name in the cohort may need a third line. Under the old caps at 0.06em:
+     31 names on one line, 8 on two, none on three. Under title case at 0.01em:
+     **36 on one, 3 on two, none on three** — the two changes together bought
+     five names a single line each, and `In Between Sips by Kaappitalism`, which
+     has driven every retune of this value, still fits in two.
+
+     **So this value is coupled to `.tv-card-name` having no `text-transform`.**
+     Put the capitals back and it goes back to 0.06em with them. Re-run the
+     count before changing either; a name is what this board is for. */
+  --track-card-name: 0.01em;
   /* Reduced 20% from clamp(15px, 1.45vw, 30px). Still the largest thing on the
      card, and still the figure the board exists to show. */
   --t-tv-card-week: 700 var(--fs-4) / 1 var(--font-sans);
@@ -1745,8 +1753,8 @@
      `--track-pod-label` was here and went with the column caption, its only
      reader. */
   --track-pod-fig: -0.025em;
-  --track-pod-name: 0.09em;
-  --track-pod-name-row: 0.06em;
+  --track-pod-name: 0.01em;
+  --track-pod-name-row: 0.01em;
 
   /* ── The list's own colours ──
 
@@ -2829,7 +2837,6 @@
   .tv-card-name {
     font: var(--t-tv-card-name);
     letter-spacing: var(--track-card-name);
-    text-transform: uppercase;
     color: var(--card-sub-ink);
     text-align: center;
     box-sizing: border-box;
@@ -3763,7 +3770,6 @@
     display: block;
     font: var(--t-stage-name);
     letter-spacing: var(--track-pod-name);
-    text-transform: uppercase;
     /* The face's ink, inherited — this is printed on a lit gradient, not on
        the page. It was `--ink-2` when the name sat under the mark on the
        page itself. */
@@ -3946,7 +3952,6 @@
   .tv-pod-row-name {
     font: var(--t-pod-name-row);
     letter-spacing: var(--track-pod-name-row);
-    text-transform: uppercase;
     /* `--ink`, not `--deep-teal`. Measured at 1.00:1 — this name was painted in
        the page colour on the dark surface and was simply not there. */
     color: var(--ink);

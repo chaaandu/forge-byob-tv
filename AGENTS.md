@@ -455,6 +455,32 @@ not by reading source.
   subset, and the difference is the point: it draws headings that are constants
   in this repo, never a spreadsheet value.
 
+- **Nothing on this wall is set in all caps by CSS any more, and the venture
+  names are cased in code instead.** `text-transform: uppercase` used to sit on
+  the masthead and on all three name rules, which made the board look consistent
+  while hiding that the data is not: of the 41 names in the feed, **10 are
+  written ALL CAPS in the sheet and 3 are lowercase**. Deleting the declarations
+  alone would have put `BLUNNT` next to `snackerly`.
+
+  `titleCase` in `lib/team.ts` owns it, and the rule is **per name, not per
+  word**: a name containing both an uppercase and a lowercase letter is printed
+  exactly as the sheet has it; anything else is lowercased with each word's
+  first letter raised. That keeps `SoleMate`, `ATC (All Things Camphor)` and
+  `The Chips n Dip Story` intact — all three are damaged by a per-word
+  title-caser — while fixing `XOCO` and `aarambh`. All 41 names come out right
+  with no exception list.
+
+  It is applied in `nameOf`, which was already the shared funnel both boards
+  use, so `/weekly` and `/podium` cannot come to disagree. **The team-ID
+  fallback deliberately bypasses it**: `SLE-C407` has no lowercase, so the rule
+  would read it as un-cased and print `Sle-c407`.
+
+  **Every tracking value on a name was tuned for capitals and has come down
+  with them** — `--track-card-name` 0.06 → 0.01em, both podium names likewise,
+  `--track-tv-heading` to 0. Positive tracking opens up capitals; lowercase is
+  already spaced by its own ascenders. Put a `text-transform` back and the
+  tracking has to go back up with it.
+
 - **A weight outside a variable font's axis is synthesised, not refused.** The
   browser smears the outlines into a fake bold, which closes the counters and
   turns `8` into a blob at six metres. Four faces here have had a different
