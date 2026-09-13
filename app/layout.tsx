@@ -46,7 +46,7 @@ import './globals.css'
    The masthead was asked, on 13 September 2026, to be centred, larger, bold and
    in capitals. **DM Serif Display has one weight**, so "bold" was not a token
    edit — it was the face or nothing, and a synthetic 800 smears the outlines on
-   a wall read at six metres. The heading is Figtree 800 now and the serif is
+   a wall read at six metres. The heading is Figtree 900 now and the serif is
    deleted rather than left loaded: it was bundled with `display: 'block'`, so an
    unread face is a render this page waits on for nothing.
 

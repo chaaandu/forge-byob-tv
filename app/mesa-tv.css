@@ -76,7 +76,7 @@
 
      It listed a bundled serif first — Newsreader, then DM Serif Display — with
      `local("New York")` deliberately kept out, so two TVs driven from two
-     laptops could not set the masthead differently. The masthead is Figtree 800
+     laptops could not set the masthead differently. The masthead is Figtree 900
      now; see `--t-tv-heading`. There is no bundled serif left to name, so this
      is generics all the way down.
 
@@ -1344,7 +1344,7 @@
      line because title case puts an x-height beside the wordmark rather than
      an unbroken run of caps. A fifth face should re-measure rather than trust
      this paragraph. */
-  /* ── 13 September 2026: Figtree 800, capitals, centred, 48px ──
+  /* ── 13 September 2026: Figtree 900, capitals, centred, 48px ──
 
      Everything above this line is the record of four faces and it is kept
      because the traps in it are live. What changed: the lockup was removed from
@@ -1357,11 +1357,15 @@
      outlines into a synthetic bold that closes the counters at six metres.
      `render.test.tsx` reads the range out of `app/layout.tsx` and fails the
      token, which is the only reason that has ever been caught. Figtree's axis
-     is 300–900 and 800 is a weight it actually draws.
+     is 300–900 and 900 is a weight it actually draws — **the top of the axis,
+     with nothing above it to synthesise into.** Asked for at 800 first and
+     raised the same day; anything wanting a heavier masthead than this needs a
+     different face, not a bigger number, because 950 here is a fake bold that
+     renders and reports nothing.
 
      The wall is **one face** now, which is where the four-faces note above was
      always pointing: hierarchy is weight, size, colour and shape, and the
-     masthead's 800 at 48px against a venture name's 700 at 22px is a wider gap
+     masthead's 900 at 48px against a venture name's 700 at 22px is a wider gap
      than any second family was buying. The serif's own argument — that a
      masthead should speak in a voice nothing else uses — was the one thing lost
      here, and it was already half-spent, because all-caps hides the lowercase
@@ -1381,7 +1385,7 @@
      touches nothing else because it has exactly one reader, and that this token
      is the reader — still true — and that if it goes up the Mesa lockup goes
      with it. The lockup went instead. */
-  --t-tv-heading: 800 var(--fs-2) / 1 var(--font-sans);
+  --t-tv-heading: 900 var(--fs-2) / 1 var(--font-sans);
   --track-tv-heading: 0.05em;
   /* `--h-tv-logo` stood here: the Mesa lockup at 1.72vw / 33px, tuned so its
      wordmark and the heading's caps read as one line of masthead. There is no
@@ -3435,7 +3439,7 @@
      Every face that has held this line since is self-hosted from `app/fonts`,
      so every screen sets it identically, and no stack the heading resolves
      through carries a `local()` entry that could put a system face in front of
-     the bundled one. It is Figtree 800 today — `--font-sans`, the same face as
+     the bundled one. It is Figtree 900 today — `--font-sans`, the same face as
      everything else on both slides — and why is at `--t-tv-heading`.
 
      The half of the old note that does *not* survive is worth keeping visible,

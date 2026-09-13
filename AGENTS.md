@@ -513,8 +513,10 @@ not by reading source.
   each locally defensible. It read as designed *at* rather than designed. Notion,
   Slack and Duolingo all ship one family and take hierarchy from weight, size,
   colour and shape; Duolingo's weekly leaderboard is very nearly this product.
-  Hierarchy here is 700 for names and ranks, 800 for money and the masthead, and
-  `--ink` against `--ink-muted`. That ladder is the whole system.
+  Hierarchy here is 700 for names and ranks, 800 for money, 900 for the
+  masthead, and `--ink` against `--ink-muted`. That ladder is the whole system.
+  **900 is the top of Figtree's axis**, so the masthead has no heavier setting
+  left — a request for one is a request for a second face.
 
   It went four → two → **one** on 13 September 2026, and the last step was
   forced rather than chosen: the masthead was asked to be bold and DM Serif
