@@ -181,6 +181,13 @@
   --ink-2: var(--royal-purple);
   --ink-muted: var(--ink-muted-light);
   --accent: var(--vivid-violet);
+  /* The band carries its own ground, so it does not need to change with the
+     surface — and it is stated here anyway rather than left to `:root`,
+     because the pair existing on both surfaces is what lets the band diverge
+     later without a component learning a colour. It agrees with the dark
+     surface today only because `--accent` is Vivid Violet on this one. */
+  --card-day-fill: var(--vivid-violet);
+  --card-day-ink: var(--ink-on-solid);
   --accent-quiet: var(--orchid-700);
   --hairline: rgba(42, 24, 73, 0.14);
   --hairline-strong: rgba(42, 24, 73, 0.26);
@@ -350,6 +357,34 @@
   --ink-2: var(--ink-on-dark-2);
   --ink-muted: var(--violet-300); /* 5.60:1. NOT --vivid-violet, which is 2.86:1 */
   --accent: var(--orchid); /* 8.39:1 */
+
+  /* ── `/weekly`'s day band, and why it is no longer `--accent` ──
+
+     The band was orchid as a solid with the page colour as ink. Measured on
+     the board, its mean luminance was **0.441** against **0.204** for the zone
+     holding the venture name and the week figure — so the *day* figure was
+     2.2x louder than the week figure, on a slide called Weekly Leaderboard
+     that is ranked by the week figure. The secondary number was winning the
+     card.
+
+     It also put orchid on the card as a **surface** thirty pixels from orchid
+     as **ink** — the venture name is `--orchid-300` — which is one step of one
+     ramp doing two opposite jobs. This file's header names that pattern as the
+     failure it is; it survived here only because the band's ink flips with the
+     surface too, but it is why the card read muddled rather than layered.
+
+     Vivid Violet at 0.212 sits level with the week figure instead of over it,
+     and takes the band off the orchid ramp entirely. White on it measures
+     5.54:1.
+
+     **Teal was the other candidate and lost on dominance.** It measured the
+     same 0.210, fixed the same two faults, and would have given the wall one
+     cool accent shared with `/podium`'s second block — but a new hue on a
+     purple card reads as a louder claim than the band is making, and the band
+     is a footnote to the figure above it. Reviewed side by side on the first
+     two cards of the real board. */
+  --card-day-fill: var(--vivid-violet);
+  --card-day-ink: var(--ink-on-solid);
   --accent-quiet: var(--violet-300);
   --hairline: rgba(255, 255, 255, 0.14);
   --hairline-strong: rgba(255, 255, 255, 0.28);
@@ -491,6 +526,13 @@
   --ink-2: var(--royal-purple);
   --ink-muted: var(--ink-muted-light);
   --accent: var(--vivid-violet);
+  /* The band carries its own ground, so it does not need to change with the
+     surface — and it is stated here anyway rather than left to `:root`,
+     because the pair existing on both surfaces is what lets the band diverge
+     later without a component learning a colour. It agrees with the dark
+     surface today only because `--accent` is Vivid Violet on this one. */
+  --card-day-fill: var(--vivid-violet);
+  --card-day-ink: var(--ink-on-solid);
   --accent-quiet: var(--orchid-700);
   --hairline: rgba(42, 24, 73, 0.14);
   --hairline-strong: rgba(42, 24, 73, 0.26);
@@ -683,9 +725,44 @@
      gradients until 13 September 2026 and the gradient ran the wrong way —
      brightest at the foot, darkest at the head, under an overhead light.
 
-       1   #9e6a06   amber      under #f0bd52 gold
-       2   #2b4490   sapphire   under #aab9cc silver
-       3   #71272e   maroon     under #cd7742 copper
+       1   #a96d11   amber      under #f5af1f gold     96% / 96% of max chroma
+       2   #33837e   teal       under #98c1bd silver   80% / 32%
+       3   #71272e   maroon     under #cd7742 copper   67% / 74%
+
+     Those percentages are of the chroma sRGB allows at each end's own
+     lightness, and they are the review notes made measurable.
+
+     **Gold's body was once at 98% and still looked like mustard**, because
+     yellow's chroma peaks near L0.80 and collapses either side — 0.167 at
+     L0.80, 0.119 at L0.57. A dark yellow is muddy and nothing fixes it but not
+     being yellow: turned orange, the same lightness carries 0.141 instead of
+     0.126, so the body is darker and richer at once, and the white name on it
+     went from 4.67:1 back to 5.3:1.
+
+     **Silver's body was at 46% — a denim — then 29%, a true steel and dull.**
+     Neither was the fault. *Blue is dark*: at the lightness the warm bodies sit
+     at, a saturated blue carries about half their relative luminance (0.083
+     against amber's 0.194). Only lightness fixes that. **Compare bodies by
+     relative luminance, not by OKLCh lightness** — they disagree most exactly
+     where blue is involved, which is how this was got wrong twice.
+
+     **Then blue was rejected outright, and the wheel is narrow.** Gold holds
+     70°, copper 18°, the page is violet at 297°. **Green is the trap** — the
+     obvious remaining cool, and the one hue this brand cannot use, because
+     this file opens by recording that Mesa's parent brand *is* green and Forge
+     is the deliberate purple re-skin of it. An emerald block reads as a
+     regression to the parent brand. Teal is what is left and it is a good
+     answer rather than a leftover: cool without being blue, green-adjacent
+     without being Mesa's green, 0.184 relative luminance against amber's
+     0.194, and 172° from copper — so the complementary axis moved from
+     first-against-second to second-against-third rather than disappearing.
+
+     **The silver metal was 6% of max and read as vague.** Gold's is 96% and
+     copper's 74%, so silver was a grey between two colours — and its ramp was
+     a *saturation* ramp where theirs are value ramps inside one hue, which is
+     why it looked different in kind rather than merely duller. At 32% it is a
+     pale cool metal carrying the body's hue, and the ramp matches. 55% was
+     tried and abandons the silver for a teal block; a third is the ceiling.
 
      **Short arcs, because long ones were the complaint.** The bodies were
      raspberry, violet and azure first, which made the turns 87°, 0° and 159°.
@@ -693,16 +770,16 @@
      was the best of the three and the 159° one was called out for holding
      "multiple colours" — which it did, since 159° of arc is copper, red,
      magenta, blue. OKLCh fixes the mud; it cannot make a long journey read as
-     one object. The three are separated from each other instead — 75°, 267°
+     one object. The three are separated from each other instead — 70°, 189°
      and 18° — so the board still carries three distinct colours.
 
-     **It is not a complementary scheme.** Gold is yellow and bronze is
-     orange-red — neighbours on the wheel, because that is what the medals are
-     — so blocks one and three are 57° apart and held apart by *value* rather
-     than hue: caps 0.40 against 0.20. Widening that means pushing copper to
-     oxblood, which takes its own arc past 60° and back into the fault the
-     35° rule exists for. First place's body moved 61° → 75° to buy what
-     separation there is, which also stopped the leader reading as brown.
+     **It is a complementary pair plus a neighbour, not an even triad.** Silver
+     and copper's bodies sit **172°** apart — a true complement, and the axis
+     the stage is built on. Copper is 52° from gold and cannot leave: gold is
+     yellow, bronze is orange-red, neighbours on the wheel because that is what
+     the medals are. Widening it pushes copper to oxblood and its own arc past
+     60°, back into the fault the 35° rule exists for. So one and three are
+     held apart by *value* — bodies 0.194 against 0.052 relative luminance.
 
      **Second place was violet and had to move off it.** Its body sat at h297°,
      which is this page's own hue to the degree, so the block was the

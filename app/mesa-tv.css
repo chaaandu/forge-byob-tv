@@ -3242,8 +3242,8 @@
 
     background: linear-gradient(
       to top,
-      color-mix(in srgb, var(--accent) 55%, var(--surface-sunken)) 0,
-      var(--accent) var(--h-card-ribbon-fold)
+      color-mix(in srgb, var(--card-day-fill) 55%, var(--surface-sunken)) 0,
+      var(--card-day-fill) var(--h-card-ribbon-fold)
     );
     /* **No shadow, and it was photographed before being cut.** One cast upward
        here, on the reasoning that a flap folded up lies over the card and so
@@ -3256,11 +3256,13 @@
        one that does not resolve only muddies the edge the other depends on. */
 
     font: var(--t-tv-card-today);
-    /* The page colour as ink on the accent: 8.39:1 on dark, 4.85:1 on light.
-       Checked on both surfaces rather than assumed — a token that is a surface
-       in one place and ink in another is the failure AGENTS.md names, and it
-       only survives here because the accent inverts with the surface too. */
-    color: var(--surface);
+    /* **The band reads a pair of its own, not `--accent`.** It was the accent
+       as a solid with the page colour as ink, which measured 2.2x the mean
+       luminance of the week figure's own zone — the day figure out-shouting
+       the number this board is ranked by. `--card-day-fill` carries the whole
+       argument, including why it is not teal. White on Vivid Violet, 5.54:1,
+       and the band supplies its own ground so it holds on either surface. */
+    color: var(--card-day-ink);
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
     overflow: hidden;

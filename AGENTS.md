@@ -246,21 +246,42 @@ npm run build        # next build
   like that read as one object.
 
   So each block now **fades into its own shadow rather than into a different
-  colour**: gold 83° → amber 61°, silver (achromatic) → sapphire, copper 51° →
-  maroon 18°. Every arc is under 35°. The three are told apart from *each
-  other* instead — a warm yellow, a cool blue and a red, roughly a third of the
+  colour**: gold 78° → amber 70°, silver (achromatic) → teal 189°, copper 51°
+  → maroon 18°. Every arc is under 35°. The three are told apart from *each
+  other* instead — a warm orange-gold, a cool teal and a red, roughly a third of the
   wheel apart — so the board still carries three distinct colours while no
   single block carries two. **Keep new arcs under ~35°.**
 
-  **And it is not a complementary scheme — do not call it one.** Gold is yellow
-  and bronze is orange-red, neighbours on the wheel, because that is what the
-  medals are. Blocks one and three sit 57° apart and are held apart by *value*
-  — caps 0.40 against 0.20 — with the cool block opposite them both. Widening
-  that gap means pushing copper toward oxblood, which takes its own arc past
-  60° and straight back into the fault the 35° rule exists for. **Short arcs
-  and evenly-spaced hues cannot both be had here.** First place's body was
-  moved 61° → 75° to buy the separation that exists, which also stopped the
-  leader reading as brown rather than gold.
+  **It is a complementary pair plus a neighbour, not an even triad.** Silver
+  and copper's bodies sit **172°** apart — a true complement, and the axis the
+  stage is built on. Copper is 52° from gold and cannot leave: gold is yellow,
+  bronze is orange-red, neighbours on the wheel because that is what the medals
+  are. Widening it pushes copper toward oxblood and its own arc past 60°,
+  straight back into the fault the 35° rule exists for. **Short arcs and evenly
+  spaced hues cannot both be had here**, so one and three are held apart by
+  value instead.
+
+  **Two things about saturation that cost several passes each.** Gold's body
+  was once at *98% of the chroma sRGB allows* and still looked like mustard,
+  because yellow's chroma collapses as it darkens (0.167 at L0.80, 0.119 at
+  L0.57) — a dark yellow is muddy and nothing fixes it but not being yellow.
+  Turned orange it carries more chroma at the same lightness, so it is darker
+  and richer at once, and the white name on it recovered from 4.67:1 to 5.3:1.
+  And silver's body read dull at 46% *and* at 29%, because the fault was never
+  hue or chroma: **blue is dark**. A saturated blue carries about half the
+  relative luminance of the warm bodies at the same OKLCh lightness — 0.083
+  against 0.194. Only lightness fixes it. **Compare bodies by relative
+  luminance, not by OKLCh lightness.**
+
+  **And then blue was rejected on looks, which leaves a narrow wheel.** Gold
+  holds 70°, copper 18°, the page is violet at 297°. **Green is the trap** —
+  the obvious remaining cool, and the one hue this brand cannot use, because
+  Mesa's parent brand *is* green and Forge is the deliberate purple re-skin of
+  it; an emerald block reads as a regression to the parent brand. Teal is what
+  is left, and it earns its place: cool without being blue, green-adjacent
+  without being Mesa's green, 0.184 relative luminance against amber's 0.194,
+  and 172° from copper. **Anything proposing green here is proposing the
+  parent brand.**
 
   **Second place was violet through two rounds and should not have been.** It
   was the ramp that worked while the others were long, which bought it a pass

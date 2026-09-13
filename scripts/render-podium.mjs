@@ -113,10 +113,10 @@ const BLOCKS = [
     w: wRest,
     h: 570,
     mark: 190,
-    ramp: ['#2b4490', '#2b4490'],
-    metal: '#aab9cc',
+    ramp: ['#33837e', '#33837e'],
+    metal: '#98c1bd',
   },
-  { place: 1, x: 0, w: w1, h: 720, mark: 250, ramp: ['#9e6a06', '#9e6a06'], metal: '#f0bd52' },
+  { place: 1, x: 0, w: w1, h: 720, mark: 250, ramp: ['#a96d11', '#a96d11'], metal: '#f5af1f' },
   {
     place: 3,
     x: w1 / 2 + GAP + wRest / 2,
@@ -449,8 +449,8 @@ for (const b of BLOCKS) {
  * lightness, chroma and hue separately in OKLCh keeps every step of the ramp
  * as saturated as its ends:
  *
- *   gold   83° → amber    75°     9° of turn
- *   silver (no hue) → sapphire    0°, a pure chroma ramp
+ *   gold   78° → amber    70°     8° of turn
+ *   silver (no hue) → teal      189°     0°, a pure chroma ramp
  *   copper 51° → maroon   18°    33° of turn
  *
  * ── And the arcs are short because long ones were the actual complaint ──
@@ -464,8 +464,8 @@ for (const b of BLOCKS) {
  * as one object, because a long journey is not one object.
  *
  * So each block now stays inside one hue family and the three are separated
- * from **each other** instead — 75°, 267° and 18°, a warm yellow, a cool blue
- * and a red.
+ * from **each other** instead — 70°, 189° and 18°, a warm orange-gold, a cool
+ * teal and a red.
  *
  * **First place's body is the one that had to give.** It sat at 61°, which is
  * an amber brown, and that was two faults at once: it left only 43° between
@@ -473,14 +473,90 @@ for (const b of BLOCKS) {
  * leader read as brown rather than gold. Moving it to 75° buys both — 57°
  * between one and three, and first place's own arc down to 9°.
  *
- * **This trio is not a complementary scheme and should not be described as
- * one.** Gold is yellow and bronze is orange-red; they are neighbours on the
- * wheel because that is what the medals are. Blocks one and three are held
- * apart by *value* — caps 0.40 against 0.20, bodies 0.087 against 0.033 — not
- * by hue, and the cool block sits opposite them both. Widening that 57° any
- * further means pushing copper toward oxblood, which takes its own arc past
- * 60° and straight back into the fault this whole rule exists for. Short arcs
- * and evenly-spaced hues cannot both be had while the metals are these three. Each block is a metal fading into its own shadow; the board is
+ * ── Saturation is a gamut problem, and gold's is the awkward one ──
+ *
+ * Reviewed once more, bronze was called the best of the three and gold "very
+ * dull, top and bottom". Measured as a share of the chroma sRGB actually
+ * allows at each end's lightness, that was exactly right: copper ran 74% and
+ * 67% of maximum, and gold's body ran **98%** — it was already as rich as a
+ * yellow can be at that lightness, and it still looked like mustard.
+ *
+ * **Because dark yellow is muddy and there is no way around it.** Yellow's
+ * chroma peaks near L0.80 and collapses either side — 0.167 at L0.80, 0.119 at
+ * L0.57, 0.109 at L0.88. Red has no such problem, which is why copper's body
+ * can be dark *and* rich and gold's cannot. Both gold ends now sit on that
+ * peak rather than past it: the metal was at L0.82, on the wrong side of the
+ * hump, which is why it read pale.
+ *
+ * **Turning the body orange is what resolved that**, and it was asked for as a
+ * look rather than as a fix. Orange keeps its chroma where yellow loses it —
+ * maxC at L0.60 is 0.141 at h60 against 0.126 at h76 — so the body can be
+ * *darker and richer at once*. It is 96% of maximum now, and the venture name
+ * on it went from 4.67:1 back to 5.3:1. Gold is still the tightest contrast on
+ * the board and the one to re-measure after any change to it.
+ *
+ * **Silver's body went the other way twice before it landed.** At 46% of
+ * maximum it was nowhere — too grey for a sapphire, too blue for a steel, so
+ * it read as denim. Taken down to a true steel at 29% it was coherent and
+ * dull, which was the correct answer to the wrong question: the body does not
+ * have to be the metal's own shadow, it has to hold the *stage* together.
+ *
+ * **And the reason it kept reading as dull is not hue at all — blue is dark.**
+ * At the lightness the warm bodies live at, a saturated blue carries roughly
+ * half their relative luminance: the steel measured 0.083 against amber's
+ * 0.194. No hue or chroma choice fixes that; only lightness does. **Compare
+ * bodies by relative luminance, not by OKLCh lightness** — the two disagree
+ * most exactly where blue is involved, which is how this was got wrong twice.
+ *
+ * ── Then blue was rejected outright, and what is left is narrow ──
+ *
+ * Lifted to L0.55 the azure measured 0.164 and read level with the warm two,
+ * which fixed the dullness and was still not wanted. The wheel is more spoken
+ * for than it looks: gold holds 70°, copper 18°, the page is violet at 297°,
+ * and blue is out.
+ *
+ * **Green is the trap.** It is the obvious remaining cool, and it is the one
+ * hue this brand cannot use: `forge-tokens.css` opens by recording that Mesa's
+ * parent brand *is* green and Forge is the deliberate purple re-skin of it. An
+ * emerald block would read as a regression to the parent brand, on a wall
+ * whose entire palette exists to be the re-skin.
+ *
+ * That leaves teal, and it happens to be a good answer rather than a leftover:
+ * cool without being blue, green-adjacent without being Mesa's green, and at
+ * 0.184 relative luminance it sits level with amber's 0.194 while staying
+ * under it. It is also 172° from copper's maroon, so the complementary axis
+ * the stage is built on simply moved from first-against-second to
+ * second-against-third.
+ *
+ * ── And the silver had to stop being a grey ──
+ *
+ * Reviewed once more, second place was called vague at the top and its
+ * gradient weak next to the other two. Measured as a share of available
+ * chroma, the three metals ran **96%, 6% and 74%** — silver was a grey
+ * standing between two colours. That is also why its *ramp* looked different
+ * in kind: gold and copper run a value ramp inside one saturated hue, and
+ * silver ran a saturation ramp from nothing to teal, which reads as a wash
+ * rather than as a material.
+ *
+ * At 32% it is a pale cool metal with the body's own hue in it — a silver with
+ * a patina rather than a shade of grey — and its ramp now has the same shape
+ * as the other two. Relative luminance 0.485, still under gold's 0.502, so the
+ * cap order holds at 0.356 / 0.320 / 0.202.
+ *
+ * **55% was tried first and it was too much**: at that chroma the block stops
+ * being a silver and becomes a teal one, which wins the richness argument by
+ * abandoning the thing the block is for. The ceiling is about a third.
+ *
+ * **It is a complementary pair plus a neighbour, not an even triad.** Silver
+ * and copper's bodies sit **172°** apart, which is as close to a true
+ * complement as makes no difference, and that axis is what gives the stage its
+ * structure.
+ * Copper is 52° from gold and cannot leave: gold is yellow and bronze is
+ * orange-red, neighbours on the wheel because that is what the medals are.
+ * Widening it means pushing copper toward oxblood, which takes its own arc past
+ * 60° and straight back into the fault this rule exists for. So blocks one and
+ * three are held apart by *value* instead — bodies 0.194 against 0.052 in
+ * relative luminance — with the cool block opposite them both. Each block is a metal fading into its own shadow; the board is
  * still three distinct colours. **Keep new arcs under ~35°.** That is the
  * number this was tuned to and the one the complaint was about.
  *
