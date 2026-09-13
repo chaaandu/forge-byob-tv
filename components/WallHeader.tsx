@@ -79,8 +79,12 @@ export function WallHeader({
   /**
    * What the board's figures are measured over, set beside its name.
    *
-   * `/podium` passes `All time`; `/weekly` passes nothing, because its own day
-   * chip and its `Revenue since` caption already say what its window is.
+   * Nothing passes it today. `/podium` passed `All time` until 13 September
+   * 2026 and the removal was asked for directly; `/weekly` never passed
+   * anything, because its own day chip and its `Revenue since` caption already
+   * say what its window is. The prop stays because it is what decides — a
+   * slide cannot come to carry the wrong window, and putting the word back on
+   * either board is this one line.
    */
   scope?: string
   /**

@@ -280,13 +280,24 @@ npm run build        # next build
   empty is a valid state here and a stamp with no figures beside it states the
   provenance of nothing.
 
-- **A board says what its figures are measured over.** `/podium` carries
-  `All time` beside its name; `/weekly` carries nothing, because its day chip
-  and its `Revenue since` caption already bound its window. The same venture
-  reads ₹2,42,546 on one slide and ₹12,400 on the other thirty seconds later,
-  and the old argument for saying nothing — that the audience is thirty-nine
-  teams who live the programme daily — is a claim about the people in the
-  corridor rather than about the board. It costs one word not to rely on it.
+- **Neither board states its window now, and `/podium` is the one that lost
+  it.** It carried `All time` beside its name until 13 September 2026; removal
+  was asked for directly. `/weekly` never carried anything, because its day chip
+  and its `Revenue since` caption already bound its window.
+
+  What this costs is stated rather than argued away. The same venture reads
+  ₹2,42,546 on one slide and ₹12,400 on the other thirty seconds later, and
+  nothing on either slide now says why. The wall is back to relying on the
+  argument the word was added to stop relying on — that the audience is
+  thirty-nine teams who live the programme daily, so they know which board is
+  which. That is a claim about the people in the corridor rather than about the
+  board, and it is the one being made again.
+
+  **The machinery stays and stays exercised.** `WallHeader`'s `scope` prop is
+  still there, still typed, still styled as `.tv-mast-scope`, and
+  `render.test.tsx` still pins that the prop is what decides — so no slide can
+  come to carry the wrong one, and putting the word back is one prop on one
+  line.
 
 - **No trigger types beyond the 15 in the design.** The list was deliberately narrowed.
 - **The rotation between the two slides is ours, and it is the only rotation logic

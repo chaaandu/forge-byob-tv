@@ -644,10 +644,12 @@ describe('WallHeader', () => {
    * ── What the figures are measured over, said once ──
    *
    * The same venture reads ₹2,42,546 on `/podium` and ₹12,400 on `/weekly`
-   * thirty seconds later. `/podium` says `All time` beside its name; `/weekly`
-   * says nothing, because its day chip and its `Revenue since` caption already
-   * bound its window. The assertion is that the prop is what decides, so a
-   * slide cannot come to carry the wrong one.
+   * thirty seconds later. Neither board says so today — `/podium` carried
+   * `All time` beside its name until 13 September 2026 and was asked to drop
+   * it; `/weekly` never carried anything, because its day chip and its
+   * `Revenue since` caption already bound its window. So this asserts the
+   * prop rather than either page: it is what decides, a slide cannot come to
+   * carry the wrong window, and the word is one prop away from returning.
    */
   it('says what a board is measured over, only when told', () => {
     const withScope = render(
