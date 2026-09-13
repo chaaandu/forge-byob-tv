@@ -91,8 +91,14 @@ const report = await page.evaluate(() => {
         ? null
         : (() => {
             const n = numeral.getBoundingClientRect()
-            const vGap = +(box.top - n.bottom).toFixed(1)
-            const hGap = +(n.left - box.right).toFixed(1)
+            // Signed clear air on each axis, whichever side the numeral is on.
+            // This assumed the numeral sat *above* the crown and to its right;
+            // since the stage it is on the plinth, 600px below, and the old
+            // one-sided subtraction reported a collision for two boxes that
+            // were nowhere near each other. Two intervals overlap only if
+            // both gaps are negative.
+            const vGap = +Math.max(n.top - box.bottom, box.top - n.bottom).toFixed(1)
+            const hGap = +Math.max(n.left - box.right, box.left - n.right).toFixed(1)
             return { vGap, hGap, collides: vGap < 0 && hGap < 0 }
           })(),
     overhangsDiscLeft: +(bandBox.left - box.left).toFixed(1),
