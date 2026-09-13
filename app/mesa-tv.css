@@ -208,11 +208,18 @@
      38px into the gaps either side of first place with nothing reporting it.
      `scripts/measure-figures.mjs` exists because of that day and is still the
      check; what it measures now is `--t-stage-figure` against a block. */
-  /* **2.5vw / 48px, up from 2.0833vw / 40px**, and this step is the masthead's
-     alone — `--t-tv-heading` is its only reader, which is what makes the size a
-     one-line change. Argued there, along with the face and the tracking it
-     moved with. */
-  --fs-2: clamp(28px, 2.5vw, 64px);
+  /* **3.25vw / 62px**, which is 2.0833vw / 40px the morning of 13 September
+     2026, then 2.5vw / 48px when the lockup came off, then 1.3x that by
+     request. This step is the masthead's alone — `--t-tv-heading` is its only
+     reader, which is what makes the size a one-line change. Argued there, along
+     with the face and the tracking it moved with.
+
+     **`--h-mast` is the second line and it is not optional.** The mast is the
+     title's line box, `--h-board` subtracts the mast, and `/weekly`'s four rows
+     of cards are what `--h-board` divides up. Raise this without raising that
+     and a 62px line sits in a 48px box, centred, overhanging the hairline under
+     it by 7px at either end. */
+  --fs-2: clamp(36px, 3.25vw, 83px);
   --fs-3: clamp(17px, 1.4583vw, 39px);
   --fs-4: clamp(14px, 1.1458vw, 31px);
   --fs-5: clamp(12px, 0.9375vw, 25px);
@@ -660,11 +667,12 @@
      so the hairline under it cannot move when a heading changes length, and so
      the two are visibly one number when the heading's size moves.
 
-     **`--h-board` is the other half of this and subtracts it.** Going 44 → 48
-     takes 4px off `/weekly`'s four rows of cards — about a pixel a row, and
-     measured rather than assumed. Anything that raises the heading again pays
-     the same way, out of the board. */
-  --h-mast: 2.5vw; /* 48px — `--fs-2` at line-height 1 */
+     **`--h-board` is the other half of this and subtracts it.** 44 → 48 → 62
+     across two changes on 13 September 2026 takes 18px off `/weekly`'s four
+     rows of cards — four or five pixels a row, measured rather than assumed.
+     Anything that raises the heading again pays the same way, out of the board,
+     and the board is the thing the wall is for. */
+  --h-mast: 3.25vw; /* 62px — `--fs-2` at line-height 1 */
   /* Air between the masthead's baseline and its rule, and between that rule and
      row 1. Deliberately unequal — the rule belongs to the masthead, so it sits
      nearer to it than to the board it introduces. */
@@ -1344,7 +1352,7 @@
      line because title case puts an x-height beside the wordmark rather than
      an unbroken run of caps. A fifth face should re-measure rather than trust
      this paragraph. */
-  /* ── 13 September 2026: Figtree 900, capitals, centred, 48px ──
+  /* ── 13 September 2026: Figtree 900, capitals, centred, 62px ──
 
      Everything above this line is the record of four faces and it is kept
      because the traps in it are live. What changed: the lockup was removed from
@@ -1381,10 +1389,20 @@
      **The two are one decision.** Put title case back and this goes to 0 with
      it, or the masthead is a tracked run of lowercase at a capital's spacing.
 
-     `--fs-2` goes 2.0833vw → 2.5vw, 40px → 48px. The note above says raising it
-     touches nothing else because it has exactly one reader, and that this token
-     is the reader — still true — and that if it goes up the Mesa lockup goes
-     with it. The lockup went instead. */
+     `--fs-2` goes 2.0833vw → 2.5vw → 3.25vw, 40px → 48px → 62px, the last step
+     asked for as "1.3x". The note above says raising it touches nothing else
+     because it has exactly one reader, and that this token is the reader —
+     still true — and that if it goes up the Mesa lockup goes with it. The
+     lockup went instead.
+
+     **What bounds it is the apparatus, not the frame.** The masthead is three
+     columns with matched `1fr`s, so the title is centred only while each `1fr`
+     still clears the slide's apparatus: `/podium`'s Flea countdown measures
+     254px of content and `/weekly`'s day chip less. At 62px the wider heading,
+     `WEEKLY LEADERBOARD`, leaves 500px a side at 1920 — twice what the widest
+     apparatus needs. The next step up should re-measure that number rather than
+     trust this sentence, because the failure is not an overflow, it is the
+     heading quietly sliding off centre. */
   --t-tv-heading: 900 var(--fs-2) / 1 var(--font-sans);
   --track-tv-heading: 0.05em;
   /* `--h-tv-logo` stood here: the Mesa lockup at 1.72vw / 33px, tuned so its
