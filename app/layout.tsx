@@ -52,37 +52,6 @@ const mesaSerifVariable = localFont({
 })
 
 /**
- * Archivo Black, for `BYOB` in `/podium`'s masthead and nothing else.
- *
- * **A third family, added deliberately and scoped to one word.** The rule this
- * bends is a real one — two families is what keeps two TVs setting the same
- * frame identically — so this is not a general display face. It is a wordmark,
- * it appears once, and it is the only thing on either wall that uses it.
- *
- * It is *bundled*, not linked. The 9.8KB latin subset sits in `app/fonts/` next
- * to the other two with its OFL licence, because a `fonts.googleapis.com` link
- * would put a runtime network dependency on a wall that runs unattended for
- * weeks — and a font request that fails silently falls back to Helvetica on a
- * screen nobody is watching closely enough to notice.
- *
- * Single weight, and that is the point: Archivo Black *is* the 900. There is no
- * axis to set, so nothing here can accidentally render it lighter. It replaced
- * MesaSerif at 900, which was the heaviest thing this wall could previously
- * draw.
- *
- * The const is not named `archivoBlack` for the same reason `mesaBody` is not
- * named `Manrope`: `next/font/local` derives the CSS family name from it, and a
- * name matching a real family risks merging with any `local()` rule that shares
- * it.
- */
-const displayBlack = localFont({
-  src: './fonts/ArchivoBlack-Regular.woff2',
-  weight: '400',
-  display: 'block',
-  variable: '--font-display-black',
-})
-
-/**
  * Bebas Neue, for venture names on `/podium` and nothing else.
  *
  * **The fourth family, and the point at which this needs saying out loud:** two
@@ -131,7 +100,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={[
         mesaBody.variable,
         mesaSerifVariable.variable,
-        displayBlack.variable,
         condensed.variable,
       ].join(' ')}
     >
