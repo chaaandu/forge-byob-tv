@@ -154,9 +154,20 @@
 
        fs-2  40px   masthead heading
        fs-3  28px   /podium's list figures
-       fs-4  22px   /weekly's figure, both boards' rank numerals
-       fs-5  18px   /weekly's rank and today line, the countdowns
-       fs-6  15px   every label, caption and venture name on /weekly
+       fs-4  22px   /podium's list venture name
+       fs-5  18px   the countdowns
+       fs-6  15px   every label and caption on both slides
+
+     ── And two sizes that are no longer on it ──
+
+     `/weekly`'s card name and card figure left for `--fs-card-name` (17px) and
+     `--fs-card-money` (26px), which are declared below this block with the
+     reason. They are derived against the card rather than against the ladder,
+     the way `--t-stage-figure` is derived against a podium block's face and
+     `--t-tv-card-rank` against its 31px tag. The line above about `fs-4` and
+     `fs-6` owning them is no longer true, and the steps did not move: raising
+     either to suit one card would have taken a label on the other slide with
+     it.
 
      There was an `fs-7` at 12px and it existed for one thing: the provenance
      stamp. The footers went and the stamp went with them, so the step had one
@@ -203,6 +214,39 @@
   --fs-4: clamp(14px, 1.1458vw, 31px);
   --fs-5: clamp(12px, 0.9375vw, 25px);
   --fs-6: clamp(10px, 0.78125vw, 21px);
+
+  /* ── Two sizes that are the weekly card's own, not the ladder's ──
+
+     `--t-tv-card-name` and `--t-tv-card-week` came off `--fs-6` and `--fs-4`
+     and sit here instead, at **17px and 26px** against the 15px and 22px those
+     steps give. Asked for directly, as +2 and +4.
+
+     **The step could not simply be raised, which is why these exist.** `--fs-6`
+     is read by six tokens — the card's name and capsule, the masthead's labels,
+     the Flea strip's, `/podium`'s — and `--fs-4` by the card's figure *and*
+     `/podium`'s list name. Moving either step to suit one card takes a label on
+     the other slide with it, silently, and the rotation shows both thirty
+     seconds apart.
+
+     **This is a real weakening of the six-step rule and it is worth saying so.**
+     That rule exists because this file once had fourteen distinct sizes per
+     slide, several within a pixel of each other, none of them decided. What
+     stops these two from being the fifteenth is that they are *derived against
+     an object* rather than tuned by eye — the card is 148px wide with a fixed
+     height, and its name and its figure are the two lines that have to survive
+     six metres. `--t-stage-figure` set that precedent in container units
+     against a podium block's face, and `--t-tv-card-rank` in px against a 31px
+     tag; both are off the ladder for the same reason and both say so.
+
+     The rule the scale really protects is intact: **nothing on this wall
+     differs from anything else by 1.2px.** 17 clears `--fs-6`'s 15 and
+     `--fs-5`'s 18 is a step above; 26 sits between `--fs-4`'s 22 and
+     `--fs-3`'s 28 with four pixels either side.
+
+     Clamp floors and ceilings are scaled from the steps they left, so the
+     behaviour outside 1920 is the one those steps were tuned for. */
+  --fs-card-name: clamp(11px, 0.8854vw, 24px);
+  --fs-card-money: clamp(17px, 1.3542vw, 37px);
 
 
   /* Podium figures, by rank. First place is the only one that gets display size. */
@@ -951,7 +995,7 @@
      clamp is not a fallback: a type size chosen against the thirty-nine strings
      currently in a spreadsheet is a fact about the spreadsheet, and a venture
      can be renamed from it on any given Tuesday. */
-  --t-tv-card-name: 700 var(--fs-6) / 1.15 var(--font-sans);
+  --t-tv-card-name: 800 var(--fs-card-name) / 1.15 var(--font-sans);
   /* ── The name's tracking, and the case change is what finally settled it ──
 
      **0.01em, and everything before it was a value for capitals.**
@@ -984,11 +1028,18 @@
      on a page.
 
      **The probe is unchanged and it is what every one of these passed.** No
-     name in the cohort may need a third line. Under the old caps at 0.06em:
-     31 names on one line, 8 on two, none on three. Under title case at 0.01em:
-     **36 on one, 3 on two, none on three** — the two changes together bought
-     five names a single line each, and `In Between Sips by Kaappitalism`, which
-     has driven every retune of this value, still fits in two.
+     name in the cohort may need a third line.
+
+       caps, 0.06em, 15px/700        31 on one line, 8 on two, none on three
+       title case, 0.01em, 15px/700  36 on one, 3 on two, none on three
+       title case, 0.01em, 17px/800  34 on one, 5 on two, none on three  (now)
+
+     The middle row is what the case change alone bought — five names a single
+     line each. The last row gives two of them back, which is the size increase
+     being spent rather than a regression: `Namma Snacking Co` and `Postcards
+     Perfumery` wrap at 17px and did not at 15. `In Between Sips by
+     Kaappitalism`, which has driven every retune of this value, still fits in
+     two, and the cohort still has no name on three.
 
      **So this value is coupled to `.tv-card-name` having no `text-transform`.**
      Put the capitals back and it goes back to 0.06em with them. Re-run the
@@ -996,7 +1047,7 @@
   --track-card-name: 0.01em;
   /* Reduced 20% from clamp(15px, 1.45vw, 30px). Still the largest thing on the
      card, and still the figure the board exists to show. */
-  --t-tv-card-week: 700 var(--fs-4) / 1 var(--font-sans);
+  --t-tv-card-week: 850 var(--fs-card-money) / 1 var(--font-sans);
   /* ── The capsule takes the name's step, and the card drops to three sizes ──
 
      This was `--fs-5` at 600, one step under the week figure and one over the
@@ -1019,7 +1070,7 @@
      `--t-tv-card-today-hot` is deleted with it. It was 800 weight in the accent
      — the "traded" state — and there is no second state left to distinguish
      from: a card with no day draws no capsule at all. */
-  --t-tv-card-today: 700 var(--fs-6) / 1 var(--font-sans);
+  --t-tv-card-today: 850 var(--fs-6) / 1 var(--font-sans);
 
   /* **Dev chrome only** — `DevFlipTrigger`'s buttons, and nothing the wall
      renders. It was the "TODAY" tag on a card, which no longer exists, and it
@@ -1349,12 +1400,12 @@
      this line is proposing to break the pair again**, and should move this
      token, which moves both. */
   --t-tv-mast-label: 700 var(--fs-6) / 1 var(--font-sans);
-  --t-tv-mast-figure: 800 var(--fs-3) / 1 var(--font-sans);
+  --t-tv-mast-figure: 850 var(--fs-3) / 1 var(--font-sans);
 
   --t-tv-strip-label: 800 var(--fs-6) / 1 var(--font-sans);
   --h-tv-cal: clamp(26px, 2.3vw, 48px);
   --w-tv-cal-stroke: 5;
-  --t-tv-cal-figure: 800 var(--fs-5) / 1 var(--font-sans);
+  --t-tv-cal-figure: 850 var(--fs-5) / 1 var(--font-sans);
 
   /* ── `/weekly`'s band, and what it makes loud ──
 
@@ -1564,9 +1615,9 @@
 
      The mark is `100cqw` of its own band — see `components/Podium.tsx` for why
      that has to be a real length rather than a percentage. */
-  --t-stage-name: 700 11cqw / 1.12 var(--font-sans);
-  --t-stage-figure: 800 15.5cqw / 1 var(--font-sans);
-  --t-stage-numeral: 800 34cqh / 0.85 var(--font-sans);
+  --t-stage-name: 800 11cqw / 1.12 var(--font-sans);
+  --t-stage-figure: 850 15.5cqw / 1 var(--font-sans);
+  --t-stage-numeral: 850 34cqh / 0.85 var(--font-sans);
   /* Air between a venture's name and its figure, on the face. */
   --s-stage-name-gap: 0.4cqw;
   /* Air between the mark's lower edge and the name under it. The mark is a
@@ -1694,7 +1745,7 @@
      caption for the figure rather than the venture the figure belongs to. */
   /* **A step down from the figure beside it**, by request: at one size the
      row read as two equal facts, and the figure is the one that ranks. */
-  --t-pod-name-row: 700 var(--fs-4) / 1.1 var(--font-sans);
+  --t-pod-name-row: 800 var(--fs-4) / 1.1 var(--font-sans);
   /* **Dev chrome only** — `DevPodiumTrigger`'s buttons. It was the left
      column's `TOTAL REVENUE, ALL TIME` caption, which is gone; this is the one
      read left. */
@@ -1714,7 +1765,7 @@
      the wall that is not on the scale. It is here because the list's figure
      was asked up "a little" and the next step, 40px, is the podium's second
      and third figure, which the list must stay under. */
-  --t-pod-fig-row: 800 1.7708vw / 1 var(--font-sans);
+  --t-pod-fig-row: 850 1.7708vw / 1 var(--font-sans);
 
   /* `--t-pod-count` stood here for the masthead's Flea countdown, at the same
      `--fs-5` the day chip's numeral used. **Deleted rather than re-pointed.**
