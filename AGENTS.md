@@ -429,6 +429,19 @@ not by reading source.
 - **Motion `layout` transforms are ignored by `<tr>`.** Reordering rows must use grid
   rows with ARIA table roles. Measured in the dashboard: 30 animation frames with the
   transform present and the row at exactly one position throughout.
+- **A font without U+20B9 draws the rupee in a different font, and nothing says so.**
+  Every figure on both slides begins `₹`. A face missing that codepoint does not
+  fail — the browser silently falls to the next entry in the stack for that one
+  glyph, so the digits are the chosen face and the rupee sign is Helvetica, at a
+  different weight and width, on every number on the wall. Checked against the
+  cmap before a face is bundled, never assumed: **Satoshi, Switzer, Chillax,
+  Plein and Panchang all lack it**, and the first of those is the most-downloaded
+  sans on Fontshare. Excon, Zodiak and Bebas Neue carry it.
+
+  The same check covers venture names, which come from a spreadsheet this
+  project does not control. `YŌKI` is on the board today and needs U+014C, which
+  is why the bundled faces ship whole rather than latin-subset.
+
 - **Google's published CSV carries a UTF-8 BOM and CRLF endings.** `﻿team_id` is not
   `team_id`. papaparse handles both; a hand-rolled parser does not.
 - **`cache: 'no-store'` on both fetches.** Without it the browser HTTP cache serves one

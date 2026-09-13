@@ -5,20 +5,20 @@ import { Ganesha } from '@/components/Ganesha'
 import { Rotator } from '@/components/Rotator'
 import './globals.css'
 
-/**
- * All three faces are self-hosted, so the wall makes **no runtime request to a
- * font CDN**. That matters more here than in a normal app: this runs unattended for
- * weeks, and a font request that fails silently falls back to Georgia or
- * Helvetica on a screen nobody is watching closely enough to notice.
- *
- * No const here may be named after a family `colors_and_type.css` already
- * declares. `next/font` derives its CSS family name from the const, and that
- * file declares seven static `Manrope` rules and four `MesaSerif` ones. CSS
- * family names match case-insensitively, so a collision merges the two sets and
- * the browser picks between them by weight — fetching a static face as well as
- * the variable one, or preferring a `local()` system font over the self-hosted
- * file. Hence `wallBody` and `wallSerif` rather than anything named for Mesa.
- */
+/* ── The three faces, and the two rules that apply to all of them ──
+
+   **Self-hosted, so the wall makes no runtime request to a font CDN.** That
+   matters more here than in a normal app: this runs unattended for weeks, and a
+   font request that fails silently falls back to Georgia or Helvetica on a
+   screen nobody is watching closely enough to notice.
+
+   **No const below may be named after a family `colors_and_type.css` already
+   declares.** `next/font` derives its CSS family name from the const, and that
+   file declares seven static `Manrope` rules and four `MesaSerif` ones. CSS
+   family names match case-insensitively, so a collision merges the two sets and
+   the browser picks between them by weight — fetching a static face as well as
+   the variable one, or preferring a `local()` system font over the self-hosted
+   file. Hence `wallBody` and `wallSerif` rather than anything named for Mesa. */
 
 /**
  * Excon, and it replaces Manrope as the voice of both slides.
