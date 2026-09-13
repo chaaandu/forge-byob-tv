@@ -748,6 +748,20 @@
      there, because their spare line sits in the same gap. */
   --h-card-name: 2.8385vw; /* 54.5px */
   --h-card-fig: 1.6406vw; /* 31.5px */
+  /* ── The figure's lift ──
+
+     4px up, and it changes no box: `position: relative` shifts paint, not
+     layout, so the row heights, the mark's size and every baseline the board
+     shares are untouched.
+
+     It corrects an optical error the reserved rows create. The figure is
+     centred in its own box, which would be right if its neighbours were
+     symmetrical — and they are not. Above it is 9px of stated gap plus the
+     name's leading; below it the day band sits flush against the box's edge.
+     Measured, the figure's glyph bottom was **0.8px** off the band and 9.7px
+     off the name: nearly touching one, adrift from the other. Lifting 4 makes
+     it 5.8 above and 4.7 below, which reads as centred because it nearly is. */
+  --s-card-fig-lift: 0.2083vw; /* 4px */
   /* The day figure's line, under the week's. 18px holds 15px of type with 1.5px
      of leading either side — it is a line of text, not an object, so it needs a
      line's height and not a capsule's. */
@@ -2572,6 +2586,9 @@
 
   .tv-card-week {
     height: var(--h-card-fig);
+    /* Paint-only, so nothing else on the card moves. See `--s-card-fig-lift`. */
+    position: relative;
+    top: calc(-1 * var(--s-card-fig-lift));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2728,8 +2745,15 @@
       color-mix(in srgb, var(--accent) 55%, var(--surface-sunken)) 0,
       var(--accent) var(--h-card-ribbon-fold)
     );
-    box-shadow: 0 -0.1042vw 0.3125vw -0.0521vw
-      color-mix(in srgb, var(--surface-sunken) 70%, transparent);
+    /* **No shadow, and it was photographed before being cut.** One cast upward
+       here, on the reasoning that a flap folded up lies over the card and so
+       shades it — sound, and invisible. Rendered with and without at 1920, the
+       two crops are indistinguishable: a 2px offset under a 28px band is detail
+       an order of magnitude below the distance this is read from.
+
+       The crease at the foot is the depth device and one is the budget. A
+       shadow above plus a crease below is two of them on a 28px object, and the
+       one that does not resolve only muddies the edge the other depends on. */
 
     font: var(--t-tv-card-today);
     /* The page colour as ink on the accent: 8.39:1 on dark, 4.85:1 on light.
