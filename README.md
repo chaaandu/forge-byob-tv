@@ -82,9 +82,29 @@ in the repository ever records that you did this — which is the point. Editing
 the literals in `config.ts` instead is how a fixture path gets committed and
 deployed, and it has happened once already.
 
-The wall polls every 60 seconds. Google caches a published CSV for about five
-minutes and the consolidator writes every ten, so a change reaches the screen
-within roughly six minutes.
+Three clocks sit between a sale and the screen, and **only the last one is ours**:
+
+| Stage | Cadence |
+|---|---|
+| Rep logs a sale in their own team workbook → consolidator pulls all 42 into `Daily Dump` | every 10 min |
+| Google re-publishes the cached CSV | ~5 min |
+| The wall polls | 60 s |
+
+**So a sale reaches the screen in about 9 minutes typically and up to 16 at worst.**
+This line used to say "roughly six minutes" in a sentence that named the ten-minute
+consolidator immediately before it — six is cache plus poll, measured from the
+consolidator *writing*, and it silently dropped the consolidator's own wheel.
+(`docs/SHEET_SETUP.md` says six too and is correct: it scopes it to "of the
+consolidator writing.")
+
+**Polling faster does not help and neither does the Sheets API.** At 10s the browser
+would fetch a byte-identical cached body 29 times out of 30. Reading the master live
+through the Sheets API with a key was costed on 13 September 2026 and rejected: it
+removes only Google's 5-minute cache, leaving the consolidator's 10-minute floor
+untouched, and it requires sharing the *entire* master — `Team Links` column B holds
+direct URLs to all 42 team workbooks and column D holds student names. Roughly five
+minutes that nobody in a corridor can perceive, against a permanent exposure. **The
+consolidator's interval is the only lever that matters**, and it belongs to the master.
 
 ## Adding a venture logo
 
