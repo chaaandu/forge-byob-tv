@@ -436,21 +436,30 @@ not by reading source.
   different weight and width, on every number on the wall. Checked against the
   cmap before a face is bundled, never assumed. Shortlisted faces that **lack
   it**: Satoshi, Switzer, Outfit, Onest, Instrument Sans, Instrument Serif,
-  Gabarito, Red Hat Display, Be Vietnam Pro, Chillax, Plein, Panchang — the
-  first of those is the most-downloaded sans on Fontshare. Figtree and
-  Newsreader, which the wall ships, both carry it.
+  Gabarito, Red Hat Display, Be Vietnam Pro, Chillax, Plein, Panchang, and **DM
+  Serif Display, which this wall ships** — the first of those is the
+  most-downloaded sans on Fontshare. Figtree, which draws every figure, carries
+  it.
+
+  **The masthead face is the one permitted exception and the scope is what makes
+  it safe.** `--font-serif` has exactly one reader, `--t-tv-heading`, and that
+  draws three strings — `BYOB Leaderboard`, `Weekly Leaderboard`, `10-Day
+  Challenge` — every one of them a constant in this repo and none of them a
+  figure. **A face without the rupee may never be given a second reader.** The
+  moment `--font-serif` is put on anything that can carry a number, the check
+  above applies to it in full.
 
   The same check covers venture names, which come from a spreadsheet this
   project does not control. `YŌKI` is on the board today and needs U+014C, which
-  is why **Figtree ships whole rather than latin-subset**. Newsreader is subset,
-  and the difference is the point: it draws three headings that are constants in
-  this repo, never a spreadsheet value.
+  is why **Figtree ships whole rather than latin-subset**. The masthead face is
+  subset, and the difference is the point: it draws headings that are constants
+  in this repo, never a spreadsheet value.
 
 - **A weight outside a variable font's axis is synthesised, not refused.** The
   browser smears the outlines into a fake bold, which closes the counters and
   turns `8` into a blob at six metres. Four faces here have had a different
-  range — Bebas Neue was 400 only, Clash Display stopped at 700, Newsreader
-  stops at 800, Figtree starts at 300 — and the trap springs when a token that
+  range — Bebas Neue was 400 only, Clash Display stopped at 700, DM Serif
+  Display is 400 only, Figtree starts at 300 — and the trap springs when a token that
   was fine under the old face is left alone through a swap. A comment never
   caught it; `render.test.tsx` reads each `localFont` call's range out of
   `app/layout.tsx` and fails any type token that exceeds it.

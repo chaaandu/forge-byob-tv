@@ -77,43 +77,41 @@ const wallBody = localFont({
 })
 
 /**
- * Newsreader, for the masthead and nothing else.
+ * DM Serif Display, for the masthead and nothing else.
  *
- * **The brand book names it.** `mesa_forge_design_system/design_system.md` is
- * explicit — "Headers in New York (serif) for a classy editorial feel;
- * everything else in Manrope" — and its font note offers Newsreader and
- * Fraunces as the free stand-ins for New York. This is the first of those,
- * which makes it the one choice on this wall that is the brand book's rather
- * than a preference.
+ * **Single weight, 400, and there is no second one to reach for.** DM Serif
+ * Display ships Regular and Italic and that is the whole family — it is a
+ * display face whose stems are already heavy at 400, which is the point of it.
+ * The masthead was 800 under the face this replaces and 900 under the one
+ * before that; asking this file for either does not fail, it makes the browser
+ * smear the outlines into a synthetic bold. `render.test.tsx` reads `weight:
+ * '400'` from right here and fails any type token that asks for anything else.
  *
- * It is the second family, and the only one, because a masthead is the one
- * place a display voice pays for itself: it is a single fixed line per slide
- * that never changes and never has to be compared to anything beside it.
+ * That trap has now had four different shapes on this wall — Bebas Neue at 400
+ * only, Clash Display stopping at 700, Newsreader stopping at 800, and this —
+ * and it has never once been caught by a person reading a comment.
  *
- * **Subset, unlike the body face, and that is deliberate rather than
- * inconsistent.** This face draws three strings — `BYOB LEADERBOARD`, `WEEKLY
- * LEADERBOARD`, `10-DAY CHALLENGE` — and all three are constants in this repo,
- * not spreadsheet values. So Latin-1 plus Latin Extended-A is a safe cut where
- * it would not be on the sans. It is still a *range* rather than the exact
- * glyphs in those three strings, because a heading can be reworded in a commit
- * and a subset cut to the letters of one sentence is a tofu waiting to happen.
+ * **It does not carry U+20B9 and that is permitted here**, narrowly. The rule
+ * in `AGENTS.md` is that a face missing the rupee draws every `₹` on the wall
+ * in whatever answers next in the stack, silently. This face draws three
+ * strings — `BYOB Leaderboard`, `Weekly Leaderboard`, `10-Day Challenge` — all
+ * of which are constants in this repo, none of which is a figure, and none of
+ * which can be edited from a spreadsheet. The guarantee is structural rather
+ * than hopeful: `--font-serif` has exactly one reader, `--t-tv-heading`.
  *
- * **The `opsz` axis is pinned at 40 and dropped from the file.** Newsreader
- * ships an optical-size axis spanning 6–72, and two live axes more than doubled
- * the file: 152KB subset, against 70KB with `opsz` instanced out. The masthead
- * renders at one size — `--fs-2`, 40px at 1920 — so a pinned optical size is
- * not a compromise here, it is the correct value baked in. It also means the
- * `font:` shorthand in `--t-tv-heading` is sufficient on its own, with no
- * `font-variation-settings` that a later shorthand could reset.
+ * Subset for the same reason, to Latin-1 plus Latin Extended-A. Still a *range*
+ * rather than the exact glyphs of those three strings, because a heading can be
+ * reworded in a commit and a subset cut to one sentence is a tofu waiting to
+ * happen.
  *
- * **The axis stops at 800.** The masthead was 900 under the face this replaces;
- * ask a variable font for a weight outside its range and nothing fails, the
- * browser synthesises one by smearing the outlines. `render.test.tsx` fails on
- * a type token that asks this face for more than 800.
+ * **Its cap height is 0.660em, the shortest of the four faces that have held
+ * this line** — 0.720, 0.700, 0.670, 0.660 — so the masthead's caps land 2.4px
+ * shorter at 40px than the original. `--h-tv-logo` is sized to those caps, so
+ * that is a measurement rather than a detail; see `--t-tv-heading`.
  */
 const wallSerif = localFont({
-  src: './fonts/Newsreader-Variable.woff2',
-  weight: '200 800',
+  src: './fonts/DMSerifDisplay-Regular.woff2',
+  weight: '400',
   display: 'block',
   variable: '--font-wall-serif',
 })

@@ -1222,34 +1222,61 @@
      1920px frame — half the width of the wall to say which of two contests is
      on — and a masthead does not have to shout to be a masthead.
 
-     **Tracking stays at 0.02em, which is a serif's value rather than a sans's.**
-     0.22em was there to fill a band that no longer exists; 0.06em is the amount
-     a heavy *sans* wants at display size. A serif is already spaced by its
-     serifs — they close the gaps a sans leaves open — so the sans value on a
-     serif reads as letter-spaced small caps rather than as a title.
+     **Tracking goes to zero, and the case change is what decides it.**
+
+     It has been 0.22em to fill a band that no longer exists, then 0.06em — the
+     amount a heavy *sans* wants at display size — then 0.02em once a serif took
+     the line, because a serif is already spaced by its serifs and the sans
+     value read as letter-spaced small caps.
+
+     Every one of those was a value for **uppercase**. Positive tracking exists
+     to open up capitals, which are drawn to sit tight; lowercase is already
+     spaced by its own ascenders and descenders, and a display serif's fitting
+     is drawn for exactly the setting this now uses. 0.02em on
+     `Weekly Leaderboard` measured 379.8px against 365.4px at zero — 14px of air
+     inserted between letters that were already correctly spaced by the person
+     who drew them.
+
+     **So this value is now coupled to `.tv-mast-title` having no
+     `text-transform`.** Put the capitals back and this has to go back up with
+     them, or the masthead is a tracked run of caps at a lowercase's spacing.
 
      ── Measured, `WEEKLY LEADERBOARD` at 1920, from the element's own rect ──
 
-       Manrope    800 @ 0.06em   494.6px   cap 28.8px
-       Zodiak     900 @ 0.02em   578.1px   cap 28.0px
-       Newsreader 800 @ 0.02em   545.4px   cap 27.5px   (now)
+       Manrope          800 @ 0.06em   494.6px   cap 28.8px   CAPS
+       Zodiak           900 @ 0.02em   578.1px   cap 28.0px   CAPS
+       Newsreader       800 @ 0.02em   545.4px   cap 27.5px   CAPS
+       DM Serif Display 400 @ 0        365.4px   cap 26.4px   Title Case  (now)
 
-     A serif is simply a wider thing than a geometric sans at the same size and
-     no negative tracking buys that back without closing the counters, so the
-     line still runs 51px wider than the sans one did. The frame has it:
-     clearance from the title's right edge to `/podium`'s countdown is **959px
-     at 1920**, and `/weekly` carries no apparatus at all outside challenge
-     mode — where the heading it switches to, `10-DAY CHALLENGE`, is the
-     shorter string. `measure-fit` reports zero overflow at all four viewports.
+     **Title case is what collapsed the width**, not the face: the line is now
+     shorter than any of the three all-caps settings before it, by 129px against
+     the sans it started as. Clearance from the title's right edge to
+     `/podium`'s countdown is **1090px at 1920**, and `/weekly` carries no
+     apparatus at all outside challenge mode. `measure-fit` reports zero
+     overflow at all four viewports.
 
-     The cap height is the number to watch rather than the width. Three faces
-     have held this line at 28.8, 28.0 and 27.5px, and **`--h-tv-logo` is sized
-     to it** — the Mesa lockup beside the heading is tuned so the wordmark and
-     the caps read as one line of masthead. The drift is 1.3px across all three,
-     inside the 1.2px-per-step rule by a hair; a fourth face that loses another
-     pixel of cap needs the lockup re-measured rather than assumed. */
-  --t-tv-heading: 800 var(--fs-2) / 1 var(--font-serif);
-  --track-tv-heading: 0.02em;
+     **The frame now has far more room than this line uses, and that is left
+     alone deliberately.** `--fs-2` has exactly one reader — this token — so
+     raising it is a one-line change that touches nothing else, and it is
+     tempting precisely because the masthead reads smaller than it did. It is
+     not raised because a masthead does not have to fill the wall to be a
+     masthead; that argument is what took it from 3.65vw to 2.05vw and it did
+     not stop being true when the line got shorter. If it does go up, the Mesa
+     lockup goes with it — see `--h-tv-logo`.
+
+     The cap height is the number to watch rather than the width. Four faces
+     have held this line at 28.8, 28.0, 27.5 and 26.4px, and **`--h-tv-logo` is
+     sized to it** — the Mesa lockup beside the heading is tuned so the wordmark
+     and the caps read as one line of masthead. The note here used to say the
+     drift was 1.3px and inside the scale's 1.2px tolerance "by a hair", with a
+     warning that a fourth face losing another pixel would need the lockup
+     re-measured. **A fourth face did, and it was**: 2.4px of total drift now,
+     measured at 1920 with the lockup at 33px, and the two still read as one
+     line because title case puts an x-height beside the wordmark rather than
+     an unbroken run of caps. A fifth face should re-measure rather than trust
+     this paragraph. */
+  --t-tv-heading: 400 var(--fs-2) / 1 var(--font-serif);
+  --track-tv-heading: 0;
   /* ── The Mesa lockup, sized to the masthead's cap height ──
 
      It was 3.5vw — 67px — because it had a filled 82px band to fill and would
@@ -3324,11 +3351,30 @@
     background: var(--hairline-strong);
   }
 
+  /* **No `text-transform` here, and the strings were always right.**
+
+     This carried `text-transform: uppercase` through four faces, so every
+     heading on the wall was shouted. The source strings have been title case
+     the whole time — `lib/board.ts` returns `Weekly Leaderboard` and `10-Day
+     Challenge`, `app/podium/page.tsx` passes `BYOB Leaderboard` — which means
+     the acronym was already cased correctly and the CSS was flattening the
+     distinction between `BYOB` and `Leaderboard` into one undifferentiated
+     run of capitals.
+
+     Setting it in title case is what lets `BYOB` read *as* an acronym, and it
+     is the case a display serif is drawn for: DM Serif Display's whole
+     character is in its lowercase — the ball terminals on `a` and `y`, the
+     bracketed serifs, the thick-thin transition — and all-caps hides every bit
+     of it behind twenty-six shapes that any serif draws similarly.
+
+     **Anything that wants to shout again should change the string, not this
+     rule.** A heading the board decides to capitalise is a content decision
+     that belongs with the other three strings, where `BYOB` can stay an
+     acronym while the rest goes up. */
   .tv-mast-title {
     margin: 0;
     font: var(--t-tv-heading);
     letter-spacing: var(--track-tv-heading);
-    text-transform: uppercase;
     color: var(--ink);
     white-space: nowrap;
   }
