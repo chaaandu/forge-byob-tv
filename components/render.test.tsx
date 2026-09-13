@@ -149,69 +149,40 @@ describe('Podium', () => {
   })
 
   /**
-   * ── The gap says which direction it goes in ──
+   * ── A list row carries no number about other numbers ──
    *
-   * It was `+₹1,592`, on the motorsport convention: a competitor's figure, then
-   * their distance from the one ahead, prefixed and quiet. The convention
-   * assumes a *populated* column, which teaches the format in a second — and
-   * production on 13 September 2026 had only the top three trading, so ranks 5
-   * to 10 were tied on ₹0, a tie prints nothing, and exactly one row on the
-   * whole list carried a gap. A lone `+₹1,592` on a row whose own figure is an
-   * em dash reads the way a plus reads everywhere else: the team with no
-   * revenue appeared to have made the most money on the board.
+   * The row printed the distance to the row above it for a while, as `+₹1,592`,
+   * then `₹1,592 behind`, then suppressed for a venture on zero. Each of those
+   * fixed something real. What removed it was measuring it: a 13.0px cap height
+   * in `--ink-muted`, the smallest and faintest type on a slide read at six
+   * metres, restating a comparison already on the board twice at 16.8px.
    *
-   * Nothing failed and nothing reported it. This is where a change that takes
-   * the word back off has to fail.
+   * This is where putting it back has to fail, and it is written against the
+   * *shape* rather than the wording so it cannot be walked around by choosing a
+   * different phrase. A row prints its venture's own figure and no derived one.
    */
-  it('says the gap is a distance behind, never a gain', () => {
+  it('prints one figure per list row and no derived gap', () => {
     const all = teams().map((row, index) => ({ ...row, totalRevenue: 1_000 * (42 - index) }))
     const text = render(<Podium ranked={rankTeams(competingTeams(all))} />)
-    expect(text).toContain(`${formatRupees(1_000)} behind`)
-    // The sign is the whole bug: `+` on a leaderboard is read as a gain, and
-    // `−` would be read as a loss. Neither is what this number is.
+    // Rank 5's own figure, and *not* the ₹1,000 that separates it from rank 4.
+    expect(text).toContain(formatRupees(38_000))
+    expect(text).not.toContain('behind')
     expect(text).not.toContain(`+${formatRupees(1_000)}`)
-    expect(text).not.toContain(`\u2212${formatRupees(1_000)}`)
-  })
 
-  /**
-   * A tie is not a gap, and a zero distance is not a thing to say. This is also
-   * what kept the production board from printing six meaningless lines under
-   * six dashes on the morning the fault above was spotted.
-   */
-  it('prints no gap at all where two ventures are level', () => {
-    const level = teams().map((row) => ({ ...row, totalRevenue: 0 }))
-    const text = render(<Podium ranked={rankTeams(competingTeams(level))} />)
-    expect(text).not.toContain('behind')
-  })
-
-  /**
-   * ── A venture that has not traded is not "behind" by a price ──
-   *
-   * The row already says `—` rather than `₹0`, because zero asserts that a team
-   * traded and earned nothing. A rupee distance beside that dash contradicts it
-   * in the same row: the first says the team has not started, the second prices
-   * exactly how far along it is not.
-   *
-   * The production wall on 13 September 2026 is the case. Only the top three
-   * had traded, so rank 4 read `—  ₹1,592 behind` — a venture with no revenue
-   * carrying the only number on the list, and a number that was not really its
-   * own: subtracting zero from third place's total just reprints third place's
-   * total.
-   *
-   * Ranks below it were silent already, but only by accident of being *tied* on
-   * zero. This is the rule stated rather than arrived at, so it still holds on
-   * the first morning one team trades and the ones under it have not.
-   */
-  it('prints no gap for a venture that has not traded, even below one that has', () => {
-    const all = teams().map((row, index) => ({
-      ...row,
-      // Three trading, everyone else on nothing — the shape of the board this
-      // was found on.
-      totalRevenue: index < 3 ? 1_000 * (3 - index) : 0,
-    }))
-    const text = render(<Podium ranked={rankTeams(competingTeams(all))} />)
-    expect(text).toContain('—')
-    expect(text).not.toContain('behind')
+    const host = document.createElement('div')
+    document.body.append(host)
+    const root = createRoot(host)
+    act(() => root.render(<Podium ranked={rankTeams(competingTeams(all))} />))
+    // The rank numeral is a `.tv-figure` too — it is tabular type on the same
+    // stack — so the count that matters excludes it. One rupee figure a row,
+    // which is the shape the gap line broke.
+    const rows = [...host.querySelectorAll('.tv-pod-row')]
+    expect(rows).toHaveLength(7)
+    expect(rows.map((r) => r.querySelectorAll('.tv-figure:not(.tv-pod-row-rank)').length)).toEqual(
+      [1, 1, 1, 1, 1, 1, 1],
+    )
+    act(() => root.unmount())
+    host.remove()
   })
 
   it('renders the waiting board when nobody has traded', () => {

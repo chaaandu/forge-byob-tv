@@ -401,15 +401,12 @@ function PodiumCard({
 function Strip({
   ranked,
   fromRank,
-  above,
   kick = null,
   vacating = null,
   incoming,
 }: {
   ranked: readonly Team[]
   fromRank: number
-  /** The venture on the podium's lowest step, which row one is measured against. */
-  above: Team | undefined
   kick?: OvertakeEvent | null
   /** A rank in this list whose venture is on its way to the podium. */
   vacating?: number | null
@@ -544,52 +541,45 @@ function Strip({
   }
 
   /**
-   * How far this venture is behind the one directly above it.
+   * ── The gap line stood here, and it is gone ──
    *
-   * **The gap to the row above, not to the leader.** Both were on the table.
-   * Against first place every row reads as hopelessly behind and the number is
-   * the same story seven times; against the row above it is the distance a team
-   * would actually have to close this week, and it changes every day.
+   * `behind(index)` printed how far a venture was from the row above it —
+   * first as `+₹1,592`, then as `₹1,592 behind`, then suppressed for anyone on
+   * zero. Each of those was a real fix to a real fault. What none of them
+   * asked was whether the line should exist.
    *
-   * It also answers the criticism that this list said *order* and never
-   * *distance* — rank 4 is nearly double rank 10 and nothing on the board
-   * showed it. The share bars that used to say it were removed because their
-   * scale was never stated anywhere on the frame; a gap needs no scale, it is
-   * denominated in rupees like everything beside it.
+   * **Measured, which is what settled it.** At 1920 the line rendered at a
+   * 13.0px cap height in `--ink-muted` — the smallest and lowest-contrast type
+   * on the slide, against 16.8px for the row's own figure and 30.1px for the
+   * leader's. Signage legibility runs about 1 inch of cap height per 25 feet;
+   * at six metres that is roughly 20mm, and this line is 12.7mm on an 85in
+   * panel and 8.2mm on a 55in. It was under the threshold on either.
    *
-   * The first row on this list has a row above it — third place, on the podium
-   * — so every one of the seven *can* carry one. Three things silence it.
+   * That alone would only argue for making it bigger. What argues for deleting
+   * it is what it was *for*. It answered the criticism that this list said
+   * order and never distance — by adding more text, smaller. Both numbers it
+   * subtracts are already on the board at 16.8px: anyone who can read those can
+   * compare them, and anyone who cannot could not read 13px either. It
+   * restated the problem below the size the problem lives at.
    *
-   * **A missing team**, and **a gap that is not positive**, which is the tie
-   * case: two ventures level is not a distance, it is nothing to say.
+   * **And it was a number about other numbers.** The row's job is "where am I,
+   * and who is just ahead of me", and rank, name and figure answer it
+   * completely — the motivator is the *name* on the row above, already set at
+   * 22px in full ink. A cardinal gap earns its place in broadcast timing, where
+   * position genuinely cannot carry it: second place may be 0.3s or 30s back.
+   * Here order and distance are both on screen already, and this was a third
+   * encoding of the second one.
    *
-   * **And a venture that has not traded at all**, which is the same test
-   * `revenueOf` uses to print an em dash rather than `₹0`. A row cannot say
-   * "no figure yet" and "₹1,592 behind" at once — the first says the team has
-   * not started and the second prices exactly how far along it is not. Seen on
-   * the production wall on 13 September 2026, with only the top three trading:
-   * rank 4 read `—  ₹1,592 behind`, which is a venture with no revenue
-   * carrying the only number on the list.
+   * The unit was wrong for the reader too. ₹2,403 is five sales to a perfume
+   * venture and a hundred and twenty to a chai stall. Precise, and not
+   * meaningful to the person it is about.
    *
-   * A gap is a distance a team is *closing*. Nobody is closing anything before
-   * their first sale, and the figure it would print is not really theirs — it
-   * is the row above's total, arrived at by subtracting zero from it, which is
-   * why the two were identical on that board. The dash is the whole truth
-   * available about a team that has not started, and this wall's rule is that
-   * empty is a valid state.
+   * **If the distance between two ventures is ever the point again, it is a
+   * screen, not a footnote** — two names, two figures, one difference, at the
+   * size the rest of this wall is set in. A thing worth saying on a wall read
+   * at six metres is worth saying large; a thing that has to be small is a
+   * thing to leave out. `ordinal()` in `lib/format.ts` is unused again.
    */
-  const behind = (index: number): string | null => {
-    const here = teams[index]
-    const ahead = index === 0 ? above : teams[index - 1]
-    if (here === undefined || ahead === undefined) return null
-    // The same test `revenueOf` prints its dash on, deliberately written the
-    // same way rather than shared: one is about what a row's figure *is* and
-    // one is about whether its footnote means anything. They agree today and
-    // there is no rule saying they must.
-    if (here.totalRevenue <= 0) return null
-    const gap = ahead.totalRevenue - here.totalRevenue
-    return gap > 0 ? formatRupees(gap) : null
-  }
 
   const figure = (team: Team, rowRank: number) =>
     rowRank === vacating && incoming !== undefined ? (
@@ -837,17 +827,10 @@ function Strip({
             {rank(index)}
             {mark(team, rowRank)}
             {name(team, rowRank)}
-            {/* The figure, and under it the distance to the row above —
-                labelled, with real air between them. **The word is back and
-                the `+` is gone**; `.tv-pod-row-behind` carries the reversal and
-                the board that forced it. See it too for why this is here rather
-                than in a column of its own. */}
-            <span className="tv-pod-row-figures">
-              {figure(team, rowRank)}
-              {behind(index) === null ? null : (
-                <span className="tv-pod-row-behind">{behind(index)} behind</span>
-              )}
-            </span>
+            {/* The figure, and nothing under it. The gap line that used to
+                stack below it is gone — see the note above `figure` for the
+                measurement that removed it. */}
+            {figure(team, rowRank)}
           </div>
         </motion.div>
         )
@@ -1095,11 +1078,6 @@ function PodiumBoard({
         <Strip
           ranked={visible}
           fromRank={PODIUM_PLACES + 1}
-          // Row one is measured against third place, which is on the podium
-          // beside it — so every row in the list carries a gap, including the
-          // first. Reading `visible` rather than `ranked` keeps it the same
-          // frozen ordering the rest of the board is rendering.
-          above={visible[PODIUM_PLACES - 1]}
           kick={kick}
           vacating={podiumEntry && kick !== null ? kick.fromRank : null}
           incoming={
