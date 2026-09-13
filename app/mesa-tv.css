@@ -1720,11 +1720,29 @@
      which is `/weekly`'s. Stated as that token rather than as 31px, so the
      two boards' ranks cannot come to differ by a pixel nobody chose. */
   --w-pod-rank: var(--w-card-ribbon);
-  /* **44px, down from 60.** At 60 the disc was the second-largest ink in a row
-     and identified nothing the name beside it did not already say. It is the
-     row's colour source now — see `--row-tint` on `.tv-pod-row` — and a colour
-     source does not need to be large. */
-  --d-pod-row-logo: 2.2917vw; /* 44px */
+  /* **64px, up from 44 — and that reverses the note this replaced**, which
+     said the disc had gone 60 → 44 because at 60 it was the second-largest ink
+     in a row and identified nothing the name beside it did not already say.
+     Asked for directly, and there is a measured argument for it rather than
+     only a preference: `scripts/logo-legibility.py` put **48px as the floor
+     below which a mark stops being a mark** — it is quoted at `--d-crown` for
+     exactly that — and 44 is under it at the wall's own 1920. Seven of the ten
+     ventures on this slide wore a disc too small to read the monogram inside,
+     on a board read at six metres, which is the one thing a mark is for.
+     (Being a `vw`, it is under the floor again below about 1440 — 46px at
+     1366. That is every element on this wall's bargain and not this one's to
+     fix; the wall runs at 1920.)
+
+     Above the old 60 on purpose: 60 was the size that was argued down, so
+     landing on it again re-opens that argument instead of settling it.
+
+     It costs the name column 20px and nothing else. The row is 109px tall with
+     no vertical padding, so 64 clears top and bottom by 22px; the name is the
+     `1fr` between a fixed mark and a right-aligned figure, and the longest name
+     in the cohort — `ATC (All Things Camphor)` — measures 273px in a column
+     that is still 431 at 1920 and 289 at 1366. The ellipsis guard stays
+     un-fired at both. */
+  --d-pod-row-logo: 3.3333vw; /* 64px */
   --s-pod-row-mark-gap: 1.25vw; /* 24px */
 
   /* ── The mover's mark ──
@@ -3909,9 +3927,11 @@
      mark sitting on the row, so the two cannot disagree. Six per cent, which
      is under a tenth of the mark's own saturation: enough that seven rows are
      seven different objects rather than seven identical slots, and nowhere
-     near enough to compete with the figure. It also gives the 44px disc a job
-     — it is the row's colour source rather than a dot beside a name that
-     already says who this is. */
+     near enough to compete with the figure. It also gives the disc a second
+     job — it is the row's colour source rather than a dot beside a name that
+     already says who this is. That was the whole argument for the disc being
+     small; the disc is 64px now and the wash is unchanged, because the tint is
+     a share of the row's own area and not of the mark's. */
   .tv-pod-row {
     display: grid;
     grid-template-columns: var(--w-pod-rank) var(--d-pod-row-logo) minmax(0, 1fr) auto;

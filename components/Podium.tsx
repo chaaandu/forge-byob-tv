@@ -97,9 +97,32 @@ const PLACE_ORDER: readonly number[] = [2, 1, 3]
  */
 type Place = 1 | 2 | 3
 
-/** How far the mark rises above the centre of the top face it stands on, as a
-    share of its own diameter. Zero would bury it in the platform. */
-const MARK_LIFT = 0.17
+/**
+ * Where a mark's lower edge sits on the top face it stands on, as a share of
+ * that face's *visible half-depth*: `0` is the centre of the face, `1` is its
+ * front edge, and anything over `1` has fallen off the platform onto the block.
+ *
+ * **It used to be a share of the mark's own diameter, and that is what put
+ * first place's mark off its block.** `MARK_LIFT = 0.17` seated every mark
+ * `0.33 · d` below its top face's centre, which is a number about the *mark*
+ * on a wall where the thing being stood on is the *block*. The three blocks
+ * are not the same size and the camera is fixed, so the deeper a block's top
+ * face projects the more of it a fixed share of diameter eats: second and
+ * third landed 14px and 22px inside their front edges, and first — the widest
+ * mark on the shallowest top face relative to it — landed **11px past its
+ * front edge**, resting on the front face rather than on the platform. Twice
+ * a minute, on a render that looked deliberate.
+ *
+ * Stated against the face, all three seat alike and the fault cannot come back
+ * by changing a block's height or its mark: `0.72` is the average of where the
+ * two that were right already sat (0.77 and 0.69), so this moves them ~3px and
+ * lifts first place 26px onto its own block.
+ *
+ * The ceiling is the type, not the geometry. The name and figure start at the
+ * mark's lower edge (`faceTop`), so a mark seated much above `0.5` on first
+ * place's shallow face carries them off the top of the block with it.
+ */
+const MARK_SEAT = 0.72
 
 /**
  * ── `MARK_IN_DISC` moved into `VentureLogo` ──
@@ -179,7 +202,12 @@ function PodiumCard({
   const markH = a.mark * aspect
   const markPct = (a.mark / a.front.w) * 100
   const markLeft = ((a.top.x - a.front.x) / a.front.w) * 100
-  const markTop = ((a.top.y - markH * MARK_LIFT - a.front.y) / a.front.h) * 100
+  /* The mark's lower edge, seated on the top face — see `MARK_SEAT`. `top.y` is
+     that face's centre and `front.y` its front edge, so the distance between
+     them is the half-depth the seat is a share of. */
+  const markFoot = a.top.y + MARK_SEAT * (a.front.y - a.top.y)
+  /* `.tv-pod-mark-band` is translated -50%, so this is the mark's *centre*. */
+  const markTop = ((markFoot - markH / 2 - a.front.y) / a.front.h) * 100
   /* Where the face's type starts: under the mark, which overhangs the block. */
   const faceTop = markTop + ((markH / 2 / a.front.h) * 100)
 
