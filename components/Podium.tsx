@@ -558,14 +558,35 @@ function Strip({
    * denominated in rupees like everything beside it.
    *
    * The first row on this list has a row above it — third place, on the podium
-   * — so every one of the seven carries one. Nothing is shown where either
-   * figure is missing or the gap is not positive, which is the tie case: two
-   * ventures level is not "+₹0", it is nothing to say.
+   * — so every one of the seven *can* carry one. Three things silence it.
+   *
+   * **A missing team**, and **a gap that is not positive**, which is the tie
+   * case: two ventures level is not a distance, it is nothing to say.
+   *
+   * **And a venture that has not traded at all**, which is the same test
+   * `revenueOf` uses to print an em dash rather than `₹0`. A row cannot say
+   * "no figure yet" and "₹1,592 behind" at once — the first says the team has
+   * not started and the second prices exactly how far along it is not. Seen on
+   * the production wall on 13 September 2026, with only the top three trading:
+   * rank 4 read `—  ₹1,592 behind`, which is a venture with no revenue
+   * carrying the only number on the list.
+   *
+   * A gap is a distance a team is *closing*. Nobody is closing anything before
+   * their first sale, and the figure it would print is not really theirs — it
+   * is the row above's total, arrived at by subtracting zero from it, which is
+   * why the two were identical on that board. The dash is the whole truth
+   * available about a team that has not started, and this wall's rule is that
+   * empty is a valid state.
    */
   const behind = (index: number): string | null => {
     const here = teams[index]
     const ahead = index === 0 ? above : teams[index - 1]
     if (here === undefined || ahead === undefined) return null
+    // The same test `revenueOf` prints its dash on, deliberately written the
+    // same way rather than shared: one is about what a row's figure *is* and
+    // one is about whether its footnote means anything. They agree today and
+    // there is no rule saying they must.
+    if (here.totalRevenue <= 0) return null
     const gap = ahead.totalRevenue - here.totalRevenue
     return gap > 0 ? formatRupees(gap) : null
   }

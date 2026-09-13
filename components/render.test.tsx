@@ -174,13 +174,43 @@ describe('Podium', () => {
   })
 
   /**
-   * A tie is not a gap, and `+₹0` is not a thing to say. This is also what kept
-   * the production board from printing six meaningless lines under six dashes
-   * on the morning the fault above was spotted.
+   * A tie is not a gap, and a zero distance is not a thing to say. This is also
+   * what kept the production board from printing six meaningless lines under
+   * six dashes on the morning the fault above was spotted.
    */
   it('prints no gap at all where two ventures are level', () => {
     const level = teams().map((row) => ({ ...row, totalRevenue: 0 }))
     const text = render(<Podium ranked={rankTeams(competingTeams(level))} />)
+    expect(text).not.toContain('behind')
+  })
+
+  /**
+   * ── A venture that has not traded is not "behind" by a price ──
+   *
+   * The row already says `—` rather than `₹0`, because zero asserts that a team
+   * traded and earned nothing. A rupee distance beside that dash contradicts it
+   * in the same row: the first says the team has not started, the second prices
+   * exactly how far along it is not.
+   *
+   * The production wall on 13 September 2026 is the case. Only the top three
+   * had traded, so rank 4 read `—  ₹1,592 behind` — a venture with no revenue
+   * carrying the only number on the list, and a number that was not really its
+   * own: subtracting zero from third place's total just reprints third place's
+   * total.
+   *
+   * Ranks below it were silent already, but only by accident of being *tied* on
+   * zero. This is the rule stated rather than arrived at, so it still holds on
+   * the first morning one team trades and the ones under it have not.
+   */
+  it('prints no gap for a venture that has not traded, even below one that has', () => {
+    const all = teams().map((row, index) => ({
+      ...row,
+      // Three trading, everyone else on nothing — the shape of the board this
+      // was found on.
+      totalRevenue: index < 3 ? 1_000 * (3 - index) : 0,
+    }))
+    const text = render(<Podium ranked={rankTeams(competingTeams(all))} />)
+    expect(text).toContain('—')
     expect(text).not.toContain('behind')
   })
 
