@@ -44,23 +44,26 @@
   /* ========= FONT STACKS =========
 
      Point the system's own stacks at the self-hosted variable faces loaded in
-     `layout.tsx`. The families themselves are unchanged — Manrope for sans,
-     Source Serif 4 standing in for New York, exactly as the design system
-     specifies.
+     `layout.tsx`.
 
-     **The self-hosted face comes first, ahead of `local("New York")`**, which
-     is the opposite of what a marketing artboard would want. On a wall the
-     priority is that every screen renders identically: if one laptop has New
-     York installed and another doesn't, two TVs side by side would set the same
-     headline in two different serifs, and nobody would think to check. */
-  /* **Impact is a system face, not a bundled one.** Every other font on this
-     wall is self-hosted from app/fonts, so it renders identically wherever the
-     wall is driven from. This one is whatever the machine happens to have, and
-     the fallback chain is what stops that being a silent substitution:
-     Haettenschweiler is Impact's Windows twin, Archivo Black is the bundled
-     face the heading used before, and it is the one that will actually render
-     if the wall's laptop has neither. Checked on the machine measuring this:
-     see the QC note for which one is in use. */
+     **The families are no longer the design system's, and that is a decision
+     rather than a drift.** This block used to say they were unchanged — Manrope
+     for sans, Source Serif 4 standing in for New York, exactly as specified.
+     Both have been replaced: Excon for sans, Zodiak for serif, argued in
+     `layout.tsx` where the faces are loaded. What is unchanged is the shape —
+     one sans owns every number, name and label, one serif owns the masthead —
+     and the reason, which is that a wall read at six metres cannot afford a
+     second opinion about what a figure looks like.
+
+     **Nothing in either stack is a `local()` entry any more.** Every real face
+     here is bundled, so the fallbacks below the first entry are generics that
+     exist to be a visible failure rather than a quiet substitution. That is the
+     property the whole self-hosting rule protects: if one laptop has a face
+     installed and another doesn't, two TVs side by side would set the same
+     frame differently and nobody would think to check. This wall has been
+     caught by that twice — a masthead that rendered in the system Impact on one
+     Mac and in a bundled fallback everywhere else, and a serif stack with
+     `local("New York")` in front of the file it shipped. */
   /* **Zodiak, and `'New York'` is deliberately not in this stack.**
 
      The old value listed the self-hosted face first and `local("New York")`
@@ -95,7 +98,7 @@
 
      `--font-rank` is deleted with the serif; this reads the sans like every
      other number on the slide. */
-  --font-sans: var(--font-mesa-body), ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+  --font-sans: var(--font-wall-body), ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
     Helvetica, Arial, sans-serif;
 
   /* ========= VIEWING-DISTANCE TYPE =========
@@ -961,7 +964,15 @@
      check is one probe: no name in the cohort may need a third line. At 0.08
      and 144px exactly one did — `In Between Sips by Kaappitalism` — and a name
      the board could print and chose to ellipsise instead is the worse of the
-     two failures every time. */
+     two failures every time.
+
+     **The probe is also what a face change has to pass, and Excon passed it
+     without this value moving.** Line boxes counted per name across all
+     thirty-nine, on the same board, under both faces: the maximum is 2 under
+     each, nothing is clipped under either, and exactly one name changed —
+     `Nature's Nibbles`, 2 lines to 1. So 0.06em was retuned against the card
+     rather than against Manrope, which is why it survived the swap. Re-run the
+     count before changing the face again; a name is what this board is for. */
   --track-card-name: 0.06em;
   /* Reduced 20% from clamp(15px, 1.45vw, 30px). Still the largest thing on the
      card, and still the figure the board exists to show. */

@@ -889,10 +889,14 @@ it('declares every custom property that anything reads', () => {
      in generated CSS that no source file contains.
    *
    * **Read out of `app/layout.tsx` rather than listed here.** It was a literal
-   * pair — `--font-mesa-body` and `--font-mesa-serif` — and the wall has five
-   * faces, so the other three were one `var()` away from failing this test for
-   * being correctly declared. It happened: a rank numeral moved back onto
+   * pair — the body face and the serif — and the wall carried five at the time,
+   * so the other three were one `var()` away from failing this test for being
+   * correctly declared. It happened: a rank numeral moved back onto
    * `--font-condensed` and the suite went red on a change that was right.
+   *
+   * Reading the layout is also what carried the type swap: the tokens are
+   * `--font-wall-body` and `--font-wall-serif` now, and no edit was needed
+   * here for either rename.
    *
    * Every one of them is declared the same way, `variable: '--x'` on a
    * `localFont` call, so the layout is the authority and a sixth face is
