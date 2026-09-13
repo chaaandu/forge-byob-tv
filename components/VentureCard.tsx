@@ -585,11 +585,24 @@ export function VentureCard({
         <div className="tv-card-today tv-card-detail">
           {traded ? (
             <span className="tv-day-delta">
-              {/* A shape, not a glyph: `▲` comes from whatever font in the
-                  stack answers for it, at whatever weight and height that font
-                  drew it. This is a box with a triangle clipped out of it, so it
-                  is the same mark on every machine. */}
-              <span className="tv-day-mark" aria-hidden="true" />
+              {/* ── The rising stack ──
+
+                  Three chevrons, brightest at the top and fading down. It was
+                  one filled triangle, which is a *state* — and this element
+                  only renders when a team has traded, so that state never
+                  varied and the mark carried no information. A fading stack
+                  reads as a trail and a trail reads as direction of travel,
+                  which is what the figure beside it actually means.
+
+                  Shapes rather than glyphs, as the triangle was: `▲` and `»`
+                  are drawn by whichever font in the stack answers for them, at
+                  whatever weight that font chose. Three boxes with one polygon
+                  clipped out of each are the same mark on every machine. */}
+              <span className="tv-day-mark" aria-hidden="true">
+                <span className="tv-day-chev" />
+                <span className="tv-day-chev" />
+                <span className="tv-day-chev" />
+              </span>
               {/* **The figure is its own element, and that is not cosmetic.**
                   As a bare text node it was an *anonymous* flex item, which
                   `text-overflow` does not apply to — measured with a crore-scale

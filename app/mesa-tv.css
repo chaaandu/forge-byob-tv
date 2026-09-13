@@ -384,7 +384,15 @@
      each card carries less height. */
   /* The same 16. See `--s-card-gap`; these are one decision and must not drift
      apart again. The hairline this once had to make room for is long gone. */
-  --s-row-gap: 2.0833vw; /* 40px — the air a breakout mark floats in */
+  /* 31px, down from 40. The row gap and the board's top margin together were
+     paying for air the cards needed more: 9px off each gap and 4 off the top
+     margin is 31px of frame, which the four rows split as **+7.7px of card
+     each**. The mark is unchanged — the name and the figure took all of it.
+
+     31 is bounded below by the mark, not by taste: the next row's halo reaches
+     6px above its own cell, so a 31px gap leaves 25px between a card's foot and
+     the mark beneath it. */
+  --s-row-gap: 1.6146vw; /* 31px */
 
   /* The card's horizontal padding. It went to zero while the cells were
      unbounded — with no card, all it did was push the rank numeral 8px in from
@@ -474,7 +482,7 @@
      which is 5px off every mark on the wall, and that is the right direction to
      pay: a crown grazing a rule looks like a rendering fault on a screen nobody
      is close enough to resolve. */
-  --s-board-top: 1.25vw; /* 24px */
+  --s-board-top: 1.0417vw; /* 20px */
   --s-board-bottom: var(--s-1);
 
   /* ══ THE EDITORIAL FRAME ══════════════════════════════════════════════════
@@ -738,8 +746,8 @@
      visibly missing. 10px costs 4px of mark and buys it back on the eight cards
      in thirty-nine that need it; the thirty-one that do not already have 27px
      there, because their spare line sits in the same gap. */
-  --h-card-name: 2.6302vw; /* 50.5px */
-  --h-card-fig: 1.4583vw; /* 28px */
+  --h-card-name: 2.8385vw; /* 54.5px */
+  --h-card-fig: 1.6406vw; /* 31.5px */
   /* The day figure's line, under the week's. 18px holds 15px of type with 1.5px
      of leading either side — it is a line of text, not an object, so it needs a
      line's height and not a capsule's. */
@@ -761,10 +769,19 @@
      needs no height or width of its own. What is left is the inline padding
      that keeps a crore-scale figure off the corners. */
   --s-day-tag-x: 0.4688vw; /* 9px */
+  /* ── The rising stack ──
+
+     Three chevrons, 9 x 5 with 1.5px between them: 18px of stack in a 28px
+     band, leaving 5px of air top and bottom. Nearly twice as wide as tall,
+     because a chevron as tall as it is wide reads as an arrowhead and the point
+     here is the shoulder. */
+  --w-day-chev: 0.4688vw; /* 9px */
+  --h-day-chev: 0.2604vw; /* 5px */
+  --s-day-chev-gap: 0.0781vw; /* 1.5px */
   /* How far the name's last line sits above the figure. Inside `--h-card-name`,
      not a grid gap — the card's parts each carry their own separation, which is
      the rule that keeps a line's spacing leaving with the line. */
-  --s-card-name-gap: 0.3125vw; /* 6px */
+  --s-card-name-gap: 0.4688vw; /* 9px */
 
   /* The card's own width, spelled out because the mark needs it as a *length*
      and the grid only ever expresses it as a fraction. Ten columns and nine
@@ -2746,33 +2763,54 @@
     white-space: nowrap;
   }
 
-  /* ── The direction mark ──
+  /* ── THE DIRECTION MARK IS A RISING STACK, NOT A TRIANGLE ──
 
-     **A shape, not a glyph.** `▲` and `▼` are drawn by whichever font in the
-     stack answers for them, they are not designed as a matched pair, and one is
-     routinely heavier or higher than the other — so the two states would differ
-     in more than direction, which is the one thing this must not do. One box,
-     clipped two ways: same width, same height, same ink, same seat on the
-     baseline. Only the polygon and the colour change.
+     It was one filled triangle. A triangle is a *state* — it said up, and it
+     said the same thing on every card that drew it, because this element only
+     renders when a team has traded. A mark whose value never varies carries no
+     information; it is punctuation.
 
-     **Sized off the figure, not in pixels.** Both dimensions are `em`, so the
-     mark tracks the figure's own type down the ramp — 0.62em of cap against the
-     figure's cap, which measures within a pixel of it at every row height.
+     Three chevrons stacked, brightest at the top and fading down, say what the
+     triangle could not: **direction of travel**. The eye reads the fade as a
+     trail and the trail as motion, so a static shape carries movement without
+     anything moving — the only way this board is allowed to suggest it. It is
+     also better drawn: a chevron has a stroke and a shoulder where a filled
+     triangle has a mass, and at 9px a mass is a blob.
 
-     `currentColor`, so it takes the state's ink from the line it sits in and
-     cannot drift from the figure it belongs to. An inline-block with no
-     content sits its bottom margin edge on the text baseline, which is what
-     puts the mark's foot exactly where the figure's is. */
+     **Still shapes and not glyphs.** `▲` and `»` are both drawn by whichever
+     font in the stack answers for them, at whatever weight that font chose;
+     three boxes with one polygon clipped out of each are identical on every
+     machine. That was the original mark's argument and it survives redrawing.
+
+     `currentColor` on every chevron, so all three take the band's ink and
+     cannot drift from the figure beside them. Opacity is what separates them,
+     and **only the leading chevron is load-bearing**: it measures 8.39:1 on the
+     band where the second and third are 3.4:1 and 1.7:1. Those two are a trail,
+     deliberately under the 3:1 a graphic needs when it carries meaning alone.
+     The one at full strength is the one that does. */
   .tv-day-mark {
-    display: inline-block;
-    width: 0.72em;
-    height: 0.62em;
-    background: currentColor;
+    display: grid;
+    gap: var(--s-day-chev-gap);
     flex: none;
   }
 
-  .tv-day-mark {
-    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+  .tv-day-chev {
+    width: var(--w-day-chev);
+    height: var(--h-day-chev);
+    background: currentColor;
+    /* Outer apex at the top, inner apex at 48% — the 4% between them is the
+       chevron's stroke. A polygon rather than two rotated borders: a rotated
+       border lands on a fractional device pixel and renders soft, and there are
+       eighteen of these on a busy board. */
+    clip-path: polygon(50% 0%, 100% 52%, 100% 100%, 50% 48%, 0 100%, 0 52%);
+  }
+
+  .tv-day-chev:nth-child(2) {
+    opacity: 0.55;
+  }
+
+  .tv-day-chev:nth-child(3) {
+    opacity: 0.3;
   }
 
 
