@@ -33,8 +33,8 @@ export const ROW_LENGTH = 10
 export const ROWS = 4
 
 /**
- * How long the rising stack takes, end to end: three chevrons 90ms apart, the
- * last of them fading for 380ms. It is the CSS's `--t-day-rise` plus twice its
+ * How long the rising stack takes, end to end: two chevrons 90ms apart, the
+ * second of them fading for 380ms. It is the CSS's `--t-day-rise` plus one
  * `--s-day-rise-step`, and the two have to agree — this is only the timer that
  * takes the class *off*, so a value shorter than the animation cuts the cascade
  * mid-fade and a longer one merely leaves an inert class on a card.
@@ -49,7 +49,7 @@ export const ROWS = 4
  * changes no pixel, because the animation's end state and the element's resting
  * style are the same value by construction.
  */
-const RISE_TOTAL_MS = 380 + 2 * 90 + 16
+const RISE_TOTAL_MS = 380 + 90 + 16
 
 /**
  * ── ROW 1'S IDLE IS GONE, AND THE BOARD IS STILL AT REST ──

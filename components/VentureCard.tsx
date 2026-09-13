@@ -605,34 +605,45 @@ export function VentureCard({
                   are drawn by whichever font in the stack answers for them, at
                   whatever weight that font chose. Three boxes with one polygon
                   clipped out of each are the same mark on every machine. */}
-              {/* The mark is Material's `chevron-triple-up`, cropped to its
-                  ink. The icon's own `0 0 24 24` artboard carries 6 units of
-                  air either side and 2 above, which on a 10.2px mark is 2.5px
-                  of nothing pushing the figure along; `6 2 12 19.42` is the
-                  box the three chevrons actually occupy, which is what lets
-                  the width token mean the width of the mark.
+              {/* **Two chevrons, from Material's `chevron-triple-up`.** The
+                  icon ships three and the third is gone — asked for directly,
+                  three read as too much on a 10px mark — and it was the right
+                  one of the three to lose: it carried opacity 0.3 and 1.7:1 on
+                  the band, so it was the one part of the mark deliberately
+                  below the contrast a graphic needs to be read at all.
 
-                  **Document order is the stack, top to bottom, and the
-                  cascade runs against it.** `nth-child` carries both the
-                  resting opacities and the animation beats, and the two read
-                  in opposite directions — child 1 is the leading chevron at
-                  full strength and fades in *last*, child 3 is the faintest
-                  and goes first. Reorder these three and the mark at rest is
-                  identical while the trail drains downward instead of
-                  climbing, which is the class of change nothing here reports.
+                  It is deleted rather than cropped away by the viewBox. A path
+                  the box does not reach still sits here taking a resting
+                  opacity and an animation beat, invisibly, and an element that
+                  animates where nothing can see it is the exact shape of bug
+                  this wall cannot report. Both numbers move together: the box
+                  ends at the second chevron's trailing edge.
 
-                  The three `d`s are the icon's own subpaths, split apart so
-                  each can hold an opacity of its own; concatenated they are
-                  the single path Material ships. */}
+                  `6 2 12 13.42` is that box — the icon's own `0 0 24 24`
+                  artboard carries 6 units of air either side and 2 above,
+                  which on a 10.2px mark is 2.5px of nothing pushing the figure
+                  along. Cropping to the ink is what lets the width token mean
+                  the width of the mark.
+
+                  **Document order is the stack, top to bottom, and the cascade
+                  runs against it.** `nth-child` carries both the resting
+                  opacities and the animation beats, and the two read in
+                  opposite directions — child 1 is the leading chevron at full
+                  strength and fades in *last*, child 2 is the trail and goes
+                  first. Swap these two and the mark at rest is identical while
+                  the trail drains downward instead of climbing, which is the
+                  class of change nothing here reports.
+
+                  The `d`s are the icon's own subpaths, split apart so each can
+                  hold an opacity of its own. */}
               <svg
                 className={`tv-day-mark${rise ? ' tv-day-rising' : ''}`}
                 aria-hidden="true"
-                viewBox="6 2 12 19.42"
+                viewBox="6 2 12 13.42"
                 focusable="false"
               >
                 <path className="tv-day-chev" d="M16.59 9.42L12 4.83L7.41 9.42L6 8l6-6l6 6z" />
                 <path className="tv-day-chev" d="M16.59 15.42L12 10.83l-4.59 4.59L6 14l6-6l6 6z" />
-                <path className="tv-day-chev" d="M16.59 21.42L12 16.83l-4.59 4.59L6 20l6-6l6 6z" />
               </svg>
               {/* **The figure is its own element, and that is not cosmetic.**
                   As a bare text node it was an *anonymous* flex item, which

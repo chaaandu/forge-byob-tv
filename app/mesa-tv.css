@@ -830,33 +830,51 @@
      needs no height or width of its own. What is left is the inline padding
      that keeps a crore-scale figure off the corners. */
   --s-day-tag-x: 0.4688vw; /* 9px */
-  /* ── The rising stack ──
+  /* ── The rising stack is two chevrons, not three ──
 
      One width, and the rest is the artwork's own proportion. The mark is an
-     SVG on a `6 2 12 19.42` box — the tight ink box of Material's
-     `chevron-triple-up` — so stating the width states the height: 10.2 x 16.5
-     in a 28px band, 5.7px of air top and bottom.
+     SVG on a `6 2 12 13.42` box — the tight ink box of the **top two** thirds
+     of Material's `chevron-triple-up` — so stating the width states the
+     height: 10.2 x 11.4 in a 28px band, 8.3px of air top and bottom.
+
+     **The third chevron is gone because three was too much**, asked for
+     directly, and it is the right one of the three to lose. It carried
+     opacity 0.3 and measured 1.7:1 on the band, so it was the one element of
+     the mark deliberately below the 3:1 a graphic needs to be read at all —
+     the faintest, the least load-bearing, and the one whose removal changes
+     what the mark *says* least. The leading chevron at 8.39:1 is still what
+     carries the meaning and the second at 3.4:1 is still what makes it a
+     trail rather than an arrowhead. Two is the floor: one chevron is a
+     direction with no travel in it, which is the state the single filled
+     triangle was in before any of this.
 
      **10.2px is not a taste value; it is the old stroke, solved for.** The
-     previous mark was three clipped boxes at 9 x 5, whose chevron stroke
-     measured 2.4px vertically. This artwork carries 2.83 units of stroke on a
-     24-unit box, so holding the stroke at 2.4px fixes the scale at 0.848 and
-     the width at 10.2. Change this number and the stroke changes with it —
-     the thing that has to survive is the weight at six metres, not the
-     footprint. It costs the figure beside it 1.2px of ellipsis budget against
-     the old mark, which is inside the 9px of inline padding either side.
+     mark before the icon was three clipped boxes at 9 x 5, whose chevron
+     stroke measured 2.4px vertically. This artwork carries 2.83 units of
+     stroke on a 24-unit box, so holding the stroke at 2.4px fixes the scale
+     at 0.848 and the width at 10.2. Change this number and the stroke changes
+     with it — the thing that has to survive is the weight at six metres, not
+     the footprint, and dropping a chevron is deliberately **not** an occasion
+     to grow the other two back to the old height. The stack got shorter
+     because there is less of it; that is the change that was asked for.
 
-     The three chevrons **overlap** on this box rather than sitting on a gap:
-     the second's outer apex is 1.42 units above the first's trailing edge. So
-     there is no gap token any more, and there is nothing for one to control —
-     the nesting is drawn into the path. */
+     The chevrons **overlap** on this box rather than sitting on a gap: the
+     second's outer apex is 1.42 units above the first's trailing edge. So
+     there is no gap token, and there is nothing for one to control — the
+     nesting is drawn into the path. */
   --w-day-mark: 0.5313vw; /* 10.2px */
   /* ── How the stack arrives ──
 
-     Bottom chevron first, then the middle, then the leading one: 90ms apart,
-     380ms each, so the whole cascade is over in 560ms. The direction is the
-     meaning. A simultaneous fade is three shapes appearing; a fade that climbs
-     is the trail being *drawn*, and the trail is what the mark is for.
+     Trailing chevron first, then the leading one: 90ms apart, 380ms each, so
+     the whole cascade is over in 470ms. The direction is the meaning. A
+     simultaneous fade is two shapes appearing; a fade that climbs is the trail
+     being *drawn*, and the trail is what the mark is for.
+
+     **The step survives the third chevron, deliberately.** 90ms was chosen as
+     a beat between two adjacent fades, not as a third of anything, so it reads
+     the same across two as it did across three — the cascade is simply shorter.
+     Widening it to keep the old 560ms total would slow a two-beat climb into
+     something that reads as one shape lagging the other.
 
      380ms rather than something quicker because this fires on up to
      thirty-nine cards at once when the slide arrives, and thirty-nine fast
@@ -2938,11 +2956,12 @@
      `currentColor` on every chevron, so all three take the band's ink and
      cannot drift from the figure beside them. The opacities are what separates
      them — and only the leading chevron is load-bearing: it measures 8.39:1 on
-     the band, where the second and third are 3.4:1 and 1.7:1. Those two are a
-     trail, deliberately under the 3:1 a graphic would need if it were carrying
-     the meaning on its own. The one at full strength is.
+     the band, where the second is 3.4:1. That one is a trail, deliberately
+     under the 3:1 a graphic would need if it were carrying the meaning on its
+     own. The one at full strength is. A third sat below it at 0.3 and 1.7:1
+     and has been removed; see the token for why it was the right one to lose.
 
-     ── It is Material's `chevron-triple-up` now, not three clipped boxes ──
+     ── It is Material's `chevron-triple-up`, cropped to two ──
 
      Same mark, better drawn, and the swap is worth being exact about because
      the two are easy to mistake for each other. The clipped boxes were 9 x 5
@@ -2951,6 +2970,13 @@
      point here is the shoulder. This artwork is 1.617 to 1 — flatter than an
      arrowhead, still a shoulder — and it **nests** where the boxes stacked,
      which is what a trail does and a stack does not.
+
+     The icon ships three and this draws two. The third is deleted rather than
+     cropped out by the viewBox, which was the other option and is the worse
+     one: a path the box does not reach still sits in the DOM taking a resting
+     opacity and an animation beat, invisibly, and an element that is animated
+     but cannot be seen is exactly the kind of thing this wall cannot report on.
+     Putting it back is one path and one number in the box, together.
 
      What the boxes could not do is the corner. A `clip-path` polygon meets its
      own outer apex at a hard point, so at 9px the tip rendered as a two-pixel
@@ -2994,10 +3020,6 @@
     --chev-rest: 0.55;
   }
 
-  .tv-day-chev:nth-child(3) {
-    --chev-rest: 0.3;
-  }
-
   /* ── The one thing this mark is allowed to do, and when ──
 
      The stack fades up — bottom, middle, leading, 90ms apart — on exactly two
@@ -3027,14 +3049,14 @@
      appearing and then fading in. */
   .tv-day-rising .tv-day-chev {
     animation: tv-day-rise var(--t-day-rise) var(--ease-out) both
-      var(--chev-beat, calc(2 * var(--s-day-rise-step)));
+      var(--chev-beat, var(--s-day-rise-step));
   }
 
+  /* The trailing chevron leads. The default above is the *leading* chevron's
+     beat, so the fallback is the late one and the override is the early one —
+     which is the way round that survives a chevron being added or removed
+     without silently reversing the climb. */
   .tv-day-rising .tv-day-chev:nth-child(2) {
-    --chev-beat: var(--s-day-rise-step);
-  }
-
-  .tv-day-rising .tv-day-chev:nth-child(3) {
     --chev-beat: 0s;
   }
 
@@ -3804,8 +3826,8 @@
        computed style. That is the *correct* value — the resting opacity is on
        the element, which is exactly why it was put there — but it is restated
        because "correct by accident" is not a state to leave a wall in, and
-       because the accident here would be three invisible marks on six cards
-       rather than something anyone would notice. */
+       because the accident here would be a blank band on six cards rather than
+       something anyone would notice. */
     .tv-day-rising .tv-day-chev {
       animation: none;
       opacity: var(--chev-rest, 1);

@@ -129,7 +129,7 @@ npm run build        # next build
   point. Nothing on the stage loops.
 
   **`/weekly`'s day mark is the third arrival, and it is the first one that
-  fires on something other than a slide mount.** The three chevrons beside a
+  fires on something other than a slide mount.** The two chevrons beside a
   day figure fade up bottom-to-top, 90ms apart, 380ms each — once, `both`, no
   iteration count — and they do it on exactly two occasions: the slide arriving,
   and *that team's* `todayRevenue` going up. Nothing else, and never at rest.
@@ -154,7 +154,7 @@ npm run build        # next build
 
   What it costs is the quiet board between polls being interrupted by up to
   thirty-nine cascades at once on arrival. That is the entrance, it is over in
-  576ms, and it is the same trade `/podium` made with `tv-stage-in`. **A fourth
+  486ms, and it is the same trade `/podium` made with `tv-stage-in`. **A fourth
   arrival is a new argument, not an extension of this one** — and an idle
   version of this one is not an arrival at all.
 
