@@ -434,25 +434,36 @@ not by reading source.
   fail — the browser silently falls to the next entry in the stack for that one
   glyph, so the digits are the chosen face and the rupee sign is Helvetica, at a
   different weight and width, on every number on the wall. Checked against the
-  cmap before a face is bundled, never assumed: **Satoshi, Switzer, Red Hat
-  Display, Be Vietnam Pro, Chillax, Plein and Panchang all lack it**, and the
-  first of those is the most-downloaded sans on Fontshare. Excon, Zodiak and
-  Clash Display carry it.
-
-  **Satoshi is the documented exception and it shows how the rule is scoped.**
-  It lacks U+20B9 and it is on the wall, because the three tokens it owns are
-  venture names and a venture name has no rupee in it. That is a claim about the
-  data, not the font, so it is guarded twice: `--font-name` lists Excon second
-  so a venture actually *named* `₹99 Store` draws its rupee in a face already on
-  the wall, and `render.test.tsx` fails if any token but the three name ones
-  reads that face. **A face without the rupee may only ever draw names.**
+  cmap before a face is bundled, never assumed. Shortlisted faces that **lack
+  it**: Satoshi, Switzer, Outfit, Onest, Instrument Sans, Instrument Serif,
+  Gabarito, Red Hat Display, Be Vietnam Pro, Chillax, Plein, Panchang — the
+  first of those is the most-downloaded sans on Fontshare. Figtree and
+  Newsreader, which the wall ships, both carry it.
 
   The same check covers venture names, which come from a spreadsheet this
   project does not control. `YŌKI` is on the board today and needs U+014C, which
-  is why the bundled faces ship whole rather than latin-subset.
+  is why **Figtree ships whole rather than latin-subset**. Newsreader is subset,
+  and the difference is the point: it draws three headings that are constants in
+  this repo, never a spreadsheet value.
 
-- **Google's published CSV carries a UTF-8 BOM and CRLF endings.** `﻿team_id` is not
-  `team_id`. papaparse handles both; a hand-rolled parser does not.
+- **A weight outside a variable font's axis is synthesised, not refused.** The
+  browser smears the outlines into a fake bold, which closes the counters and
+  turns `8` into a blob at six metres. Four faces here have had a different
+  range — Bebas Neue was 400 only, Clash Display stopped at 700, Newsreader
+  stops at 800, Figtree starts at 300 — and the trap springs when a token that
+  was fine under the old face is left alone through a swap. A comment never
+  caught it; `render.test.tsx` reads each `localFont` call's range out of
+  `app/layout.tsx` and fails any type token that exceeds it.
+
+- **Two faces, and adding a third is a design argument rather than a token.**
+  The wall ran four for a while — serif masthead, sans for labels, a second sans
+  for venture names, a display face for numerals — each scoped to one job and
+  each locally defensible. It read as designed *at* rather than designed. Notion,
+  Slack and Duolingo all ship one family and take hierarchy from weight, size,
+  colour and shape; Duolingo's weekly leaderboard is very nearly this product.
+  Hierarchy here is 700 for names and ranks, 800 for money, and `--ink` against
+  `--ink-muted`. That ladder is the whole system.
+
 - **`cache: 'no-store'` on both fetches.** Without it the browser HTTP cache serves one
   body for the life of a page that never manually reloads, and the wall freezes silently.
 - **A revoked sheet returns an HTML login page with HTTP 200.** Status codes pass it;

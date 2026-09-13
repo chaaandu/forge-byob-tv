@@ -46,14 +46,22 @@
      Point the system's own stacks at the self-hosted variable faces loaded in
      `layout.tsx`.
 
-     **The families are no longer the design system's, and that is a decision
-     rather than a drift.** This block used to say they were unchanged — Manrope
-     for sans, Source Serif 4 standing in for New York, exactly as specified.
-     Both have been replaced: Excon for sans, Zodiak for serif, argued in
-     `layout.tsx` where the faces are loaded. What is unchanged is the shape —
-     one sans owns every number, name and label, one serif owns the masthead —
-     and the reason, which is that a wall read at six metres cannot afford a
-     second opinion about what a figure looks like.
+     **Two stacks, and for a while there were four.** This wall ran a serif
+     masthead, a sans for labels, a second sans for venture names and a display
+     face for every numeral — each scoped to one job, each argued for, and the
+     board still read as a thing designed *at* rather than designed. Notion,
+     Slack and Duolingo all ship one family and take hierarchy from weight,
+     size, colour and shape; Duolingo's weekly leaderboard is very nearly this
+     product and it is one family. `layout.tsx` carries that argument in full.
+
+     So: **Figtree owns everything but the masthead, Newsreader owns the
+     masthead.** The design system's own pairing was Manrope and New York, and
+     its font note names Newsreader as the free stand-in for the latter — so
+     half of this is the brand book's choice rather than a preference.
+
+     What the shape protects is unchanged: a wall read at six metres cannot
+     afford a second opinion about what a figure looks like, so one face draws
+     every figure, name, rank and label on both slides.
 
      **Nothing in either stack is a `local()` entry any more.** Every real face
      here is bundled, so the fallbacks below the first entry are generics that
@@ -64,14 +72,17 @@
      caught by that twice — a masthead that rendered in the system Impact on one
      Mac and in a bundled fallback everywhere else, and a serif stack with
      `local("New York")` in front of the file it shipped. */
-  /* **Zodiak, and `'New York'` is deliberately not in this stack.**
+  /* **Newsreader, and `'New York'` is deliberately not in this stack.**
 
-     The old value listed the self-hosted face first and `local("New York")`
-     second, which is the right order for making every screen render alike but
-     still leaves a second serif reachable. It is unreachable now: the bundled
-     face is the only real entry, and what follows it is a generic. That is what
-     makes two TVs driven from two laptops set the masthead identically, which
-     is the property the whole self-hosting rule exists for.
+     The value this replaced listed the self-hosted face first and
+     `local("New York")` second, which is the right order for making every
+     screen render alike but still leaves a second serif reachable. It is
+     unreachable now: the bundled face is the only real entry, and what follows
+     it is a generic. That is what makes two TVs driven from two laptops set the
+     masthead identically, which is the property the whole self-hosting rule
+     exists for — and it matters more here than usual, because the face this
+     stack points at is the very one the design system reaches for New York to
+     provide.
 
      `colors_and_type.css` declares its own `--font-serif` whose first entry is
      a `MesaSerif` family with a **`fonts.gstatic.com` `src`**. This declaration
@@ -101,35 +112,6 @@
   --font-sans: var(--font-wall-body), ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
     Helvetica, Arial, sans-serif;
 
-  /* ── The name's face, and the fallback that is doing real work ──
-
-     Satoshi, and it owns exactly three tokens: `--t-tv-card-name`,
-     `--t-pod-name-row`, `--t-stage-name`. Nothing else on either slide.
-
-     **Excon is listed second on purpose and it is not decoration.** Satoshi has
-     no U+20B9. That is safe because a venture *name* contains no rupee — but it
-     is a claim about a spreadsheet this project does not control, so the stack
-     answers it rather than assuming it. A venture called `₹99 Store` draws its
-     rupee in Excon, which is already on the wall, instead of in whatever the
-     operating system offers. `render.test.tsx` pins the other half: no figure
-     token may read this. */
-  --font-name: var(--font-wall-name), var(--font-wall-body), ui-sans-serif, system-ui,
-    -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
-
-  /* ── Every numeral on the wall, and the ceiling that comes with it ──
-
-     Clash Display. The `₹` figures, the ranks, `/podium`'s 1/2/3, the day count
-     and the Flea count — one face owns all of them, which is what makes the
-     board say *how much* in a different voice from *who*.
-
-     **Nothing may ask this for more than 700.** The axis stops there. A heavier
-     value does not fail; the browser synthesises a bold by smearing the
-     outlines, which closes the counters and turns `8` into a blob at six
-     metres. Bebas Neue carried the identical warning at 400 and this replaces
-     it, so the trap moved rather than left. Every figure token that was `800`
-     is `700`, and the test suite fails on a token that reads this at 800. */
-  --font-numeral: var(--font-wall-numeral), var(--font-wall-body), ui-sans-serif,
-    system-ui, Helvetica, Arial, sans-serif;
 
   /* ========= VIEWING-DISTANCE TYPE =========
 
@@ -969,7 +951,7 @@
      clamp is not a fallback: a type size chosen against the thirty-nine strings
      currently in a spreadsheet is a fact about the spreadsheet, and a venture
      can be renamed from it on any given Tuesday. */
-  --t-tv-card-name: 700 var(--fs-6) / 1.15 var(--font-name);
+  --t-tv-card-name: 700 var(--fs-6) / 1.15 var(--font-sans);
   /* ── The name's tracking, and why it is not `--track-overline` ──
 
      The system's 0.12em is an *overline* value: two or three uppercase words
@@ -996,8 +978,8 @@
      the board could print and chose to ellipsise instead is the worse of the
      two failures every time.
 
-     **The probe is also what a face change has to pass, and Excon passed it
-     without this value moving.** Line boxes counted per name across all
+     **The probe is also what a face change has to pass, and it has now been
+     run for four of them without this value moving.** Line boxes counted per name across all
      thirty-nine, on the same board, under both faces: the maximum is 2 under
      each, nothing is clipped under either, and exactly one name changed —
      `Nature's Nibbles`, 2 lines to 1. So 0.06em was retuned against the card
@@ -1006,7 +988,7 @@
   --track-card-name: 0.06em;
   /* Reduced 20% from clamp(15px, 1.45vw, 30px). Still the largest thing on the
      card, and still the figure the board exists to show. */
-  --t-tv-card-week: 700 var(--fs-4) / 1 var(--font-numeral);
+  --t-tv-card-week: 700 var(--fs-4) / 1 var(--font-sans);
   /* ── The capsule takes the name's step, and the card drops to three sizes ──
 
      This was `--fs-5` at 600, one step under the week figure and one over the
@@ -1029,7 +1011,7 @@
      `--t-tv-card-today-hot` is deleted with it. It was 800 weight in the accent
      — the "traded" state — and there is no second state left to distinguish
      from: a card with no day draws no capsule at all. */
-  --t-tv-card-today: 700 var(--fs-6) / 1 var(--font-numeral);
+  --t-tv-card-today: 700 var(--fs-6) / 1 var(--font-sans);
 
   /* **Dev chrome only** — `DevFlipTrigger`'s buttons, and nothing the wall
      renders. It was the "TODAY" tag on a card, which no longer exists, and it
@@ -1084,42 +1066,36 @@
      `1`'s width is the point of setting it this way. */
   /* **Off the `--fs-*` scale on purpose, and derived against the tag.**
 
-     That has been true through three faces and the reason has not changed: the
-     scale is built against the body sans, and the rank is set in whatever face
-     owns the numerals, at whatever width that face happens to be per point. It
-     shares the *box* with the scale, not the ladder.
+     That has held through four faces and the reason has not changed: the scale
+     is built for running type, and this is a numeral in a fixed 31px box. It
+     shares the *box* with the scale, not the ladder — so it is re-measured
+     against the tag every time the face changes, and it has never once landed
+     on a step.
 
-     ── Bebas 400 at 1.25vw is what this replaced ──
+     ── What each face needed, in the same 31px tag ──
 
-     24px, putting `10` at 19.2px — 5.9px of margin each side in a 31px tag.
-     That face was chosen for being condensed, and the note here said so
-     plainly: "a condensed face cannot share a size scale with the sans and
-     have both read right."
+       Bebas Neue      400 @ 24px     `10` = 19.2px   5.9px each side
+       Clash Display   600 @ 20.2px   `10` = 22.0px   4.5px each side
+       Figtree         700 @ 21.1px   `10` = 22.5px   4.3px each side
 
-     ── And Clash Display is not condensed, so this is the one place the
-     numeral swap costs something ──
+     Bebas was chosen for being condensed and the note here used to say that a
+     condensed face was "the only category of face whose proportions match the
+     box". That was true and it has been given up twice now, for the same
+     reason both times: a fourth family bundled for two digits is a worse deal
+     than a slightly smaller numeral. Cap height runs 16.8px → 13.5px → 14.8px
+     across those three, so **this is still about a tenth shorter than the
+     condensed face it started as**, and that is the standing cost.
 
-     Stated rather than argued away. At the same 24px, Clash 600 puts `10` at
-     26.2px in a 31px tag — 2.4px each side, which is a numeral filling its box
-     rather than sitting in it. So the size comes down to **1.05vw / 20.2px**,
-     where `10` measures 22.0px on `/weekly` and 21.0px on `/podium`: 4.5px and
-     5.0px of margin, near enough the optical air Bebas was tuned to.
+     It is affordable because a rank here is a caption. The reading order
+     already carries the ordering — that is the argument that took the numeral
+     off the artwork in the first place, and it is why this does not need to
+     win a size contest with the money above it.
 
-     What it costs is cap height. Bebas at 24px stood 16.8px of cap; Clash at
-     20.2px stands 13.5px, so **the rank numeral is about a fifth smaller than
-     it was.** That is affordable because a rank on this board is a caption —
-     the reading order already carries the ordering, which is the argument that
-     took the numeral off the artwork in the first place — and it is the price
-     of one face owning every number on the wall instead of a fourth family
-     owning two digits.
-
-     **600, not 400.** Bebas shipped one weight and had to be asked for 400.
-     Clash has an axis, and a condensed face's apparent weight at 400 is not a
-     display grotesk's: at 400 in a tinted tag this read as a caption's caption.
-     700 is available and is what the figures use; 600 keeps the rank a step
-     under the money, which is the hierarchy every other pair on this card
-     already states. */
-  --t-tv-card-rank: 600 1.05vw / 1 var(--font-numeral);
+     **700, which is the venture name's weight and a step under the figure's
+     800.** With one family on the wall, that ladder is the entire hierarchy:
+     name and rank at 700, money at 800. Nothing here is carried by the face any
+     more, because there is only one. */
+  --t-tv-card-rank: 700 1.1vw / 1 var(--font-sans);
   /* Ranks 1-3. The one step up, and it replaces the metals outright. */
   /* The top three, one step larger and in the surface's accent. The face is
      the same — the distinction is size and ink, as it is everywhere else on
@@ -1206,39 +1182,39 @@
 
   /* ── The slide heading ──
 
-     **Zodiak 900, and the serif is the point.**
+     **Newsreader 800, and it is the brand book's own choice.**
 
-     This token has now been three faces and the first two were the same
-     mistake at different sizes. It resolved through `--font-impact` — a stack
-     whose first entry was the *system* Impact — and measured on the machine it
-     was tuned on the wall was setting its masthead in Impact, while a laptop
-     without it fell through to a bundled Archivo Black: a different face, a
-     different width, and nothing anywhere reporting the substitution. The fix
-     was Manrope 800, self-hosted, so every screen set the line identically.
+     This token has been four faces. It resolved through `--font-impact`, a
+     stack whose first entry was the *system* Impact — measured on the machine
+     it was tuned on, the wall set its masthead in Impact while a laptop without
+     it fell through to a bundled Archivo Black, with nothing anywhere reporting
+     the substitution. The fix was Manrope 800, self-hosted, so every screen set
+     the line identically.
 
-     That fixed the right problem and left a different one standing. Manrope is
-     the voice of every number, name and label on both slides, so putting the
-     masthead in it too meant **the only static line on the frame was set in the
-     same face, and one weight step away from, the figures underneath it.** A
-     masthead that is a bolder version of a label is not a masthead; it is the
-     largest label. The wall had no editorial voice at all.
+     That fixed the right problem and left a different one. Manrope was the
+     voice of every number, name and label on both slides, so the masthead was
+     set in the same face as its labels and one weight step from the figures
+     under it — not a masthead but the largest label on the frame. Two serifs
+     have since held this line; this is the one the design system actually
+     asks for.
 
-     `mesa_forge_design_system/design_system.md` is explicit that it should:
-     "Headers in New York (serif) for a classy editorial feel; everything else
-     in Manrope." That half had simply been dropped. Zodiak is the free stand-in
-     the brand book itself invites — it names Newsreader and Fraunces for the
-     same job — and unlike either of those it reaches 900, which is what a
-     single line has to be to hold its own over thirty-nine cards.
+     `mesa_forge_design_system/design_system.md`: "Headers in New York (serif)
+     for a classy editorial feel; everything else in Manrope", with a font note
+     naming **Newsreader** and Fraunces as the free stand-ins for New York.
+     Every other face on this wall is a judgement call. This one is a citation.
 
-     Self-hosted like everything else here, so the substitution failure above
-     cannot come back in a new face.
+     **800, not 900.** Newsreader's axis stops at 800 and the face this replaces
+     ran to 900. A variable font asked for a weight outside its range does not
+     fail — the browser smears the outlines into a synthetic bold — so the drop
+     is mandatory rather than aesthetic, and `render.test.tsx` reads the range
+     out of `layout.tsx` and fails on a token that exceeds it.
 
-     **Size is unchanged at `--fs-2`.** The 2.05vw argued below was measured
-     against this frame and nothing about the frame has changed; only the voice
-     has. Zodiak's cap height is 0.700em against Manrope's 0.720, so the caps
-     land 0.8px shorter at 40px — under the 1.2px the scale calls a difference,
-     and the lockup beside it is sized to the heading's caps, so this was
-     measured rather than assumed. See the QC note at `.tv-mast-title`.
+     **`opsz` is pinned at 40 in the file, not set here.** Newsreader ships an
+     optical-size axis; it is instanced out at the masthead's own render size
+     before bundling, which halved the file and means this `font:` shorthand is
+     sufficient on its own. A `font-variation-settings` declaration here would
+     be silently reset by any later `font:` shorthand on the same element —
+     which is exactly how `tabular-nums` died on every figure on this wall.
 
      ── What the size argument below still says ──
 
@@ -1246,43 +1222,33 @@
      1920px frame — half the width of the wall to say which of two contests is
      on — and a masthead does not have to shout to be a masthead.
 
-     **Tracking drops to 0.02em, and that is a face change rather than a taste
-     one.** 0.22em was there to fill a band that no longer exists; 0.06em is the
-     amount a heavy *sans* wants at display size. A serif is already spaced by
-     its serifs — they close the gaps a sans leaves open — so the same 0.06em on
-     Zodiak reads as letter-spaced small caps rather than as a title.
+     **Tracking stays at 0.02em, which is a serif's value rather than a sans's.**
+     0.22em was there to fill a band that no longer exists; 0.06em is the amount
+     a heavy *sans* wants at display size. A serif is already spaced by its
+     serifs — they close the gaps a sans leaves open — so the sans value on a
+     serif reads as letter-spaced small caps rather than as a title.
 
-     ── The width this costs, measured rather than waved through ──
+     ── Measured, `WEEKLY LEADERBOARD` at 1920, from the element's own rect ──
 
-     `WEEKLY LEADERBOARD` at 1920, from `.tv-mast-title`'s own rect:
+       Manrope    800 @ 0.06em   494.6px   cap 28.8px
+       Zodiak     900 @ 0.02em   578.1px   cap 28.0px
+       Newsreader 800 @ 0.02em   545.4px   cap 27.5px   (now)
 
-       Manrope 800 @ 0.06em   494.6px   (what this replaced)
-       Zodiak  900 @ 0.06em   607.0px
-       Zodiak  900 @ 0.02em   578.1px   (now)
+     A serif is simply a wider thing than a geometric sans at the same size and
+     no negative tracking buys that back without closing the counters, so the
+     line still runs 51px wider than the sans one did. The frame has it:
+     clearance from the title's right edge to `/podium`'s countdown is **959px
+     at 1920**, and `/weekly` carries no apparatus at all outside challenge
+     mode — where the heading it switches to, `10-DAY CHALLENGE`, is the
+     shorter string. `measure-fit` reports zero overflow at all four viewports.
 
-     So the tracking recovers 29px and **the line still runs 83px wider than the
-     sans one did.** That is the face, not the tracking: a 900 serif is simply a
-     wider thing than an 800 geometric sans at the same size, and no amount of
-     negative tracking buys it back without closing the counters.
-
-     The frame has the room, which is why this is a note rather than a problem.
-     Clearance from the title's right edge to the leftmost piece of masthead
-     apparatus is **936px on `/podium` at 1920** and 755px at 1600; `/weekly`
-     carries no apparatus at all unless `challenge_mode` is on. `measure-fit`
-     reports zero overflow at all four viewports.
-
-     **Challenge mode is the arrangement to check and it is not the tight one**,
-     which is worth recording because the opposite is the obvious guess. It is
-     the only state where `/weekly` has a heading and apparatus on the line at
-     once — but the heading it switches to is *shorter*: `10-DAY CHALLENGE`
-     right-edges at 640px against `WEEKLY LEADERBOARD`'s 762, and the `DAY 9 OF
-     10` chip still leaves 1113px between them. Measured by flipping
-     `challenge_mode` in the fixture, not reasoned about.
-
-     So the widest this line ever gets is the plain weekly masthead with an
-     empty right-hand side, and the binding constraint on `--fs-2` is
-     `/podium`'s Flea countdown at 936px of clearance. */
-  --t-tv-heading: 900 var(--fs-2) / 1 var(--font-serif);
+     The cap height is the number to watch rather than the width. Three faces
+     have held this line at 28.8, 28.0 and 27.5px, and **`--h-tv-logo` is sized
+     to it** — the Mesa lockup beside the heading is tuned so the wordmark and
+     the caps read as one line of masthead. The drift is 1.3px across all three,
+     inside the 1.2px-per-step rule by a hair; a fourth face that loses another
+     pixel of cap needs the lockup re-measured rather than assumed. */
+  --t-tv-heading: 800 var(--fs-2) / 1 var(--font-serif);
   --track-tv-heading: 0.02em;
   /* ── The Mesa lockup, sized to the masthead's cap height ──
 
@@ -1348,12 +1314,12 @@
      this line is proposing to break the pair again**, and should move this
      token, which moves both. */
   --t-tv-mast-label: 700 var(--fs-6) / 1 var(--font-sans);
-  --t-tv-mast-figure: 700 var(--fs-3) / 1 var(--font-numeral);
+  --t-tv-mast-figure: 800 var(--fs-3) / 1 var(--font-sans);
 
   --t-tv-strip-label: 800 var(--fs-6) / 1 var(--font-sans);
   --h-tv-cal: clamp(26px, 2.3vw, 48px);
   --w-tv-cal-stroke: 5;
-  --t-tv-cal-figure: 700 var(--fs-5) / 1 var(--font-numeral);
+  --t-tv-cal-figure: 800 var(--fs-5) / 1 var(--font-sans);
 
   /* ── `/weekly`'s band, and what it makes loud ──
 
@@ -1563,9 +1529,9 @@
 
      The mark is `100cqw` of its own band — see `components/Podium.tsx` for why
      that has to be a real length rather than a percentage. */
-  --t-stage-name: 700 11cqw / 1.12 var(--font-name);
-  --t-stage-figure: 700 15.5cqw / 1 var(--font-numeral);
-  --t-stage-numeral: 700 34cqh / 0.85 var(--font-numeral);
+  --t-stage-name: 700 11cqw / 1.12 var(--font-sans);
+  --t-stage-figure: 800 15.5cqw / 1 var(--font-sans);
+  --t-stage-numeral: 800 34cqh / 0.85 var(--font-sans);
   /* Air between a venture's name and its figure, on the face. */
   --s-stage-name-gap: 0.4cqw;
   /* Air between the mark's lower edge and the name under it. The mark is a
@@ -1693,7 +1659,7 @@
      caption for the figure rather than the venture the figure belongs to. */
   /* **A step down from the figure beside it**, by request: at one size the
      row read as two equal facts, and the figure is the one that ranks. */
-  --t-pod-name-row: 700 var(--fs-4) / 1.1 var(--font-name);
+  --t-pod-name-row: 700 var(--fs-4) / 1.1 var(--font-sans);
   /* **Dev chrome only** — `DevPodiumTrigger`'s buttons. It was the left
      column's `TOTAL REVENUE, ALL TIME` caption, which is gone; this is the one
      read left. */
@@ -1713,7 +1679,7 @@
      the wall that is not on the scale. It is here because the list's figure
      was asked up "a little" and the next step, 40px, is the podium's second
      and third figure, which the list must stay under. */
-  --t-pod-fig-row: 700 1.7708vw / 1 var(--font-numeral);
+  --t-pod-fig-row: 800 1.7708vw / 1 var(--font-sans);
 
   /* `--t-pod-count` stood here for the masthead's Flea countdown, at the same
      `--fs-5` the day chip's numeral used. **Deleted rather than re-pointed.**
@@ -2617,18 +2583,22 @@
      condensed face in a narrow vertical tag is not a style choice but the only
      category of face whose proportions match the box.
 
-     **That argument was right and it has been traded away deliberately.** Bebas
-     is gone; `--font-numeral` draws this, the same face as every figure on both
-     slides, and it is not condensed. The tag did not change, so the numeral
-     did — see `--t-tv-card-rank` for the sizes and for what the fifth of a cap
-     height costs. What the wall buys is one voice for every number on it
-     rather than a fourth family bundled for two digits.
+     **That argument was right and it has been traded away, twice, knowingly.**
+     Bebas went when one display face took every numeral; that face went when
+     the wall collapsed to a single family. The tag never changed, so the
+     numeral did each time — `--t-tv-card-rank` carries the three measurements
+     and what the lost cap height costs. What the wall buys is two bundled
+     faces instead of four, on a frame where nothing but the masthead is set in
+     anything but Figtree.
 
-     **The fake-bold trap moved with it rather than leaving.** Bebas shipped one
-     weight, so any value over 400 smeared its outlines into a synthetic bold
-     and closed the counters. Clash Display's axis stops at 700 and does exactly
-     the same thing above it. `render.test.tsx` fails on any token that reads
-     `--font-numeral` above 700. */
+     **The fake-bold trap is the part that survives every swap.** Bebas shipped
+     one weight, so anything over 400 smeared its outlines into a synthetic
+     bold and closed the counters; Clash Display's axis stopped at 700 and did
+     the same above it; Figtree runs 300–900 and does it at either end. It has
+     never yet been caught by a person, so it is caught by a test:
+     `render.test.tsx` reads the weight range out of each `localFont` call in
+     `app/layout.tsx` and fails on any type token that asks a face for a weight
+     it does not have. */
   .tv-card-rank {
     position: absolute;
     /* The card's top-left, exactly: `--h-mark-out` is where the card begins in
@@ -2702,9 +2672,10 @@
 
        The padding is an optical correction, not a layout one. It was measured
        against Bebas, whose digits sat high in their em box — the same thing
-       `/podium`'s chip and `VentureLogo`'s monogram correct for. Clash Display
-       sits high too, so the correction still applies; it is the one thing the
-       face swap did not have to re-derive. */
+       `/podium`'s chip and `VentureLogo`'s monogram correct for. Every face
+       since has sat high too, so the correction has survived three swaps
+       unchanged. It is the one number here that has never had to be
+       re-derived, which is worth knowing before assuming it must be. */
     display: grid;
     justify-items: center;
     align-content: center;
