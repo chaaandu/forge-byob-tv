@@ -195,14 +195,101 @@ npm run build        # next build
   before shortening it.** Eighteen against the slide's thirty is also not a
   rounding — five strikes fit, A · B · C · A · B, so no pair repeats back to
   back, which is the failure three pairs exist to prevent.
-- **Gold is back, as exactly one object.** `--forge-metal-gold` sat unread from
-  the deletion of the plinths until the crown, kept on §5's stated condition
-  that if it returned it would "arrive as one decision in one place". The crown
-  is that decision: one glyph, one rank, one slide, no plinth and no sweep. The
-  budget is spent — a second gold thing is a new argument, not an extension of
-  this one. Components read `--crown-ink`, never the metal token, because gold
+- **Gold was exactly one object, and on 13 September 2026 it became two.**
+  `--forge-metal-gold` sat unread from the deletion of the plinths until the
+  crown, kept on §5's stated condition that if it returned it would "arrive as
+  one decision in one place". The crown was that decision: one glyph, one rank,
+  one slide, no plinth and no sweep. This bullet then said the budget was spent
+  and that a second gold thing would be a new argument rather than an extension
+  of this one.
+
+  **That argument was made and it won.** `/podium`'s three blocks now wear
+  their medals — a gold cap on first place, silver on second, bronze on third.
+  Asked for directly, twice: once as gold/silver/bronze in the blocks'
+  gradients, which was built, rejected on looks and reverted, and once as
+  "blending of gold, silver and bronze into these podiums ... should feel and
+  look like 1, 2, 3".
+
+  **What holds is the shape of the rule, not the count.** The medals are not a
+  second use of the token: they are three baked colours in one rendered image,
+  and `--forge-metal-gold` still has exactly one reader in CSS, `--crown-ink`.
+  Components still read `--crown-ink` and never the metal token, because gold
   measures 8.59:1 on Deep Aubergine and **1.61:1 on Lavender Mist**, so the
-  light surface answers with Royal Purple instead.
+  light surface answers with Royal Purple instead. So the discipline that
+  actually protects the surface flip is untouched; what is gone is the sentence
+  that there is one gold thing on this wall. **A third is a new argument
+  again**, and it does not get in on this one's precedent.
+
+  **Each medal is a gradient down roughly half its block, and the thing that
+  made it possible was changing colour space.** Six passes got there. The
+  metals as albedo across the bottom third; a cap on the top face alone, which
+  was "just adding those on top"; then a fade down the face at three lengths;
+  then, wrongly, a hard band with a meniscus.
+
+  Every fade before the last muddied in the middle — gold crossing into
+  raspberry going grey-brown around orange, bronze into azure going flatly
+  grey — and the conclusion drawn from that was that a fade between contrasting
+  materials *must* mud, so the crossing should be given no width. **That was
+  the wrong diagnosis and it cost a whole pass.** A fade muds in linear RGB
+  because a straight line between two saturated hues runs through the middle of
+  the colour solid, and the middle of the colour solid is grey. In OKLCh the
+  same fade rotates *around* the neutral axis and every step holds its chroma.
+  The ramp interpolates lightness, chroma and hue separately, and the crossing
+  can then be as wide as the design wants.
+
+  **But OKLCh only fixes the mud, and a long arc is still a long arc.** The
+  first bodies under it were raspberry, violet and azure, giving turns of 87°,
+  0° and **159°**. Reviewed block by block, the verdicts tracked that one
+  number: the 0° ramp was the best of the three, and the 159° one was called
+  out for holding "multiple colours in it" — which it did, because 159° of arc
+  is copper, then red, then magenta, then blue. No colour space makes a journey
+  like that read as one object.
+
+  So each block now **fades into its own shadow rather than into a different
+  colour**: gold 83° → amber 61°, silver (achromatic) → sapphire, copper 51° →
+  maroon 18°. Every arc is under 35°. The three are told apart from *each
+  other* instead — a warm yellow, a cool blue and a red, roughly a third of the
+  wheel apart — so the board still carries three distinct colours while no
+  single block carries two. **Keep new arcs under ~35°.**
+
+  **And it is not a complementary scheme — do not call it one.** Gold is yellow
+  and bronze is orange-red, neighbours on the wheel, because that is what the
+  medals are. Blocks one and three sit 57° apart and are held apart by *value*
+  — caps 0.40 against 0.20 — with the cool block opposite them both. Widening
+  that gap means pushing copper toward oxblood, which takes its own arc past
+  60° and straight back into the fault the 35° rule exists for. **Short arcs
+  and evenly-spaced hues cannot both be had here.** First place's body was
+  moved 61° → 75° to buy the separation that exists, which also stopped the
+  leader reading as brown rather than gold.
+
+  **Second place was violet through two rounds and should not have been.** It
+  was the ramp that worked while the others were long, which bought it a pass
+  it had not earned. Two faults, both measurable: its body sat at **h297°,
+  the page's own hue to the degree**, so the block was the background rather
+  than an object; and its metal was **L0.85 against gold's L0.82**, so the
+  runner-up was the brightest thing on a board whose only job is saying who
+  won. Sapphire sits 30° off the page and the silver is stepped down — the
+  caps now measure 0.40 · 0.28 · 0.20 in rank order.
+
+  **Silver's hue is noise and must be treated as such.** Its chroma is 0.015
+  against 0.12-plus for every other end, because it is nudged toward green to
+  survive the room's violet fill. Read as a hue, it rotated second place
+  through **cyan and teal** — hues this brand does not contain, on the board,
+  from `atan2` being asked about rounding error. An end under 0.05 chroma
+  borrows the other's hue.
+
+  **The metal also needs interior value variation or it is orange paint** — a
+  dark line under the cap's lip and a bright band through the ramp. §5 says the
+  same of the crown, which got its variation hand-drawn into gradient stops;
+  the blocks get theirs from `polish`.
+
+  **And the type had to move for any of this to be possible.** It occupied the
+  top 21% of every face with 48% of the face empty below it, so the metal's
+  only clear ground was the sliver above the name. The name and figure now sit
+  below the waterline, placed from `wash` in the manifest rather than from a
+  constant — a wash and a name that drift apart is a venture's figure printed
+  on gold, and nothing here would report it. It bought contrast rather than
+  costing it: first place went from 5.5:1 to 6.9:1 under its figure.
 
   **And on 12 September 2026 the plinths came back — as a render.**
   `/podium`'s three places stand on blocks that are one image,

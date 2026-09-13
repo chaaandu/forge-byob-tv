@@ -1757,8 +1757,16 @@
      amount whatever that block's height, so on a 450-unit face it eats a
      far larger share of the face than on a 720-unit one. Second and third
      read tight under their marks at the figure that is right for first. */
-  --s-stage-mark-gap: 8.5cqw;
-  --s-stage-mark-gap-rest: 13cqw;
+  /* ── Air above the name, and it is no longer measured from the mark ──
+
+     These were 8.5cqw and 13cqw, which was the gap between a mark's lower edge
+     and the name directly beneath it. The name is not directly beneath the
+     mark any more: it sits below the medal's ramp, at a depth the renderer
+     publishes. So this is air under a gradient rather than under a disc, and
+     it needs far less of it — at the old values third place's figure landed on
+     its own rank numeral. */
+  --s-stage-mark-gap: 2.5cqw;
+  --s-stage-mark-gap-rest: 3cqw;
   /* The face's side margins. Deliberately slight: the widest figure
      `formatRupees` can produce is twelve glyphs and it needs nearly the whole
      block. `scripts/measure-figures.mjs` is the check. */

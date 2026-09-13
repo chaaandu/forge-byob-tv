@@ -5,7 +5,10 @@
  * image with the origin at its top left. `front` is a block's face, which is
  * an exact rectangle because the render's camera is off-axis; `top` is the
  * centre of its top face, where the mark stands; `mark` is that mark's
- * diameter as a fraction of the image's width.
+ * diameter as a fraction of the image's width; `wash` is how far down the
+ * face the medal has faded to a tint, as a share of the face's own height, and
+ * is what the name and the figure are placed below. It is *not* where the ramp
+ * ends — the ramp runs on underneath the type as a wash of colour.
  *
  * Re-run the script after changing any block's size, the camera, or the view.
  */
@@ -14,6 +17,7 @@ export type BlockAnchor = {
   front: { x: number; y: number; w: number; h: number }
   top: { x: number; y: number }
   mark: number
+  wash: number
 }
 
 export const BLOCK_IMAGE = { src: '/podium/blocks.png', width: 1920, height: 1695 } as const
@@ -30,7 +34,8 @@ export const BLOCKS: Record<number, BlockAnchor> = {
       "x": 0.5,
       "y": 0.27614
     },
-    "mark": 0.19531
+    "mark": 0.19531,
+    "wash": 0.37677
   },
   "2": {
     "front": {
@@ -43,7 +48,8 @@ export const BLOCKS: Record<number, BlockAnchor> = {
       "x": 0.19262,
       "y": 0.39731
     },
-    "mark": 0.14844
+    "mark": 0.14844,
+    "wash": 0.37677
   },
   "3": {
     "front": {
@@ -56,6 +62,7 @@ export const BLOCKS: Record<number, BlockAnchor> = {
       "x": 0.80738,
       "y": 0.49425
     },
-    "mark": 0.14844
+    "mark": 0.14844,
+    "wash": 0.37677
   }
 }

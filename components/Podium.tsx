@@ -208,8 +208,21 @@ function PodiumCard({
   const markFoot = a.top.y + MARK_SEAT * (a.front.y - a.top.y)
   /* `.tv-pod-mark-band` is translated -50%, so this is the mark's *centre*. */
   const markTop = ((markFoot - markH / 2 - a.front.y) / a.front.h) * 100
-  /* Where the face's type starts: under the mark, which overhangs the block. */
-  const faceTop = markTop + ((markH / 2 / a.front.h) * 100)
+  /* ── Where the face's type starts: under the *medal*, not under the mark ──
+   *
+   * It was the mark's lower edge, which put the name and the figure in the top
+   * 21% of every face and left the lower half of the block empty. That was the
+   * composition when the medals were a cap sitting on a lid, and the two facts
+   * are the same fact: the metal had nowhere to run because the type was
+   * standing in it.
+   *
+   * `a.wash` is how far the medal runs down this face, and the renderer is
+   * what says so — a second opinion here is a venture's figure printed in gold
+   * on a wall nobody is checking. `max` because a mark that overhung further
+   * than the wash would still have to be cleared; today the wash always wins,
+   * and the day it does not this still cannot collide.
+   */
+  const faceTop = Math.max(markTop + ((markH / 2 / a.front.h) * 100), a.wash * 100)
 
   /* ── Who wears the crown ──
    *

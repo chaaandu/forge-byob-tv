@@ -65,10 +65,44 @@ const RADIUS = 26
  * and second stands 80 over third. Not equal steps: the leap to first place is
  * the one this wall is about, and three equal risers read as a bar chart.
  *
- * Each gradient runs top to bottom and ends *warmer and lighter* than it
- * starts, which is the reference's own lighting logic. First place is the only
- * one that reaches a warm hue; the other two stay in the page's purple family,
- * so the hierarchy survives a greyscale crop.
+ * **Each block is one flat colour with its medal on top, and the light does
+ * all the modelling.**
+ * They were multi-stop gradients until 13 September 2026 — first a hue
+ * rotation each, then a rotation landing on that place's medal — and both
+ * read as paint rather than as material. A lit box does not carry a gradient
+ * in its surface; it carries one value, and the room decides what happens to
+ * it. `heightLight` is the room. Everything vertical you see on a face is
+ * falloff, ambient occlusion and the specular along the top edge.
+ *
+ * Each also carries a `metal`, which is its medal — gold, silver, bronze. It
+ * is not part of the ramp and never touches a front face; see the cap in
+ * `shade`, and the note above `metalAlb` for why a metal cannot be albedo in
+ * this room.
+ *
+ * **Each block is its own medal, top to bottom** — gold into amber, silver
+ * into sapphire, copper into maroon. The body is not a separate colour the metal
+ * has to reach across; it is that metal in shadow, which is why the ramps are
+ * short and why none of the three reads as more than one object.
+ *
+ * The three are told apart from each other rather than from their own tops:
+ * a warm yellow, a cool blue and a red, roughly a third of the wheel between
+ * each. Second place is a colour rather than a grey because a grey block on a
+ * violet page is furniture — steel into sapphire is still silver in shadow,
+ * and it is the only cool object on a stage with two warm ones.
+ *
+ * **First place's white type is what caps the whole stage's brightness.** The
+ * name and the figure are printed on the upper part of each face, which is the
+ * part nearest the light, so the leader's colour is the one with no headroom:
+ * at an earlier set of values it measured **3.9:1** under its own figure —
+ * below the 4.5 floor, on the biggest number on the wall. It sits at 5.2:1 on
+ * the name and 5.6:1 on the figure now, with second and third at 6.7 and 7.7.
+ * Anything that brightens a block has to re-measure those four.
+ *
+ * Value is the other half of the hierarchy and it is not set here: the blocks
+ * share one light, so the tallest one's head is simply nearest to it. Measured
+ * across the heads, 0.160 · 0.105 · 0.081 — and down to 0.059 · 0.058 · 0.053
+ * at the feet, where they converge because they stand on the same floor under
+ * the same falloff. Re-measure after moving a height, a colour or the light.
  */
 const w1 = 460
 const wRest = 350
@@ -79,16 +113,18 @@ const BLOCKS = [
     w: wRest,
     h: 570,
     mark: 190,
-    ramp: ['#5b3bc4', '#4a63ef', '#3fb9f0'],
+    ramp: ['#2b4490', '#2b4490'],
+    metal: '#aab9cc',
   },
-  { place: 1, x: 0, w: w1, h: 720, mark: 250, ramp: ['#7c3ad0', '#c026d3', '#ff6a7f'] },
+  { place: 1, x: 0, w: w1, h: 720, mark: 250, ramp: ['#9e6a06', '#9e6a06'], metal: '#f0bd52' },
   {
     place: 3,
     x: w1 / 2 + GAP + wRest / 2,
     w: wRest,
     h: 450,
     mark: 190,
-    ramp: ['#63309f', '#9b56cf', '#e79bd8'],
+    ramp: ['#71272e', '#71272e'],
+    metal: '#cd7742',
   },
 ]
 
@@ -129,11 +165,70 @@ const H = Math.round((VIEW.y1 - VIEW.y0) * SCALE)
    strength and cooler, so the shadowed side keeps some colour instead of going
    to black. Ambient is a hemisphere: violet from above, near-nothing from
    below, which is what stops the undersides reading as holes. */
-const KEY_DIR = norm([0.55, 0.72, 0.42])
-const KEY = [1.0, 0.97, 0.94]
+/* **The key has a position, and that is what stops the faces being slabs.**
+
+   It was a direction, and a direction has no *where* — so every point on a
+   flat face got the identical light vector and the identical exposure, and a
+   460-unit-wide front face came out one uniform colour. That is the last tell
+   that separates a render from a CSS gradient, and no palette reaches past it:
+   the eye reads a lit object by watching the light fall off *across* a
+   surface, not down it.
+
+   Placed above, in front, and to the right — the corner the page's own glow is
+   already in. `REF` is the distance at which it is at full strength, and it is
+   **first place's head**, so the brightest point on the stage is the one the
+   crown sits on.
+
+   **How far right is a ranking decision, not a lighting one.** At x 500 the
+   light stood over the right-hand block, which is rank *three* — and measured
+   off the render, third place's face came out L 0.207 against first place's
+   0.180. The podium's whole job is to say who won, and the light was
+   contradicting it. At 320 the distances run 1008 · 1286 · 1144 to the three
+   heads, so the leader is nearest and the two behind it fall away.
+
+   The cost of pulling it in is the horizontal gradient across first place's
+   face, which goes from 1.6x to 1.33x left-to-right. That is the term that
+   stops a flat face being a slab, so it is the thing to watch if the light
+   ever moves again — centring it entirely would take it to 1.0 and hand back
+   the whole reason the light has a position. */
+const KEY_POS = [320, 1300, 760]
+const KEY_REF = 1008
+const KEY = [1.02, 0.99, 0.94]
 const FILL_DIR = norm([-0.62, 0.34, 0.5])
 const FILL = [0.52, 0.44, 0.76]
 const SKY = [0.38, 0.30, 0.56]
+const RIM = [0.86, 0.80, 1.0]
+
+/* ── The room falls off too, and without this the far blocks are slabs ──
+
+   The key has a position, so it dims with distance on its own. The fill and
+   the hemisphere ambient do not — they are directions, and a direction lights
+   a foot exactly as hard as a head. That is fine while the key dominates, and
+   the key only dominates on the block nearest to it: measured down a clean
+   column, first place fell 1.60x from head to foot and **second place fell
+   1.16x**, which is a flat slab with a rim on it. The further a block stands
+   from the light, the larger the share of it that is lit by terms with no
+   falloff at all. With the gradient in, the three faces run **2.67x · 1.81x ·
+   1.56x** head to foot — the short block spans less of the light's range,
+   which is correct rather than a shortfall.
+
+   So the environment gets a vertical gradient, in world space, applied to the
+   fill and the ambient only. This is not a second light — the key is still the
+   only thing in the scene that emits — it is the room being brighter above the
+   stage than at its feet, which is true of this room in particular: the haze
+   behind the blocks is a glow standing *over* them, and the floor blocks the
+   lower hemisphere.
+
+   **`TOP` is the haze's own centre**, for the same reason `KEY_REF` is first
+   place's head: a falloff peaking anywhere other than the glow you can see
+   gives the scene two rooms. */
+const AMB = { top: 900, floor: 0.30, curve: 1.3 }
+
+function ambientAt(y) {
+  const t = Math.min(Math.max(y / AMB.top, 0), 1)
+  return AMB.floor + (1 - AMB.floor) * t ** AMB.curve
+}
+
 /* ── The haze ──
 
    A soft violet glow standing above the blocks, added only where a ray misses
@@ -195,6 +290,298 @@ function hexToLinear(hex) {
 }
 
 for (const b of BLOCKS) b.lin = b.ramp.map(hexToLinear)
+
+/* ── The medal lives in the reflection, not in the paint ──
+
+   A first pass put gold, silver and bronze in the *albedo*, across the bottom
+   third of each block, and it failed twice over. It looked like three
+   gradients again, and the scene's violet fill turned the two unsaturated
+   metals back into the page — silver rendered #ada5d9 and bronze #ce8f93,
+   lavender and dusty pink.
+
+   Which is the wrong physics for the thing being asked for. A painted surface
+   reflects the light's own colour; **a metal tints what it reflects**. So the
+   medal goes where a metal actually shows: the specular and the fresnel rim.
+   The body of each block keeps its rank colour, and the highlight running the
+   top edge and the lit corner is gold, silver or bronze. That is a trophy —
+   colour with metal trim — rather than a bar painted to look like one.
+
+   It also sidesteps the desaturation problem entirely: a highlight is not
+   competing with the fill light, it *is* light.
+
+   Normalised to its brightest channel, so swapping a metal changes its hue and
+   not the sheen's strength. Gold comes out [1.00, 0.52, 0.04], silver
+   [0.85, 0.88, 1.00] — near-neutral, which is what silver is and why block two
+   reads as a cooler white edge rather than a coloured one. */
+/* ── How far the medal runs down the face ──
+
+   A share of each block's height, from the top. The cap alone was a lid: the
+   review was "just adding those on top?", and it was right — a plane of gold
+   sitting on a plane of pink is two objects, not one dipped one.
+
+   **What made the lid unavoidable was the type, not the metal.** Measured off
+   the running board, the name and the figure occupied the top **21%** of every
+   face and then 48% of it was empty — so the only clear ground was the sliver
+   above the name, and a wash there would have taken first place's figure from
+   5.5:1 to under 4. Moving the type down into the empty half is what buys the
+   metal its room, and it is a better composition besides.
+
+   Published in the manifest so the type is placed *from* this number rather
+   than from a constant that happens to agree with it. A wash and a name that
+   drift apart is a venture's figure printed on gold, and nothing on this wall
+   would report it.
+
+   **Short, and the first attempt at it was not.** At 0.38 and 0.72 the metal
+   owned better than a third of every block and the thing came back as a
+   gradient — which is the look two passes have now been rejected for. It also
+   pushed the type so far down that third place's figure landed on its own rank
+   numeral. And it is where the two colours meet that the length hurts most:
+   bronze into azure is warm into cool, and a long crossing spends it in a band
+   of dead grey. A short dip keeps that crossing to a line. */
+/* ── The environment the metal reflects ──
+
+   **This is what was missing, and no amount of moving the metal around fixed
+   it.** The medals were a colour blended into the albedo — which is paint. A
+   painted surface scatters; a metal *reflects*, and what it reflects is the
+   room. That is the whole difference between gold and orange, and the review
+   that called the cap a lid was really calling it flat.
+
+   `--crown-ink`'s own notes in `forge-tokens.css` §5 say this outright about
+   the crown: "gold does not read as a gold blob: interior value variation is
+   what gives a metal its metal". The crown got that variation hand-drawn into
+   its gradient stops. The blocks get it from an actual reflection.
+
+   A studio environment, which is the cheapest one that reads: bright above the
+   horizon, a lift at the horizon itself, near-dark below it. Sampled by the
+   reflection vector, so it costs nothing and varies correctly across a face —
+   a front face reflects the floor and goes dark at its foot, a top face
+   reflects the sky and goes bright, and the rounded corner between them sweeps
+   the whole range. That sweep is the highlight a metal has and a fill does
+   not. */
+function envSample(ry) {
+  if (ry >= 0) return 0.34 + 0.66 * Math.min(ry / 0.5, 1) ** 0.8
+  return 0.06 + 0.28 * Math.max(1 + ry / 0.35, 0)
+}
+
+const ENV = 1.55
+
+/**
+ * ── The polish, and it is art direction rather than physics ──
+ *
+ * The reflection above does the right thing on a top face and almost nothing
+ * on a front one, and that is not a bug: with the camera above the stage, a
+ * vertical face physically reflects the *floor*, so it stays flat however much
+ * environment you give it. Chasing it with a low softbox was tried and is
+ * fragile — the band of reflection vectors a face sweeps depends on that
+ * block's height, so a lobe tuned to light first place misses third entirely.
+ *
+ * So the metal's internal value is *drawn*, as a function of how far down the
+ * dip a point is. Three things, all of which a real dipped metal has:
+ *
+ *   · a dark line immediately under the cap's lip, where the overhang shades
+ *     the face — this is what gives the cap an edge instead of a fade
+ *   · a bright band through the middle of the dip, the metal catching the room
+ *   · a fall back to the rank colour at the waterline
+ *
+ * That dark-then-bright is the whole trick. `forge-tokens.css` §5 says it about
+ * the crown in as many words — "gold does not read as a gold blob: interior
+ * value variation is what gives a metal its metal" — and the crown got its
+ * variation hand-drawn into gradient stops for exactly this reason. The blocks
+ * had none, which is why two passes of moving the metal around kept producing
+ * orange paint.
+ *
+ * Consistent across all three blocks because it is keyed to the dip, not to
+ * the geometry, which is the property the reflection could not give.
+ *
+ * **`t`, which is depth into the collar — not the blend weight.** It was
+ * written against the weight while the dip still faded out, and when the dip
+ * became a band with a meniscus that weight went to ~1 across the whole collar.
+ * `polish(1)` is 0.66, so every collar came out uniformly **34% darker** and
+ * the gold went to ochre. It looked like a deliberate matte finish and it was
+ * a curve being read at one end of itself.
+ */
+function polish(t) {
+  const lip = Math.exp(-((t - 0.05) ** 2) / (2 * 0.055 ** 2))
+  const band = Math.exp(-((t - 0.46) ** 2) / (2 * 0.2 ** 2))
+  return 1 - 0.34 * lip + 0.62 * band
+}
+
+const WASH_END = 0.46
+const WASH_MAX = 0.97
+const WASH_CURVE = 1.15
+
+/* ── Where the type may start, which is not where the ramp ends ──
+ *
+ * The ramp is nearly half the block, and waiting for its literal end would
+ * push third place's figure onto its own rank numeral — that collision has
+ * already happened once. It does not have to wait: what the type needs is not
+ * the absence of metal but enough of the deep rank colour under it to hold
+ * contrast, and the ramp is down to a tint long before it is down to nothing.
+ *
+ * `TYPE_SAFE` is the weight at which that is true, and the depth below is
+ * solved from it rather than guessed, so changing `WASH_CURVE` moves the type
+ * with it instead of quietly eating the margin. Measured after the fact. */
+const TYPE_SAFE = 0.14
+const TYPE_TOP = WASH_END * (1 - TYPE_SAFE ** (1 / WASH_CURVE))
+
+for (const b of BLOCKS) {
+  b.metalAlb = hexToLinear(b.metal)
+  const peak = Math.max(...b.metalAlb)
+  b.metalLin = b.metalAlb.map((c) => c / peak)
+  /* The ramp's two ends, converted once. Per pixel this is three lerps and a
+     trig pair; converting here rather than in `shade` is the difference
+     between a 20-second render and a two-minute one. */
+  b.lchBody = toLch(b.lin[0])
+  b.lchMetal = toLch(b.metalAlb)
+}
+
+/* ══ OKLab, and it is the whole answer to the mud ══════════════════════════
+ *
+ * Blending a medal into a rank colour muddied at every length tried, and the
+ * diagnosis was wrong three times running. It is not *how far* the blend runs.
+ * It is that a straight line between two saturated hues in RGB — or in linear
+ * light, which is what this file was doing — passes through the middle of the
+ * colour solid, and the middle of the colour solid is grey. Gold to raspberry
+ * lost its chroma around orange-brown; bronze to azure lost all of it.
+ *
+ * A perceptual space does not have that problem, because you can rotate the
+ * hue *around* the neutral axis instead of driving through it. Interpolating
+ * lightness, chroma and hue separately in OKLCh keeps every step of the ramp
+ * as saturated as its ends:
+ *
+ *   gold   83° → amber    75°     9° of turn
+ *   silver (no hue) → sapphire    0°, a pure chroma ramp
+ *   copper 51° → maroon   18°    33° of turn
+ *
+ * ── And the arcs are short because long ones were the actual complaint ──
+ *
+ * The first set of bodies were raspberry, violet and azure, which made the
+ * turns 87°, 0° and **159°**. Reviewed block by block, the scores tracked that
+ * one number almost exactly: silver at 0° was the best of the three, gold at
+ * 87° was middling, and third place at 159° was called out for having "multiple
+ * colours in it" — which it did. 159° of arc is copper, then red, then magenta,
+ * then blue. OKLCh had solved the *mud*; it could not make a long journey read
+ * as one object, because a long journey is not one object.
+ *
+ * So each block now stays inside one hue family and the three are separated
+ * from **each other** instead — 75°, 267° and 18°, a warm yellow, a cool blue
+ * and a red.
+ *
+ * **First place's body is the one that had to give.** It sat at 61°, which is
+ * an amber brown, and that was two faults at once: it left only 43° between
+ * blocks one and three, the weakest separation on the board, and it made the
+ * leader read as brown rather than gold. Moving it to 75° buys both — 57°
+ * between one and three, and first place's own arc down to 9°.
+ *
+ * **This trio is not a complementary scheme and should not be described as
+ * one.** Gold is yellow and bronze is orange-red; they are neighbours on the
+ * wheel because that is what the medals are. Blocks one and three are held
+ * apart by *value* — caps 0.40 against 0.20, bodies 0.087 against 0.033 — not
+ * by hue, and the cool block sits opposite them both. Widening that 57° any
+ * further means pushing copper toward oxblood, which takes its own arc past
+ * 60° and straight back into the fault this whole rule exists for. Short arcs
+ * and evenly-spaced hues cannot both be had while the metals are these three. Each block is a metal fading into its own shadow; the board is
+ * still three distinct colours. **Keep new arcs under ~35°.** That is the
+ * number this was tuned to and the one the complaint was about.
+ *
+ * ── Second place was violet first, and it failed twice over ──
+ *
+ * It was the one ramp that worked while the others were long, so it survived a
+ * round it should not have. Two faults, both measurable:
+ *
+ *   · its body sat at **h297°, which is the page's own hue exactly** — the
+ *     block was the background colour, so it never read as an object the way
+ *     the two warm ones did
+ *   · its metal was **L0.85 against gold's L0.82**, so second place out-glowed
+ *     first. Measured at the caps it was 0.28 vs 0.40 the right way round once
+ *     fixed, and a podium whose runner-up is the brightest thing on it is
+ *     working against the only job it has
+ *
+ * Sapphire at 267° is 30° off the page and complements both warm blocks; the
+ * silver is stepped down so the gold stays the brightest object on the stage.
+ * **Check both of those before changing this block again.**
+ *
+ * Ottosson's constants, unmodified. In and out of *linear* sRGB, which is what
+ * this renderer works in — feeding it gamma-encoded values gives a ramp that
+ * looks right in a swatch and wrong under a light.
+ * ═══════════════════════════════════════════════════════════════════════════ */
+function linearToOklab(c) {
+  const l = Math.cbrt(0.4122214708 * c[0] + 0.5363325363 * c[1] + 0.0514459929 * c[2])
+  const m = Math.cbrt(0.2119034982 * c[0] + 0.6806995451 * c[1] + 0.1073969566 * c[2])
+  const s = Math.cbrt(0.0883024619 * c[0] + 0.2817188376 * c[1] + 0.6299787005 * c[2])
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  ]
+}
+
+function oklabToLinear(c) {
+  const l = (c[0] + 0.3963377774 * c[1] + 0.2158037573 * c[2]) ** 3
+  const m = (c[0] - 0.1055613458 * c[1] - 0.0638541728 * c[2]) ** 3
+  const s = (c[0] - 0.0894841775 * c[1] - 1.291485548 * c[2]) ** 3
+  return [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ]
+}
+
+/** Linear sRGB to OKLCh — lightness, chroma, hue in radians. */
+function toLch(rgb) {
+  const [L, a, b] = linearToOklab(rgb)
+  return [L, Math.hypot(a, b), Math.atan2(b, a)]
+}
+
+const TAU = Math.PI * 2
+
+/**
+ * One step along the ramp, in OKLCh.
+ *
+ * **Chroma decides the hue when one end has barely any.** Measured, the six
+ * ends of these three ramps are:
+ *
+ *   gold       C 0.142  h  81°      raspberry  C 0.170  h 354°
+ *   silver     C 0.015  h 165°      violet     C 0.218  h 300°
+ *   bronze     C 0.121  h  59°      azure      C 0.145  h 260°
+ *
+ * Silver is the odd one and the threshold exists for it. Its chroma is 0.015 —
+ * a tenth of anything else here — because it is pre-compensated a hair toward
+ * green to survive this room's violet fill. At that chroma the hue is not a
+ * colour, it is a rounding artefact, and rotating the violet's 300° to meet its
+ * 165° swept the second-place block through **cyan and teal**: hues this brand
+ * does not contain, arriving on the board because `atan2` was asked a question
+ * about noise. So an achromatic end borrows the other's hue and the ramp
+ * becomes what it should be — chroma alone, falling away to nothing.
+ *
+ * 0.05 separates cleanly: every real end above is 0.12 or more.
+ */
+function rampAt(from, to, t) {
+  const [L0, C0, h0] = from
+  const [L1, C1, h1] = to
+  const hA = C0 < 0.05 ? h1 : h0
+  const hB = C1 < 0.05 ? hA : h1
+  let d = hB - hA
+  while (d > Math.PI) d -= TAU
+  while (d < -Math.PI) d += TAU
+  const L = L0 + (L1 - L0) * t
+  const C = C0 + (C1 - C0) * t
+  const h = hA + d * t
+  const lin = oklabToLinear([L, C * Math.cos(h), C * Math.sin(h)])
+  /* Out-of-gamut is real here — the arc bulges past sRGB between two in-gamut
+     ends — and a negative channel cubes back to a black speck rather than
+     clipping quietly. Clamp at the floor, and let the tone map take the top. */
+  return [Math.max(lin[0], 0), Math.max(lin[1], 0), Math.max(lin[2], 0)]
+}
+
+/** Toward the medal, by `k`, from a neutral. */
+function towardMetal(base, metal, k) {
+  return [
+    base[0] + (metal[0] - base[0]) * k,
+    base[1] + (metal[1] - base[1]) * k,
+    base[2] + (metal[2] - base[2]) * k,
+  ]
+}
 
 /* ── Signed distance to the scene ────────────────────────────────────────
    A rounded box, three times. Exact, so sphere tracing converges in a handful
@@ -298,10 +685,10 @@ function normalAt(px, py, pz) {
 
 /** Percentage-closer soft shadow, the standard SDF trick: the closest the ray
     passes to the geometry, relative to how far along it was, is the penumbra. */
-function softShadow(px, py, pz, lx, ly, lz, k) {
+function softShadow(px, py, pz, lx, ly, lz, k, maxT = 2600) {
   let res = 1
   let t = 1.5
-  for (let i = 0; i < 40 && t < 2600; i++) {
+  for (let i = 0; i < 40 && t < maxT; i++) {
     const d = sdScene(px + lx * t, py + ly * t, pz + lz * t)
     if (d < 0.02) return 0
     res = Math.min(res, (k * d) / t)
@@ -321,47 +708,172 @@ function ao(px, py, pz, nx, ny, nz) {
     occ += (h - d) * w
     w *= 0.72
   }
-  return Math.min(Math.max(1 - occ * 0.028, 0), 1)
+  return Math.min(Math.max(1 - occ * 0.033, 0), 1)
 }
 
-/** The block's own colour at a height: its ramp, sampled top to bottom. */
+/** The block's own colour at a height: its ramp, sampled top to bottom.
+ *
+ * **Any number of stops, evenly spaced.** All three blocks pass one colour
+ * twice today, which is the flat case and the one the file argues for — the
+ * light does the modelling. The machinery is kept because it is what a
+ * *material* variation would use if one is ever wanted, and because it cost
+ * nothing: two stops of the same value is the same arithmetic.
+ *
+ * It earned its keep on the way past. Three-stop hue rotations were the old
+ * board, and a four-stop pass tried to land each block on its own medal —
+ * which failed for a reason worth keeping: the scene's fill light is violet,
+ * so an unsaturated colour comes back as the page. Silver rendered **#ada5d9**
+ * and bronze **#ce8f93**, lavender and dusty pink. Only saturated colour
+ * survives this room, which is why the three below are all saturated. */
 function albedo(b, y) {
   const f = Math.min(Math.max(1 - y / b.h, 0), 1)
-  const [a, m, c] = b.lin
-  if (f < 0.5) {
-    const u = f * 2
-    return [a[0] + (m[0] - a[0]) * u, a[1] + (m[1] - a[1]) * u, a[2] + (m[2] - a[2]) * u]
-  }
-  const u = (f - 0.5) * 2
-  return [m[0] + (c[0] - m[0]) * u, m[1] + (c[1] - m[1]) * u, m[2] + (c[2] - m[2]) * u]
+  const r = b.lin
+  const seg = r.length - 1
+  const i = Math.min(Math.floor(f * seg), seg - 1)
+  const u = f * seg - i
+  const a = r[i]
+  const c = r[i + 1]
+  return [a[0] + (c[0] - a[0]) * u, a[1] + (c[1] - a[1]) * u, a[2] + (c[2] - a[2]) * u]
 }
 
 function shade(px, py, pz, nx, ny, nz, vx, vy, vz) {
   const b = blockAt(px, py, pz)
-  const alb = albedo(b, py)
   const occ = ao(px, py, pz, nx, ny, nz)
-  const sh = softShadow(px, py, pz, KEY_DIR[0], KEY_DIR[1], KEY_DIR[2], 14)
 
-  const nk = Math.max(nx * KEY_DIR[0] + ny * KEY_DIR[1] + nz * KEY_DIR[2], 0)
+  /* ── The cap, and why it is the top face and nothing else ──
+
+     Tinting the specular alone was not enough to read: a highlight on these
+     blocks is a sliver along one edge, and at six metres a sliver is not a
+     medal. The top face is a whole plane, it is the plane the mark stands on,
+     and it is the one surface the key light hits close to head-on — which is
+     exactly where an unsaturated metal keeps its colour instead of being
+     turned back into the page by the violet fill. That was the failure of the
+     pass that made the metals albedo; here the physics is on the right side.
+
+     **To the fourth power, and the exponent is load-bearing.** A front face
+     has `ny` of 0 and gets none of this at any exponent — but the 26px rounded
+     corner between the two sweeps `ny` through every value in between, and
+     that corner projects tall on screen. Squared, the wash ran a visible band
+     down the top of each front face: dusty bronze on third place, which is the
+     exact colour the albedo pass failed at. Raised to four it stops at the
+     corner, so the cap has an edge and the face keeps its rank colour. */
+  const up = Math.max(ny, 0) ** 4
+
+  /* And the same metal running down the face from under it. Keyed to height
+     alone, so it crosses the front, both sides and the rounded corners at one
+     level — a dip has a waterline, and a wash that followed the normal would
+     ride up the sides and read as paint instead.
+
+     ── A long fade, which was only possible once the ramp moved to OKLCh ──
+
+     This ran as a hard band with a meniscus for one pass, and the reasoning
+     behind that band was wrong in an interesting way. Three fades before it had
+     muddied in the middle, so the conclusion was that a fade between two
+     contrasting materials *must* mud and the crossing had to be given no width.
+     It does not. It muds in linear RGB, because a straight line between two
+     saturated hues runs through the neutral axis. In OKLCh the same fade
+     rotates around it and every step stays as saturated as the ends — so the
+     crossing can have all the width it wants, and the band goes back to being
+     the gradient it should have been.
+
+     Long on purpose: at 0.46 nearly half the block is ramp, which is what stops
+     either end reading as a flat area with a join. `t` is depth into it. */
+  const t = Math.min(Math.max((1 - py / b.h) / WASH_END, 0), 1)
+  const down = (1 - t) ** WASH_CURVE
+
+  /* `max`, not a sum: where the cap and the wash meet they are the same metal,
+     and adding them would lay a bright seam along the edge the two share. */
+  const metalness = Math.max(0.9 * up, WASH_MAX * down)
+  /* Down the ramp rather than across a lerp. At `metalness` 0 this returns the
+     block's flat rank colour, so everything below the ramp is unchanged. */
+  const alb = rampAt(b.lchBody, b.lchMetal, metalness)
+
+  /* To the light rather than along a fixed axis, and the inverse square that
+     comes with having somewhere to be. Both terms vary across a flat face,
+     which is the whole point of the move. */
+  const lx = KEY_POS[0] - px
+  const ly = KEY_POS[1] - py
+  const lz = KEY_POS[2] - pz
+  const ld = Math.hypot(lx, ly, lz)
+  const kx = lx / ld
+  const ky = ly / ld
+  const kz = lz / ld
+  const atten = Math.min((KEY_REF / ld) ** 2, 1.35)
+  const sh = softShadow(px, py, pz, kx, ky, kz, 14, ld)
+
+  const kdot = Math.max(nx * kx + ny * ky + nz * kz, 0)
+  const nk = kdot * atten
   const nf = Math.max(nx * FILL_DIR[0] + ny * FILL_DIR[1] + nz * FILL_DIR[2], 0)
   const hemi = 0.5 + 0.5 * ny
+
+  /* On the fill and the ambient, never on the key — the key already dims by
+     being somewhere. Scaling it twice is how a stage ends up lit like a
+     tunnel. */
+  const room = ambientAt(py)
 
   const out = [0, 0, 0]
   for (let c = 0; c < 3; c++) {
     const ambient = (GROUND[c] + (SKY[c] - GROUND[c]) * hemi) * occ
-    out[c] = alb[c] * (KEY[c] * nk * sh + FILL[c] * nf * occ + ambient)
+    out[c] = alb[c] * (KEY[c] * nk * sh + (FILL[c] * nf * occ + ambient) * room)
   }
 
-  /* One broad specular, on the key only. Enough to put a sheen along the top
-     edges, which is what says "solid object" rather than "painted rectangle";
-     any tighter and the blocks read as plastic. */
-  const hx = KEY_DIR[0] - vx
-  const hy = KEY_DIR[1] - vy
-  const hz = KEY_DIR[2] - vz
+  /* The specular, on the key only. It was a broad one for as long as the
+     material carried its own gradient — the blocks needed a wide sheen to say
+     "solid" because nothing else was. The light does that now, so this can
+     tighten to what a real highlight is: a line along the top edge where the
+     face turns through the mirror angle, rather than a bloom across it. */
+  const hx = kx - vx
+  const hy = ky - vy
+  const hz = kz - vz
   const hl = Math.hypot(hx, hy, hz)
   const nh = Math.max((nx * hx + ny * hy + nz * hz) / hl, 0)
-  const spec = nh ** 26 * 0.30 * sh
-  for (let c = 0; c < 3; c++) out[c] += spec * KEY[c]
+  const spec = nh ** 36 * 0.34 * sh * atten
+  const specTint = towardMetal(KEY, b.metalLin, 0.65)
+  for (let c = 0; c < 3; c++) out[c] += spec * specTint[c]
+
+  /* ── The rim, and why it only shows on the edges ──
+
+     Fresnel: how far the surface has turned away from the eye. A front face
+     points straight down the barrel, so `facing` is ~1 and the term is zero —
+     the flat middle of a block gets nothing at all. It climbs only across the
+     rounded corner where the face rolls away, which is exactly the sliver a
+     real object lights up and a flat fill cannot.
+
+     Gated three ways, and each gate is a fault it had without it: by `kdot` so
+     it only appears on the side the light is on, by `sh` so a block standing in
+     another's shadow does not glow along its edge, and by `occ` so the crease
+     where two blocks nearly touch stays a crease.
+
+     Cool and near-white rather than the key's warm white, because an edge
+     catches the *room* and this room's sky is violet. */
+  const facing = Math.max(-(nx * vx + ny * vy + nz * vz), 0)
+
+  /* ── The reflection, and it is only the metal that has one ──
+
+     Weighted by `metalness`, so the rank colour below the waterline stays the
+     matte painted surface it is and the dipped part above it stays metal. The
+     two materials meet at one line instead of being one material pretending.
+
+     Metals reflect hard at every angle, not only at grazing ones — hence the
+     0.52 floor rather than a pure fresnel, which would have put the whole
+     reflection on the silhouette and left the face flat again. */
+  if (metalness > 0.002) {
+    const vn = nx * vx + ny * vy + nz * vz
+    const ry = vy - 2 * vn * ny
+    const env = envSample(ry) * (0.52 + 0.48 * (1 - facing) ** 3)
+    const refl = metalness * env * ENV * sh
+    for (let c = 0; c < 3; c++) out[c] += refl * b.metalLin[c] * alb[c]
+    /* A metal has almost no diffuse. */
+    for (let c = 0; c < 3; c++) out[c] *= 1 - 0.46 * metalness
+
+    /* And the drawn profile, faded in by the same weight, so the rank colour
+       below the waterline is untouched by it. */
+    const p = 1 + (polish(t) - 1) * metalness
+    for (let c = 0; c < 3; c++) out[c] *= p
+  }
+  const rim = (1 - facing) ** 3.4 * (0.2 + 0.8 * kdot) * sh * occ * 0.62
+  const rimTint = towardMetal(RIM, b.metalLin, 0.55)
+  for (let c = 0; c < 3; c++) out[c] += rim * rimTint[c]
 
   return out
 }
@@ -442,7 +954,11 @@ for (let iy = 0; iy < H; iy++) {
           const fx = CAM.x + dir[0] * tf
           const fz = CAM.z + dir[2] * tf
           if (tf > 0 && fz > -1400 && Math.abs(fx) < 1400) {
-            const sh = softShadow(fx, 0.6, fz, KEY_DIR[0], KEY_DIR[1], KEY_DIR[2], 9)
+            const flx = KEY_POS[0] - fx
+            const fly = KEY_POS[1] - 0.6
+            const flz = KEY_POS[2] - fz
+            const fld = Math.hypot(flx, fly, flz)
+            const sh = softShadow(fx, 0.6, fz, flx / fld, fly / fld, flz / fld, 9, fld)
             const occ = ao(fx, 0.6, fz, 0, 1, 0)
             /* ── Contact, not cast ──
 
@@ -555,6 +1071,7 @@ const places = Object.fromEntries(
         front: { x: f(lx / W), y: f(ty / H), w: f((rx - lx) / W), h: f((by - ty) / H) },
         top: { x: f(tx / W), y: f(tyc / H) },
         mark: f(b.mark / (VIEW.x1 - VIEW.x0)),
+        wash: f(TYPE_TOP),
       },
     ]
   }),
@@ -576,7 +1093,10 @@ writeFileSync(
  * image with the origin at its top left. \`front\` is a block's face, which is
  * an exact rectangle because the render's camera is off-axis; \`top\` is the
  * centre of its top face, where the mark stands; \`mark\` is that mark's
- * diameter as a fraction of the image's width.
+ * diameter as a fraction of the image's width; \`wash\` is how far down the
+ * face the medal has faded to a tint, as a share of the face's own height, and
+ * is what the name and the figure are placed below. It is *not* where the ramp
+ * ends — the ramp runs on underneath the type as a wash of colour.
  *
  * Re-run the script after changing any block's size, the camera, or the view.
  */
@@ -585,6 +1105,7 @@ export type BlockAnchor = {
   front: { x: number; y: number; w: number; h: number }
   top: { x: number; y: number }
   mark: number
+  wash: number
 }
 
 export const BLOCK_IMAGE = { src: '/podium/blocks.png', width: ${W}, height: ${H} } as const

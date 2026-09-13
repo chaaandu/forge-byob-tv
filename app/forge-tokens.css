@@ -678,12 +678,83 @@
      was never true of ink. Everything printed *on* them still reads a token
      and still flips.
 
-     The ramps, for the record, each start at the wall's own violet and rotate
-     away from it going down, hottest for first place:
+     The three blocks' colour, for the record. Each is **one flat value** and
+     the renderer's light does all the modelling; they were multi-stop
+     gradients until 13 September 2026 and the gradient ran the wrong way —
+     brightest at the foot, darkest at the head, under an overhead light.
 
-       1   #7c3ad0 → #c026d3 → #ff6a7f
-       2   #5b3bc4 → #4a63ef → #3fb9f0
-       3   #63309f → #9b56cf → #e79bd8 */
+       1   #9e6a06   amber      under #f0bd52 gold
+       2   #2b4490   sapphire   under #aab9cc silver
+       3   #71272e   maroon     under #cd7742 copper
+
+     **Short arcs, because long ones were the complaint.** The bodies were
+     raspberry, violet and azure first, which made the turns 87°, 0° and 159°.
+     Reviewed block by block, the scores tracked that one number: the 0° ramp
+     was the best of the three and the 159° one was called out for holding
+     "multiple colours" — which it did, since 159° of arc is copper, red,
+     magenta, blue. OKLCh fixes the mud; it cannot make a long journey read as
+     one object. The three are separated from each other instead — 75°, 267°
+     and 18° — so the board still carries three distinct colours.
+
+     **It is not a complementary scheme.** Gold is yellow and bronze is
+     orange-red — neighbours on the wheel, because that is what the medals are
+     — so blocks one and three are 57° apart and held apart by *value* rather
+     than hue: caps 0.40 against 0.20. Widening that means pushing copper to
+     oxblood, which takes its own arc past 60° and back into the fault the
+     35° rule exists for. First place's body moved 61° → 75° to buy what
+     separation there is, which also stopped the leader reading as brown.
+
+     **Second place was violet and had to move off it.** Its body sat at h297°,
+     which is this page's own hue to the degree, so the block was the
+     background and never read as an object; and its metal measured L0.85
+     against gold's L0.82, so the runner-up was the brightest thing on a board
+     whose only job is saying who won. Sapphire is 30° off the page, the silver
+     is stepped down, and the caps now measure 0.40 · 0.28 · 0.20 in rank
+     order. Check both before touching that block.
+
+     First place is the one to watch on contrast: a brighter body once took its
+     figure to 3.9:1, under the floor, on the biggest number on the wall. It is
+     what caps how bright the whole stage is allowed to go.
+
+     **Each block is its own medal fading into its own shadow**, interpolated
+     in **OKLCh** so the ramp rotates around the neutral axis rather than
+     through it — a straight RGB blend between any of these pairs goes grey in
+     the middle. The body is not a second colour the metal has to cross to; it
+     is that metal deepened, which is why every arc here is under 35°:
+
+       1   #dda52f   gold
+       2   #c6d2cc   silver, pushed cool
+       3   #c47a3a   bronze, deepened
+
+     Two of those diverge from `--forge-metal-*` above and the reason is the
+     room, not taste. A neutral surface under a violet fill light comes back
+     violet: the token silver rendered a plain lavender cap. Pre-compensating
+     toward green takes it to a cool grey. The token bronze rendered dusty
+     pink, so it is deepened toward copper. Neither is read by CSS — these are
+     render parameters, baked into the PNG like everything else here.
+
+     Flat is the *albedo*, not the block: each face falls 2.67x / 1.81x / 1.56x
+     from head to foot, and every bit of that comes from the renderer's light
+     rather than from paint. That distinction is the whole argument — a
+     gradient in the material is what made the version before this one read as
+     CSS. See `scripts/render-podium.mjs`.
+
+     The white type sits **below** the collar now rather than at the top of the
+     face, which is what gave the metal its room — and it bought contrast
+     rather than spending it: **6.4 · 7.6 · 8.5:1** on the three names, and
+     6.9:1 on first place's figure.
+
+     **There are two gold objects on this wall now, and it was a decision.**
+     The rule said one — the crown — and a pass earlier this same day spent it
+     a second time by putting the metals in the blocks' gradients; that was
+     rejected on looks. This is the third attempt and the one that stands,
+     asked for directly. `AGENTS.md` carries the full record.
+
+     What survives is the part that protects the surface flip:
+     `--forge-metal-gold` still has exactly one reader in this file,
+     `--crown-ink`, because gold is 8.59:1 on aubergine and 1.61:1 on lavender.
+     The medals above are pixels in a PNG and cannot follow a flip — which is
+     the stated cost of rendering the blocks, not a new one. */
 
   --stage-type-shadow: rgba(21, 11, 38, 0.38);
   --stage-numeral: rgba(255, 255, 255, 0.16);
