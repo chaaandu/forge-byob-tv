@@ -498,12 +498,74 @@ describe('Podium', () => {
     // a rank changed hands — so the crown crosses to `/weekly` and its loop
     // does not. `AGENTS.md` scopes the motion exception to "one object, on one
     // slide"; that scope is what this second assertion keeps.
+    //
+    // **The fixture carries contest figures rather than all-time ones**, and
+    // that is load-bearing: this board's crown is gated on the figure this
+    // board sorted by, so `TRADING` — three teams with lakhs of all-time
+    // revenue and nothing this fortnight — is an *uncrowned* board. The test
+    // below is where that is pinned.
     const host = document.createElement('div')
     document.body.append(host)
     const root = createRoot(host)
-    act(() => root.render(<WeeklyGrid teams={TRADING} />))
+    act(() =>
+      root.render(
+        <WeeklyGrid
+          teams={teams([
+            { teamId: 'VBC101', ventureName: 'Aurora Bakes', challengeRevenue: 42_000 },
+            { teamId: 'VBC102', ventureName: 'Kite Coffee', challengeRevenue: 31_500 },
+          ])}
+        />,
+      ),
+    )
     expect(host.querySelectorAll('.tv-crown')).toHaveLength(1)
     expect(host.querySelectorAll('.tv-crown-glint')).toHaveLength(0)
+    act(() => root.unmount())
+    host.remove()
+  })
+
+  it('crowns nobody on /weekly before the first sale of the contest', () => {
+    // `/podium` has refused to crown an untraded board since the crown existed;
+    // this is the same refusal on the board that is actually in that state
+    // regularly. Every Monday morning, and the whole of a challenge's first
+    // day, rank 1 is whoever the tie-break put first — lowest team ID, on ₹0,
+    // against thirty-eight other ventures on ₹0. A crown there renders
+    // perfectly and says something false about who is winning.
+    const host = document.createElement('div')
+    document.body.append(host)
+    const root = createRoot(host)
+
+    // All-time revenue on the leader and nothing this fortnight, which is the
+    // case a gate written against `totalRevenue` would pass: `/weekly` did not
+    // rank on that figure and does not print it.
+    act(() =>
+      root.render(
+        <WeeklyGrid
+          teams={teams([
+            { teamId: 'VBC101', ventureName: 'Aurora Bakes', totalRevenue: 240_000 },
+          ])}
+        />,
+      ),
+    )
+    expect(host.querySelectorAll('.tv-crown')).toHaveLength(0)
+
+    // And one sale is enough to put it back. The gate is the figure, not a
+    // count of teams or a flag somebody has to remember to set.
+    act(() =>
+      root.render(
+        <WeeklyGrid
+          teams={teams([
+            {
+              teamId: 'VBC101',
+              ventureName: 'Aurora Bakes',
+              totalRevenue: 240_000,
+              challengeRevenue: 1_200,
+            },
+          ])}
+        />,
+      ),
+    )
+    expect(host.querySelectorAll('.tv-crown')).toHaveLength(1)
+
     act(() => root.unmount())
     host.remove()
   })
@@ -1365,12 +1427,47 @@ describe('VentureCard', () => {
    * and this is that glyph on that rank on the other slide. What this pins is
    * the "one rank" half: a crown that reached rank 2 would be a second gold
    * object, which the rule says is a new argument rather than an extension.
+   *
+   * **And rank 1 is necessary rather than sufficient.** The card has to have
+   * traded in the contest the board is showing — a leader on ₹0 is the
+   * tie-break's alphabetical accident, not a leader. The fixture therefore
+   * carries a figure, and the second half of this test is the zero.
    */
   it('crowns rank 1 and nobody else', () => {
-    expect(markup(<VentureCard team={team({})} rank={1} />)).toContain('tv-crown')
+    const traded = team({ challengeRevenue: 12_400 })
+    expect(markup(<VentureCard team={traded} rank={1} />)).toContain('tv-crown')
     for (const rank of [2, 3, 4, COMPETING_SIZE]) {
-      expect(markup(<VentureCard team={team({})} rank={rank} />)).not.toContain('tv-crown')
+      expect(markup(<VentureCard team={traded} rank={rank} />)).not.toContain('tv-crown')
     }
+  })
+
+  /**
+   * ── And nothing is crowned on a board where nobody has traded ──
+   *
+   * The three cases are one rule read through `boardEarned`, so each is worth
+   * its own line: a zero is not a lead, a figure below the fortnight's baseline
+   * is even less of one, and the figure that counts is the contest's rather
+   * than the all-time one `/podium` ranks. The last is the one a plausible
+   * wrong fix produces — a card crowned for a lakh it earned in August, on a
+   * board printing `₹0` beneath the crown.
+   */
+  it('crowns nobody on a figure of zero or below, whatever the all-time total', () => {
+    expect(markup(<VentureCard team={team({})} rank={1} />)).not.toContain('tv-crown')
+    expect(markup(<VentureCard team={team({ challengeRevenue: -3_850 })} rank={1} />)).not.toContain(
+      'tv-crown',
+    )
+    expect(markup(<VentureCard team={team({ totalRevenue: 240_000 })} rank={1} />)).not.toContain(
+      'tv-crown',
+    )
+
+    // The week board is gated on the week's figure, so a card carrying a
+    // challenge figure between challenges is not crowned for it either.
+    expect(
+      markup(<VentureCard team={team({ challengeRevenue: 12_400 })} rank={1} mode="week" />),
+    ).not.toContain('tv-crown')
+    expect(
+      markup(<VentureCard team={team({ weekRevenue: 12_400 })} rank={1} mode="week" />),
+    ).toContain('tv-crown')
   })
 
   /**

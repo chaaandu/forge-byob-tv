@@ -175,6 +175,33 @@ export function VentureCard({
   const quiet = rank > SOLID_RANKS
 
   /**
+   * ── The crown, and the zero gate that is not defensive ──
+   *
+   * `/podium` already refuses to crown a board where nobody has traded, for a
+   * reason that is about truth rather than about tidiness, and the reason
+   * carries across unchanged: before the first sale of a week lands, rank 1 is
+   * whoever the tie-break put first — lowest team ID, on ₹0, against
+   * thirty-eight other ventures on ₹0. There is no leader, and a crown on
+   * `SLE-C401` for being alphabetically early is this wall's stated failure
+   * mode: it renders perfectly and it is false, for however many days it takes
+   * somebody to sell something. On `/weekly` that is not a rare state — it is
+   * every Monday morning, and the whole of a challenge's first day.
+   *
+   * **The figure it reads is the one the board sorted by**, not `totalRevenue`.
+   * `boardEarned` is what the ranking, the ink and the printed number all go
+   * through, so a crown gated on anything else could appear over a `₹0` or sit
+   * out a board that has traded. Rounded for the same reason the ink is: this
+   * agrees with what `formatRupees` prints rather than with what the sheet
+   * happens to hold, so a leader on ₹0.40 — who prints `₹0` — is not crowned
+   * for a fraction of a rupee nobody on the wall can see.
+   *
+   * **`> 0` rather than `!== 0`.** A negative leader means every team on the
+   * board is below the total it started the fortnight on, which is the absence
+   * of a leader rather than the presence of one.
+   */
+  const crowned = rank === 1 && Math.round(boardEarned(mode, team)) > 0
+
+  /**
    * ── Today is shown, or it is not ──
    *
    * A team that has traded today gets a capsule carrying the figure and a mark
@@ -370,7 +397,7 @@ export function VentureCard({
             crown with no exit does not stay behind; it rides the seat, and the
             seat travels. Measured before `tv-crown-off` existed: it crossed to
             rank 2's slot at full opacity and sat there on the Mesa card back
-            for a second and a half. `rank === 1` with a cue is only ever the
+            for a second and a half. A crowned card with a cue is only ever the
             defender of an event whose `toRank` is 1 — an attacker is by
             definition climbing into the slot, and a slide cue only ever goes to
             a rank below `toRank` — so this class means exactly one thing: the
@@ -403,7 +430,7 @@ export function VentureCard({
           />
         </div>
 
-        {rank === 1 ? (
+        {crowned ? (
           <span
             className="tv-crown"
             style={
