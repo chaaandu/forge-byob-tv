@@ -246,14 +246,14 @@ npm run build        # next build
   like that read as one object.
 
   So each block now **fades into its own shadow rather than into a different
-  colour**: gold 78° → amber 70°, silver (achromatic) → teal 189°, copper 51°
+  colour**: gold 78° → amber 70°, silver (achromatic) → ice-cyan 210°, copper 51°
   → maroon 18°. Every arc is under 35°. The three are told apart from *each
   other* instead — a warm orange-gold, a cool teal and a red, roughly a third of the
   wheel apart — so the board still carries three distinct colours while no
   single block carries two. **Keep new arcs under ~35°.**
 
   **It is a complementary pair plus a neighbour, not an even triad.** Silver
-  and copper's bodies sit **172°** apart — a true complement, and the axis the
+  and copper's bodies sit **168°** apart — a true complement, and the axis the
   stage is built on. Copper is 52° from gold and cannot leave: gold is yellow,
   bronze is orange-red, neighbours on the wheel because that is what the medals
   are. Widening it pushes copper toward oxblood and its own arc past 60°,
@@ -280,8 +280,17 @@ npm run build        # next build
   it; an emerald block reads as a regression to the parent brand. Teal is what
   is left, and it earns its place: cool without being blue, green-adjacent
   without being Mesa's green, 0.184 relative luminance against amber's 0.194,
-  and 172° from copper. **Anything proposing green here is proposing the
+  and 168° from copper. **Anything proposing green here is proposing the
   parent brand.**
+
+  **The wheel is mapped in the renderer, because this block keeps getting
+  revisited.** Only **180-225°** is open; everything else is copper, gold,
+  Mesa's green, blue, or the page's own hue. Every alternative for second
+  place is a shade of teal-to-cyan — there is no fifth option. It sits at 210°.
+  And that band is the poorest part of the gamut at the luminance this block
+  must hit: chroma 0.076 against 0.19 on the warm side, so **silver cannot be
+  made as rich as gold or copper whatever hue it is given.** Say that before
+  spending another pass on it.
 
   **Second place was violet through two rounds and should not have been.** It
   was the ramp that worked while the others were long, which bought it a pass

@@ -113,8 +113,8 @@ const BLOCKS = [
     w: wRest,
     h: 570,
     mark: 190,
-    ramp: ['#33837e', '#33837e'],
-    metal: '#98c1bd',
+    ramp: ['#33818e', '#33818e'],
+    metal: '#98bfc7',
   },
   { place: 1, x: 0, w: w1, h: 720, mark: 250, ramp: ['#a96d11', '#a96d11'], metal: '#f5af1f' },
   {
@@ -450,7 +450,7 @@ for (const b of BLOCKS) {
  * as saturated as its ends:
  *
  *   gold   78° → amber    70°     8° of turn
- *   silver (no hue) → teal      189°     0°, a pure chroma ramp
+ *   silver (no hue) → ice-cyan  210°     0°, a pure chroma ramp
  *   copper 51° → maroon   18°    33° of turn
  *
  * ── And the arcs are short because long ones were the actual complaint ──
@@ -464,8 +464,8 @@ for (const b of BLOCKS) {
  * as one object, because a long journey is not one object.
  *
  * So each block now stays inside one hue family and the three are separated
- * from **each other** instead — 70°, 189° and 18°, a warm orange-gold, a cool
- * teal and a red.
+ * from **each other** instead — 70°, 210° and 18°, a warm orange-gold, a cool
+ * ice-cyan and a red.
  *
  * **First place's body is the one that had to give.** It sat at 61°, which is
  * an amber brown, and that was two faults at once: it left only 43° between
@@ -544,11 +544,33 @@ for (const b of BLOCKS) {
  * cap order holds at 0.356 / 0.320 / 0.202.
  *
  * **55% was tried first and it was too much**: at that chroma the block stops
- * being a silver and becomes a teal one, which wins the richness argument by
- * abandoning the thing the block is for. The ceiling is about a third.
+ * being a silver and becomes a coloured one, which wins the richness argument
+ * by abandoning the thing the block is for. The ceiling is about a third.
+ *
+ * ── The whole wheel, mapped, because second place keeps getting revisited ──
+ *
+ * Every hue was checked against what this block has to satisfy, at the
+ * luminance it has to hit. Almost all of it is spoken for:
+ *
+ *     0-30°   too close to copper (18°)
+ *    30-105°  too close to gold (70°)
+ *   120-165°  green — Mesa's parent brand, see `forge-tokens.css`
+ *   180-225°  **open** — and this is the whole of it
+ *   240-270°  blue — rejected on looks
+ *   270-345°  the page's own hue (297°), or back into copper
+ *
+ * So there is no fifth option; every alternative for this block is a different
+ * shade of teal-to-cyan. It sits at 210°, the cooler end, which reads as ice
+ * rather than patina and is as far from blue as the band allows.
+ *
+ * **And the open band is the poorest part of the gamut.** At the luminance
+ * that keeps second place level with first, the warm side offers chroma of
+ * 0.19 and this band offers **0.076-0.085** — less than half. Silver cannot be
+ * made as rich as gold or copper, whatever hue it is given. That is sRGB, not
+ * a bad choice, and it is the thing to say before spending another pass on it.
  *
  * **It is a complementary pair plus a neighbour, not an even triad.** Silver
- * and copper's bodies sit **172°** apart, which is as close to a true
+ * and copper's bodies sit **168°** apart, which is as close to a true
  * complement as makes no difference, and that axis is what gives the stage its
  * structure.
  * Copper is 52° from gold and cannot leave: gold is yellow and bronze is

@@ -726,7 +726,7 @@
      brightest at the foot, darkest at the head, under an overhead light.
 
        1   #a96d11   amber      under #f5af1f gold     96% / 96% of max chroma
-       2   #33837e   teal       under #98c1bd silver   80% / 32%
+       2   #33818e   ice-cyan   under #98bfc7 silver   80% / 32%
        3   #71272e   maroon     under #cd7742 copper   67% / 74%
 
      Those percentages are of the chroma sRGB allows at each end's own
@@ -754,7 +754,7 @@
      regression to the parent brand. Teal is what is left and it is a good
      answer rather than a leftover: cool without being blue, green-adjacent
      without being Mesa's green, 0.184 relative luminance against amber's
-     0.194, and 172° from copper — so the complementary axis moved from
+     0.194, and 168° from copper — so the complementary axis moved from
      first-against-second to second-against-third rather than disappearing.
 
      **The silver metal was 6% of max and read as vague.** Gold's is 96% and
@@ -762,7 +762,15 @@
      a *saturation* ramp where theirs are value ramps inside one hue, which is
      why it looked different in kind rather than merely duller. At 32% it is a
      pale cool metal carrying the body's hue, and the ramp matches. 55% was
-     tried and abandons the silver for a teal block; a third is the ceiling.
+     tried and abandons the silver for a coloured block; a third is the ceiling.
+
+     **The wheel is mapped in `scripts/render-podium.mjs` because this block
+     keeps getting revisited.** Only 180-225° is open — everything else is
+     copper, gold, Mesa's green, blue, or this page's own hue — so every
+     alternative is a shade of teal-to-cyan. It sits at 210°, the cooler end.
+     And that band is the poorest part of the gamut at this luminance: 0.076
+     against 0.19 on the warm side, so **silver cannot be made as rich as gold
+     or copper whatever hue it is given.**
 
      **Short arcs, because long ones were the complaint.** The bodies were
      raspberry, violet and azure first, which made the turns 87°, 0° and 159°.
