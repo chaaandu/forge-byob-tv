@@ -856,3 +856,28 @@
   --stage-row-sheen: rgba(255, 255, 255, 0.09);
   --stage-row-shade: rgba(10, 5, 20, 0.34);
 }
+
+/* ── §8 · Visarjan ─────────────────────────────────────────────────────────
+
+   The water and the sprout in the Ganesha's corner on 25 September 2026, and
+   drawn by nothing on any other day. `components/VisarjanScene.tsx`.
+
+   **Declared on `:root` rather than per surface, and that is a known gap.**
+   The ornament hangs off the root layout, outside both slides' frames, so it
+   has no surface class to inherit from. Both slides are dark, so these are
+   measured against Deep Aubergine only; if `/weekly` goes back to
+   `.surface-light` the water needs re-measuring on Lavender Mist, where a pale
+   translucent blue will very nearly vanish.
+
+   The leaves are a yellow spring green, h132° in OKLCh against Mesa's
+   `--bright-green` at h153° — a leaf, not the parent brand. 8.6:1 on
+   aubergine for the body, 4.9:1 for the stem. The water is translucent so the
+   idol is seen going into it rather than behind it. */
+:root {
+  --visarjan-water: rgba(120, 196, 230, 0.28);
+  --visarjan-water-deep: rgba(74, 146, 206, 0.6);
+  --visarjan-surface: rgba(214, 240, 252, 0.8);
+  --visarjan-leaf-lit: #c2ec7a;
+  --visarjan-leaf: #8fd14f;
+  --visarjan-stem: #5e9e3a;
+}

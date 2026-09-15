@@ -355,21 +355,26 @@ npm run build        # next build
     wall is read at six metres. That was the fault that killed the fifth CSS
     attempt, and it is available to a renderer too.
 
-- **One looping Lottie is on the wall, for three days, and it is the borrowed
-  artwork exception too.** `components/Ganesha.tsx` puts an 80px Ganesha in the
-  bottom-left corner of both slides from **14 to 16 September 2026** and renders
-  `null` the other 362 days. It loops, which the rule above says an ornament does
-  not get to do on the crown's precedent — so it makes its own argument, and the
-  argument is in that file rather than here.
+- **One looping Lottie is on the wall, for eleven days, then an immersion for
+  one, and it is the borrowed artwork exception too.** `components/Ganesha.tsx`
+  puts an 80px Ganesha in the bottom-left corner of both slides from **14 to 24
+  September 2026**, immerses it on the **25th**, and renders `null` the other
+  353 days. It loops, which the rule above says an ornament does not get to do
+  on the crown's precedent — so it makes its own argument, and the argument is
+  in that file rather than here. It was three days until 15 September 2026,
+  when the whole festival was asked for.
 
   The short form: the motion rule protects *the board*, where movement means a
   rank changed hands. This carries no figure, sits outside the board, and is
   bounded by a date rather than by someone remembering. That last part is the
   condition, not a detail — the ornament's correct state is **absent**, and
-  absence is the one state no polling loop arrives at on its own. `isFestival`
-  in `lib/schedule.ts` owns the window; `GANESH_UNTIL_ISO` is the **17th**,
-  exclusive, because naming the last day gives two days instead of three and
-  looks exactly like a wall configured that way.
+  absence is the one state no polling loop arrives at on its own. `ganeshPhase`
+  in `lib/schedule.ts` owns the window, from three instants in `config.ts`:
+  `VISARJAN_FROM_ISO` is the **25th** and `GANESH_UNTIL_ISO` the **26th**, both
+  exclusive ends, because naming the last day takes a day off and looks exactly
+  like a wall configured that way. **A widened test window once sat in `main`
+  for three days** with a comment saying to restore it; use the dev switch
+  instead, which overrides the phase without moving the dates.
 
   It is also the only artwork here this project did not draw, which the `LOGOS`
   rule below otherwise forbids — and the distinction that lets it in is the one
@@ -401,10 +406,33 @@ npm run build        # next build
   103px, so the footprint did not move. **104px is the width ceiling** in that
   gutter; check the width before changing the height.
 
-  **If it should stop looping, that is one word** — `loop: false` on the
-  `loadAnimation` call — and what remains is a figure that arrives once and
-  holds, exactly as the crown does. **A second looping ornament is a new
+  **If it should stop looping, that is one word** — `moving` in the effect
+  that calls `loadAnimation` — and what remains is a figure that arrives once
+  and holds, exactly as the crown does. **A second looping ornament is a new
   argument, not an extension of this one.**
+
+  **On the 25th the idol stops dancing and is immersed, every three minutes.**
+  Visarjan was asked for as the idol melting into water and a plant growing
+  from it; what shipped, agreed before it was built, is the idol *sinking* and
+  dissolving at a waterline, three ripples, and a sprout coming up in the same
+  place. A literal melt of another artist's illustration needs an animator,
+  and in code at 88px it reads as a rendering fault. The water and the plant
+  are this project's drawing, in `components/VisarjanScene.tsx`; the artist's
+  loop is frozen on a frame the mooshika is not in.
+
+  It **replays** on `--d-visarjan-cycle`, 180s, rather than playing once, for a
+  mechanical reason: the ornament lives in the root layout and never remounts,
+  so a single run happens at midnight to nobody and the corridor sees only a
+  plant all day. It is the same ornament's motion swapped for another, not a
+  second one. Keep the cycle in minutes — **lengthen before shortening**
+  applies to a whole figure going under with more force than to a glint.
+
+  **The leaves are green and that is not the parent brand returning.** The
+  green ban is about surfaces and blocks reading as Mesa. A seedling is a
+  seedling, one day, one corner, and it is measured off the brand anyway:
+  h132° against `--bright-green`'s h153°. Its tokens are §8 of
+  `forge-tokens.css`, declared on `:root` because the ornament sits outside
+  both slides' surfaces — so if `/weekly` ever goes light, re-measure the water.
 - **No filler content.** Empty is a valid state. The wall being quiet is what makes it
   loud when something happens. No spinners, ever — first paint reads cached CSV.
 - **There is no footer and there is no `as_of` stamp. This wall now cannot

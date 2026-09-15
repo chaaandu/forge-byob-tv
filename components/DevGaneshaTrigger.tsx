@@ -1,31 +1,37 @@
 'use client'
 
 import { GANESH_FROM_ISO, GANESH_UNTIL_ISO } from '@/config'
+import type { GaneshPhase } from '@/lib/schedule'
 
 /**
  * Put the Ganesha on the wall on a day that is not Ganesh Chaturthi, in
- * development only.
+ * development only. Click once for the idol, again for Visarjan, again for off.
  *
  * An observability affordance, not a feature — the same standing as
  * `DevFlipTrigger`, and for a sharper version of the same problem. The flip
- * fires a few times a day on live data; this fires on **three days of the year**,
- * so without a button the only way to look at the ornament is to edit
- * `config.ts`, and editing the dates to see the thing is how the dates end up
- * committed wrong.
+ * fires a few times a day on live data; this fires on **twelve days of the
+ * year**, and the immersion on exactly one, so without a button the only way
+ * to look at either is to edit `config.ts` — and editing the dates to see the
+ * thing is how the dates end up committed wrong. They were, once: a widened
+ * test window sat in `main` for three days.
  *
  * ── It overrides the window. It does not move it ──
  *
  * The one thing this must not do is what it would be easiest to do: reach into
- * `config.ts`, or fake a clock, or hand `isFestival` a different date. All three
+ * `config.ts`, or fake a clock, or hand `ganeshPhase` a different date. All three
  * would mean the wall you are watching is running on a schedule the real wall
  * does not have, and the dates are the part of this feature most likely to be
  * wrong — they are the reason `lib/schedule.test.ts` pins five boundary
  * instants.
  *
- * So `isFestival` is left entirely alone and still answers on the real clock.
- * This sets a second, independent flag that is OR-ed with it. Everything past
- * that point — the fetch, the layer strip, the crop, the loop, the fade — is
- * one code path, so what you watch is what 14 September produces.
+ * So `ganeshPhase` is left entirely alone and still answers on the real clock.
+ * This sets a second, independent phase that wins over it. Everything past
+ * that point — the fetch, the layer strip, the crop, the loop, the water — is
+ * one code path, so what you watch is what 14 or 25 September produces.
+ *
+ * **The immersion starts eight seconds after it is switched on**, because its
+ * cycle starts when the idol lands and the idol's rest is split across the
+ * loop. That is the wall's own timing, not a preview speed-up.
  *
  * ── Why it is a toggle and not a "preview for 10 seconds" ──
  *
@@ -37,14 +43,14 @@ import { GANESH_FROM_ISO, GANESH_UNTIL_ISO } from '@/config'
  */
 export function DevGaneshaTrigger({
   forced,
-  inWindow,
-  onToggle,
+  phase,
+  onCycle,
 }: {
-  forced: boolean
-  /** What `isFestival` says about the real clock right now, so the label can
+  forced: GaneshPhase | null
+  /** What `ganeshPhase` says about the real clock right now, so the label can
       distinguish "I am forcing this" from "it is genuinely the 15th". */
-  inWindow: boolean
-  onToggle: () => void
+  phase: GaneshPhase | null
+  onCycle: () => void
 }) {
   if (process.env.NODE_ENV === 'production') return null
 
@@ -70,8 +76,8 @@ export function DevGaneshaTrigger({
     // Inverted when forced, so the control reads as a switch rather than as an
     // action. Reads tokens like everything else — a dev affordance is still not
     // allowed to name a colour.
-    background: forced ? 'var(--midnight-charcoal)' : 'var(--white)',
-    color: forced ? 'var(--white)' : 'var(--midnight-charcoal)',
+    background: forced !== null ? 'var(--midnight-charcoal)' : 'var(--white)',
+    color: forced !== null ? 'var(--white)' : 'var(--midnight-charcoal)',
     cursor: 'pointer',
   }
 
@@ -118,10 +124,14 @@ export function DevGaneshaTrigger({
           opacity: 0.75,
         }}
       >
-        {inWindow ? 'in window' : window_}
+        {phase !== null ? `in window: ${phase}` : window_}
       </span>
-      <button type="button" style={button} onClick={onToggle}>
-        {forced ? 'Ganesha: forced on' : 'Show Ganesha'}
+      <button type="button" style={button} onClick={onCycle}>
+        {forced === null
+          ? 'Show Ganesha'
+          : forced === 'chaturthi'
+            ? 'Ganesha: forced on'
+            : 'Visarjan: forced on'}
       </button>
     </div>
   )

@@ -141,8 +141,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             outlive both of them: a rotator inside `/weekly` would unmount at the
             moment it navigated away and never arm the swap back. */}
         <Rotator />
-        {/* Ganesh Chaturthi, 14–16 September 2026, bottom-left of both slides.
-            Renders nothing for the other 362 days.
+        {/* Ganesh Chaturthi, 14–24 September 2026, and Visarjan on the 25th,
+            bottom-left of both slides. Renders nothing for the other 353 days.
 
             **Here rather than in either page, and for the load-bearing half of
             `Rotator`'s reason rather than the obvious one.** A looping animation

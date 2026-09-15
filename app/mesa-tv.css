@@ -2019,7 +2019,7 @@
 
   /* ========= GANESH CHATURTHI =========
 
-     Three days of the year, bottom-left of both slides. `components/Ganesha.tsx`
+     Twelve days of the year, bottom-left of both slides. `components/Ganesha.tsx`
      has the argument for why a looping ornament is here at all; this block is
      only about where it sits, which took measuring on both boards.
 
@@ -2099,6 +2099,16 @@
      materially wider than 4K is the point at which this needs re-measuring
      rather than trusting. */
   --s-ganesha-x: 28px;
+
+  /* ── Visarjan's cycle: the immersion replays every three minutes ──
+
+     Asked for as "every few minutes". Three, because the corridor needs to
+     catch it and a passer-by is there for well under one, and not less,
+     because the glint's rule applies with more force to a whole figure:
+     lengthen before shortening. Every keyframe percentage in the Visarjan
+     block below is a second of *this* cycle — change the number and the
+     choreography stretches with it rather than breaking. */
+  --d-visarjan-cycle: 180s;
 }
 
 /* Animations defined in CSS rather than in Motion, for one shared reason: each
@@ -4265,7 +4275,7 @@
 
   /* ── Ganesh Chaturthi ──
 
-     Bottom-left of both slides, three days of the year. The geometry tokens and
+     Bottom-left of both slides, twelve days of the year. The geometry tokens and
      the reasoning behind the 28px inset are in `:root`; this is the placement.
 
      `position: fixed` because it hangs off the root layout rather than off
@@ -4342,6 +4352,213 @@
     width: 100% !important;
     height: 100% !important;
     display: block;
+  }
+
+  /* The mask layer, the player inside it, and the water on top all fill the
+     one box, so the crop geometry above is still the only geometry. */
+  .tv-ganesha-sink,
+  .tv-ganesha-idol,
+  .tv-visarjan {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  /* ── Visarjan, 25 September ──
+
+     One three-minute cycle, shared by everything, read as seconds of it:
+
+        0– 8s   the idol stands in the water
+        8–16s   it sinks, dissolving at the surface; ripples from 10s
+       17–22s   the stem draws itself up out of the water
+       21–26s   the leaves unfurl, the right one a beat behind
+      26–150s   the plant holds
+     150–153s   the plant fades
+     152–156s   the idol returns, in place, while nothing else is moving
+     156–180s   it stands, and the cycle's first 8s continue that rest
+
+     The rest is split across the loop so the sink comes 8s after the idol
+     lands rather than a minute later. **The idol returns by fading in where it
+     stood, not by rising out of the water** — rising is the immersion played
+     backwards, which is not a thing that happens.
+
+     Keyed on `data-ready`, like the idol's fade, so the cycle starts on the
+     frame the idol appears and not while its JSON is still downloading. */
+  .tv-ganesha[data-phase='visarjan'] .tv-ganesha-sink {
+    /* Fades the idol out over 9% of the box *below* the surface, fixed to the
+       box while the player slides through it. White is the mask's opacity, not
+       a colour on screen. */
+    mask-image: linear-gradient(
+      to bottom,
+      var(--white) calc(var(--visarjan-waterline) * 100%),
+      transparent calc(var(--visarjan-waterline) * 100% + 9%)
+    );
+  }
+
+  .tv-ganesha[data-phase='visarjan'][data-ready] .tv-ganesha-idol {
+    animation: tv-visarjan-idol var(--d-visarjan-cycle) infinite both;
+  }
+
+  @keyframes tv-visarjan-idol {
+    0%,
+    4.444% {
+      transform: translateY(0);
+      opacity: 1;
+      filter: blur(0);
+      animation-timing-function: cubic-bezier(0.45, 0, 0.55, 1);
+    }
+    /* 92% of the box takes the idol's crown, at y 282, below the mask's fade. */
+    8.889%,
+    84.444% {
+      transform: translateY(92%);
+      opacity: 0;
+      filter: blur(0.08vw);
+    }
+    84.5% {
+      transform: translateY(0);
+      opacity: 0;
+      filter: blur(0);
+      animation-timing-function: var(--ease-out);
+    }
+    86.667%,
+    100% {
+      transform: translateY(0);
+      opacity: 1;
+      filter: blur(0);
+    }
+  }
+
+  .tv-visarjan-plant {
+    opacity: 0;
+  }
+
+  .tv-visarjan-stem {
+    stroke: var(--visarjan-stem);
+    /* Dash and gap both a whole path long, so a dash offset of 1 draws nothing
+       and 0 draws the stem. `pathLength` is 1 on the element. */
+    stroke-dasharray: 1 2;
+  }
+
+  .tv-visarjan-leaf {
+    /* The origin is the leaf's own base: each path is drawn from 0,0 and
+       placed by its group's `translate`. */
+    transform-box: view-box;
+    transform-origin: 0 0;
+  }
+
+  .tv-visarjan-surface,
+  .tv-visarjan-ripple {
+    stroke: var(--visarjan-surface);
+  }
+
+  .tv-visarjan-surface {
+    opacity: 0.5;
+  }
+
+  .tv-visarjan-ripple {
+    opacity: 0;
+  }
+
+  .tv-ganesha[data-ready] .tv-visarjan-plant {
+    animation: tv-visarjan-plant var(--d-visarjan-cycle) infinite both;
+  }
+
+  .tv-ganesha[data-ready] .tv-visarjan-stem {
+    animation: tv-visarjan-stem var(--d-visarjan-cycle) infinite both;
+  }
+
+  .tv-ganesha[data-ready] .tv-visarjan-leaf {
+    animation: tv-visarjan-leaf var(--d-visarjan-cycle) infinite both;
+  }
+
+  .tv-ganesha[data-ready] .tv-visarjan-leaf-right {
+    animation-delay: 0.4s;
+  }
+
+  .tv-ganesha[data-ready] .tv-visarjan-ripple {
+    animation: tv-visarjan-ripple var(--d-visarjan-cycle) infinite both;
+  }
+
+  .tv-ganesha[data-ready] .tv-visarjan-ripple-2 {
+    animation-delay: 1.4s;
+  }
+
+  .tv-ganesha[data-ready] .tv-visarjan-ripple-3 {
+    animation-delay: 2.8s;
+  }
+
+  @keyframes tv-visarjan-plant {
+    0%,
+    9.389% {
+      opacity: 0;
+    }
+    9.444%,
+    83.333% {
+      opacity: 1;
+    }
+    85%,
+    100% {
+      opacity: 0;
+    }
+  }
+
+  @keyframes tv-visarjan-stem {
+    0%,
+    9.444% {
+      stroke-dashoffset: 1;
+      animation-timing-function: var(--ease-out);
+    }
+    12.222%,
+    100% {
+      stroke-dashoffset: 0;
+    }
+  }
+
+  @keyframes tv-visarjan-leaf {
+    0%,
+    11.667% {
+      transform: scale(0);
+      animation-timing-function: cubic-bezier(0.34, 1.4, 0.64, 1);
+    }
+    14.444%,
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  @keyframes tv-visarjan-ripple {
+    0%,
+    5.556% {
+      rx: 40px;
+      ry: 5px;
+      opacity: 0;
+    }
+    6.111% {
+      opacity: 0.9;
+      animation-timing-function: var(--ease-out);
+    }
+    /* 440 keeps the widest ring inside the box: the centre is 464 units from
+       its right edge, and past that sits card 31. */
+    10%,
+    100% {
+      rx: 440px;
+      ry: 46px;
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    /* The immersion does not play. What is left is the idol standing in calm
+       water, which is every element's own style rather than a keyframe — so
+       `none` is correct here, unlike the fade below. */
+    .tv-ganesha[data-phase='visarjan'][data-ready] .tv-ganesha-idol,
+    .tv-ganesha[data-ready] .tv-visarjan-plant,
+    .tv-ganesha[data-ready] .tv-visarjan-stem,
+    .tv-ganesha[data-ready] .tv-visarjan-leaf,
+    .tv-ganesha[data-ready] .tv-visarjan-ripple {
+      animation: none;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
