@@ -3,17 +3,16 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { DevGaneshaTrigger } from '@/components/DevGaneshaTrigger'
-import { VisarjanScene, WATER_Y } from '@/components/VisarjanScene'
 import { GANESH_CHECK_MS, GANESH_LOTTIE_URL } from '@/config'
-import { ganeshPhase, type GaneshPhase } from '@/lib/schedule'
+import { isFestival } from '@/lib/schedule'
 
 /**
  * Ganesh Chaturthi — the idol at about 80px, with the mooshika running across
  * the bottom of it, in the bottom-left corner of both slides.
  *
- * On the wall from 14 to 24 September 2026, going into the water on the 25th,
- * and gone afterwards without anyone touching the laptop — `ganeshPhase` owns
- * the window and `config.ts` owns the dates.
+ * On the wall from 14 to 17 September 2026 and gone afterwards without anyone
+ * touching the laptop — `isFestival` owns the window and `config.ts` owns the
+ * dates.
  *
  * ── This loops, and that is a real exception ──
  *
@@ -26,32 +25,14 @@ import { ganeshPhase, type GaneshPhase } from '@/lib/schedule'
  * movement means a rank changed hands and anything else is a lie about the data.
  * This carries no figure. It cannot be mistaken for an overtake because it is
  * not on the board, not near a numeral, and not shaped like one. And it is
- * bounded in a way no previous ornament proposal was: **an end date**, after
- * which the wall is back to the rule with nothing to undo. It was three days
- * until 15 September 2026, when it was asked to carry the whole festival.
+ * bounded in a way no previous ornament proposal was: **four days**, after
+ * which the wall is back to the rule with nothing to undo.
  *
- * What it does cost is honest. Until the 26th the wall is never completely
+ * What it does cost is honest. For four days the wall is never completely
  * still, so "nothing moves unless something happened" is not true of the frame
  * as a whole — only of the board inside it. If that trade stops being worth it,
- * the fix is `moving` in the effect below, which leaves a figure that arrives
- * once and holds, exactly as the crown does.
- *
- * ── On the 25th the idol stops dancing and goes into the water ──
- *
- * Visarjan, on Anant Chaturdashi. The artist's loop is **frozen** on
- * `VISARJAN_FRAME` and `VisarjanScene` draws water under the idol. Every
- * `--d-visarjan-cycle` the idol sinks, three ripples spread from where it went
- * under, and a sprout comes up in the same place — the seed-Ganesha immersion
- * rather than a literal melt. That substitution was agreed before any of this
- * was built: melting another artist's illustration needs an animator working
- * frame by frame, and done in code at 88px it would read as a glitch.
- *
- * **It replays rather than playing once, and the reason is the layout.** This
- * component sits above both slides and never remounts, so an immersion that
- * played once would play at midnight, to an empty corridor, and everybody who
- * walked past for the rest of the day would see only a plant. The replay is
- * the whole of the motion that day — the idol no longer loops underneath it —
- * and its timeline lives in `mesa-tv.css`, not here.
+ * the fix is `loop: false` on the `loadAnimation` call below, which leaves a
+ * figure that arrives once and holds, exactly as the crown does.
  *
  * ── Three things are stripped from the artist's file before it plays ──
  *
@@ -169,32 +150,11 @@ const CROP_ASPECT = 1398 / 794
  */
 const CROP_LEAD = 470 / 794
 
-/** `CROP`'s top and height, read out of the one string rather than restated. */
-const [, CROP_TOP, , CROP_HEIGHT] = CROP.split(' ').map(Number)
-
-/**
- * The water's surface as a fraction of the box's height, which is where the
- * idol's mask starts dissolving it. Derived from the same `WATER_Y` the scene
- * draws the surface and the ripples at, so the idol goes under exactly where
- * the water is rather than a couple of pixels above it — at 88px, two pixels
- * is a figure visibly vanishing into dry air.
- */
-const WATERLINE = (WATER_Y - CROP_TOP) / CROP_HEIGHT
-
-/**
- * The frame the idol holds on the 25th, when the artist's loop stops.
- *
- * It has to be one of the frames the mooshika is **not** on — it runs 46 to 83,
- * see `CROP` — or a rat stands frozen in the water for a day. Beyond that it is
- * the idol at rest, with nothing mid-gesture to be caught sinking.
- */
-const VISARJAN_FRAME = 0
-
 export function Ganesha() {
   const host = useRef<HTMLDivElement>(null)
-  // `undefined` until the first check runs. The window is a function of the
-  // clock, and the clock is not a thing a server render may consult — see below.
-  const [phase, setPhase] = useState<GaneshPhase | null | undefined>(undefined)
+  // `null` until the first check runs. The window is a function of the clock,
+  // and the clock is not a thing a server render may consult — see below.
+  const [inWindow, setInWindow] = useState<boolean | null>(null)
   const [ready, setReady] = useState(false)
 
   /**
@@ -213,16 +173,16 @@ export function Ganesha() {
    * and a browser reload resetting it is one click to undo.
    *
    * In production `DevGaneshaTrigger` renders `null` and nothing ever calls
-   * `setForced`, so this is `null` for the life of the page.
+   * `setForced`, so this is `false` for the life of the page.
    */
-  const [forced, setForced] = useState<GaneshPhase | null>(null)
+  const [forced, setForced] = useState(false)
 
-  const shown = forced ?? phase ?? null
+  const showing = forced || inWindow === true
 
   /**
    * **The window is opened client-side, and never during render.**
    *
-   * Both routes are prerendered static, so a `ganeshPhase(new Date())` in the
+   * Both routes are prerendered static, so a `isFestival(new Date())` in the
    * component body would be answered once at *build* time and baked in. The
    * wall would then carry whatever the answer was on the day it was deployed,
    * for as long as it ran — a deploy on the 13th ships a wall that never shows
@@ -230,19 +190,18 @@ export function Ganesha() {
    * The page never reloads, so nothing would ever correct either.
    *
    * Re-checked once a minute for the same reason. The laptop is set up once and
-   * left; the transitions into the 14th, the 25th and the 26th all happen with
-   * the page already open and nobody watching. The 25th rebuilds the player,
-   * because `shown` is what the effect below depends on.
+   * left; the transition into the 14th and out of the 17th, at midnight entering
+   * the 18th, both happen with the page already open and nobody watching.
    */
   useEffect(() => {
-    const check = () => setPhase(ganeshPhase(new Date()))
+    const check = () => setInWindow(isFestival(new Date()))
     check()
     const timer = setInterval(check, GANESH_CHECK_MS)
     return () => clearInterval(timer)
   }, [])
 
   useEffect(() => {
-    if (shown === null) return
+    if (!showing) return
     const node = host.current
     if (node === null) return
 
@@ -255,7 +214,7 @@ export function Ganesha() {
     void (async () => {
       try {
         // Both are dynamic, and for different reasons. `lottie-web` is 250KB
-        // that no slide needs for 362 days of the year; the JSON is 877KB that
+        // that no slide needs for 361 days of the year; the JSON is 877KB that
         // no slide needs at all. Neither belongs in the bundle that paints the
         // board.
         const [{ default: lottie }, response] = await Promise.all([
@@ -290,15 +249,12 @@ export function Ganesha() {
         // is a whole figure underneath the motion, so the reduction is to stop
         // it, not to remove it.
         const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-        // On the 25th the idol stands still to be immersed; the immersion is
-        // the motion that day, and it is CSS's.
-        const moving = shown === 'chaturthi' && !still
 
-        const player = lottie.loadAnimation({
+        anim = lottie.loadAnimation({
           container: node,
           renderer: 'svg',
-          loop: moving,
-          autoplay: moving,
+          loop: !still,
+          autoplay: !still,
           animationData: data,
           rendererSettings: {
             // The measured crop, and the reason this is not `viewBoxOnly`:
@@ -311,14 +267,6 @@ export function Ganesha() {
             className: 'tv-ganesha-svg',
           },
         })
-        anim = player
-        if (shown === 'visarjan') {
-          // A stopped player shows frame 0 of its own accord; asked for a frame
-          // before its DOM exists it silently shows that instead.
-          const hold = () => player.goToAndStop(VISARJAN_FRAME, true)
-          if (player.isLoaded) hold()
-          else player.addEventListener('DOMLoaded', hold)
-        }
         if (live) setReady(true)
       } catch {
         // **Swallowed on purpose, and this is the one place that is right.**
@@ -334,22 +282,20 @@ export function Ganesha() {
       anim?.destroy()
       setReady(false)
     }
-  }, [shown])
+  }, [showing])
 
   return (
     <>
       {/* Renders `null` in production, so the fragment below collapses to
           exactly what shipped before the button existed. It is outside the
-          `shown` check on purpose: a switch that disappeared when the thing
+          `showing` check on purpose: a switch that disappeared when the thing
           it controls was off could only ever be turned on. */}
       <DevGaneshaTrigger
         forced={forced}
-        phase={phase ?? null}
-        onCycle={() =>
-          setForced((on) => (on === null ? 'chaturthi' : on === 'chaturthi' ? 'visarjan' : null))
-        }
+        inWindow={inWindow === true}
+        onToggle={() => setForced((on) => !on)}
       />
-      {shown !== null ? <GaneshaFigure host={host} phase={shown} ready={ready} /> : null}
+      {showing ? <GaneshaFigure host={host} ready={ready} /> : null}
     </>
   )
 }
@@ -358,20 +304,14 @@ export function Ganesha() {
  * The ornament itself, split out for one reason: the `ref` has to be attached
  * by the same render that decides to show it, and keeping the host element in
  * its own component makes that hard to get wrong when the dev switch is edited
- * later. The only conditional part is the water, which is the 25th's.
- *
- * **The idol is two elements deep for the immersion's sake.** The outer one is
- * masked at the waterline and never moves; the inner one is the player, and it
- * is what sinks. A mask on the moving element would travel down with it and
- * dissolve nothing.
+ * later. Nothing here is conditional — if it is rendered at all, it is the
+ * whole ornament.
  */
 function GaneshaFigure({
   host,
-  phase,
   ready,
 }: {
   host: React.RefObject<HTMLDivElement | null>
-  phase: GaneshPhase
   ready: boolean
 }) {
   return (
@@ -389,8 +329,6 @@ function GaneshaFigure({
           // inset. Unitless on purpose — `mesa-tv.css` multiplies it by
           // `--h-ganesha`, and a length here would make that calc invalid.
           '--ganesha-lead': String(CROP_LEAD),
-          // Unitless; the mask multiplies it by 100%. Read only on the 25th.
-          '--visarjan-waterline': String(WATERLINE),
         } as React.CSSProperties
       }
       // Presentational, for the same reason the crown is: this restates nothing
@@ -398,13 +336,8 @@ function GaneshaFigure({
       // reader announcing an SVG's worth of unnamed groups in the corner of a
       // leaderboard is noise rather than help.
       aria-hidden="true"
-      data-phase={phase}
       data-ready={ready ? '' : undefined}
-    >
-      <div className="tv-ganesha-sink">
-        <div className="tv-ganesha-idol" ref={host} />
-      </div>
-      {phase === 'visarjan' ? <VisarjanScene viewBox={CROP} /> : null}
-    </div>
+      ref={host}
+    />
   )
 }

@@ -1,14 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import {
-  GANESH_FROM_ISO,
-  GANESH_FROM_MS,
-  GANESH_UNTIL_ISO,
-  GANESH_UNTIL_MS,
-  VISARJAN_FROM_ISO,
-  VISARJAN_FROM_MS,
-} from '@/config'
-import { ganeshPhase, isEndOfDay, istHour } from '@/lib/schedule'
+import { GANESH_FROM_MS, GANESH_UNTIL_MS } from '@/config'
+import { isEndOfDay, isFestival, istHour } from '@/lib/schedule'
 
 /** 17:59 and 18:00 IST, written as the absolute instants they are. */
 const BEFORE_SIX = new Date('2026-08-11T17:59:00+05:30')
@@ -60,19 +53,10 @@ describe('isEndOfDay', () => {
  */
 const SECOND = 1000
 
-describe('ganeshPhase', () => {
-  it('opens on the idol exactly at GANESH_FROM and not a second earlier', () => {
-    expect(ganeshPhase(new Date(GANESH_FROM_MS - SECOND))).toBe(null)
-    expect(ganeshPhase(new Date(GANESH_FROM_MS))).toBe('chaturthi')
-  })
-
-  /**
-   * The shared boundary. There is no instant in neither phase — a night with
-   * an empty corner in the middle of the festival — and none in both.
-   */
-  it('hands the idol to Visarjan on one instant, with no gap and no overlap', () => {
-    expect(ganeshPhase(new Date(VISARJAN_FROM_MS - SECOND))).toBe('chaturthi')
-    expect(ganeshPhase(new Date(VISARJAN_FROM_MS))).toBe('visarjan')
+describe('isFestival', () => {
+  it('opens exactly at GANESH_FROM and not a second earlier', () => {
+    expect(isFestival(new Date(GANESH_FROM_MS - SECOND))).toBe(false)
+    expect(isFestival(new Date(GANESH_FROM_MS))).toBe(true)
   })
 
   /**
@@ -81,25 +65,13 @@ describe('ganeshPhase', () => {
    * day off the window — an off-by-one that reports nothing, because a wall
    * that stopped a day early looks exactly like a wall configured to.
    */
-  it('runs Visarjan to the last instant before GANESH_UNTIL, then shuts', () => {
-    expect(ganeshPhase(new Date(GANESH_UNTIL_MS - SECOND))).toBe('visarjan')
-    expect(ganeshPhase(new Date(GANESH_UNTIL_MS))).toBe(null)
+  it('runs to the last instant before GANESH_UNTIL, then shuts', () => {
+    expect(isFestival(new Date(GANESH_UNTIL_MS - SECOND))).toBe(true)
+    expect(isFestival(new Date(GANESH_UNTIL_MS))).toBe(false)
   })
 
-  it('puts the idol before the immersion, inside the window', () => {
-    expect(GANESH_FROM_MS).toBeLessThan(VISARJAN_FROM_MS)
-    expect(VISARJAN_FROM_MS).toBeLessThan(GANESH_UNTIL_MS)
-  })
-
-  /**
-   * **Every bound is an IST midnight**, which is a shape rather than a date and
-   * so belongs here. A `+00:00` typed for `+05:30` still parses, still passes
-   * every boundary test above, and moves the immersion to 05:30 in the morning.
-   */
-  it('bounds every phase on an IST midnight', () => {
-    for (const iso of [GANESH_FROM_ISO, VISARJAN_FROM_ISO, GANESH_UNTIL_ISO]) {
-      expect(iso).toMatch(/T00:00:00\+05:30$/)
-    }
+  it('is open somewhere in the middle', () => {
+    expect(isFestival(new Date((GANESH_FROM_MS + GANESH_UNTIL_MS) / 2))).toBe(true)
   })
 
   /**
@@ -113,8 +85,8 @@ describe('ganeshPhase', () => {
    */
   it('answers on the instant, not on the machine’s calendar', () => {
     const opensAsUtc = new Date(new Date(GANESH_FROM_MS).toISOString())
-    expect(ganeshPhase(opensAsUtc)).toBe('chaturthi')
-    expect(ganeshPhase(new Date(opensAsUtc.getTime() - SECOND))).toBe(null)
+    expect(isFestival(opensAsUtc)).toBe(true)
+    expect(isFestival(new Date(opensAsUtc.getTime() - SECOND))).toBe(false)
   })
 
   /**
@@ -125,8 +97,8 @@ describe('ganeshPhase', () => {
    * the board during its run-up.
    */
   it('is shut on the dates that would embarrass the wall', () => {
-    expect(ganeshPhase(new Date('2026-10-25T10:00:00+05:30'))).toBe(null) // Mesa Flea
-    expect(ganeshPhase(new Date('2026-08-31T00:00:00+05:30'))).toBe(null) // programme start
-    expect(ganeshPhase(new Date('2026-12-25T12:00:00+05:30'))).toBe(null)
+    expect(isFestival(new Date('2026-10-25T10:00:00+05:30'))).toBe(false) // Mesa Flea
+    expect(isFestival(new Date('2026-08-31T00:00:00+05:30'))).toBe(false) // programme start
+    expect(isFestival(new Date('2026-12-25T12:00:00+05:30'))).toBe(false)
   })
 })

@@ -216,16 +216,18 @@ export const PROGRAMME_START_MS = Date.parse(PROGRAMME_START_ISO)
 // ── Ganesh Chaturthi ────────────────────────────────────────────────────────
 
 /**
- * The Ganesha ornament's two phases — **the idol from 14 to 24 September 2026,
- * then Visarjan on the 25th, IST** — and then it is gone without anyone
- * touching the laptop.
+ * The window the Ganesha ornament is on the wall — **14 to 17 September 2026,
+ * IST**, and then it is gone without anyone touching the laptop.
  *
- * Ganesh Chaturthi 2026 falls on Monday 14 September and the festival runs to
- * Anant Chaturdashi on Friday 25 September. The wall took only the first three
- * days until 15 September, when it was asked to carry the whole festival and to
- * end on the immersion rather than simply stopping: on the 25th the idol goes
- * into the water and a sprout comes up where it went. See `ganeshPhase` and
- * `components/VisarjanScene.tsx`.
+ * Ganesh Chaturthi 2026 falls on Monday 14 September; the full festival runs to
+ * Anant Chaturdashi on Friday 25 September. This wall takes the first four days
+ * by decision, not by accident — see `isFestival`. It was three, and on 15
+ * September 2026 it was asked to run through Thursday night.
+ *
+ * **The whole festival and a Visarjan on the 25th were built and turned down
+ * the same day** — the idol sinking into water and a sprout growing where it
+ * went, replayed every three minutes. It is commit `37a421b`, reverted rather
+ * than lost, if it is wanted another year.
  *
  * ── Why an end date at all ──
  *
@@ -237,29 +239,20 @@ export const PROGRAMME_START_MS = Date.parse(PROGRAMME_START_ISO)
  * deliberate then as it does on the 14th. That is the same failure mode as the
  * missing `as_of` stamp, so it gets the treatment the stamp did not.
  *
- * **Every end is exclusive and names the day after.** Each constant is the
- * instant something starts, so `VISARJAN_FROM` is the 25th and the idol's last
- * day is the 24th, and `GANESH_UNTIL` is the 26th so Visarjan gets the whole of
- * the 25th. Naming the last day instead takes a day off the phase — off-by-one
- * in the direction that reports nothing, because a wall that stopped a day
- * early looks precisely like a wall that was configured that way.
+ * **The end is exclusive and it is the 18th, not the 17th.** `UNTIL` is the
+ * instant the window shuts, so naming the last day here would take the ornament
+ * down at midnight *entering* Thursday and give three days rather than four —
+ * off-by-one in the direction that reports nothing, because a wall that stopped
+ * a day early looks precisely like a wall that was configured that way.
  *
- * **Three instants, not two pairs.** Visarjan starts at the same constant the
- * idol stops at, so no instant belongs to both phases and none to neither. Two
- * independent pairs can drift into a night where the corner is empty, or an
- * overlap where the component has to pick, and both render convincingly.
- *
- * All three are absolute instants with an explicit `+05:30`, for the reason in
+ * Both are absolute instants with an explicit `+05:30`, for the reason in
  * `docs/DESIGN.md` §"Timezone: the client needs none": the comparison is then
  * correct on any machine whose clock is right, including a laptop that came
- * back from a trip still set to another timezone. `lib/schedule.test.ts` checks
- * that each one is an IST midnight.
+ * back from a trip still set to another timezone.
  */
 export const GANESH_FROM_ISO = '2026-09-14T00:00:00+05:30'
-export const VISARJAN_FROM_ISO = '2026-09-25T00:00:00+05:30'
-export const GANESH_UNTIL_ISO = '2026-09-26T00:00:00+05:30'
+export const GANESH_UNTIL_ISO = '2026-09-18T00:00:00+05:30'
 export const GANESH_FROM_MS = Date.parse(GANESH_FROM_ISO)
-export const VISARJAN_FROM_MS = Date.parse(VISARJAN_FROM_ISO)
 export const GANESH_UNTIL_MS = Date.parse(GANESH_UNTIL_ISO)
 
 /** Where the animation is served from. A plain file in `public/`, fetched at
@@ -267,7 +260,7 @@ export const GANESH_UNTIL_MS = Date.parse(GANESH_UNTIL_ISO)
     does not belong in the JS bundle of a page that must paint immediately. */
 export const GANESH_LOTTIE_URL = '/lottie/ganesha.json'
 
-/** Once a minute is plenty to notice a day-bounded phase opening or shutting. */
+/** Once a minute is plenty to notice a three-day window opening or shutting. */
 export const GANESH_CHECK_MS = 60_000
 
 /** Once a second while the live timer shows seconds; once a minute before that. */

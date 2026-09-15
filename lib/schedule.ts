@@ -1,10 +1,4 @@
-import {
-  EOD_FROM_HOUR_IST,
-  GANESH_FROM_MS,
-  GANESH_UNTIL_MS,
-  IST_TIMEZONE,
-  VISARJAN_FROM_MS,
-} from '@/config'
+import { EOD_FROM_HOUR_IST, GANESH_FROM_MS, GANESH_UNTIL_MS, IST_TIMEZONE } from '@/config'
 
 /**
  * The only module in the project that asks what time it is.
@@ -44,17 +38,13 @@ export function isEndOfDay(now: Date): boolean {
   return hour >= EOD_FROM_HOUR_IST && hour <= 23
 }
 
-export type GaneshPhase = 'chaturthi' | 'visarjan'
-
 /**
- * Which phase of the Ganesha ornament the wall is in, or `null` outside both.
+ * Is the Ganesha ornament in its window?
  *
- * Two half-open windows sharing a boundary — `[from, visarjan)` and
- * `[visarjan, until)` — which is what makes the three constants in `config.ts`
- * readable as the boundaries they are rather than as days. The idol appears the
- * moment 14 September begins in IST, goes into the water the moment the 25th
- * does, and the corner is empty again from the 26th, on a wall nobody touches
- * in between.
+ * Half-open — `[from, until)` — which is what makes the two constants in
+ * `config.ts` readable as the boundaries they are rather than as days. The
+ * ornament appears the moment 14 September begins in IST and is gone the moment
+ * the 18th does, on a wall nobody touches in between.
  *
  * **No `Intl` here, deliberately**, unlike `istHour` above. Both bounds are
  * already absolute instants carrying `+05:30`, so comparing epoch milliseconds
@@ -63,8 +53,7 @@ export type GaneshPhase = 'chaturthi' | 'visarjan'
  * without a formatter. Asking `Intl` for a date here would be the version that
  * *looks* more careful and is the one that can be wrong.
  */
-export function ganeshPhase(now: Date): GaneshPhase | null {
+export function isFestival(now: Date): boolean {
   const at = now.getTime()
-  if (at < GANESH_FROM_MS || at >= GANESH_UNTIL_MS) return null
-  return at < VISARJAN_FROM_MS ? 'chaturthi' : 'visarjan'
+  return at >= GANESH_FROM_MS && at < GANESH_UNTIL_MS
 }
