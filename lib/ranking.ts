@@ -73,12 +73,29 @@ export function compareChallenge(a: Team, b: Team): number {
   return a.teamId.localeCompare(b.teamId)
 }
 
+/**
+ * Today's standing: today's revenue desc → all-time desc → team ID asc.
+ *
+ * Read only by `/live`. All-time second for the reason `compareWeek` gives: at
+ * nine in the morning every team is on zero, and the order a reader already
+ * has in their head is the all-time one.
+ */
+export function compareToday(a: Team, b: Team): number {
+  if (b.todayRevenue !== a.todayRevenue) return b.todayRevenue - a.todayRevenue
+  if (b.totalRevenue !== a.totalRevenue) return b.totalRevenue - a.totalRevenue
+  return a.teamId.localeCompare(b.teamId)
+}
+
 export function rankTeams(teams: readonly Team[]): Team[] {
   return [...teams].sort(compareTeams)
 }
 
 export function rankByWeek(teams: readonly Team[]): Team[] {
   return [...teams].sort(compareWeek)
+}
+
+export function rankByToday(teams: readonly Team[]): Team[] {
+  return [...teams].sort(compareToday)
 }
 
 export function rankByChallenge(teams: readonly Team[]): Team[] {

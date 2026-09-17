@@ -917,6 +917,9 @@ it('declares every custom property that anything reads', () => {
     ...readdirSync('components').filter((f) => f.endsWith('.tsx')).map((f) => `components/${f}`),
     'app/weekly/page.tsx',
     'app/podium/page.tsx',
+    'app/live/page.tsx',
+    'app/live/live.css',
+    ...readdirSync('components/live').map((f) => `components/live/${f}`),
   ]
 
   // **Comments are stripped first, and that is not a detail.** These files

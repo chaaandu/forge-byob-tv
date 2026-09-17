@@ -1,5 +1,6 @@
 'use client'
 
+import { usePathname } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
 import { DevGaneshaTrigger } from '@/components/DevGaneshaTrigger'
@@ -177,7 +178,12 @@ export function Ganesha() {
    */
   const [forced, setForced] = useState(false)
 
-  const showing = forced || inWindow === true
+  // **Not on `/live`.** The layout mounts this for every route, and the phone
+  // is not a slide: an 88px idol pinned over the bottom-left of a scrolling
+  // list covers a row, and the dev switch would sit over the dock.
+  const onPhone = usePathname()?.startsWith('/live') ?? false
+
+  const showing = !onPhone && (forced || inWindow === true)
 
   /**
    * **The window is opened client-side, and never during render.**
@@ -290,11 +296,13 @@ export function Ganesha() {
           exactly what shipped before the button existed. It is outside the
           `showing` check on purpose: a switch that disappeared when the thing
           it controls was off could only ever be turned on. */}
+      {onPhone ? null : (
       <DevGaneshaTrigger
         forced={forced}
         inWindow={inWindow === true}
         onToggle={() => setForced((on) => !on)}
       />
+      )}
       {showing ? <GaneshaFigure host={host} ready={ready} /> : null}
     </>
   )

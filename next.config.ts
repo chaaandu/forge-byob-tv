@@ -2,6 +2,21 @@ import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   /**
+   * **Development only: let a phone on the same Wi-Fi load `next dev`.**
+   *
+   * `/live` is a phone page, and the only honest way to judge one is on a
+   * phone. Next 16 answers every `/_next` request from any host but
+   * `localhost` with a 403, so opening `http://<laptop-ip>:3000/live` on a
+   * phone paints the prerendered header and then nothing — no data, no taps —
+   * which looks like a broken page rather than a blocked one. Measured.
+   *
+   * Private address ranges rather than this laptop's IP, which changes with
+   * the network and does not belong in a tracked file. Ignored by
+   * `next build` and `next start`; nothing deployed reads it.
+   */
+  allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '172.*.*.*'],
+
+  /**
    * `/` → `/weekly`, and nothing else.
    *
    * There is no `app/page.tsx`, so the bare domain used to answer 404. That is

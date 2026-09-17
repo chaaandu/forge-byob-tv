@@ -473,6 +473,46 @@ npm run build        # next build
   rotation — ordering with the other Mesa slides, what else is in the loop — belongs
   here.
 
+## `/live` — the phone page
+
+`/live` is the standings built for a phone, styled like F1's broadcast graphics:
+a position numeral, a slab in the team's livery, a violet score band. **It is not
+a slide.** `Rotator` never visits it, `Ganesha` renders nothing on it, and it is
+the one page here that a person holds. Added 17 September 2026.
+
+- **What it shares with the wall is everything that decides a number**: `fetchCsv`
+  (with `no-store`), `parseSnapshot`, `passesRowGate`, the CSV cache, `rankTeams`,
+  `rankForMode` and `challenge_mode`. `lib/live.test.ts` asserts the all-time and
+  period boards sort exactly as `/podium` and `/weekly` do — a phone that
+  disagreed with the TV about who is fourth would be worse than no phone.
+- **What it does not share is the wall's detection.** `lib/useLiveData.ts` never
+  writes `board.*` or the kick queue; a phone is not a third writer to state the
+  two slides own.
+- **The still-board rules are the wall's, not the phone's.** On `/live` rows use
+  Motion `layout="position"` (a slot change only, never a figure change), the
+  live dot pulses, figures count up, and it **honours `prefers-reduced-motion`**
+  — the wall ignores that setting because a TV laptop's OS says nothing about
+  who is walking past; a phone's says exactly who is holding it. It also shows
+  how fresh its data is, which the wall deliberately does not.
+- **The colour rule is unchanged.** Twelve liveries, the score band and every
+  `/live` colour are §8 of `forge-tokens.css`; `lib/live.test.ts` fails on any
+  hex or `rgba(` under `app/live/` or `components/live/`. No violet livery (the
+  score band is violet) and no green one (Mesa's parent brand).
+- **The badges are drawn in code**, twelve geometric marks in
+  `components/live/Emblem.tsx`, picked by hashing the team id. They are
+  placeholders that belong to nobody, which is what keeps them inside the
+  borrowed-artwork rule. A real logo arrives the wall's way — file plus `LOGOS`
+  entry — and `/live` picks it up with no change.
+- **The product strip is sample data, development only.** `TV_Feed` publishes
+  no products. `lib/liveSample.ts` invents three per team, every card wears a
+  `Sample data` badge, and `app/live/page.tsx` passes nothing in production;
+  a test pins that guard. The real source would be a `TV_Products` tab
+  (`team_id, product, units, revenue, image_url`) built from `Daily Dump`,
+  published like the other two. Delete `liveSample.ts` the day it lands.
+- **`allowedDevOrigins` in `next.config.ts`** lets a phone on the same Wi-Fi load
+  `next dev` at `http://<laptop-ip>:3000/live`. Without it Next 16 403s every
+  script and the page paints a header and nothing else.
+
 ## Domain
 
 - 42 workbooks, `SLE-C401`–`SLE-C442`. Team IDs come from `Team Links` col A, rows 6–47.
