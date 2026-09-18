@@ -14,7 +14,10 @@ import {
   boardScope,
   rankForMode,
 } from '@/lib/board'
+import { needsMark } from '@/lib/daily'
 import { openWeek } from '@/lib/feed'
+import { istWindowKey } from '@/lib/schedule'
+import { readCsvCache, readDailyMarks } from '@/lib/storage'
 import { matchesBoard } from '@/lib/overtake'
 import { competingTeams } from '@/lib/ranking'
 import { useDevOvertakes } from '@/lib/devOvertake'
@@ -90,6 +93,43 @@ export const BOARD: BoardSpec = {
   // silent through each. Its docblock has the arithmetic, and the note about
   // what the first of the three costs this slide.
   period: boardPeriod,
+  /**
+   * ── This board goes to the network once a day ──
+   *
+   * Asked for directly. Its figures are a finished day and change only at
+   * 10:00, so the other 1,439 polls a day could not move anything on screen;
+   * `needsMark` answers `true` exactly once per day, when the current window
+   * has not been photographed yet.
+   *
+   * **Gated on the data, not on a timer**, which is what makes it survive a
+   * laptop that sleeps and a network that is down at ten — the question is
+   * asked afresh every minute and stays `true` until a fetch actually succeeds.
+   * `lib/daily.ts` has the argument.
+   *
+   * **`/podium` is deliberately not given one of these.** It ranks live
+   * all-time revenue, it is the only board on the wall that still animates an
+   * overtake, and freezing it to once a day would leave the whole wall static.
+   * It also has a second job now: its sixty-second poll is what keeps the shared
+   * CSV cache warm, and this page re-reads that cache every time the rotation
+   * brings it back — which is how a board that fetches once a day still knows
+   * who has sold today and which contest is on.
+   */
+  /**
+   * **Or there is nothing to draw yet**, which is the edge the window condition
+   * alone does not cover. The board renders `snapshot.teams`, and those come
+   * from the CSV cache on mount — *not* from the marks, which only carry
+   * figures. So a browser holding marks but no cache has everything it needs to
+   * compute a board and no teams to put on one: thirty-nine cards' worth of
+   * nothing, on a page that has decided it does not need to fetch until ten
+   * tomorrow morning. Blank, plausible, and reported by nothing.
+   *
+   * It takes a partial clear or a failed cache write to get there — the two keys
+   * are written in the same tick but separately, so a quota error on one is
+   * enough. Cheap to rule out, and the check pays for itself on a truly cold
+   * browser too, where it is simply the first condition to answer `true`.
+   */
+  shouldFetch: () =>
+    readCsvCache() === null || needsMark(readDailyMarks(), istWindowKey(new Date())),
 }
 
 export default function WeeklyPage() {

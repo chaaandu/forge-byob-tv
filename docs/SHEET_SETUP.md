@@ -309,6 +309,16 @@ screen:
   masthead** are the only thing that says the window widened. `17 Sep → 18 Sep`
   is a day; `16 Sep → 18 Sep` is not.
 
+**The wall asks the sheet for this once a day.** `/daily` only goes to the
+network when its 10:00 window has not been photographed yet, so it makes one
+request a day rather than 1,440. `/podium` still polls every sixty seconds,
+because it is a live all-time board — so the workbook is still being read
+regularly; it is the *daily* board that has stopped asking.
+
+If a fetch fails at 10:00 — the laptop is offline, the sheet is slow — nothing
+is lost. The window stays unphotographed, so the wall simply asks again a minute
+later, and keeps asking until it succeeds.
+
 **If you would rather the sheet owned this**, it is one formula and it retires
 all of the above — no photographs, no localStorage, no blank first day:
 

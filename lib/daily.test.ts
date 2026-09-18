@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
-import { MARKS_KEPT, dailyEarned, markWindow, windowOf, windowPeriod } from '@/lib/daily'
+import { MARKS_KEPT, dailyEarned, markWindow, needsMark, windowOf, windowPeriod } from '@/lib/daily'
 import type { DailyMark } from '@/lib/daily'
 import { istWindowKey } from '@/lib/schedule'
 import { team } from '@/test/fixtures'
@@ -112,6 +112,56 @@ describe('markWindow', () => {
     }
     expect(marks).toHaveLength(MARKS_KEPT)
     expect(marks.map((mark) => mark.key)).toEqual(['2026-09-17', '2026-09-18'])
+  })
+})
+
+/**
+ * The gate on `/daily`'s network access. It is the same condition `markWindow`
+ * acts on — that function asks this one — so the board cannot come to fetch on
+ * a schedule that disagrees with when it photographs.
+ */
+describe('needsMark', () => {
+  const marks = markWindow([], rows, '2026-09-18')
+
+  it('is true exactly once per window', () => {
+    expect(needsMark(marks, '2026-09-18')).toBe(false)
+    expect(needsMark(marks, '2026-09-19')).toBe(true)
+  })
+
+  /** A wall that has never run has to fetch whatever the hour is. */
+  it('is true for a wall with no marks at all', () => {
+    expect(needsMark([], '2026-09-18')).toBe(true)
+  })
+
+  /**
+   * **It stays true until a mark is actually written**, which is what replaces
+   * the retry a `setTimeout` could not have. The network being down at ten does
+   * not cost the day: nothing was photographed, so the next minute asks again.
+   */
+  it('stays true while the fetch keeps failing', () => {
+    let held: readonly DailyMark[] = marks
+    for (let minute = 0; minute < 5; minute += 1) {
+      expect(needsMark(held, '2026-09-19')).toBe(true)
+      // the fetch failed, so nothing was marked
+      held = held
+    }
+    expect(needsMark(markWindow(held, rows, '2026-09-19'), '2026-09-19')).toBe(false)
+  })
+
+  /** A clock corrected backwards is not a new window to go and fetch. */
+  it('is false for a key older than the newest mark', () => {
+    expect(needsMark(marks, '2026-09-17')).toBe(false)
+  })
+
+  /**
+   * The pair that must never drift: if these two disagreed, the board would
+   * either fetch 1,440 times a day or stop fetching for good.
+   */
+  it('agrees with markWindow on every key', () => {
+    for (const key of ['2026-09-17', '2026-09-18', '2026-09-19', '2026-10-01']) {
+      const wrote = markWindow(marks, rows, key) !== marks
+      expect(wrote, key).toBe(needsMark(marks, key))
+    }
   })
 })
 

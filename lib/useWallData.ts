@@ -88,6 +88,32 @@ export type BoardSpec = {
    * figure is the all-time total, which never resets at all.
    */
   period?: (cohort: Cohort, day: DailyWindow | null) => number | null
+  /**
+   * Whether this tick should go to the network at all. Default: every tick,
+   * which is what `/podium` wants and what this loop has always done.
+   *
+   * ── `/daily` fetches once a day, and this is how ──
+   *
+   * Its figures are a *finished* day that changes only at 10:00, so polling the
+   * sheet every sixty seconds asks 1,439 questions a day whose answer cannot
+   * change anything on screen. This lets the board say so: it returns `true`
+   * only when the current window has not been photographed yet, which happens
+   * exactly once per day.
+   *
+   * **The clock keeps ticking; only the fetching stops.** The interval below is
+   * untouched and still runs every sixty seconds — it just asks a local
+   * question first and usually answers it without a request. That is the whole
+   * mechanism, and it is deliberately not a `setTimeout` to the next ten
+   * o'clock: `needsMark` in `lib/daily.ts` has the three reasons, all of which
+   * are about a laptop that sleeps and that nobody is standing at.
+   *
+   * **A board that skips its fetch still renders.** Nothing about the board's
+   * figures comes from the tick — they come from the two marks in storage — and
+   * the mount-time cache read above is what keeps everything else it draws
+   * current. On the wall that cache is warm, because `/podium` is fetching every
+   * sixty seconds and the two slides share it.
+   */
+  shouldFetch?: () => boolean
 }
 
 /**
@@ -182,6 +208,11 @@ export function useWallData(board: BoardSpec): WallData {
 
   const tick = useCallback(async () => {
     if (running.current) return
+    // **Asked before the in-flight guard is taken, and before the network.**
+    // A board whose window is already photographed does nothing here at all —
+    // no request, no parse, no write — which is what makes "once a day" true of
+    // the fetching rather than merely of the figures.
+    if (board.shouldFetch !== undefined && !board.shouldFetch()) return
     running.current = true
     try {
       const raw = await fetchCsv()

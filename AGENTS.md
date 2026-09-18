@@ -857,6 +857,47 @@ is the one page here that a person holds. Added 17 September 2026.
     keeps `week_revenue` under its own honest label. `lib/live.test.ts` states
     the divergence as a fact rather than asserting a parity that is gone.
 
+- **`/daily` goes to the network once a day, and `/podium` still polls every
+  sixty seconds.** Asked for directly. The daily board's figures change only at
+  10:00, so the other 1,439 polls could not move anything on screen; its
+  `shouldFetch` returns `true` only when the current window has not been
+  photographed yet.
+
+  **Gated on the data, never on a timer**, and the three reasons are all about a
+  laptop that sleeps and that nobody is standing at. A `setTimeout` to the next
+  10:00 fires late by however long the machine slept, so the board would
+  photograph at six in the evening and call it ten in the morning. A timer that
+  fires while the network is down has fired and gone, and the day is lost with
+  nothing retrying. And a timer has to be right about `now` exactly once, where
+  a question asked every minute simply starts answering correctly when a wrong
+  clock is corrected. `needsMark` in `lib/daily.ts` is that question, and it is
+  the *same* condition `markWindow` acts on rather than a second opinion about
+  it — two spellings of "is this window already closed" that could drift apart
+  is a board that either fetches 1,440 times a day or never fetches again.
+
+  **The clock keeps ticking; only the fetching stops.** The sixty-second
+  interval is untouched — it asks a local string comparison first and usually
+  answers it without a request.
+
+  **`/podium` must not be given one of these**, and it now has two jobs because
+  of that. It ranks live all-time revenue and is the only board on the wall that
+  still animates an overtake, so freezing it would leave the whole wall static.
+  It is also what keeps the shared CSV cache warm: `/daily` re-reads that cache
+  on every mount, and the rotation remounts it every thirty seconds, which is
+  how a board that fetches once a day still knows who has sold today and which
+  contest is on.
+
+  **What this costs is the chevrons' second trigger.** They fire on two
+  occasions — the slide arriving, and a team's `todayRevenue` going up — and the
+  second one needs two polls to compare. `/daily` no longer polls, so within a
+  thirty-second visit nothing changes underneath it and that trigger cannot
+  fire. The chevrons still *render*, on whoever has sold today according to the
+  cache `/podium` refreshed, and they still cascade on arrival. What is gone is
+  a sale announcing itself mid-slide, which had thirty seconds a minute to
+  happen in. **A board opened standalone, outside the rotation, has no `/podium`
+  keeping its cache warm** — there the chevrons are as old as the last 10:00,
+  which is to say absent.
+
   **A team newly listed in `TV_Feed` is left out of the window, not credited
   with its whole all-time total as one day's takings.** That is the one bug in
   here that would have put a false leader at rank 1 for twenty-four hours with

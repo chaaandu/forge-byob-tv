@@ -102,12 +102,49 @@ export function markWindow(
   teams: readonly Team[],
   key: string,
 ): readonly DailyMark[] {
-  const last = marks[marks.length - 1]
-  if (last !== undefined && last.key >= key) return marks
+  if (!needsMark(marks, key)) return marks
 
   const totals: Record<TeamId, number> = {}
   for (const team of teams) totals[team.teamId] = team.totalRevenue
   return [...marks, { key, totals }].slice(-MARKS_KEPT)
+}
+
+/**
+ * Has this window been photographed yet?
+ *
+ * **This is what decides whether `/daily` goes to the network at all**, and it
+ * is the same condition `markWindow` acts on rather than a second opinion about
+ * it — which is why that function now asks this one. Two spellings of "is the
+ * window already closed" that could drift apart is a board that either fetches
+ * 1,440 times a day or never fetches again.
+ *
+ * ── Why the fetch is gated on the data rather than on a timer ──
+ *
+ * The obvious way to fetch once a day at ten is a `setTimeout` to the next
+ * 10:00. It is the wrong mechanism on this wall, for reasons that are all about
+ * a laptop nobody is standing at:
+ *
+ * - **A timer does not survive sleep.** A `setTimeout` armed for twenty hours on
+ *   a machine that sleeps for eight fires eight hours late, so the board would
+ *   photograph its window at six in the evening and call it ten in the morning.
+ * - **A timer that misses has no second chance.** If the network is down at
+ *   10:00, a timer has fired and gone; the board holds yesterday's window for
+ *   another day and nothing retries.
+ * - **A timer has to be right about `now` once.** This is asked afresh every
+ *   tick, so a clock that was wrong and got corrected simply produces the right
+ *   answer from then on.
+ *
+ * Asking a local question every minute costs nothing — no network, one string
+ * comparison — and answers `true` exactly once per day. The wall fetches when
+ * the answer changes, which is the same thing as "at ten", and it keeps trying
+ * until it succeeds instead of missing the day.
+ */
+export function needsMark(marks: readonly DailyMark[], key: string): boolean {
+  const last = marks[marks.length - 1]
+  // `<` and not `!==`: a key *older* than the newest mark is a clock that went
+  // backwards, and rewinding onto a window already shown is not a fetch worth
+  // making. `markWindow` refuses to write it for the same reason.
+  return last === undefined || last.key < key
 }
 
 /**
