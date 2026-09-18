@@ -1336,8 +1336,12 @@ body:has(.lv-app[data-locked]) {
     left: 0;
     right: 0;
     bottom: -24px;
-    height: 112px;
-    background: linear-gradient(transparent, var(--lv-page) 64%);
+    /* 84, not 112. The fade is a floor for the keys, but everything inside it
+       is dimmed — and at 112 it reached up over the revenue card's caption on
+       a mid-size phone, which is the line that says how far behind the leader
+       a team is. */
+    height: 84px;
+    background: linear-gradient(transparent, var(--lv-page) 58%);
     pointer-events: none;
   }
 
@@ -1401,25 +1405,47 @@ body:has(.lv-app[data-locked]) {
    * out: an iPhone SE and a phone in landscape have the same problem and
    * different widths. */
   @media (max-height: 720px) {
-    /* The hero's own floor, or it holds 300px open under a 250px header and
-       the saving goes nowhere. */
+    /* ── A small phone has to give from four places at once ──
+     *
+     * The test is not "is the revenue card inside the sheet" but "is it above
+     * the chevrons", which float over the content. On a 667px phone it was
+     * **covered by 31px**: the header, the card and a 46px key stacked into
+     * 567px and the key won.
+     *
+     * So the sheet takes a little more of the screen, the header and the
+     * faces come down again, and the keys sit lower and smaller. No single
+     * one of those is enough, and any single one of them taken far enough
+     * would look wrong on its own. */
+    .lv-sheet {
+      height: min(90dvh, calc(100dvh - env(safe-area-inset-top) - 18px));
+    }
+
     .lv-sheet-hero {
-      min-height: 250px;
+      min-height: 228px;
+    }
+
+    .lv-nav-key {
+      width: 42px;
+      height: 42px;
+    }
+
+    .lv-sheet-nav {
+      bottom: 16px;
     }
 
     .lv-sheet-id {
-      min-height: 218px;
-      padding-top: 14px;
+      min-height: 196px;
+      padding-top: 12px;
     }
 
     .lv-person {
-      width: 84px;
-      height: 116px;
-      margin-left: -26px;
+      width: 78px;
+      height: 104px;
+      margin-left: -24px;
     }
 
     .lv-squad {
-      margin-bottom: -38px;
+      margin-bottom: -34px;
     }
 
     .lv-sheet-name {
@@ -1431,7 +1457,7 @@ body:has(.lv-app[data-locked]) {
     }
 
     .lv-sheet-body {
-      padding-top: 58px;
+      padding-top: 52px;
     }
   }
 
