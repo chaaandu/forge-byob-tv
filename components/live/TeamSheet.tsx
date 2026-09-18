@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { Climb } from '@/components/live/Board'
 import { CountUp } from '@/components/live/CountUp'
 import { Emblem } from '@/components/live/Emblem'
-import { ProductArt } from '@/components/live/ProductArt'
+import { SellsIcon } from '@/components/live/SellsIcon'
 import { formatCount, formatRupees, ordinal } from '@/lib/format'
 import {
   BOARD_KEYS,
@@ -20,13 +20,12 @@ import {
   type BoardKey,
   type Standing,
 } from '@/lib/live'
-import type { Product } from '@/lib/liveSample'
 import { nameOf } from '@/lib/team'
 import type { BoardMode } from '@/lib/types'
 
 /**
  * One team, opened from any row: where it stands on every board, the gap to
- * the car ahead and behind, its numbers, and its top sellers.
+ * the team ahead and behind, its numbers, and what it sells.
  *
  * Drag the header down to close; swipe it sideways for the next team on the
  * board. Both have buttons as well — a gesture nobody discovers is not a
@@ -37,22 +36,16 @@ export function TeamSheet({
   boards,
   boardKey,
   mode,
-  followed,
-  products,
   onBoard,
   onNavigate,
-  onFollow,
   onClose,
 }: {
   teamId: string | null
   boards: Record<BoardKey, Standing[]>
   boardKey: BoardKey
   mode: BoardMode
-  followed: string | null
-  products: (teamId: string) => Product[]
   onBoard: (key: BoardKey) => void
   onNavigate: (teamId: string) => void
-  onFollow: (teamId: string | null) => void
   onClose: () => void
 }) {
   const drag = useDragControls()
@@ -124,17 +117,6 @@ export function TeamSheet({
             >
               <span className="lv-grabber" aria-hidden="true" />
               <div className="lv-sheet-actions">
-                <button
-                  type="button"
-                  className="lv-icon-btn"
-                  aria-pressed={followed === race.self.team.teamId}
-                  aria-label={followed === race.self.team.teamId ? 'Unfollow team' : 'Follow team'}
-                  onClick={() =>
-                    onFollow(followed === race.self.team.teamId ? null : race.self.team.teamId)
-                  }
-                >
-                  {followed === race.self.team.teamId ? '★' : '☆'}
-                </button>
                 <button type="button" className="lv-icon-btn" aria-label="Close" onClick={onClose}>
                   ✕
                 </button>
@@ -159,9 +141,11 @@ export function TeamSheet({
                     <Emblem team={race.self.team} size={44} />
                   </span>
                   <h2 className="lv-sheet-name">{nameOf(race.self.team)}</h2>
+                  {/* No team id. It is a code for a spreadsheet, not a fact
+                      about a venture — the rows dropped it for the same
+                      reason. Search still matches on it. */}
                   <p className="lv-sheet-sub">
-                    {race.self.team.teamId} · {ordinal(race.self.rank)} of {race.total} ·{' '}
-                    {boardLabel(boardKey, mode)}
+                    {ordinal(race.self.rank)} of {race.total} · {boardLabel(boardKey, mode)}
                   </p>
                 </motion.div>
               </AnimatePresence>
@@ -223,7 +207,7 @@ export function TeamSheet({
                 />
               </div>
 
-              <Products items={products(race.self.team.teamId)} />
+              <Sells product={race.self.team.product} />
 
               <nav className="lv-sheet-nav">
                 <button type="button" disabled={race.ahead === undefined} onClick={() => go(-1)}>
@@ -322,34 +306,30 @@ function Intervals({
   )
 }
 
-function Products({ items }: { items: readonly Product[] }) {
-  if (items.length === 0) return null
+/**
+ * What the venture sells, in its own words.
+ *
+ * **Real or absent — there is no sample.** A strip of invented products with
+ * invented unit counts stood here for a day; it rendered beautifully and said
+ * false things about a team, which is the one failure this project is built
+ * around. `TV_Feed` has no product column yet, so this shows nothing at all
+ * until the sheet grows one, and then shows exactly what the team typed.
+ *
+ * Two lines, clamped, because a team writes a sentence and the sheet is the
+ * place to shorten it. The icon is read off the same words by
+ * `sellsCategory`, so nothing here has to be maintained per team.
+ */
+function Sells({ product }: { product?: string }) {
+  if (!product) return null
   return (
-    <section className="lv-products">
-      <header className="lv-products-head">
-        <span className="lv-label">Top sellers</span>
-        {items.some((item) => item.sample) ? <span className="lv-sample">Sample data</span> : null}
-      </header>
-      <div className="lv-products-rail">
-        {items.map((item, index) => (
-          <motion.article
-            key={item.name}
-            className="lv-product"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 + index * 0.07, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          >
-            <div className="lv-product-shot">
-              <span className="lv-product-rank">#{index + 1}</span>
-              <ProductArt art={item.art} />
-            </div>
-            <div className="lv-product-name">{item.name}</div>
-            <div className="lv-product-meta">
-              {formatCount(item.units)} sold · {formatRupees(item.revenue)}
-            </div>
-          </motion.article>
-        ))}
-      </div>
+    <section className="lv-sells">
+      <span className="lv-sells-icon">
+        <SellsIcon product={product} size={24} />
+      </span>
+      <span className="lv-sells-text">
+        <span className="lv-label">Sells</span>
+        <span className="lv-sells-line">{product}</span>
+      </span>
     </section>
   )
 }

@@ -112,6 +112,7 @@ function toTeam(row: Record<string, string>): Team | null {
     // does — no second deploy, no version check.
     challengeRevenue: toNumber(row.challenge_revenue ?? '') ?? 0,
     ...prevWeekRankOf(row.prev_week_rank),
+    ...productOf(row.product),
   }
 }
 
@@ -132,6 +133,23 @@ function prevWeekRankOf(raw: string | undefined): { prevWeekRank?: number } {
   const value = toNumber((raw ?? '').trim())
   if (value === null || value < 1) return {}
   return { prevWeekRank: Math.round(value) }
+}
+
+/**
+ * What a venture sells, if the sheet says.
+ *
+ * Absent rather than empty when there is nothing to show, so `/live` can ask
+ * `team.product === undefined` and render nothing at all — `AGENTS.md`'s rule
+ * that empty is a valid state, applied to a field that is empty for every team
+ * until somebody adds the column.
+ *
+ * The workbook template's placeholder is treated as no answer, the way
+ * `ventureNameOf` treats its own.
+ */
+function productOf(raw: string | undefined): { product?: string } {
+  const product = (raw ?? '').trim()
+  if (product === '' || product.toLowerCase().startsWith('type your')) return {}
+  return { product }
 }
 
 function rows(csv: string): Record<string, string>[] {

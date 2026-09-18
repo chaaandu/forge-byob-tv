@@ -475,43 +475,70 @@ npm run build        # next build
 
 ## `/live` — the phone page
 
-`/live` is the standings built for a phone, styled like F1's broadcast graphics:
-a position numeral, a slab in the team's livery, a violet score band. **It is not
-a slide.** `Rotator` never visits it, `Ganesha` renders nothing on it, and it is
-the one page here that a person holds. Added 17 September 2026.
+`/live` is the standings built for a phone, styled like F1's broadcast
+graphics: a rank numeral on the dark, a slab in the team's livery running to
+the edge of the screen, and the money band laid over the end of it. **It is not
+a slide.** `Rotator` never visits it, `Ganesha` renders nothing on it, and it
+is the one page here that a person holds. Added 17 September 2026.
 
-- **What it shares with the wall is everything that decides a number**: `fetchCsv`
-  (with `no-store`), `parseSnapshot`, `passesRowGate`, the CSV cache, `rankTeams`,
-  `rankForMode` and `challenge_mode`. `lib/live.test.ts` asserts the all-time and
-  period boards sort exactly as `/podium` and `/weekly` do — a phone that
-  disagreed with the TV about who is fourth would be worse than no phone.
-- **What it does not share is the wall's detection.** `lib/useLiveData.ts` never
-  writes `board.*` or the kick queue; a phone is not a third writer to state the
-  two slides own.
-- **The still-board rules are the wall's, not the phone's.** On `/live` rows use
-  Motion `layout="position"` (a slot change only, never a figure change), the
-  live dot pulses, figures count up, and it **honours `prefers-reduced-motion`**
-  — the wall ignores that setting because a TV laptop's OS says nothing about
-  who is walking past; a phone's says exactly who is holding it. It also shows
-  how fresh its data is, which the wall deliberately does not.
-- **The colour rule is unchanged.** Twelve liveries, the score band and every
-  `/live` colour are §8 of `forge-tokens.css`; `lib/live.test.ts` fails on any
-  hex or `rgba(` under `app/live/` or `components/live/`. No violet livery (the
-  score band is violet) and no green one (Mesa's parent brand).
+- **What it shares with the wall is everything that decides a number**:
+  `fetchCsv` (with `no-store`), `parseSnapshot`, `passesRowGate`, the CSV
+  cache, `rankTeams`, `rankForMode` and `challenge_mode`. `lib/live.test.ts`
+  asserts the all-time and period boards sort exactly as `/podium` and
+  `/weekly` do — a phone that disagreed with the TV about who is fourth would
+  be worse than no phone.
+- **What it does not share is the wall's detection.** `lib/useLiveData.ts`
+  never writes `board.*` or the kick queue; a phone is not a third writer to
+  state the two slides own.
+- **The still-board rules are the wall's, not the phone's.** Rows use Motion
+  `layout="position"` (a slot change only, never a figure change), figures
+  count up, and it **honours `prefers-reduced-motion`** — the wall ignores that
+  setting because a TV laptop's OS says nothing about who is walking past; a
+  phone's says exactly who is holding it.
+- **The colour rule is unchanged, and each row now carries two of them.**
+  Twelve liveries plus a per-livery **money band** are §8 of
+  `forge-tokens.css`; `lib/live.test.ts` fails on any hex or `rgba(` under
+  `app/live/` or `components/live/`. The band replaced one violet column down
+  the whole board, asked for directly. It is the *opposite value* to its slab
+  rather than a darker version — a dark livery given a darker band puts a hole
+  at the end of the row, and five of the twelve measured under 1.4:1 against
+  the page that way. Violet is now chrome only (tabs, podium steps, the search
+  key) and there is still no green livery: §7's note on the podium's second
+  place has that argument.
+- **It ships a second face, and that is a per-surface decision rather than a
+  loosened rule.** `AGENTS.md`'s "one face" rule is about one surface carrying
+  four; `/live` carries exactly one, **Archivo**, and the wall carries exactly
+  one, Figtree. Archivo is variable on *weight and width*, so the condensed
+  raked 900 of a standings graphic and a normal-width 600 label are one file.
+  **Its cmap was checked for U+20B9 before bundling** — the rupee rule binds
+  any face that draws a figure — and it carries U+014C for `YŌKI`, so it ships
+  whole rather than subset. `lib/live.test.ts` checks every weight in
+  `live.css` against the axis declared in `app/live/layout.tsx`.
 - **The badges are drawn in code**, twelve geometric marks in
   `components/live/Emblem.tsx`, picked by hashing the team id. They are
   placeholders that belong to nobody, which is what keeps them inside the
   borrowed-artwork rule. A real logo arrives the wall's way — file plus `LOGOS`
   entry — and `/live` picks it up with no change.
-- **The product strip is sample data, development only.** `TV_Feed` publishes
-  no products. `lib/liveSample.ts` invents three per team, every card wears a
-  `Sample data` badge, and `app/live/page.tsx` passes nothing in production;
-  a test pins that guard. The real source would be a `TV_Products` tab
-  (`team_id, product, units, revenue, image_url`) built from `Daily Dump`,
-  published like the other two. Delete `liveSample.ts` the day it lands.
-- **`allowedDevOrigins` in `next.config.ts`** lets a phone on the same Wi-Fi load
-  `next dev` at `http://<laptop-ip>:3000/live`. Without it Next 16 403s every
-  script and the page paints a header and nothing else.
+- **What a venture sells is read, never invented.** A strip of sample products
+  with sample unit counts shipped here for a day and was deleted: it rendered
+  beautifully and said false things about a team, which is the failure this
+  project is built around. `Team.product` is an **optional** `product` column
+  in `TV_Feed` (from `Team Links` col F, which the consolidator maintains) —
+  optional for the reason `challenge_revenue` is, so a missing column cannot
+  throw away a fetch. Absent means the card is not rendered at all.
+  `components/live/SellsIcon.tsx` reads a *category* off the same words, and
+  an unrecognised product draws a plain tag rather than a wrong picture.
+  `lib/live.test.ts` fails if `sampleProducts` ever comes back.
+- **No team id on a row, no "Pos", no live chip, no follow.** All four removed
+  by decision on 18 September 2026. The id is a spreadsheet code and the row's
+  second line carries today's takings or the product instead; `Pos` reads as
+  point-of-sale on a board about takings, so the column says `Rank`; the live
+  chip was a status light, and what it actually said is one line in the
+  footer; following a team was a star, a pinned bar and a `localStorage` key
+  for something search does in two taps.
+- **`allowedDevOrigins` in `next.config.ts`** lets a phone on the same Wi-Fi
+  load `next dev` at `http://<laptop-ip>:3000/live`. Without it Next 16 403s
+  every script and the page paints a header and nothing else.
 
 ## Domain
 

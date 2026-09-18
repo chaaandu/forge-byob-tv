@@ -4,26 +4,23 @@ import { MotionConfig } from 'motion/react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import { Podium, Standings, splitBoard } from '@/components/live/Board'
-import { BoardTabs, Dock, LiveHeader, SearchSheet } from '@/components/live/Chrome'
+import { BoardTabs, LiveHeader, SearchKey, SearchSheet } from '@/components/live/Chrome'
 import { CountUp } from '@/components/live/CountUp'
 import { TeamSheet } from '@/components/live/TeamSheet'
 import { boardMode } from '@/lib/board'
 import { openWeek } from '@/lib/feed'
 import { standingsFor, type BoardKey, type Standing } from '@/lib/live'
-import { sampleProducts, type Product } from '@/lib/liveSample'
-import { readFollowed, writeFollowed } from '@/lib/storage'
 import { useLiveData } from '@/lib/useLiveData'
 
 /**
  * `/live` — the standings on a phone.
  *
  * Not a slide. It is not on the rotation (`Rotator` only swaps `/weekly` and
- * `/podium`), it carries no Ganesha, and it is the one page on this project
- * a person touches — so it is built the other way round from the wall: it
- * moves when you do, it tells you how fresh it is, and it honours
- * `prefers-reduced-motion`, which the wall deliberately ignores because the
- * OS setting on a TV laptop says nothing about who is walking past. On a
- * phone it says exactly who is holding it.
+ * `/podium`), it carries no Ganesha, and it is the one page on this project a
+ * person touches — so it is built the other way round from the wall: it moves
+ * when you do, and it honours `prefers-reduced-motion`, which the wall
+ * deliberately ignores because the OS setting on a TV laptop says nothing
+ * about who is walking past. On a phone it says exactly who is holding it.
  *
  * What it does share with the wall is everything that decides a number: the
  * feed, the gate, the comparators and `challenge_mode`. See `lib/live.ts`.
@@ -32,23 +29,20 @@ import { useLiveData } from '@/lib/useLiveData'
 /** How long the arrival stagger and count-up run before rows only travel. */
 const ARRIVAL_MS = 1_400
 
-const noProducts = (): Product[] => []
-
 export default function LivePage() {
-  const { snapshot, fetchedAt, refreshing, refresh } = useLiveData()
+  const { snapshot, fetchedAt } = useLiveData()
   const [boardKey, setBoardKey] = useState<BoardKey>('all')
   const [openId, setOpenId] = useState<string | null>(null)
   const [searching, setSearching] = useState(false)
-  const [followed, setFollowed] = useState<string | null>(null)
   const [arriving, setArriving] = useState(true)
 
   const hasData = snapshot !== null
 
-  // Client-only reads: the followed team, and a `?team=` deep link.
+  // A `?team=` deep link, read on the client only: the route is prerendered,
+  // so the URL's query is not knowable during render.
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setFollowed(readFollowed())
     const linked = new URLSearchParams(window.location.search).get('team')
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (linked) setOpenId(linked)
   }, [])
 
@@ -95,13 +89,6 @@ export default function LivePage() {
   const { podium, rest } = splitBoard(standings)
   const boardTotal = standings.reduce((sum, s) => sum + s.figure, 0)
   const trading = standings.filter((s) => s.figure > 0).length
-  const followedStanding = followed === null ? null : (standings.find((s) => s.team.teamId === followed) ?? null)
-
-  const follow = useCallback((teamId: string | null) => {
-    setFollowed(teamId)
-    writeFollowed(teamId)
-    buzz()
-  }, [])
 
   const open = useCallback((teamId: string) => {
     setOpenId(teamId)
@@ -139,7 +126,7 @@ export default function LivePage() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="lv-app" data-locked={openId !== null || searching ? '' : undefined}>
-        <LiveHeader subtitle={subtitle} fetchedAt={fetchedAt} refreshing={refreshing} onRefresh={refresh} />
+        <LiveHeader subtitle={subtitle} />
         <BoardTabs boardKey={boardKey} mode={mode} onChange={changeBoard} />
 
         {hasData ? (
@@ -150,7 +137,7 @@ export default function LivePage() {
                 <CountUp className="lv-summary-value" value={boardTotal} from={arriving ? 0 : undefined} />
               </div>
               <div>
-                <span className="lv-label">On the board</span>
+                <span className="lv-label">Trading</span>
                 <span className="lv-summary-value">
                   {trading}
                   <small>/{standings.length}</small>
@@ -160,32 +147,45 @@ export default function LivePage() {
 
             <Podium podium={podium} arriving={arriving} onOpen={open} />
 
+            {/* **Not "Pos".** On a board about takings that reads as
+                point-of-sale, which is a different system entirely. */}
             <div className="lv-colheads" aria-hidden="true">
-              <span>Pos</span>
+              <span>Rank</span>
               <span>Team</span>
               <span>Revenue</span>
             </div>
 
-            <Standings rest={rest} boardKey={boardKey} followed={followed} arriving={arriving} onOpen={open} />
+            <Standings rest={rest} boardKey={boardKey} arriving={arriving} onOpen={open} />
 
+            {/* The only provenance on the page, and it is a line rather than a
+                status light. The wall carries none at all — `AGENTS.md` has
+                what that costs there; a phone is held by somebody who can act
+                on a stale figure, so it says so. */}
             <footer className="lv-foot">
               Logged, proof-backed revenue from the BYOB master
+              {fetchedAt === null ? null : (
+                <>
+                  {' · checked '}
+                  {new Date(fetchedAt).toLocaleTimeString('en-IN', {
+                    hour: 'numeric',
+                    minute: '2-digit',
+                  })}
+                </>
+              )}
               {snapshot.cohort.as_of ? <> · sheet as of {snapshot.cohort.as_of}</> : null}
             </footer>
           </main>
         ) : null}
 
-        <Dock followed={followedStanding} onOpen={open} onSearch={() => setSearching(true)} />
+        <SearchKey onSearch={() => setSearching(true)} />
 
         <SearchSheet
           open={searching}
           standings={standings}
-          followed={followed}
           onPick={(teamId) => {
             setSearching(false)
             open(teamId)
           }}
-          onFollow={follow}
           onClose={closeSearch}
         />
 
@@ -194,19 +194,8 @@ export default function LivePage() {
           boards={boards}
           boardKey={boardKey}
           mode={mode}
-          followed={followed}
-          // Sample products in development only — see `lib/liveSample.ts`.
-          products={
-            process.env.NODE_ENV === 'production'
-              ? noProducts
-              : (teamId) => {
-                  const team = snapshot?.teams.find((t) => t.teamId === teamId)
-                  return team === undefined ? [] : sampleProducts(team)
-                }
-          }
           onBoard={changeBoard}
           onNavigate={setOpenId}
-          onFollow={follow}
           onClose={close}
         />
       </div>

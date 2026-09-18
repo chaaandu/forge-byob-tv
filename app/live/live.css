@@ -1,13 +1,17 @@
 /* ============================================================
-   /live — the standings on a phone.
+   /live — the standings on a phone, as a race broadcast.
 
-   F1's broadcast standings, in Forge purple: a position numeral, a slab in
-   the team's livery, and a score band down the right. Every colour is a token
-   from §8 of `forge-tokens.css`; nothing here spells one out.
+   F1's standings graphic: a rank numeral on the dark, a slab in the team's
+   colour running to the edge of the screen, and the money band laid over the
+   end of it. Every colour is a token from §8 of `forge-tokens.css`; nothing
+   here spells one out, and `lib/live.test.ts` fails on a hex or an `rgba(`.
+
+   Type is Archivo, one face, two axes — see `app/live/layout.tsx`. Display
+   type is **condensed and raked**: `font-stretch` down to ~72% with a skew,
+   which is the whole voice of the thing. Body type stays at normal width.
 
    Loaded by `app/live/layout.tsx` only, so the wall never downloads it.
-   Class rules sit in `@layer components`, like `mesa-tv.css`, so a Tailwind
-   utility can still override one.
+   Class rules sit in `@layer components`, like `mesa-tv.css`.
    ============================================================ */
 
 /* ── Unlayered, on purpose ──
@@ -21,6 +25,7 @@ body:has(.lv-app) {
   height: auto;
   min-height: 100%;
   overflow: visible;
+  background: var(--lv-page);
 }
 
 body:has(.lv-app[data-locked]) {
@@ -29,15 +34,22 @@ body:has(.lv-app[data-locked]) {
 
 @layer components {
   .lv-app {
+    --lv-rank-w: 50px;
+    --lv-band-w: 112px;
+    /* The rake on every diagonal edge in the page: slabs, bands, the seam
+       between them. One number, so nothing drifts out of parallel. */
+    --lv-rake: 13px;
+
     position: relative;
     max-width: 520px;
     min-height: 100dvh;
     margin: 0 auto;
-    padding-bottom: calc(92px + env(safe-area-inset-bottom));
+    padding-bottom: calc(96px + env(safe-area-inset-bottom));
+    overflow-x: clip;
     color: var(--lv-ink);
-    font-family: var(--font-sans);
+    font-family: var(--font-live), var(--font-sans);
     background:
-      radial-gradient(120% 50% at 100% 0%, var(--lv-glow) 0%, transparent 62%),
+      radial-gradient(130% 44% at 88% 0%, var(--lv-glow) 0%, transparent 60%),
       var(--lv-page);
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
@@ -48,7 +60,6 @@ body:has(.lv-app[data-locked]) {
     font: inherit;
     color: inherit;
     cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
   }
 
   .lv-app :focus-visible {
@@ -58,30 +69,43 @@ body:has(.lv-app[data-locked]) {
 
   .lv-label {
     display: block;
-    font-size: 10.5px;
-    font-weight: 800;
-    letter-spacing: 0.16em;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--lv-ink-muted);
+  }
+
+  /* Display type: condensed, heavy, raked — the three things that make a
+     numeral read as a race graphic rather than as a number. */
+  .lv-pos,
+  .lv-title,
+  .lv-wordmark,
+  .lv-pod-num,
+  .lv-sheet-pos,
+  .lv-placement-rank,
+  .lv-search-pos {
+    font-stretch: 72%;
+    font-variant-numeric: tabular-nums;
   }
 
   /* ── Header ─────────────────────────────────────────────── */
 
   .lv-hero {
     position: relative;
-    padding: calc(env(safe-area-inset-top) + 14px) 16px 16px;
+    padding: calc(env(safe-area-inset-top) + 14px) 18px 18px;
     overflow: hidden;
   }
 
   .lv-hero::after {
     content: '';
     position: absolute;
-    right: -40px;
-    top: 40px;
-    width: 220px;
-    height: 180px;
-    background: repeating-linear-gradient(115deg, var(--lv-panel) 0 9px, transparent 9px 20px);
-    mask-image: linear-gradient(90deg, transparent, black 60%);
+    right: -30px;
+    top: 30px;
+    width: 230px;
+    height: 200px;
+    background: repeating-linear-gradient(108deg, var(--lv-panel) 0 10px, transparent 10px 24px);
+    mask-image: linear-gradient(90deg, transparent, black 65%);
     pointer-events: none;
   }
 
@@ -89,116 +113,84 @@ body:has(.lv-app[data-locked]) {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
   }
 
   .lv-stripes {
-    height: 13px;
+    height: 14px;
     background: linear-gradient(
-      var(--lv-stripe-a) 0 54%,
-      transparent 54% 70%,
-      var(--lv-stripe-b) 70% 100%
+      var(--lv-stripe-a) 0 50%,
+      transparent 50% 68%,
+      var(--lv-stripe-b) 68% 100%
     );
   }
 
   .lv-stripes-l {
-    clip-path: polygon(0 0, 100% 0, calc(100% - 13px) 100%, 0 100%);
+    clip-path: polygon(0 0, 100% 0, calc(100% - var(--lv-rake)) 100%, 0 100%);
   }
 
   .lv-stripes-r {
-    clip-path: polygon(13px 0, 100% 0, 100% 100%, 0 100%);
+    clip-path: polygon(var(--lv-rake) 0, 100% 0, 100% 100%, 0 100%);
   }
 
   .lv-wordmark {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 24px;
+    font-size: 25px;
     font-weight: 900;
     line-height: 0.9;
-    letter-spacing: -0.01em;
-    transform: skewX(-10deg);
+    letter-spacing: 0.01em;
+    transform: skewX(-11deg);
   }
 
   .lv-wordmark span {
-    margin-top: 3px;
+    margin-top: 4px;
     font-size: 8.5px;
-    font-weight: 800;
-    letter-spacing: 0.3em;
+    font-weight: 700;
+    font-stretch: 100%;
+    letter-spacing: 0.34em;
     text-transform: uppercase;
     color: var(--lv-accent);
-  }
-
-  .lv-live {
-    position: absolute;
-    z-index: 2;
-    right: 16px;
-    top: calc(env(safe-area-inset-top) + 50px);
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    height: 28px;
-    padding: 0 11px;
-    border: 1px solid var(--lv-hairline);
-    border-radius: 999px;
-    background: var(--lv-panel-strong);
-    font-size: 10.5px;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-  }
-
-  .lv-live-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-    background: var(--lv-ink-faint);
-  }
-
-  .lv-live[data-live] .lv-live-dot {
-    background: var(--lv-live);
-    animation: lv-pulse 1.8s ease-out infinite;
-  }
-
-  @keyframes lv-pulse {
-    0% {
-      box-shadow: 0 0 0 0 var(--lv-live);
-    }
-    80%,
-    100% {
-      box-shadow: 0 0 0 7px transparent;
-    }
   }
 
   .lv-title {
     position: relative;
     z-index: 1;
-    margin: 30px 0 0;
-    /* Stated, not inherited: the design system's own `h1` rule sets the serif. */
-    font-family: var(--font-sans);
-    font-size: clamp(42px, 13vw, 60px);
+    display: flex;
+    flex-direction: column;
+    margin: 26px 0 0;
+    /* Stated, not inherited: the design system's own `h1` rule sets a serif. */
+    font-family: inherit;
+    font-size: clamp(50px, 16vw, 74px);
     font-weight: 900;
-    line-height: 0.86;
-    letter-spacing: -0.02em;
+    line-height: 0.82;
+    letter-spacing: -0.005em;
     text-transform: uppercase;
     color: var(--lv-ink);
   }
 
-  .lv-title-skew {
+  .lv-title-line {
     display: inline-block;
-    max-width: 7.5ch;
-    transform: skewX(-9deg);
+    transform: skewX(-11deg);
     transform-origin: 0 100%;
-    text-shadow: 0 6px 24px var(--lv-shade);
+    text-shadow: 0 8px 26px var(--lv-shade);
+  }
+
+  /* The second word carries the weight, the way a broadcast title does. */
+  .lv-title-line:first-child {
+    font-size: 0.56em;
+    letter-spacing: 0.02em;
+    color: var(--lv-accent);
   }
 
   .lv-subtitle {
     position: relative;
     z-index: 1;
-    margin: 12px 0 0;
+    margin: 14px 0 0;
     font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.18em;
+    font-weight: 600;
+    letter-spacing: 0.2em;
     text-transform: uppercase;
     color: var(--lv-ink-muted);
   }
@@ -214,10 +206,10 @@ body:has(.lv-app[data-locked]) {
     position: sticky;
     z-index: 20;
     top: env(safe-area-inset-top);
-    padding: 8px 16px;
+    padding: 10px 14px;
     background: var(--lv-glass);
-    backdrop-filter: blur(14px) saturate(1.4);
-    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
     border-bottom: 1px solid var(--lv-hairline);
   }
 
@@ -226,7 +218,7 @@ body:has(.lv-app[data-locked]) {
     grid-template-columns: repeat(3, 1fr);
     padding: 4px;
     border: 1px solid var(--lv-hairline);
-    border-radius: 14px;
+    border-radius: 13px;
     background: var(--lv-panel);
   }
 
@@ -235,20 +227,21 @@ body:has(.lv-app[data-locked]) {
     height: 40px;
     border: 0;
     background: none;
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 800;
+    letter-spacing: 0.04em;
     color: var(--lv-ink-muted);
   }
 
   .lv-tab[aria-selected='true'] {
-    color: var(--lv-score-ink);
+    color: var(--lv-key-ink);
   }
 
   .lv-tab-pill {
     position: absolute;
     inset: 0;
-    border-radius: 10px;
-    background: linear-gradient(100deg, var(--lv-score-a), var(--lv-score-b));
+    border-radius: 9px;
+    background: linear-gradient(100deg, var(--lv-key-a), var(--lv-key-b));
     box-shadow:
       inset 0 1px 0 var(--lv-sheen),
       0 6px 18px var(--lv-shade);
@@ -264,11 +257,7 @@ body:has(.lv-app[data-locked]) {
     display: grid;
     grid-template-columns: 1fr auto;
     gap: 12px;
-    margin: 16px 16px 0;
-    padding: 12px 14px;
-    border: 1px solid var(--lv-hairline);
-    border-radius: 16px;
-    background: var(--lv-panel);
+    padding: 16px 18px 4px;
   }
 
   .lv-summary > div:last-child {
@@ -277,15 +266,16 @@ body:has(.lv-app[data-locked]) {
 
   .lv-summary-value {
     display: block;
-    margin-top: 4px;
-    font-size: 22px;
+    margin-top: 5px;
+    font-size: 26px;
     font-weight: 900;
+    font-stretch: 80%;
     letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums;
   }
 
   .lv-summary-value small {
-    font-size: 14px;
+    font-size: 15px;
     font-weight: 700;
     color: var(--lv-ink-muted);
   }
@@ -294,10 +284,10 @@ body:has(.lv-app[data-locked]) {
 
   .lv-podium {
     display: grid;
-    grid-template-columns: 1fr 1.18fr 1fr;
+    grid-template-columns: 1fr 1.2fr 1fr;
     align-items: end;
-    gap: 8px;
-    padding: 20px 16px 6px;
+    gap: 7px;
+    padding: 18px 14px 4px;
     perspective: 900px;
   }
 
@@ -317,71 +307,73 @@ body:has(.lv-app[data-locked]) {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    height: 156px;
+    height: 158px;
     padding: 0;
     overflow: hidden;
     border: 0;
-    border-radius: 18px 18px 6px 6px;
+    border-radius: 16px 16px 4px 4px;
     color: var(--livery-ink);
-    background: linear-gradient(160deg, var(--livery-a), var(--livery-b));
+    background: linear-gradient(158deg, var(--livery-a), var(--livery-b));
     box-shadow:
       inset 0 1px 0 var(--lv-sheen),
-      0 16px 34px var(--lv-shade);
+      0 18px 34px var(--lv-shade);
     text-align: center;
   }
 
   .lv-pod-slot-1 .lv-pod {
-    height: 190px;
+    height: 192px;
   }
 
   .lv-pod-ghost {
     position: absolute;
-    right: -48%;
-    bottom: 4%;
-    opacity: 0.15;
+    right: -46%;
+    bottom: 6%;
+    opacity: 0.16;
     transform: rotate(-14deg);
     pointer-events: none;
   }
 
   .lv-pod-num {
     position: absolute;
-    left: 9px;
-    top: 4px;
-    font-size: 46px;
+    left: 8px;
+    top: 0;
+    font-size: 54px;
     font-weight: 900;
     line-height: 1;
     color: transparent;
     /* The livery's ink, not `currentColor` — `currentColor` here is the
        transparent fill one line up, and the numeral vanished. */
     -webkit-text-stroke: 1.6px var(--livery-ink);
-    transform: skewX(-10deg);
-    opacity: 0.9;
+    transform: skewX(-11deg);
+    opacity: 0.92;
   }
 
   .lv-pod-slot-1 .lv-pod-num {
-    font-size: 62px;
+    font-size: 70px;
   }
 
   .lv-pod-mark {
     position: relative;
-    margin-top: 42px;
+    margin-top: 44px;
     filter: drop-shadow(0 6px 12px var(--lv-shade));
   }
 
   .lv-pod-slot-1 .lv-pod-mark {
-    margin-top: 52px;
+    margin-top: 56px;
   }
 
+  /* The name and figure sit on the team's own money band, so a podium card
+     and its row downstairs are visibly the same object. */
   .lv-pod-foot {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
     width: 100%;
     margin-top: auto;
     padding: 8px 6px 9px;
-    background: var(--lv-chip-bg);
-    color: var(--lv-ink);
+    background: var(--livery-band);
+    color: var(--livery-band-ink);
   }
 
   .lv-pod-name {
@@ -396,9 +388,9 @@ body:has(.lv-app[data-locked]) {
   }
 
   .lv-pod-fig {
-    font-size: 13.5px;
+    font-size: 14px;
     font-weight: 900;
-    color: var(--lv-accent);
+    font-stretch: 84%;
     font-variant-numeric: tabular-nums;
   }
 
@@ -407,7 +399,7 @@ body:has(.lv-app[data-locked]) {
   }
 
   .lv-pod-slot-1 .lv-pod-fig {
-    font-size: 15px;
+    font-size: 16px;
   }
 
   .lv-pod-empty {
@@ -432,67 +424,68 @@ body:has(.lv-app[data-locked]) {
   .lv-pod-step {
     display: grid;
     place-items: center;
-    height: 24px;
+    height: 18px;
     margin-top: 6px;
-    border-radius: 6px 6px 0 0;
-    background: linear-gradient(180deg, var(--lv-score-a), var(--lv-score-b));
+    border-radius: 5px 5px 0 0;
+    background: linear-gradient(180deg, var(--lv-key-a), var(--lv-key-b));
     box-shadow: inset 0 1px 0 var(--lv-sheen);
-    color: var(--lv-score-ink);
+    color: var(--lv-key-ink);
     font-size: 11px;
     font-weight: 900;
-    letter-spacing: 0.14em;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
   }
 
   .lv-pod-slot-1 .lv-pod-step {
-    height: 46px;
+    height: 48px;
     font-size: 13px;
   }
 
   .lv-pod-slot-2 .lv-pod-step {
-    height: 34px;
+    height: 31px;
   }
 
   /* ── Standings ──────────────────────────────────────────── */
 
   .lv-colheads {
     display: grid;
-    grid-template-columns: 40px 1fr 104px;
-    padding: 18px 16px 8px;
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.18em;
+    grid-template-columns: var(--lv-rank-w) minmax(0, 1fr) var(--lv-band-w);
+    padding: 20px 0 8px;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.22em;
     text-transform: uppercase;
-    color: var(--lv-accent);
+    color: var(--lv-ink-faint);
   }
 
   .lv-colheads span:first-child {
-    padding-left: 2px;
+    padding-left: 14px;
   }
 
   .lv-colheads span:nth-child(2) {
-    padding-left: 18px;
+    padding-left: var(--lv-rake);
   }
 
   .lv-colheads span:last-child {
     text-align: right;
-    padding-right: 12px;
+    padding-right: 16px;
   }
 
+  /* Full bleed. The rows are the page — no side margin to stop them short. */
   .lv-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 4px;
     margin: 0;
-    padding: 0 16px;
+    padding: 0;
     list-style: none;
   }
 
   .lv-row {
     display: grid;
-    grid-template-columns: 40px minmax(0, 1fr) auto;
+    grid-template-columns: var(--lv-rank-w) minmax(0, 1fr) var(--lv-band-w);
     width: 100%;
-    height: 58px;
+    height: 60px;
     padding: 0;
     border: 0;
     background: none;
@@ -500,57 +493,69 @@ body:has(.lv-app[data-locked]) {
   }
 
   .lv-row[data-quiet] {
-    opacity: 0.62;
-  }
-
-  .lv-row[data-followed] {
-    filter: drop-shadow(0 0 10px var(--lv-follow-glow));
+    opacity: 0.58;
   }
 
   .lv-pos {
     display: flex;
     align-items: center;
-    padding-left: 2px;
-    font-size: 22px;
+    justify-content: center;
+    padding-right: 4px;
+    font-size: 25px;
     font-weight: 900;
-    color: var(--lv-accent);
-    font-variant-numeric: tabular-nums;
-    transform: skewX(-10deg);
+    line-height: 1;
+    color: var(--lv-ink);
+    transform: skewX(-11deg);
   }
 
+  /* The slab runs under the money band and out to the right edge, so the
+     colour never stops short of the screen. */
   .lv-slab {
+    position: relative;
+    /* Both are placed explicitly. Without the row, the band's own
+       `grid-column: 3` overlaps the spanning slab, auto-placement pushes it
+       to a second row, and every row draws at double height with the figure
+       underneath the name. Measured. */
+    grid-row: 1;
+    grid-column: 2 / 4;
+    min-width: 0;
+    overflow: hidden;
+    color: var(--livery-ink);
+    background: linear-gradient(92deg, var(--livery-a), var(--livery-b));
+    box-shadow: inset 0 1px 0 var(--lv-sheen);
+    clip-path: polygon(var(--lv-rake) 0, 100% 0, 100% 100%, 0 100%);
+  }
+
+  .lv-slab-body {
     position: relative;
     display: flex;
     align-items: center;
     gap: 10px;
-    min-width: 0;
-    padding: 0 14px 0 20px;
-    overflow: hidden;
-    color: var(--livery-ink);
-    background: linear-gradient(90deg, var(--livery-a), var(--livery-b));
-    box-shadow: inset 0 1px 0 var(--lv-sheen);
-    clip-path: polygon(11px 0, 100% 0, 100% 100%, 0 100%);
+    height: 100%;
+    /* Clear of the band that sits on top of the slab's right end. Every pixel
+       here is a venture name not ellipsised, so the clearance is 2px rather
+       than a round number. */
+    padding: 0 calc(var(--lv-band-w) + 2px) 0 calc(var(--lv-rake) + 8px);
   }
 
   .lv-slab-mark {
-    position: relative;
     flex: none;
     filter: drop-shadow(0 2px 5px var(--lv-shade));
   }
 
   .lv-slab-text {
-    position: relative;
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 2px;
     min-width: 0;
   }
 
   .lv-name {
     overflow: hidden;
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 800;
     line-height: 1.1;
+    letter-spacing: -0.005em;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
@@ -561,48 +566,46 @@ body:has(.lv-app[data-locked]) {
     gap: 6px;
     min-width: 0;
     font-size: 11px;
-    font-weight: 700;
+    font-weight: 600;
     white-space: nowrap;
   }
 
-  .lv-meta-today,
-  .lv-meta-id {
+  .lv-meta-text {
     overflow: hidden;
     text-overflow: ellipsis;
-    opacity: 0.86;
+    opacity: 0.8;
+  }
+
+  .lv-meta-text[data-today] {
+    font-weight: 800;
+    opacity: 0.95;
   }
 
   .lv-slab-ghost {
     position: absolute;
-    right: -18px;
+    right: calc(var(--lv-band-w) - 34px);
     top: 50%;
-    opacity: 0.16;
+    opacity: 0.17;
     transform: translateY(-50%) rotate(-12deg);
     pointer-events: none;
   }
 
-  .lv-follow-flag {
-    position: absolute;
-    right: 8px;
-    top: 5px;
-    font-size: 12px;
-    line-height: 1;
-  }
-
-  .lv-score {
+  .lv-band {
+    position: relative;
+    z-index: 1;
+    grid-row: 1;
+    grid-column: 3;
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    min-width: 104px;
-    margin-left: -7px;
-    padding: 0 12px 0 16px;
-    border-radius: 0 10px 10px 0;
-    background: linear-gradient(90deg, var(--lv-score-a), var(--lv-score-b));
+    padding: 0 14px 0 var(--lv-rake);
+    background: var(--livery-band);
+    color: var(--livery-band-ink);
     box-shadow: inset 0 1px 0 var(--lv-sheen);
-    clip-path: polygon(11px 0, 100% 0, 100% 100%, 0 100%);
-    color: var(--lv-score-ink);
-    font-size: 15px;
+    clip-path: polygon(var(--lv-rake) 0, 100% 0, 100% 100%, 0 100%);
+    font-size: 16px;
     font-weight: 900;
+    font-stretch: 82%;
     letter-spacing: -0.01em;
     font-variant-numeric: tabular-nums;
   }
@@ -631,15 +634,15 @@ body:has(.lv-app[data-locked]) {
   }
 
   .lv-foot {
-    margin: 22px 16px 0;
+    margin: 26px 18px 0;
     font-size: 11px;
-    font-weight: 600;
-    line-height: 1.5;
+    font-weight: 500;
+    line-height: 1.55;
     text-align: center;
     color: var(--lv-ink-faint);
   }
 
-  /* ── Dock ───────────────────────────────────────────────── */
+  /* ── The search key ─────────────────────────────────────── */
 
   .lv-dock {
     position: fixed;
@@ -648,83 +651,27 @@ body:has(.lv-app[data-locked]) {
     right: 0;
     bottom: 0;
     display: flex;
-    gap: 10px;
+    justify-content: flex-end;
     max-width: 520px;
     margin: 0 auto;
-    padding: 18px 16px calc(12px + env(safe-area-inset-bottom));
-    background: linear-gradient(transparent, var(--lv-page) 45%);
+    padding: 20px 18px calc(16px + env(safe-area-inset-bottom));
+    background: linear-gradient(transparent, var(--lv-page) 62%);
     pointer-events: none;
-  }
-
-  .lv-dock > * {
-    pointer-events: auto;
-  }
-
-  .lv-dock-team,
-  .lv-dock-find,
-  .lv-dock-search {
-    height: 54px;
-    border: 0;
-    border-radius: 16px;
-    box-shadow:
-      inset 0 1px 0 var(--lv-sheen),
-      0 12px 30px var(--lv-shade);
-  }
-
-  .lv-dock-team {
-    display: grid;
-    grid-template-columns: auto auto minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 10px;
-    flex: 1;
-    min-width: 0;
-    padding: 0 14px;
-    background: linear-gradient(100deg, var(--livery-a), var(--livery-b));
-    color: var(--livery-ink);
-    text-align: left;
-  }
-
-  .lv-dock-pos {
-    font-size: 17px;
-    font-weight: 900;
-    transform: skewX(-10deg);
-  }
-
-  .lv-dock-name {
-    overflow: hidden;
-    font-size: 14px;
-    font-weight: 800;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-
-  .lv-dock-fig {
-    font-size: 14px;
-    font-weight: 900;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .lv-dock-find {
-    flex: 1;
-    border: 1px solid var(--lv-hairline-strong);
-    background: var(--lv-glass);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    font-size: 14px;
-    font-weight: 800;
-  }
-
-  .lv-dock-find span {
-    color: var(--lv-accent);
   }
 
   .lv-dock-search {
     display: grid;
     place-items: center;
-    flex: none;
-    width: 54px;
-    background: linear-gradient(135deg, var(--lv-score-a), var(--lv-score-b));
-    color: var(--lv-score-ink);
+    width: 56px;
+    height: 56px;
+    border: 0;
+    border-radius: 18px;
+    background: linear-gradient(135deg, var(--lv-key-a), var(--lv-key-b));
+    color: var(--lv-key-ink);
+    box-shadow:
+      inset 0 1px 0 var(--lv-sheen),
+      0 14px 30px var(--lv-shade);
+    pointer-events: auto;
   }
 
   /* ── Team sheet ─────────────────────────────────────────── */
@@ -747,10 +694,10 @@ body:has(.lv-app[data-locked]) {
     display: flex;
     flex-direction: column;
     max-width: 520px;
-    height: calc(100dvh - env(safe-area-inset-top) - 28px);
+    height: calc(100dvh - env(safe-area-inset-top) - 26px);
     margin: 0 auto;
     overflow: hidden;
-    border-radius: 26px 26px 0 0;
+    border-radius: 24px 24px 0 0;
     background: var(--lv-page);
     box-shadow: 0 -24px 60px var(--lv-shade);
     color: var(--lv-ink);
@@ -759,12 +706,11 @@ body:has(.lv-app[data-locked]) {
   .lv-sheet-hero {
     position: relative;
     flex: none;
-    min-height: 222px;
+    min-height: 218px;
     padding: 10px 20px 20px;
     overflow: hidden;
     color: var(--livery-ink);
-    background: linear-gradient(135deg, var(--livery-a), var(--livery-b));
-    box-shadow: inset 0 -1px 0 var(--lv-hairline);
+    background: linear-gradient(140deg, var(--livery-a), var(--livery-b));
     touch-action: none;
     user-select: none;
   }
@@ -797,12 +743,8 @@ body:has(.lv-app[data-locked]) {
     border-radius: 50%;
     background: var(--lv-chip-bg);
     color: var(--lv-ink);
-    font-size: 17px;
-    font-weight: 800;
-  }
-
-  .lv-icon-btn[aria-pressed='true'] {
-    color: var(--lv-accent);
+    font-size: 16px;
+    font-weight: 700;
   }
 
   .lv-sheet-id {
@@ -814,24 +756,23 @@ body:has(.lv-app[data-locked]) {
     position: absolute;
     right: -70px;
     top: -34px;
-    opacity: 0.16;
+    opacity: 0.17;
     transform: rotate(-14deg);
     pointer-events: none;
   }
 
   .lv-sheet-pos {
     display: inline-block;
-    font-size: 78px;
+    font-size: 86px;
     font-weight: 900;
-    line-height: 0.84;
-    letter-spacing: -0.03em;
-    transform: skewX(-10deg);
-    font-variant-numeric: tabular-nums;
+    line-height: 0.82;
+    letter-spacing: -0.02em;
+    transform: skewX(-11deg);
   }
 
   .lv-sheet-pos small {
     margin-right: 2px;
-    font-size: 32px;
+    font-size: 34px;
     letter-spacing: 0;
   }
 
@@ -852,22 +793,25 @@ body:has(.lv-app[data-locked]) {
   .lv-sheet-name {
     max-width: calc(100% - 76px);
     margin: 12px 0 0;
-    font-family: var(--font-sans);
-    font-size: 26px;
+    font-family: inherit;
+    font-size: 28px;
     font-weight: 900;
-    line-height: 1.05;
-    letter-spacing: -0.01em;
+    font-stretch: 88%;
+    line-height: 1.02;
+    letter-spacing: -0.015em;
     color: inherit;
   }
 
   .lv-sheet-sub {
-    margin: 6px 0 0;
+    margin: 7px 0 0;
     /* Stated: the design system's `p` rule would otherwise paint it muted
        purple, which disappears on every dark livery. */
     color: inherit;
-    font-size: 12px;
+    font-size: 11.5px;
     font-weight: 700;
-    opacity: 0.82;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    opacity: 0.85;
   }
 
   .lv-sheet-body {
@@ -900,29 +844,29 @@ body:has(.lv-app[data-locked]) {
 
   .lv-placement[aria-selected='true'] {
     border-color: transparent;
-    background: linear-gradient(135deg, var(--lv-score-a), var(--lv-score-b));
+    background: linear-gradient(135deg, var(--lv-key-a), var(--lv-key-b));
     box-shadow: inset 0 1px 0 var(--lv-sheen);
   }
 
   .lv-placement-label {
-    font-size: 10px;
-    font-weight: 800;
-    letter-spacing: 0.12em;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    opacity: 0.82;
+    opacity: 0.85;
   }
 
   .lv-placement-rank {
-    font-size: 24px;
+    font-size: 26px;
     font-weight: 900;
     line-height: 1;
-    transform: skewX(-10deg);
-    font-variant-numeric: tabular-nums;
+    transform: skewX(-11deg);
   }
 
   .lv-figure,
   .lv-stat,
-  .lv-interval {
+  .lv-interval,
+  .lv-sells {
     border: 1px solid var(--lv-hairline);
     border-radius: 16px;
     background: var(--lv-panel);
@@ -934,17 +878,18 @@ body:has(.lv-app[data-locked]) {
 
   .lv-figure-value {
     display: block;
-    margin-top: 4px;
-    font-size: 40px;
+    margin-top: 5px;
+    font-size: 44px;
     font-weight: 900;
-    line-height: 1.05;
+    font-stretch: 78%;
+    line-height: 1;
     letter-spacing: -0.02em;
     font-variant-numeric: tabular-nums;
   }
 
   .lv-leaderbar {
     position: relative;
-    margin-top: 12px;
+    margin-top: 14px;
     padding-top: 10px;
   }
 
@@ -972,9 +917,9 @@ body:has(.lv-app[data-locked]) {
 
   .lv-leaderbar-caption {
     display: block;
-    margin-top: 6px;
+    margin-top: 7px;
     font-size: 11.5px;
-    font-weight: 700;
+    font-weight: 600;
     color: var(--lv-ink-muted);
   }
 
@@ -1017,15 +962,16 @@ body:has(.lv-app[data-locked]) {
 
   .lv-interval-name {
     overflow: hidden;
-    font-size: 14px;
+    font-size: 14.5px;
     font-weight: 800;
     white-space: nowrap;
     text-overflow: ellipsis;
   }
 
   .lv-interval-gap {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 900;
+    font-stretch: 84%;
     font-variant-numeric: tabular-nums;
   }
 
@@ -1049,16 +995,17 @@ body:has(.lv-app[data-locked]) {
   }
 
   .lv-stat .lv-label {
-    font-size: 9.5px;
-    letter-spacing: 0.1em;
+    font-size: 9px;
+    letter-spacing: 0.12em;
   }
 
   .lv-stat-value {
     display: block;
     margin-top: 5px;
     overflow: hidden;
-    font-size: 15.5px;
+    font-size: 16px;
     font-weight: 900;
+    font-stretch: 86%;
     white-space: nowrap;
     text-overflow: ellipsis;
     font-variant-numeric: tabular-nums;
@@ -1068,105 +1015,42 @@ body:has(.lv-app[data-locked]) {
     font-size: 13px;
   }
 
-  .lv-products-head {
-    display: flex;
+  /* ── What they sell ─────────────────────────────────────── */
+
+  .lv-sells {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
     align-items: center;
-    justify-content: space-between;
-    margin: 6px 0 10px;
+    gap: 12px;
+    padding: 12px 14px;
   }
 
-  .lv-sample {
-    padding: 3px 8px;
-    border: 1px solid var(--lv-follow-glow);
-    border-radius: 99px;
-    background: var(--lv-sample-bg);
-    font-size: 9.5px;
-    font-weight: 800;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    color: var(--lv-accent);
-  }
-
-  .lv-products-rail {
-    display: flex;
-    gap: 10px;
-    margin: 0 -16px;
-    padding: 2px 16px 6px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-padding: 0 16px;
-    scrollbar-width: none;
-  }
-
-  .lv-products-rail::-webkit-scrollbar {
-    display: none;
-  }
-
-  .lv-product {
-    flex: none;
-    width: 150px;
-    scroll-snap-align: start;
-  }
-
-  .lv-product-shot {
-    position: relative;
+  .lv-sells-icon {
     display: grid;
     place-items: center;
-    aspect-ratio: 1;
-    border: 1px solid var(--lv-hairline);
-    border-radius: 18px;
-    background: radial-gradient(circle at 50% 38%, var(--lv-panel-strong), var(--lv-panel) 70%);
+    width: 44px;
+    height: 44px;
+    border-radius: 13px;
+    background: linear-gradient(140deg, var(--livery-a), var(--livery-b));
+    color: var(--livery-ink);
   }
 
-  .lv-product-rank {
-    position: absolute;
-    left: 10px;
-    top: 8px;
-    font-size: 13px;
-    font-weight: 900;
-    color: var(--lv-accent);
-    transform: skewX(-10deg);
+  .lv-sells-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
   }
 
-  .lv-product-art {
-    width: 76%;
-    height: 76%;
-    filter: drop-shadow(0 10px 14px var(--lv-shade));
-  }
-
-  .lv-art-body {
-    fill: var(--livery-a);
-  }
-
-  .lv-art-dark {
-    fill: var(--livery-b);
-  }
-
-  .lv-art-label {
-    fill: var(--lv-ink);
-    opacity: 0.88;
-  }
-
-  .lv-art-line {
-    fill: none;
-    stroke: var(--lv-ink);
-    stroke-width: 3;
-    stroke-linecap: round;
-    opacity: 0.55;
-  }
-
-  .lv-product-name {
-    margin-top: 8px;
-    font-size: 13.5px;
-    font-weight: 800;
-  }
-
-  .lv-product-meta {
-    margin-top: 2px;
-    font-size: 11.5px;
-    font-weight: 600;
-    color: var(--lv-ink-muted);
-    font-variant-numeric: tabular-nums;
+  .lv-sells-line {
+    display: -webkit-box;
+    overflow: hidden;
+    font-size: 14.5px;
+    font-weight: 700;
+    line-height: 1.25;
+    /* Two lines, then an ellipsis: the sheet is the place to shorten it. */
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
   }
 
   .lv-sheet-nav {
@@ -1265,7 +1149,7 @@ body:has(.lv-app[data-locked]) {
     background: var(--lv-panel-strong);
     color: var(--lv-ink);
     /* 16px, not less: iOS zooms the page into any smaller input on focus. */
-    font: 600 16px/1 var(--font-sans);
+    font: 600 16px/1 var(--font-live), var(--font-sans);
   }
 
   .lv-search-bar input:focus,
@@ -1315,11 +1199,10 @@ body:has(.lv-app[data-locked]) {
   }
 
   .lv-search-pos {
-    font-size: 17px;
+    font-size: 18px;
     font-weight: 900;
     color: var(--lv-accent);
-    transform: skewX(-10deg);
-    font-variant-numeric: tabular-nums;
+    transform: skewX(-11deg);
   }
 
   .lv-search-name {
@@ -1333,18 +1216,11 @@ body:has(.lv-app[data-locked]) {
   }
 
   .lv-search-name small {
-    font-size: 11px;
-    font-weight: 600;
+    overflow: hidden;
+    font-size: 11.5px;
+    font-weight: 500;
+    text-overflow: ellipsis;
     color: var(--lv-ink-muted);
-  }
-
-  .lv-search-star {
-    width: 44px;
-    height: 44px;
-    border: 0;
-    background: none;
-    font-size: 20px;
-    color: var(--lv-accent);
   }
 
   .lv-search-none {
@@ -1357,22 +1233,16 @@ body:has(.lv-app[data-locked]) {
 
   /* ── Liveries ───────────────────────────────────────────── */
 
-  .lv-livery-1 { --livery-a: var(--lv-1-a); --livery-b: var(--lv-1-b); --livery-ink: var(--lv-1-ink); }
-  .lv-livery-2 { --livery-a: var(--lv-2-a); --livery-b: var(--lv-2-b); --livery-ink: var(--lv-2-ink); }
-  .lv-livery-3 { --livery-a: var(--lv-3-a); --livery-b: var(--lv-3-b); --livery-ink: var(--lv-3-ink); }
-  .lv-livery-4 { --livery-a: var(--lv-4-a); --livery-b: var(--lv-4-b); --livery-ink: var(--lv-4-ink); }
-  .lv-livery-5 { --livery-a: var(--lv-5-a); --livery-b: var(--lv-5-b); --livery-ink: var(--lv-5-ink); }
-  .lv-livery-6 { --livery-a: var(--lv-6-a); --livery-b: var(--lv-6-b); --livery-ink: var(--lv-6-ink); }
-  .lv-livery-7 { --livery-a: var(--lv-7-a); --livery-b: var(--lv-7-b); --livery-ink: var(--lv-7-ink); }
-  .lv-livery-8 { --livery-a: var(--lv-8-a); --livery-b: var(--lv-8-b); --livery-ink: var(--lv-8-ink); }
-  .lv-livery-9 { --livery-a: var(--lv-9-a); --livery-b: var(--lv-9-b); --livery-ink: var(--lv-9-ink); }
-  .lv-livery-10 { --livery-a: var(--lv-10-a); --livery-b: var(--lv-10-b); --livery-ink: var(--lv-10-ink); }
-  .lv-livery-11 { --livery-a: var(--lv-11-a); --livery-b: var(--lv-11-b); --livery-ink: var(--lv-11-ink); }
-  .lv-livery-12 { --livery-a: var(--lv-12-a); --livery-b: var(--lv-12-b); --livery-ink: var(--lv-12-ink); }
-
-  @media (prefers-reduced-motion: reduce) {
-    .lv-live[data-live] .lv-live-dot {
-      animation: none;
-    }
-  }
+  .lv-livery-1 { --livery-a: var(--lv-1-a); --livery-b: var(--lv-1-b); --livery-ink: var(--lv-1-ink); --livery-band: var(--lv-1-band); --livery-band-ink: var(--lv-1-band-ink); }
+  .lv-livery-2 { --livery-a: var(--lv-2-a); --livery-b: var(--lv-2-b); --livery-ink: var(--lv-2-ink); --livery-band: var(--lv-2-band); --livery-band-ink: var(--lv-2-band-ink); }
+  .lv-livery-3 { --livery-a: var(--lv-3-a); --livery-b: var(--lv-3-b); --livery-ink: var(--lv-3-ink); --livery-band: var(--lv-3-band); --livery-band-ink: var(--lv-3-band-ink); }
+  .lv-livery-4 { --livery-a: var(--lv-4-a); --livery-b: var(--lv-4-b); --livery-ink: var(--lv-4-ink); --livery-band: var(--lv-4-band); --livery-band-ink: var(--lv-4-band-ink); }
+  .lv-livery-5 { --livery-a: var(--lv-5-a); --livery-b: var(--lv-5-b); --livery-ink: var(--lv-5-ink); --livery-band: var(--lv-5-band); --livery-band-ink: var(--lv-5-band-ink); }
+  .lv-livery-6 { --livery-a: var(--lv-6-a); --livery-b: var(--lv-6-b); --livery-ink: var(--lv-6-ink); --livery-band: var(--lv-6-band); --livery-band-ink: var(--lv-6-band-ink); }
+  .lv-livery-7 { --livery-a: var(--lv-7-a); --livery-b: var(--lv-7-b); --livery-ink: var(--lv-7-ink); --livery-band: var(--lv-7-band); --livery-band-ink: var(--lv-7-band-ink); }
+  .lv-livery-8 { --livery-a: var(--lv-8-a); --livery-b: var(--lv-8-b); --livery-ink: var(--lv-8-ink); --livery-band: var(--lv-8-band); --livery-band-ink: var(--lv-8-band-ink); }
+  .lv-livery-9 { --livery-a: var(--lv-9-a); --livery-b: var(--lv-9-b); --livery-ink: var(--lv-9-ink); --livery-band: var(--lv-9-band); --livery-band-ink: var(--lv-9-band-ink); }
+  .lv-livery-10 { --livery-a: var(--lv-10-a); --livery-b: var(--lv-10-b); --livery-ink: var(--lv-10-ink); --livery-band: var(--lv-10-band); --livery-band-ink: var(--lv-10-band-ink); }
+  .lv-livery-11 { --livery-a: var(--lv-11-a); --livery-b: var(--lv-11-b); --livery-ink: var(--lv-11-ink); --livery-band: var(--lv-11-band); --livery-band-ink: var(--lv-11-band-ink); }
+  .lv-livery-12 { --livery-a: var(--lv-12-a); --livery-b: var(--lv-12-b); --livery-ink: var(--lv-12-ink); --livery-band: var(--lv-12-band); --livery-band-ink: var(--lv-12-band-ink); }
 }

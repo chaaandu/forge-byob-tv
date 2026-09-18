@@ -77,6 +77,19 @@ export type Team = {
    * footer line; the field is still published and still read by the cards.)
    */
   prevWeekRank?: number
+  /**
+   * What the venture sells, in its own words — `Team Links` col F, published
+   * as a `product` column in `TV_Feed`.
+   *
+   * **Read optionally, like `challengeRevenue` and `prevWeekRank`**, and
+   * deliberately not in `FEED_HEADERS`: the sheet does not publish it today,
+   * and a required column that does not exist throws away every fetch. The
+   * moment the column lands, `/live` starts showing it with no deploy.
+   *
+   * Read by `/live` only. Neither slide prints it — a venture's product is a
+   * sentence, and the wall is figures at six metres.
+   */
+  product?: string
 }
 
 /**

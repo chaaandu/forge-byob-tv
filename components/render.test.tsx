@@ -918,6 +918,7 @@ it('declares every custom property that anything reads', () => {
     'app/weekly/page.tsx',
     'app/podium/page.tsx',
     'app/live/page.tsx',
+    'app/live/layout.tsx',
     'app/live/live.css',
     ...readdirSync('components/live').map((f) => `components/live/${f}`),
   ]
@@ -966,7 +967,13 @@ it('declares every custom property that anything reads', () => {
    * Every one of them is declared the same way, `variable: '--x'` on a
    * `localFont` call, so the layout is the authority and a sixth face is
    * covered the moment it is added. */
-  const layout = readFileSync('app/layout.tsx', 'utf8')
+  /* Both layouts, because `/live` bundles its own face — see
+     `app/live/layout.tsx` for why that page has one this file's wall does
+     not. Read the same way, so a third route with a third face is covered
+     the day it is added. */
+  const layout = ['app/layout.tsx', 'app/live/layout.tsx']
+    .map((file) => readFileSync(file, 'utf8'))
+    .join('\n')
   const external = new Set(
     [...layout.matchAll(/variable:\s*'(--[a-z0-9-]+)'/g)].map((m) => m[1]),
   )

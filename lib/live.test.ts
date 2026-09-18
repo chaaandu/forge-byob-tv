@@ -1,4 +1,4 @@
-import { readFileSync, readdirSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 import { rankForMode } from '@/lib/board'
@@ -81,7 +81,8 @@ describe('liveries and emblems', () => {
     const tokens = readFileSync('app/forge-tokens.css', 'utf8')
     for (let n = 1; n <= LIVERY_COUNT; n += 1) {
       expect(css).toContain(`.lv-livery-${n} {`)
-      for (const part of ['a', 'b', 'ink']) expect(tokens).toContain(`--lv-${n}-${part}:`)
+      for (const part of ['a', 'b', 'ink', 'band', 'band-ink'])
+        expect(tokens).toContain(`--lv-${n}-${part}:`)
     }
   })
 })
@@ -180,12 +181,36 @@ describe('/live source rules', () => {
     }
   })
 
-  // Sample products are invented; a production build must never show them.
-  it('only reaches sample products behind a production guard', () => {
-    const importers = liveFiles.filter((f) => readFileSync(f, 'utf8').includes('sampleProducts('))
-    expect(importers).toEqual(['app/live/page.tsx'])
-    expect(readFileSync('app/live/page.tsx', 'utf8')).toMatch(
-      /process\.env\.NODE_ENV === 'production'\s*\?\s*noProducts/,
-    )
+  /**
+   * **There is no sample data on this page, and that is a rule rather than a
+   * state.** A strip of invented products with invented unit counts shipped
+   * here for a day and was deleted: it rendered beautifully and said false
+   * things about a team, which is the one failure this project is built
+   * around. What a venture sells now comes from the sheet or not at all.
+   */
+  it('invents no product data', () => {
+    for (const file of liveFiles) {
+      expect(strip(readFileSync(file, 'utf8')), file).not.toMatch(/sampleProducts|Sample data/)
+    }
+    expect(existsSync('lib/liveSample.ts')).toBe(false)
+  })
+
+  /**
+   * Archivo is variable on 100–900. A weight outside a face's axis is
+   * **synthesised rather than refused** — the browser smears the outlines —
+   * so the range is read out of the layout that bundles the face, exactly as
+   * `render.test.tsx` does for the wall. A face swapped for one with a
+   * narrower axis fails here the moment the file is replaced.
+   */
+  it('never asks its face for a weight it does not have', () => {
+    const layout = readFileSync('app/live/layout.tsx', 'utf8')
+    const [, lo, hi] = layout.match(/weight:\s*'(\d+)(?:\s+(\d+))?'/)!
+    const css = strip(readFileSync('app/live/live.css', 'utf8'))
+    const weights = [...css.matchAll(/font-weight:\s*(\d{3})/g)].map((m) => Number(m[1]))
+    expect(weights.length).toBeGreaterThan(10)
+    for (const weight of weights) {
+      expect(weight).toBeGreaterThanOrEqual(Number(lo))
+      expect(weight).toBeLessThanOrEqual(Number(hi ?? lo))
+    }
   })
 })

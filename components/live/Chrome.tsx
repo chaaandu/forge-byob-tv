@@ -4,35 +4,23 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
 import { Emblem } from '@/components/live/Emblem'
-import { formatRupees } from '@/lib/format'
 import { BOARD_KEYS, boardLabel, liveryFor, matchesQuery, type BoardKey, type Standing } from '@/lib/live'
 import { nameOf } from '@/lib/team'
 import type { BoardMode } from '@/lib/types'
 
-/** A fetch younger than this is live; older is shown as a time. Three polls' worth. */
-const LIVE_FOR_MS = 3 * 60_000
+/**
+ * The page's own furniture: masthead, board tabs, the search key and the
+ * search sheet.
+ *
+ * **There is no live chip and no follow button.** Both were here and both
+ * were removed by decision. The chip was a status light on a page that polls
+ * itself every sixty seconds; what it actually said — how fresh the figures
+ * are — is one line in the footer now, where it is provenance rather than
+ * chrome. Following a team was a star, a pinned bar and a `localStorage` key
+ * for something search already does in two taps.
+ */
 
-export function LiveHeader({
-  subtitle,
-  fetchedAt,
-  refreshing,
-  onRefresh,
-}: {
-  subtitle: React.ReactNode
-  fetchedAt: number | null
-  refreshing: boolean
-  onRefresh: () => void
-}) {
-  const now = useNow(15_000)
-  const live = fetchedAt !== null && now - fetchedAt < LIVE_FOR_MS
-  const status = refreshing
-    ? 'Syncing'
-    : live
-      ? 'Live'
-      : fetchedAt !== null
-        ? `Updated ${new Date(fetchedAt).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' })}`
-        : 'Offline'
-
+export function LiveHeader({ subtitle }: { subtitle: React.ReactNode }) {
   return (
     <header className="lv-hero">
       <div className="lv-topline" aria-hidden="true">
@@ -42,23 +30,14 @@ export function LiveHeader({
         </span>
         <span className="lv-stripes lv-stripes-r" />
       </div>
-      <button
-        type="button"
-        className="lv-live"
-        data-live={live && !refreshing ? '' : undefined}
-        onClick={onRefresh}
-        aria-label={`${status}. Tap to refresh`}
-      >
-        <span className="lv-live-dot" aria-hidden="true" />
-        {status}
-      </button>
       <motion.h1
         className="lv-title"
         initial={{ opacity: 0, x: -24 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
       >
-        <span className="lv-title-skew">Team Standings</span>
+        <span className="lv-title-line">Team</span>
+        <span className="lv-title-line">Standings</span>
       </motion.h1>
       <p className="lv-subtitle">{subtitle}</p>
     </header>
@@ -101,54 +80,14 @@ export function BoardTabs({
   )
 }
 
-/** The bar pinned to the bottom: your team if you follow one, and search. */
-export function Dock({
-  followed,
-  onOpen,
-  onSearch,
-}: {
-  followed: Standing | null
-  onOpen: (teamId: string) => void
-  onSearch: () => void
-}) {
+/** The one floating control: find a team. */
+export function SearchKey({ onSearch }: { onSearch: () => void }) {
   return (
     <div className="lv-dock">
-      <AnimatePresence mode="popLayout" initial={false}>
-        {followed ? (
-          <motion.button
-            key={followed.team.teamId}
-            type="button"
-            className={`lv-dock-team lv-livery-${liveryFor(followed.team.teamId)}`}
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 30, opacity: 0 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={() => onOpen(followed.team.teamId)}
-          >
-            <span className="lv-dock-pos">P{followed.rank}</span>
-            <Emblem team={followed.team} size={22} />
-            <span className="lv-dock-name">{nameOf(followed.team)}</span>
-            <span className="lv-dock-fig">{formatRupees(followed.figure)}</span>
-          </motion.button>
-        ) : (
-          <motion.button
-            key="find"
-            type="button"
-            className="lv-dock-find"
-            initial={{ y: 30, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 30, opacity: 0 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={onSearch}
-          >
-            <span aria-hidden="true">☆</span> Follow your team
-          </motion.button>
-        )}
-      </AnimatePresence>
       <motion.button
         type="button"
         className="lv-dock-search"
-        whileTap={{ scale: 0.9 }}
+        whileTap={{ scale: 0.92 }}
         aria-label="Search teams"
         onClick={onSearch}
       >
@@ -161,16 +100,12 @@ export function Dock({
 export function SearchSheet({
   open,
   standings,
-  followed,
   onPick,
-  onFollow,
   onClose,
 }: {
   open: boolean
   standings: readonly Standing[]
-  followed: string | null
   onPick: (teamId: string) => void
-  onFollow: (teamId: string | null) => void
   onClose: () => void
 }) {
   const [query, setQuery] = useState('')
@@ -231,17 +166,8 @@ export function SearchSheet({
                   </span>
                   <span className="lv-search-name">
                     {nameOf(s.team)}
-                    <small>{s.team.teamId}</small>
+                    {s.team.product ? <small>{s.team.product}</small> : null}
                   </span>
-                </button>
-                <button
-                  type="button"
-                  className="lv-search-star"
-                  aria-pressed={followed === s.team.teamId}
-                  aria-label={followed === s.team.teamId ? 'Unfollow' : 'Follow'}
-                  onClick={() => onFollow(followed === s.team.teamId ? null : s.team.teamId)}
-                >
-                  {followed === s.team.teamId ? '★' : '☆'}
                 </button>
               </li>
             ))}
@@ -260,14 +186,4 @@ function SearchIcon() {
       <path d="M15.5 15.5 21 21" />
     </svg>
   )
-}
-
-/** A clock for the live chip. Client-only: the page prerenders with no fetch time, so nothing here runs on the server. */
-function useNow(everyMs: number): number {
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), everyMs)
-    return () => clearInterval(timer)
-  }, [everyMs])
-  return now
 }

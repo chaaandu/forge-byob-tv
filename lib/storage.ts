@@ -38,8 +38,6 @@ export const KEYS = {
   csv: `${PREFIX}.csv`,
   board: (board: string) => `${PREFIX}.board.${board}`,
   queue: (board: string) => `${PREFIX}.queue.${board}`,
-  /** `/live`'s followed team. One string, written only when a person taps a star. */
-  follow: `${PREFIX}.live.follow`,
 } as const
 
 /**
@@ -196,35 +194,4 @@ export function takeKick(board: string): OvertakeEvent | null {
   if (next === undefined) return null
   writeJson(KEYS.queue(board), queued.slice(1))
   return next
-}
-
-/**
- * The team a phone follows on `/live`, or `null`.
- *
- * A bare id rather than JSON, and it is only ever *read as a hint*: an id the
- * feed no longer carries simply matches nothing, so there is no shape to
- * validate and nothing to repair.
- */
-export function readFollowed(): string | null {
-  try {
-    const value = localStorage.getItem(KEYS.follow)
-    return value === null || value.trim() === '' ? null : value
-  } catch {
-    return null
-  }
-}
-
-/**
- * Swallowed, unlike `writeJson`, and the difference is who is holding the
- * device. A wall's failed write is a fault in an unattended system; a phone in
- * private mode refusing a star is a person who still gets their star for the
- * rest of the visit.
- */
-export function writeFollowed(teamId: string | null): void {
-  try {
-    if (teamId === null) localStorage.removeItem(KEYS.follow)
-    else localStorage.setItem(KEYS.follow, teamId)
-  } catch {
-    // Private mode. The in-memory state still holds for this visit.
-  }
 }

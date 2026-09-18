@@ -11,14 +11,24 @@ import { nameOf } from '@/lib/team'
 /**
  * The podium and the standings list.
  *
+ * ── The row is one object in one colour, edge to edge ──
+ *
+ * F1's standings graphic has no margins: a position numeral on the dark, a
+ * slab in the team's colour, and the points block sitting **on top of** that
+ * slab rather than beside it. This is that. The slab spans to the right edge
+ * of the screen and the money band is laid over its end with a raked left
+ * edge, so the colour runs underneath and the row never stops short.
+ *
+ * The band wears the team's colour too — see §8 of `forge-tokens.css` for why
+ * it is the *opposite* value to the slab rather than a darker version of it.
+ *
  * ── Motion `layout` is used here, and the wall's ban on it does not apply ──
  *
  * `render.test.tsx` forbids `layout` in the wall's board tree because a figure
  * ticking up by ₹200 would nudge a card on a display where movement must mean
- * a rank changed. On `/live` the rows are keyed by team and `layout="position"`
- * animates *only* a change of slot — a figure changing inside a row does not
- * move it — and the slot changes when a person switches board or a rank
- * changes hands between polls. Both are things that happened.
+ * a rank changed. Here rows are keyed by team and `layout="position"` animates
+ * only a change of *slot* — which happens when a person switches board, or a
+ * rank changes hands between polls. Both are things that happened.
  *
  * Rows are `<li>` in an `<ol>`, not table rows: `AGENTS.md` records that a
  * `<tr>` ignores the layout transform.
@@ -102,13 +112,11 @@ export function Podium({
 export function Standings({
   rest,
   boardKey,
-  followed,
   arriving,
   onOpen,
 }: {
   rest: readonly Standing[]
   boardKey: BoardKey
-  followed: string | null
   arriving: boolean
   onOpen: (teamId: string) => void
 }) {
@@ -120,7 +128,6 @@ export function Standings({
             key={standing.team.teamId}
             standing={standing}
             boardKey={boardKey}
-            followed={standing.team.teamId === followed}
             // The board arriving staggers in; after that, rows only travel.
             delay={arriving ? Math.min(index, 12) * 0.04 : 0}
             arriving={arriving}
@@ -135,21 +142,28 @@ export function Standings({
 function Row({
   standing,
   boardKey,
-  followed,
   delay,
   arriving,
   onOpen,
 }: {
   standing: Standing
   boardKey: BoardKey
-  followed: boolean
   delay: number
   arriving: boolean
   onOpen: (teamId: string) => void
 }) {
   const { team, rank, figure } = standing
   const climb = climbOf(boardKey, standing)
-  const quiet = figure <= 0
+
+  /**
+   * One line under the name, and **the team id is not a candidate for it.**
+   * A code says nothing to the person reading — the day's takings do, and
+   * what the venture sells does. Today's figure wins when there is one,
+   * because it is the news; the product is what the row says the rest of the
+   * time. A team with neither shows nothing, and the name centres itself.
+   */
+  const today = boardKey !== 'today' && team.todayRevenue > 0
+  const meta = today ? `+${formatRupees(team.todayRevenue)} today` : (team.product ?? '')
 
   return (
     <motion.li
@@ -162,34 +176,32 @@ function Row({
     >
       <motion.button
         type="button"
-        whileTap={{ scale: 0.975 }}
+        whileTap={{ scale: 0.985 }}
         className={`lv-row lv-livery-${liveryFor(team.teamId)}`}
-        data-followed={followed ? '' : undefined}
-        data-quiet={quiet ? '' : undefined}
+        data-quiet={figure <= 0 ? '' : undefined}
         onClick={() => onOpen(team.teamId)}
       >
         <span className="lv-pos">{rank}</span>
         <span className="lv-slab">
-          <Emblem team={team} size={30} className="lv-slab-mark" />
-          <span className="lv-slab-text">
-            <span className="lv-name">{nameOf(team)}</span>
-            <span className="lv-meta">
-              {climb !== null ? <Climb climb={climb} /> : null}
-              {boardKey !== 'today' && team.todayRevenue > 0 ? (
-                <span className="lv-meta-today">+{formatRupees(team.todayRevenue)} today</span>
-              ) : (
-                <span className="lv-meta-id">{team.ventureName ? team.teamId : 'Unnamed venture'}</span>
+          <Emblem team={team} size={104} className="lv-slab-ghost" />
+          <span className="lv-slab-body">
+            <Emblem team={team} size={30} className="lv-slab-mark" />
+            <span className="lv-slab-text">
+              <span className="lv-name">{nameOf(team)}</span>
+              {meta === '' && climb === null ? null : (
+                <span className="lv-meta">
+                  {climb !== null ? <Climb climb={climb} /> : null}
+                  {meta === '' ? null : (
+                    <span className="lv-meta-text" data-today={today ? '' : undefined}>
+                      {meta}
+                    </span>
+                  )}
+                </span>
               )}
             </span>
           </span>
-          <Emblem team={team} size={96} className="lv-slab-ghost" />
-          {followed ? (
-            <span className="lv-follow-flag" aria-label="Following">
-              ★
-            </span>
-          ) : null}
         </span>
-        <span className="lv-score">
+        <span className="lv-band">
           <CountUp value={figure} from={arriving ? 0 : undefined} />
         </span>
       </motion.button>

@@ -146,6 +146,52 @@ export function shareOf(standings: readonly Standing[], teamId: TeamId): number 
   return self === undefined ? null : Math.max(0, self.figure) / total
 }
 
+/**
+ * What kind of thing a venture sells, guessed from its own words.
+ *
+ * `product` is free text a team typed into its workbook, so this is a reading
+ * of *wording*, not a taxonomy: the first list whose word appears wins, and
+ * anything unrecognised is `other`, which draws a neutral tag. A wrong icon
+ * would be a small lie about a venture; a neutral one says only "a product".
+ *
+ * Order matters. `hair oil` is beauty and `chilli oil` is food, so the
+ * specific phrases are matched before the loose words, and food is asked
+ * after fragrance so a `camphor` diffuser is not read as a snack.
+ */
+export type Sells =
+  | 'snack'
+  | 'bakery'
+  | 'drink'
+  | 'beauty'
+  | 'fragrance'
+  | 'apparel'
+  | 'jewellery'
+  | 'home'
+  | 'stationery'
+  | 'craft'
+  | 'other'
+
+const SELLS: readonly (readonly [Sells, readonly string[]])[] = [
+  ['beauty', ['hair oil', 'face', 'skin', 'serum', 'lip', 'aloe', 'neem', 'soap', 'balm', 'shampoo', 'scrub', 'mist']],
+  ['fragrance', ['perfume', 'attar', 'fragrance', 'candle', 'incense', 'camphor', 'wax melt', 'scent', 'diffuser', 'oud']],
+  ['drink', ['coffee', 'tea ', 'tea,', 'chai', 'juice', 'kombucha', 'brew', 'drink', 'beverage', 'smoothie', 'shake', 'lemonade']],
+  ['bakery', ['cake', 'cookie', 'brownie', 'bread', 'sourdough', 'bake', 'chocolate', 'dessert', 'sweet', 'mithai', 'laddoo', 'granola']],
+  ['snack', ['chips', 'namkeen', 'makhana', 'peanut', 'snack', 'pickle', 'masala', 'chilli', 'spice', 'millet', 'protein', 'jam', 'honey']],
+  ['jewellery', ['jewel', 'earring', 'silver', 'ring', 'bead', 'pendant', 'charm', 'anklet', 'bracelet']],
+  ['apparel', ['shirt', 'tee', 'apparel', 'wear', 'stole', 'scarf', 'denim', 'linen', 'sock', 'dress', 'scrunchie', 'clothing']],
+  ['home', ['planter', 'mug', 'ceramic', 'decor', 'cushion', 'napkin', 'coaster', 'terracotta', 'pottery', 'lamp', 'home']],
+  ['stationery', ['notebook', 'paper', 'sticker', 'journal', 'print', 'card', 'poster']],
+  ['craft', ['macrame', 'crochet', 'resin', 'handmade', 'craft', 'knot', 'art', 'bamboo', 'upcycled', 'tote', 'pouch', 'bag']],
+]
+
+export function sellsCategory(product: string): Sells {
+  const text = product.toLowerCase()
+  for (const [category, words] of SELLS) {
+    if (words.some((word) => text.includes(word))) return category
+  }
+  return 'other'
+}
+
 /** Case- and accent-insensitive search over venture name and team id. */
 export function matchesQuery(team: Team, query: string): boolean {
   const fold = (text: string) =>

@@ -863,77 +863,88 @@
    and not on the rotation, so the wall's still-board rules are not its rules
    — but this file's rule is: every colour the phone draws is named here, and
    nothing under `app/live/` or `components/live/` spells one out.
+   `lib/live.test.ts` fails on a hex or an `rgba(` in either place.
 
    ── Twelve liveries, because F1 teams wear a colour ──
 
    A venture is assigned one by hashing its team id (`liveryFor` in
    `lib/live.ts`), so it keeps its colour as it climbs, exactly as a mark's
-   tint does on the wall. Each livery is a left-to-right pair and **its own
-   ink**: some are light enough to need dark type, as Mercedes' teal and
-   Haas' white do in the references. Measured, ink against *both* stops:
+   tint does on the wall. Each is a left-to-right pair with **its own ink**:
+   some are light enough to need dark type, as Mercedes' teal and Haas' white
+   do in the references.
 
-     raspberry  white   4.91 · 9.48      teal     aubergine  10.93 · 7.19
-     crimson    white   4.73 · 9.71      azure    white       4.56 · 8.82
-     tangerine  aub.    8.05 · 5.28      navy     white      10.54 · 16.24
-     gold       aub.   12.89 · 9.12      orchid   aubergine  11.37 · 7.25
-     coral      white   4.97 · 7.37      pearl    aubergine  17.30 · 10.83
-     carbon     white  11.71 · 18.88     copper   white       4.64 · 10.05
+   ── And each carries its own money band ──
 
-   **No violet livery, and no green one.** Violet is the score band's colour,
-   and a violet slab beside a violet band is one object with a seam in it.
-   Green is Mesa's parent brand; §7's note on the podium's second place has
-   the whole argument.
+   The figure used to sit on one violet band down the whole board, which is
+   what F1's red points column does. Asked to take the row's colour instead,
+   so every row is now one object in one hue: slab, then band.
 
-   Navy and carbon sit within 1.8:1 of the page, so every slab carries
-   `--lv-sheen` along its top edge — the only thing giving those two an edge
-   in the dark.
+   **The band is the maximum value step from the slab, not simply a darker
+   version of it.** A dark livery — navy, carbon, crimson — given a darker
+   band produces a hole at the end of the row rather than a block, and five of
+   the twelve measured under 1.4:1 against the page that way. So a dark livery
+   gets a *light* band with dark ink and a bright one gets a deep band with
+   white ink. Measured, ink against band and the band's step against the slab's
+   own end:
+
+     raspberry  7.14 · 4.31    azure   8.61 · 5.13    coral    7.43 · 3.96
+     crimson    7.59 · 4.79    navy    8.91 · 7.80    pearl    8.33 · 4.76
+     tangerine 10.60 · 2.95    orchid  9.17 · 3.51    carbon  12.35 · 12.35
+     gold       8.31 · 4.00    teal    9.25 · 3.51    copper   8.72 · 5.56
+
+   **No violet livery and no green one.** Violet is the chrome — tabs, podium
+   steps, the search key — and the board would blur into it. Green is Mesa's
+   parent brand; §7's note on the podium's second place has the argument.
+
+   Rows are full-bleed, so a band no longer has to separate itself from the
+   page: it ends at the edge of the screen. What it does have to do is step
+   away from the slab it touches, which is the second column above.
    ───────────────────────────────────────────────────────────────────────── */
 :root {
-  --lv-page: var(--aubergine-900);
-  --lv-page-deep: var(--aubergine-950);
+  --lv-page: var(--aubergine-950);
+  --lv-page-lift: var(--aubergine-900);
   --lv-panel: rgba(255, 255, 255, 0.05);
   --lv-panel-strong: rgba(255, 255, 255, 0.09);
   --lv-hairline: rgba(255, 255, 255, 0.1);
-  --lv-sheen: rgba(255, 255, 255, 0.22);
-  --lv-shade: rgba(10, 5, 20, 0.55);
-  --lv-scrim: rgba(8, 4, 16, 0.62);
   --lv-hairline-strong: rgba(255, 255, 255, 0.22);
-  --lv-glow: rgba(124, 77, 204, 0.38);
-  /* Dark enough that white type on it reads over every livery, pearl
-     included — the podium's name band and the climb chips sit on it. */
-  --lv-chip-bg: rgba(14, 7, 25, 0.78);
-  --lv-follow-glow: rgba(228, 167, 243, 0.55);
-  --lv-sample-bg: rgba(228, 167, 243, 0.14);
-  --lv-glass: rgba(21, 11, 38, 0.9);
+  --lv-sheen: rgba(255, 255, 255, 0.22);
+  --lv-shade: rgba(6, 3, 12, 0.6);
+  --lv-scrim: rgba(6, 3, 12, 0.68);
+  --lv-glass: rgba(14, 7, 25, 0.92);
+  --lv-glow: rgba(124, 77, 204, 0.32);
   --lv-ink: var(--white);
   --lv-ink-muted: var(--mint-300); /* 10.11:1 on the page */
   --lv-ink-faint: var(--royal-300); /* 4.56:1 — labels only, never a figure */
-  --lv-accent: var(--orchid); /* 10.04:1 — the position numerals */
+  --lv-accent: var(--orchid); /* 10.04:1 */
   --lv-stripe-a: var(--vivid-violet);
   --lv-stripe-b: var(--orchid);
+  /* Dark enough that white type on it reads over every livery, pearl
+     included — the podium's name band sits on it. */
+  --lv-chip-bg: rgba(10, 5, 20, 0.82);
 
-  /* The score band: F1's red points column, in Forge's one high-energy
-     colour. White on both stops, 4.65 · 8.33:1. */
-  --lv-score-a: #8a57e0;
-  --lv-score-b: #5d36a3;
-  --lv-score-ink: var(--white);
+  /* The chrome: tabs, podium steps, the search key. Forge's one high-energy
+     colour, and the only violet left on the board now the rows wear their
+     own. White on both stops, 4.65 · 8.33:1. */
+  --lv-key-a: #8a57e0;
+  --lv-key-b: #5d36a3;
+  --lv-key-ink: var(--white);
 
   --lv-up: #62dce8; /* a climb — cyan, in the 180-225° band §7 maps as open; not Mesa green */
   --lv-down: #ff7a93; /* a fall — 7.63:1 */
-  --lv-live: #ff4d6d;
 
   --lv-ink-dark: var(--aubergine-900);
 
-  --lv-1-a: #d81b69;  --lv-1-b: #8a0c43;  --lv-1-ink: var(--white);          /* raspberry */
-  --lv-2-a: #e0241b;  --lv-2-b: #8c0a08;  --lv-2-ink: var(--white);          /* crimson */
-  --lv-3-a: #ff8a2b;  --lv-3-b: #e0600a;  --lv-3-ink: var(--lv-ink-dark);    /* tangerine */
-  --lv-4-a: #ffcf4a;  --lv-4-b: #f0a51c;  --lv-4-ink: var(--lv-ink-dark);    /* gold */
-  --lv-5-a: #46d9d1;  --lv-5-b: #1fb0b8;  --lv-5-ink: var(--lv-ink-dark);    /* teal */
-  --lv-6-a: #2f6fec;  --lv-6-b: #1a3fb0;  --lv-6-ink: var(--white);          /* azure */
-  --lv-7-a: #27358f;  --lv-7-b: #111a52;  --lv-7-ink: var(--white);          /* navy */
-  --lv-8-a: #f0b3ff;  --lv-8-b: #d77cf0;  --lv-8-ink: var(--lv-ink-dark);    /* orchid */
-  --lv-9-a: #d42a4a;  --lv-9-b: #a8173a;  --lv-9-ink: var(--white);          /* coral */
-  --lv-10-a: #f7f3fb; --lv-10-b: #c9c0d6; --lv-10-ink: var(--lv-ink-dark);   /* pearl */
-  --lv-11-a: #3a3645; --lv-11-b: #121017; --lv-11-ink: var(--white);         /* carbon */
-  --lv-12-a: #b9592b; --lv-12-b: #6f2f10; --lv-12-ink: var(--white);         /* copper */
+  /* livery:     slab start     slab end       money band       band ink */
+  --lv-1-a: #d81b69;  --lv-1-b: #8a0c43;  --lv-1-band: #ff8ab5;  --lv-1-band-ink: #4a0524;  --lv-1-ink: var(--white);        /* raspberry */
+  --lv-2-a: #e0241b;  --lv-2-b: #8c0a08;  --lv-2-band: #ff9b93;  --lv-2-band-ink: #4f0705;  --lv-2-ink: var(--white);        /* crimson */
+  --lv-3-a: #ff8a2b;  --lv-3-b: #e0600a;  --lv-3-band: #6d2a00;  --lv-3-band-ink: var(--white);  --lv-3-ink: var(--lv-ink-dark);  /* tangerine */
+  --lv-4-a: #ffcf4a;  --lv-4-b: #f0a51c;  --lv-4-band: #6d4600;  --lv-4-band-ink: var(--white);  --lv-4-ink: var(--lv-ink-dark);  /* gold */
+  --lv-5-a: #46d9d1;  --lv-5-b: #1fb0b8;  --lv-5-band: #0b4f57;  --lv-5-band-ink: var(--white);  --lv-5-ink: var(--lv-ink-dark);  /* teal */
+  --lv-6-a: #2f6fec;  --lv-6-b: #1a3fb0;  --lv-6-band: #a9c6ff;  --lv-6-band-ink: #0c235e;  --lv-6-ink: var(--white);        /* azure */
+  --lv-7-a: #27358f;  --lv-7-b: #111a52;  --lv-7-band: #9db0ff;  --lv-7-band-ink: #080f36;  --lv-7-ink: var(--white);        /* navy */
+  --lv-8-a: #f0b3ff;  --lv-8-b: #d77cf0;  --lv-8-band: #6f2489;  --lv-8-band-ink: var(--white);  --lv-8-ink: var(--lv-ink-dark);  /* orchid */
+  --lv-9-a: #d42a4a;  --lv-9-b: #a8173a;  --lv-9-band: #ffa5b4;  --lv-9-band-ink: #5c0a20;  --lv-9-ink: var(--white);        /* coral */
+  --lv-10-a: #f7f3fb; --lv-10-b: #c9c0d6; --lv-10-band: #514a66; --lv-10-band-ink: var(--white); --lv-10-ink: var(--lv-ink-dark); /* pearl */
+  --lv-11-a: #3a3645; --lv-11-b: #121017; --lv-11-band: #d3cfdd; --lv-11-band-ink: #121017; --lv-11-ink: var(--white);       /* carbon */
+  --lv-12-a: #b9592b; --lv-12-b: #6f2f10; --lv-12-band: #f0b48d; --lv-12-band-ink: #3d1806; --lv-12-ink: var(--white);       /* copper */
 }

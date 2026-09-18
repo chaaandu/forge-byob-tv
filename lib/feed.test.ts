@@ -159,6 +159,43 @@ describe('venture names', () => {
   })
 })
 
+describe('the product column', () => {
+  const head = 'team_id,venture_name,total_revenue,week_revenue,today_revenue,total_units'
+
+  /**
+   * Read optionally and **deliberately not in `FEED_HEADERS`**: the live sheet
+   * does not publish it yet, and a required column that does not exist throws
+   * away every fetch. `/live` shows what a venture sells the moment the column
+   * lands, with no deploy.
+   */
+  it('is absent, not empty, when the sheet has no such column', () => {
+    const rows = parseTeams([head, 'VBC101,Dosa Crisps,1,1,1,1'].join('\n'))
+    expect(rows[0].product).toBeUndefined()
+  })
+
+  it('carries what the team typed, trimmed', () => {
+    const rows = parseTeams(
+      [`${head},product`, 'VBC101,Dosa Crisps,1,1,1,1,"  Ragi chips, baked  "'].join('\n'),
+    )
+    expect(rows[0].product).toBe('Ragi chips, baked')
+  })
+
+  // The same reasoning as the venture-name placeholder above: the template's
+  // own words are not an answer, and printing them would look like a wall
+  // nobody is looking after.
+  it('treats the workbook placeholder and a blank cell as no answer', () => {
+    const rows = parseTeams(
+      [
+        `${head},product`,
+        'VBC101,Dosa Crisps,1,1,1,1,Type your product here',
+        'VBC102,ROOH,1,1,1,1,',
+      ].join('\n'),
+    )
+    expect(rows[0].product).toBeUndefined()
+    expect(rows[1].product).toBeUndefined()
+  })
+})
+
 describe('parseCohort', () => {
   it('reads every key', () => {
     const parsed = parseCohort(cohortCsv(cohort({ current_open_week: '4' })))
