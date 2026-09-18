@@ -887,12 +887,23 @@ body:has(.lv-app[data-locked]) {
     -webkit-mask-image: linear-gradient(180deg, black 78%, transparent 100%);
   }
 
-  /* The shadow belongs to a photograph, which is opaque and has an edge. On
-     the translucent silhouette it drew a dark hump under the page's own
-     colour, which looked like a fault rather than a placeholder. */
-  .lv-person:has(img) {
-    filter: drop-shadow(0 6px 10px var(--lv-shade));
-  }
+  /* ── No shadow under a cutout, and that took three tries ──
+   *
+   * It began as `0 6px 10px var(--lv-shade)` — a wide 60%-black blur under
+   * every figure. Four of those, overlapping, laid a grey rectangle across
+   * the livery that read as background the removal had missed: measured on
+   * the running page, the colour between two heads was (191, 93, 29) against
+   * (243, 121, 30) two centimetres away. Tightening it to a sideways cast
+   * halved the problem and kept it.
+   *
+   * The cutouts are opaque and stand on flat colour, so the shadow was
+   * carrying nothing except the appearance of a botched mask. Removing it
+   * makes the ground exactly the livery — checked by sampling the same two
+   * points, which now differ by 6/255 of gradient and nothing else.
+   *
+   * The alpha itself was never the problem: `nirmalya-sah.webp` is 33.7%
+   * fully clear, 64.4% solid, and 1% edge. If a halo ever does appear, that
+   * is where to look — not here. */
 
   .lv-person:first-child {
     margin-left: 0;
