@@ -34,46 +34,11 @@ import sys
 import time
 from pathlib import Path
 
-import cv2
-import numpy as np
-from PIL import Image, ImageFilter, ImageOps
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-ROOT = Path(__file__).resolve().parent.parent
-OUT = ROOT / "public" / "people"
-TMP = Path("/tmp/headshot-original.jpg")
-# The cutout, not a thumbnail: wide enough for shoulders, tall enough to run
-# off the bottom of the frame the way a line-up card does.
-WIDTH = 330
-HEIGHT = 440
-QUALITY = 84
+from PIL import Image, ImageOps
 
-# ── The crop is found, not assumed ──
-#
-# **These are not headshots.** The shoot is environmental portraits: the
-# student standing, half the frame behind them, shot at 6000x4000. A square
-# taken from the middle — which is what a headshot pipeline does, and what the
-# first run of this script did — produces a person the size of a thumbnail
-# inside their own photograph. Measured on the first three: the face was about
-# 7% of the crop's height.
-#
-# So YuNet finds the face and the square is built around it. The model is
-# ~230KB and is fetched on first run rather than committed: it is a tool this
-# project uses, not a thing this project ships.
-YUNET = Path("/tmp/yunet-face.onnx")
-YUNET_URL = (
-    "https://media.githubusercontent.com/media/opencv/opencv_zoo/main/models/"
-    "face_detection_yunet/face_detection_yunet_2023mar.onnx"
-)
-# ── One scale for everybody ──
-#
-# The students were shot at different distances, so a fixed crop would give a
-# line-up of people at four different sizes — which reads as a mistake rather
-# than a group. Every crop is therefore measured **in face widths**: the frame
-# is 3.4 faces across and 4.6 faces tall, with the eyes a fifth of the way
-# down. Heads then come out the same size whoever took two steps back.
-FACE_W = 3.4
-FACE_H = 4.6
-EYE_LINE = 0.22
+from cutout import QUALITY, cut_out, detector, face_box, portrait
 
 FOLDER = (
     "https://www.dropbox.com/scl/fo/m36ozbh9jrqx0xerpsb5d/AAw7rl67gtYNEN0lnT1Co4o"
@@ -117,71 +82,6 @@ def fetch(slot: str) -> bool:
     return False
 
 
-def detector() -> cv2.FaceDetectorYN:
-    if not YUNET.exists():
-        print("fetching the face model …")
-        subprocess.run(["curl", "-sSL", "-o", str(YUNET), YUNET_URL], check=True)
-    return cv2.FaceDetectorYN.create(str(YUNET), "", (320, 320), 0.6, 0.3, 5000)
-
-
-def face_box(model: cv2.FaceDetectorYN, image: Image.Image) -> tuple[int, int, int, int] | None:
-    """The largest face in the frame, as (x, y, w, h) in the image's own pixels."""
-    # Detection runs on a downscaled copy: a 6000px frame is slow and the model
-    # is trained near 320px anyway.
-    scale = 1024 / max(image.size)
-    small = image.resize((int(image.width * scale), int(image.height * scale)), Image.BILINEAR)
-    frame = cv2.cvtColor(np.array(small), cv2.COLOR_RGB2BGR)
-    model.setInputSize((frame.shape[1], frame.shape[0]))
-    _, faces = model.detect(frame)
-    if faces is None or len(faces) == 0:
-        return None
-    x, y, w, h = max(faces, key=lambda f: f[2] * f[3])[:4]
-    return int(x / scale), int(y / scale), int(w / scale), int(h / scale)
-
-
-def portrait(image: Image.Image, box: tuple[int, int, int, int] | None) -> Image.Image | None:
-    """Head and shoulders, scaled off the face so everyone matches."""
-    if box is None:
-        return None
-    width, height = image.size
-    x, y, w, h = box
-    cw = int(w * FACE_W)
-    ch = int(cw * HEIGHT / WIDTH)
-    cx = x + w // 2
-    cy = y + h // 2
-    left = cx - cw // 2
-    top = int(cy - ch * EYE_LINE)
-    # Clamp into the frame, keeping the box's size — a cutout that shrank at
-    # the edge of a photograph would break the one-scale rule above.
-    left = max(0, min(width - cw, left)) if cw <= width else 0
-    top = max(0, min(height - ch, top)) if ch <= height else 0
-    return image.crop((left, top, left + cw, top + ch)).resize((WIDTH, HEIGHT), Image.LANCZOS)
-
-
-def cut_out(image: Image.Image) -> Image.Image:
-    """
-    The background removed, so the line-up is a group rather than four framed
-    pictures.
-
-    `rembg`'s human-segmentation model, which is trained on exactly this —
-    a person, a room behind them. The alpha is eroded by a pixel and blurred
-    by one more: the raw matte leaves a bright halo of the office wall around
-    the hair, and on a dark header that halo is the first thing the eye finds.
-    """
-    from rembg import new_session, remove
-
-    global _SESSION
-    if _SESSION is None:
-        _SESSION = new_session("u2net_human_seg")
-    cut = remove(image, session=_SESSION, post_process_mask=True)
-    alpha = cut.getchannel("A").filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.8))
-    cut.putalpha(alpha)
-    return cut
-
-
-_SESSION = None
-
-
 def main() -> int:
     if len(sys.argv) < 2:
         print(__doc__)
@@ -211,13 +111,13 @@ def main() -> int:
             with Image.open(TMP) as raw:
                 image = ImageOps.exif_transpose(raw).convert("RGB")
             box = face_box(model, image)
-            crop = portrait(image, box)
-            if crop is None:
+            if box is None:
                 # No face, no cutout. A guessed crop of a person is worse than
                 # the initials the page already draws.
                 faceless.append(f"{team} {name} (slot {slot})")
                 TMP.unlink(missing_ok=True)
                 continue
+            crop = portrait(image, box)
             target.parent.mkdir(parents=True, exist_ok=True)
             # No `exif=`: the camera, the time and any GPS stay behind.
             cut_out(crop).save(target, "WEBP", quality=QUALITY, method=6, lossless=False)
