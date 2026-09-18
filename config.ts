@@ -378,12 +378,14 @@ export const LOGOS: readonly TeamId[] = []
  * Students who have a photograph committed at
  * `public/people/<TEAM_ID>/<name-slug>.webp`.
  *
- * ── IT IS EMPTY, AND EVERY LINE-UP IS DRAWN PORTRAITS TODAY ──
+ * ── 105 of the 117 competing students, and the other twelve are a data gap ──
  *
- * `components/live/Lineup.tsx` shows a silhouette in the team's livery with
- * the person's initials until a real photograph lands. That is a first-class
- * treatment rather than a degraded one, for the reason the monogram is on the
- * wall: **a stock face standing in for a student is the `LOGOS` mistake with a
+ * Seven missed the shoot (`Headshot Slots` says "not coming"), four attended
+ * with no slot number written down, and one — `VBC113`'s roster entry `Diya` —
+ * is a first name the shoot has three of. Each of those shows a silhouette in
+ * the team's livery with their initials, which is a first-class treatment
+ * rather than a degraded one, for the reason the monogram is on the wall:
+ * **a stock face standing in for a student is the `LOGOS` mistake with a
  * person's face in it.** Borrowed artwork says something false about who a
  * team is; a borrowed face says it about who a person is.
  *
@@ -394,13 +396,14 @@ export const LOGOS: readonly TeamId[] = []
  * is invisible; an entry here with no file is a broken image on somebody's
  * phone. They arrive together, in one commit.
  *
- * ── The spec for real photographs ──
+ * ── The spec ──
  *
- * **256x256 WebP, square, face in the upper middle.**
- * `scripts/prepare-people.py` takes whatever the cohort sends — JPEG, PNG,
- * HEIC, any size, any aspect — centre-crops to a square biased towards the
- * head, resizes, compresses and prints the list to paste here. At that size
- * each is about 15-25KB, and a team sheet loads three or four of them.
+ * **330x440 WebP with an alpha channel: a cutout, not a photograph.** The
+ * background is removed and the crop is measured in face widths so every
+ * student comes out the same size — see `scripts/fetch-headshots.py`, which
+ * built this set from the cohort's own shoot, and `scripts/prepare-people.py`
+ * for a folder of files named after their student. Each is about 16KB and a
+ * team sheet loads three or four.
  *
  * Entries are `<TEAM_ID>/<slug>`, where the slug comes from `photoSlug` in
  * lib/live.ts: the student's name, lowercased, non-letters to hyphens —
@@ -411,4 +414,110 @@ export const LOGOS: readonly TeamId[] = []
  * on a page anybody with the link can open, which no other asset in this
  * project is. Removing one person is deleting one entry and one file.
  */
-export const PEOPLE_PHOTOS: readonly string[] = []
+export const PEOPLE_PHOTOS: readonly string[] = [
+  'VBC101/nirmalya-sah',
+  'VBC101/sachidananda-dehury',
+  'VBC101/tanishque-jain',
+  'VBC102/arpita-mahata',
+  'VBC102/diya-agarwal',
+  'VBC102/simran-kalra',
+  'VBC103/kavya-zala',
+  'VBC103/pragati-singh',
+  'VBC104/preethi-s',
+  'VBC104/udhav-kothari',
+  'VBC105/harsh-malani',
+  'VBC105/meith-jain',
+  'VBC105/ritesh-oswal',
+  'VBC106/aarav',
+  'VBC106/tushar',
+  'VBC107/aditi',
+  'VBC107/satvik',
+  'VBC107/soumanshu',
+  'VBC108/akassh',
+  'VBC108/divyam',
+  'VBC108/vatsal',
+  'VBC109/ajitwsh-s',
+  'VBC109/ridhima-gupta',
+  'VBC109/shweta-singh',
+  'VBC110/diya-harish',
+  'VBC110/happy-panjwani',
+  'VBC110/rishika-choudhary',
+  'VBC111/jenessa-bhathena',
+  'VBC111/tanishq-lomte',
+  'VBC111/zalak-gogri',
+  'VBC112/naveen-kumar',
+  'VBC112/parin-kumat',
+  'VBC112/praval-goud-madduri',
+  'VBC113/archit-pathak',
+  'VBC113/riya-kothavade',
+  'VBC114/abhishek-kamblath',
+  'VBC114/aditi-roy',
+  'VBC114/kalika-srivastava',
+  'VBC115/dev-mehra',
+  'VBC115/maitree-shah',
+  'VBC115/risheet-gangar',
+  'VBC116/ananta-tantia',
+  'VBC116/rydham-jain',
+  'VBC116/vidhi-agarwal',
+  'VBC117/harsh-dubey',
+  'VBC117/pratiksha-bengani',
+  'VBC117/rishika-uppalapati',
+  'VBC118/adithya-rajagopalan',
+  'VBC118/rahul-m',
+  'VBC118/sairaj-g',
+  'VBC119/abeer-bhati',
+  'VBC119/bhadar-singh',
+  'VBC119/utkarsh-kapoor',
+  'VBC120/anushka-ghogre',
+  'VBC120/dhruvi-lohiya',
+  'VBC120/mayank-agrawal',
+  'VBC121/ashutosh-saxena',
+  'VBC121/sohum-shikhare',
+  'VBC121/tejas-joshi',
+  'VBC122/akristi-mohta',
+  'VBC122/itish-pande',
+  'VBC122/shashank-pandey',
+  'VBC123/akhilesh',
+  'VBC123/hritik',
+  'VBC123/yashwi',
+  'VBC124/aditya-peter',
+  'VBC124/naveen-kolla',
+  'VBC124/tanishkha',
+  'VBC125/anuj-bajaj',
+  'VBC125/darshan-chopda',
+  'VBC126/sarth',
+  'VBC126/vikram',
+  'VBC127/akshat',
+  'VBC127/lipika',
+  'VBC127/param',
+  'VBC128/adnaan-r',
+  'VBC128/akash-ghorpade',
+  'VBC128/vion-d-souza',
+  'VBC129/bhavya',
+  'VBC129/haider',
+  'VBC129/yogita',
+  'VBC130/anshul-dhapte',
+  'VBC130/devansh-mehta',
+  'VBC130/nikhil-kanjolia',
+  'VBC131/brijesh-attal',
+  'VBC131/rushabh-shah',
+  'VBC132/darsh-shah',
+  'VBC132/rohan-vivek',
+  'VBC132/sinchan-rai',
+  'VBC133/aditya-agarwal',
+  'VBC133/ansh-loya',
+  'VBC133/yaswanth-krishna',
+  'VBC134/dhyay',
+  'VBC134/preet',
+  'VBC134/yashansh',
+  'VBC135/devansh-vora',
+  'VBC135/madhuresh-binzani',
+  'VBC135/sakshi-awasthi',
+  'VBC136/aadishwar-r',
+  'VBC136/pratiksha-bihani',
+  'VBC138/radha-hutkey',
+  'VBC138/sahil-agrawal',
+  'VBC139/aditya-singhal',
+  'VBC139/bhavit-gupta',
+  'VBC139/harsh-nain',
+]
