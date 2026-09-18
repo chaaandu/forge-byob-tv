@@ -859,10 +859,10 @@ describe('WallHeader', () => {
    * snapshot below genuinely carries a timestamp. Nothing renders it.
    */
   it('renders no provenance stamp, with data or without', () => {
-    const text = render(<WallHeader snapshot={snapshotAt(...WINDOW)} label="Weekly Leaderboard" />)
-    expect(text).toContain('Weekly Leaderboard')
+    const text = render(<WallHeader snapshot={snapshotAt(...WINDOW)} label="Daily Leaderboard" />)
+    expect(text).toContain('Daily Leaderboard')
     expect(text).not.toContain('Updated')
-    expect(render(<WallHeader snapshot={null} label="Weekly Leaderboard" />)).not.toContain(
+    expect(render(<WallHeader snapshot={null} label="Daily Leaderboard" />)).not.toContain(
       'Updated',
     )
   })
@@ -888,8 +888,52 @@ describe('WallHeader', () => {
       <WallHeader snapshot={snapshotAt(...WINDOW)} label="BYOB Leaderboard" scope="All time" />,
     )
     expect(withScope).toContain('All time')
-    expect(render(<WallHeader snapshot={snapshotAt(...WINDOW)} label="Weekly Leaderboard" />)).not.toContain(
+    expect(render(<WallHeader snapshot={snapshotAt(...WINDOW)} label="Daily Leaderboard" />)).not.toContain(
       'All time',
+    )
+  })
+
+  /**
+   * ── And the scope is counterweighted, or the masthead moves on the cut ──
+   *
+   * `.tv-mast` centres the *heading*, and the scope lives inside the heading —
+   * so without a mirror on the other side of it the words go off centre by half
+   * the scope's width. Measured at 1920 before the fix: `DAILY LEADERBOARD` sat
+   * **103.3px left** of the frame's centre while `/podium`'s `BYOB
+   * LEADERBOARD`, which passes no scope, sat at 0. The two slides cut every
+   * thirty seconds, so that is a masthead jumping a hundred pixels sideways on
+   * the rotation — motion the wall did not choose, in the one band of either
+   * slide that is nothing but type.
+   *
+   * It is asserted here rather than left to the measurement script because the
+   * failure is a *missing element*, which no contrast probe and no screenshot
+   * diff of a single slide would ever report: `/weekly` alone looks entirely
+   * correct off centre. Both counts matter — two copies when there is a scope,
+   * because one is the counterweight, and none when there is not, because an
+   * empty counterweight on `/podium` would push *its* masthead off centre by
+   * the width of nothing at all.
+   */
+  it('counterweights the scope so the heading stays on the centre line', () => {
+    const html = markup(
+      <WallHeader snapshot={snapshotAt(...WINDOW)} label="BYOB Leaderboard" scope="All time" />,
+    )
+    const count = (needle: string) => html.split(needle).length - 1
+    // **The needles carry their closing quote**, because `tv-mast-scope` is a
+    // prefix of `tv-mast-scope-ghost` and counting the bare name finds three of
+    // two elements — which would make this test pass on a header carrying two
+    // ghosts and no visible scope.
+    expect(count('class="tv-mast-scope"')).toBe(1)
+    expect(count('tv-mast-scope-ghost"')).toBe(1)
+    // The ghost is the same string, so the two widths cannot drift apart at any
+    // viewport or in any language.
+    expect(count('All time')).toBe(2)
+    // Spoken once, not twice.
+    expect(html).toContain('tv-mast-scope tv-mast-scope-ghost" aria-hidden="true"')
+
+    // And nothing at all without a scope: an empty counterweight on `/podium`
+    // would push *its* masthead off centre by the width of nothing.
+    expect(markup(<WallHeader snapshot={snapshotAt(...WINDOW)} label="BYOB Leaderboard" />)).not.toContain(
+      'tv-mast-scope',
     )
   })
 })

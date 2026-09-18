@@ -1379,9 +1379,11 @@
      to open up capitals, which are drawn to sit tight; lowercase is already
      spaced by its own ascenders and descenders, and a display serif's fitting
      is drawn for exactly the setting this now uses. 0.02em on
-     `Weekly Leaderboard` measured 379.8px against 365.4px at zero — 14px of air
-     inserted between letters that were already correctly spaced by the person
-     who drew them.
+     the old `Weekly Leaderboard` measured 379.8px against 365.4px at zero —
+     14px of air inserted between letters that were already correctly spaced by
+     the person who drew them. (That string is `Daily Leaderboard` now; the
+     measurement is kept because it is the *ratio* that made the argument, and
+     re-measuring one character's difference would not change it.)
 
      **So this value is now coupled to `.tv-mast-title` having no
      `text-transform`.** Put the capitals back and this has to go back up with
@@ -3571,7 +3573,7 @@
   /* **`text-transform: uppercase` is back, and it is the one on this wall.**
 
      The note that stood here argued it out: the strings are already cased
-     correctly — `lib/board.ts` returns `Weekly Leaderboard` and `10-Day
+     correctly — `lib/board.ts` returns `Daily Leaderboard` and `10-Day
      Challenge`, `app/podium/page.tsx` passes `BYOB Leaderboard` — so the
      transform flattens the distinction between `BYOB` as an acronym and
      `Leaderboard` as a word into one undifferentiated run of capitals, and it
@@ -3582,7 +3584,7 @@
 
      It is a transform rather than three capitalised strings because the strings
      are what `lib/board.ts` and the tests read. `render.test.tsx` asserts on
-     `Weekly Leaderboard` and `10-Day Challenge`; shouting in the source would
+     `Daily Leaderboard` and `10-Day Challenge`; shouting in the source would
      put the case decision in three places and the wall's own scar tissue on
      that is `titleCase` in `lib/team.ts`, which exists because casing in two
      places is how `BLUNNT` ended up next to `snackerly`.
@@ -3617,6 +3619,21 @@
     text-transform: uppercase;
     color: var(--ink-muted);
     white-space: nowrap;
+  }
+
+  /* The same string, on the other side of the heading, drawing nothing.
+     `WallHeader` carries the argument and the measurement; the short form is
+     that `.tv-mast` centres the *heading* and the scope lives inside it, so
+     without a mirror the words go off centre by half the scope's width — 103.3px
+     at 1920, against `/podium`'s 0, on two slides that cut every thirty seconds.
+
+     `visibility: hidden` and not `display: none`: it has to take up its space,
+     which is the entire job. The margin mirrors too — a counterweight that
+     matches the text and not its gap is off by `--s-3`. */
+  .tv-mast-scope-ghost {
+    visibility: hidden;
+    margin-left: 0;
+    margin-right: var(--s-3);
   }
 
   /* The right-hand group: whatever apparatus the slide has — `/podium`'s Flea

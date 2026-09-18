@@ -215,6 +215,29 @@ strict, vitest**. Two dependency choices differ:
 whose clock is right. All "today" / "this week" logic lives in the sheet, which is IST.
 No `Intl` timezone gymnastics client-side.
 
+**The last two sentences stopped being true, in three steps, and the first one
+did not.** Absolute instants are still the rule wherever a deadline is being
+compared, and it is still the better mechanism — `isFestival` uses it and says
+so. What has arrived beside it is a set of questions that are *about* an IST
+calendar rather than about a moment, and those cannot be answered by subtracting
+two instants:
+
+- `istHour` — is the wall in its end-of-day state, 18:00 IST to midnight?
+- `isFestival`'s bounds — still instants, deliberately, and its docblock is
+  where the distinction is argued.
+- `istWindowKey` — which 10:00-to-10:00 day is this, for `/weekly`'s daily
+  board? Added 18 September 2026, and it is the one that made the sheet stop
+  owning "today" entirely: the board's figure is now computed on the client
+  from two photographs of `total_revenue`.
+
+All three ask `Intl` for **`Asia/Kolkata` explicitly and never the machine's own
+setting**, which is the whole of the gymnastics and is what makes them safe. The
+wall runs from a laptop that travels; one still set to another zone would open
+the end-of-day celebration in the afternoon and close the daily window at the
+wrong hour, and look entirely deliberate doing both. They are confined to
+`lib/schedule.ts` for that reason, and `lib/overtake.ts`, `lib/ranking.ts` and
+`lib/daily.ts` are each scanned for `Date` to keep them out.
+
 ---
 
 ## 4. Ranking
@@ -344,6 +367,24 @@ and merged, `pending` is destructively drained, and `csv` is blindly overwritten
 60s. Folding the cache into the ledger would rewrite it 1,440 times a day and multiply
 the cross-tab clobber window by sixty for no benefit.
 
+**It is `v2` and there are more than three**, and the *rule* is what survived
+rather than the list. `lib/storage.ts` is the live inventory: `csv`, a `board.*`
+and a `queue.*` per board — namespaced, because two boards ranking different
+figures must not share a memory of what the board looked like — and, from 18
+September 2026, `daily`, which holds the two photographs `/weekly`'s figure is
+the difference between.
+
+`daily` is the one that tests the write-pattern argument rather than just
+inheriting it, and it lands on the opposite side of *both* halves. It is written
+**twice a day at most**, not 1,440 times, so it could have been folded into the
+CSV cache's value without the clobber cost the paragraph above warns about — and
+it is its own key anyway, because being overwritten every minute alongside a
+value that changes twice a day is the same hazard read from the other end. And
+it is deliberately **not** namespaced per board, unlike `board.*` and `queue.*`:
+it records what the *sheet* held at ten o'clock, which is one fact about the
+cohort rather than one board's opinion, and two copies could drift apart by a
+poll and put different figures on two open tabs.
+
 Version lives **in the key name**. A version bump makes the old key simply absent, which
 routes into the seed branch — no migration code, which would be a second read path.
 
@@ -415,6 +456,27 @@ Logo presence comes from the `config.ts` list, so no broken image is ever reques
 Neither slide carries the `as_of` stamp any more — it was the only element on either page
 that was not in the brief's list, and it was removed on 13 September 2026. §2 has what
 that costs.
+
+**`/weekly` has become the Daily Leaderboard**, on 18 September 2026, and the
+part of it that belongs in a design record rather than in `AGENTS.md` is that it
+is the wall's first **locked** board: a finished day, 10:00 to 10:00, decided
+once a morning and identical for the next twenty-four hours.
+
+Two things follow from "locked" that no amount of layout work can soften, and
+both are stated here because they are the kind of thing a later reader will
+otherwise rediscover as a bug:
+
+- **The slide produces no overtake animations.** Ranks can only change at the
+  tick where all thirty-nine figures change together, which is precisely the
+  tick `boardPeriod` exists to silence. `/podium` is what exercises the flip
+  machinery now.
+- **It carries a caption, and that is not the `as_of` decision reversed.** Every
+  board before this one was live, so its window was "now" and a caption could
+  only add provenance — which is what the paragraph above removed. A board whose
+  figures stopped six hours ago is not missing its provenance, it is missing its
+  subject, and it is also the only place a window that quietly widened from 24
+  to 48 hours becomes visible. `boardScope` in `lib/board.ts` has the full
+  argument.
 
 ---
 

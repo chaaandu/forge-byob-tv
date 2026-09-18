@@ -151,6 +151,36 @@ export function WallHeader({
         <span />
       ) : (
         <h1 className="tv-mast-title">
+          {/* ── The scope's counterweight, and it is measured rather than
+              cosmetic ──
+
+              Exactly the trick `.tv-mast`'s own left counterweight uses, one
+              level down, and it exists because the outer one is not enough.
+              `.tv-mast` is `[1fr][auto][1fr]`, so what it centres is the whole
+              heading — and with the scope inside the heading, the *words* go
+              off centre by half the scope's width. Measured at 1920 without
+              this: `DAILY LEADERBOARD` sat **103.3px left** of the frame's
+              centre line while `/podium`'s `BYOB LEADERBOARD` sat at 0.
+
+              That is a rotation fault rather than a layout preference. The two
+              slides cut every thirty seconds and both are dark, so the layouts
+              are what has to carry the cut — `AGENTS.md` says exactly that
+              where it records both slides going dark. A masthead that jumps a
+              hundred pixels sideways on the cut is motion the wall did not
+              choose, on the one band of either slide that is nothing but type.
+
+              Mirroring the string is what makes it exact: identical text is
+              identical width in the same face, at every viewport, in any
+              language, so the words are centred by construction rather than by
+              a number that has to be maintained. `visibility: hidden` rather
+              than `display: none` — it has to occupy its space, which is the
+              whole job. `aria-hidden` because it is the same string twice and a
+              screen reader should hear the window once. */}
+          {scope === undefined ? null : (
+            <span className="tv-mast-scope tv-mast-scope-ghost" aria-hidden="true">
+              {scope}
+            </span>
+          )}
           {label}
           {/* ── What the figures below are measured over ──
 

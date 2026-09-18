@@ -264,34 +264,77 @@ insensitively: `Yes`, `yes`, `Y` and a ticked checkbox all read the same.
 `challenge_revenue`, the band reads `10-Day Challenge`, the `Day 7 of 10` chip
 appears, and the legend adds `Revenue since 4 Sept`.
 
-`No` → the board is the **Weekly Leaderboard**: it ranks and prints
-`week_revenue`, the band reads `Weekly Leaderboard`, and both the day chip and
-the `Revenue since` caption leave. Nothing else on the wall changes; `/podium`
-is all-time revenue either way and never looks at this cell.
+`No` → the board is the **Daily Leaderboard**: it ranks and prints a *finished
+day*, 10:00 yesterday to 10:00 today, the band reads `Daily Leaderboard` with
+that window's two dates beside it, and the day chip leaves. Nothing else on the
+wall changes; `/podium` is all-time revenue either way and never looks at this
+cell.
 
 **Leave the two `challenge_*_iso` dates in place when you switch to `No`.** They
 are the window, not the switch, and you will want them back. The wall simply
 stops measuring against them.
 
 **Anything that is not a yes is a no** — blank, missing, `Nope`, a typo. That
-asymmetry is the safety margin and it only runs one way: `week_revenue` is a
-required column and always holds real figures, while `challenge_revenue` is
-optional and between challenges holds whatever the consolidator last left in it.
-Guessing wrong towards week puts true numbers under an honest heading. Guessing
-wrong towards challenge puts **₹0 on thirty-nine cards** — which renders
-perfectly, reports nothing, and would run for weeks.
+asymmetry is the safety margin and it only runs one way. Guessing wrong towards
+daily puts a true, ranked, finished day on the board under a heading that says
+so, and it corrects itself the moment you fix the cell. Guessing wrong towards
+challenge puts **₹0 on thirty-nine cards** under the name of a contest that is
+not running — which renders perfectly, reports nothing, and would run for weeks.
 
 Deliberately **not** in `COHORT_KEYS`, so adding the row is not urgent and
 editing it mid-poll cannot discard a tick: a missing key there throws the whole
-fetch away. Until the row exists the wall is in week mode.
+fetch away. Until the row exists the wall is in daily mode.
+
+### The daily board needs nothing from you, and that is worth knowing about
+
+**There is no `yesterday_revenue` column and the wall does not want one today.**
+A finished day cannot be read out of `BYOB_MASTER` as it stands — `today_revenue`
+is live from midnight and reads ₹0 for most teams until the afternoon, `Daily
+Team Summary` is cumulative in spite of its name, `Weekly — by Team` is weekly.
+So the wall makes the window itself: the laptop driving the TV photographs every
+team's `total_revenue` at the first poll at or after 10:00 IST, keeps the newest
+two photographs, and prints the difference. Exactly the trick the
+`challenge_baseline` column already uses, done on the client.
+
+Two consequences for whoever looks after the wall, because neither is visible on
+screen:
+
+- **A laptop that has never run the wall shows ₹0 on every card** until its
+  second 10:00 — up to twenty-four hours. So does one whose browser data has
+  been cleared. The board looks completely healthy throughout. If you set up a
+  new laptop, open `/weekly` on it the day before you need it.
+- **A laptop that is asleep or off at 10:00 takes its photograph late**, and the
+  window silently becomes 25 or 48 hours long. The figures stay true — they are
+  the difference between two real photographs — and the **two dates in the
+  masthead** are the only thing that says the window widened. `17 Sep → 18 Sep`
+  is a day; `16 Sep → 18 Sep` is not.
+
+**If you would rather the sheet owned this**, it is one formula and it retires
+all of the above — no photographs, no localStorage, no blank first day:
+
+```
+=BYROW(A2:A43,LAMBDA(t,IF(t="","",SUMIFS('Daily Dump'!$N:$N,'Daily Dump'!$A:$A,t,'Daily Dump'!$D:$D,"Sale",'Daily Dump'!$B:$B,TODAY()-1))))
+```
+
+published as a `yesterday_revenue` column. Say so and the wall will read it the
+way it reads `challenge_revenue` — optional, so adding the column cannot break
+anything and the wall picks it up on its next poll. Note that it would be a
+**midnight-to-midnight** day rather than 10-to-10, and that it inherits
+`today_revenue`'s own dependency on `Daily Dump` column B: see checklist item 5.
 
 **`as_of` reads `Sync Status`, not `NOW()`.** `NOW()` would restamp on every
 recalculation and the wall would look freshly updated even while the data underneath
 was days stale — which is the exact failure this stamp exists to expose.
 
 **`current_open_week` is not clamped at 8.** The eight challenge weeks end on 13 Sep
-but the programme runs to 30 Sep, and a clamp would freeze the weekly board on week
-8's numbers for the last fortnight. On 11 Sep 2026 it reads **2**.
+but the programme runs to 30 Sep, and a clamp would freeze anything reading it on
+week 8's numbers for the last fortnight. On 11 Sep 2026 it reads **2**.
+
+**Nothing on the wall ranks `week_revenue` any more**, as of 18 Sep 2026 —
+`/weekly` is the daily board and `/podium` is all-time. Keep both the column and
+this key: `/live`'s middle tab still ranks the week, and `current_open_week` is
+still what tells the wall a week rolled over. Neither is dead, but neither
+decides a figure on a TV.
 
 **`flea_datetime_iso` needs the cell formatted as plain text first** — Format ▸ Number
 ▸ Plain text — before you type it. Otherwise Sheets parses it as a date and publishes
@@ -331,9 +374,15 @@ seconds, so it sees a change within roughly six minutes of the consolidator writ
 
 Also confirm, once: **File ▸ Settings ▸ Time zone is `(GMT+05:30) India Standard
 Time`.** That setting is separate from `appsscript.json`, and `TODAY()` follows the
-spreadsheet. If it is wrong, `today_revenue` is a day out near midnight — and in v2
-`today_revenue` drives both the 6pm celebration and a whole column of slide 2, so it
-is worth thirty seconds to check.
+spreadsheet. If it is wrong, `today_revenue` is a day out near midnight, and every
+figure on the wall is made from a `TODAY()` somewhere — so it is worth thirty
+seconds to check.
+
+**The client asks `Intl` for Asia/Kolkata explicitly and never the machine's own
+setting**, which is what lets the two agree. The laptop driving the TV can come
+back from a trip still set to another zone and the daily board's 10:00 boundary
+does not move. Nothing protects you from the *spreadsheet's* timezone being
+wrong, which is why this line is here.
 
 ---
 
