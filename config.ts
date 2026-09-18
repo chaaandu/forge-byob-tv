@@ -281,6 +281,34 @@ export const IST_TIMEZONE = 'Asia/Kolkata'
 /** The podium marks the end of the trading day from this hour, IST, until midnight. */
 export const EOD_FROM_HOUR_IST = 18
 
+// ── The daily window ────────────────────────────────────────────────────────
+
+/**
+ * The hour, IST, at which `/weekly`'s window closes and the board locks for the
+ * next twenty-four hours.
+ *
+ * **Not midnight, and the difference is the whole point.** The board shows a
+ * *finished* day — 10:00 yesterday to 10:00 today — so every figure on it is
+ * settled before anybody is in the corridor to read it, and the thirty-nine
+ * figures that change when it rolls change while the building is empty. A
+ * window closing at midnight would be as correct and would roll at the hour the
+ * consolidator, the sheet's `TODAY()` and the laptop's own clock are all least
+ * likely to agree.
+ *
+ * **Ten, not nine, because the consolidator has to have run.** The window is
+ * closed by photographing `total_revenue` as the sheet publishes it, and a
+ * published CSV lags the sheet by about five minutes on top of whatever the
+ * consolidator's own cadence is. Ten gives the previous night's last sales time
+ * to have reached the feed before the shutter closes on them; nine does not,
+ * and a sale logged at 23:50 landing in the *next* day's window is the kind of
+ * wrong this wall cannot report.
+ *
+ * Moving it is one number, and it moves the boundary for everything: the mark,
+ * the period `detect` goes quiet on, and the word in the masthead. There is no
+ * second copy of it anywhere.
+ */
+export const DAILY_CLOSE_HOUR_IST = 10
+
 // ── Overtakes ───────────────────────────────────────────────────────────────
 
 /**

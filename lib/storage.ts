@@ -1,4 +1,5 @@
 import { KICK_QUEUE_CAP } from '@/config'
+import type { DailyMark } from '@/lib/daily'
 import type { BoardState, CsvCache, OvertakeEvent } from '@/lib/types'
 
 /**
@@ -38,6 +39,22 @@ export const KEYS = {
   csv: `${PREFIX}.csv`,
   board: (board: string) => `${PREFIX}.board.${board}`,
   queue: (board: string) => `${PREFIX}.queue.${board}`,
+  /**
+   * The daily window's two photographs of `total_revenue`.
+   *
+   * **Not namespaced per board, unlike `board` and `queue` above.** Those are
+   * per-board because two boards ranking different figures see different rank
+   * changes and must not share a memory of what the board looked like. This is
+   * the opposite kind of thing: it is a record of what the *sheet* held at ten
+   * o'clock, which is one fact about the cohort. Two copies of it could drift
+   * apart by a poll and put a different daily figure on two open tabs.
+   *
+   * **Written twice a day at most**, which is why it is its own key rather than
+   * a member of the CSV cache's value — that one is overwritten every sixty
+   * seconds, and merging the two would put the window at risk of a cross-tab
+   * clobber 1,440 times a day instead of twice. Same rule as the note above.
+   */
+  daily: `${PREFIX}.daily`,
 } as const
 
 /**
@@ -89,6 +106,42 @@ export function readCsvCache(): CsvCache | null {
 
 export function writeCsvCache(cache: CsvCache): void {
   writeJson(KEYS.csv, cache)
+}
+
+/**
+ * Every mark, or none.
+ *
+ * The shape check reaches into each mark's `totals` and requires every value to
+ * be a finite number, which is stricter than `isBoardState` above and
+ * deliberately so: a `null` or a `"1,04,500"` in there does not throw, it
+ * subtracts to `NaN`, and `NaN` sorts as equal to everything. One bad cell in
+ * one photograph would put a card at a rank decided by nothing and print `₹NaN`
+ * under it — or, in the direction that reports even less, leave the whole board
+ * in an order no comparator chose. Discarding both marks costs one window and
+ * fails quiet; the store rebuilds itself from the sheet.
+ */
+function isDailyMarks(value: unknown): value is DailyMark[] {
+  return (
+    Array.isArray(value) &&
+    value.every((mark) => {
+      if (typeof mark !== 'object' || mark === null) return false
+      const candidate = mark as Partial<DailyMark>
+      if (typeof candidate.key !== 'string') return false
+      if (typeof candidate.totals !== 'object' || candidate.totals === null) return false
+      return Object.values(candidate.totals).every(
+        (total) => typeof total === 'number' && Number.isFinite(total),
+      )
+    })
+  )
+}
+
+/** `[]` for absent, corrupt or wrong-shaped — all of which mean "start the window again". */
+export function readDailyMarks(): DailyMark[] {
+  return readJson(KEYS.daily, isDailyMarks) ?? []
+}
+
+export function writeDailyMarks(marks: readonly DailyMark[]): void {
+  writeJson(KEYS.daily, marks)
 }
 
 function isBoardState(value: unknown): value is BoardState {
