@@ -581,11 +581,30 @@ is the one page here that a person holds. Added 17 September 2026.
 
   Photographs are `public/people/<TEAM_ID>/<name-slug>.webp`, listed in
   `PEOPLE_PHOTOS` in `config.ts` — **the list, not the filesystem**, exactly as
-  `LOGOS` works and for the same reason. `scripts/prepare-people.py` crops,
-  resizes, strips EXIF and prints the list; the slug is derived from the
+  `LOGOS` works and for the same reason. The slug is derived from the
   student's name at both ends, so a photograph needs no mapping file. The
   failure mode to know: a filename spelled differently from the sheet's cell
   simply never appears, on one card, silently.
+
+  Two scripts write them. `scripts/prepare-people.py` takes a folder of files
+  named after their student. `scripts/fetch-headshots.py` takes the cohort's
+  actual shoot, which is a different problem in three ways, each measured:
+
+  - **It is 22.6 GB.** 565 camera JPEGs at ~43 MB, named `DSC0<slot>.JPG`, on
+    a Dropbox link that serves no resized preview — `&size=w640h480` returns
+    the full original, checked twice. So each needed frame is streamed,
+    cropped and deleted before the next starts.
+  - **They are not headshots.** They are environmental portraits at 6000x4000
+    with the student standing in half a frame; a centre square makes the face
+    about 7% of the crop. YuNet finds the face and the square is built around
+    it at 2.8x the face box, eyes on the 0.42 line. The model is fetched on
+    first run, not committed.
+  - **Nothing links a face to a team.** `Headshot Slots` gives student name →
+    slot number and `Team Links` col D gives team → names, so the join is the
+    name. **A name that does not match confidently is left out rather than
+    guessed** — the matcher's first version paired `Diya Agarwal` with
+    *Aditya* Agarwal's photograph, which is the one mistake on this page worth
+    an apology. 100 of 117 matched; the rest are a list for a human.
 
   **Until a photograph exists, a student is initials in the team's livery, and
   that is not a placeholder to be filled with a stock face.** A borrowed

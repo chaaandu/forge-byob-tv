@@ -136,6 +136,17 @@ export function TeamSheet({
               className="lv-sheet-hero"
               onPointerDown={(event) => drag.start(event)}
             >
+              {/* ── The colour is a layer, so the faces can leave the header ──
+               *
+               * The header used to carry the gradient itself and clip its own
+               * overflow, which is what a rounded top corner needs — and that
+               * clip is exactly what kept the squad inside. So the paint moves
+               * into this layer, which clips, and the header stops clipping,
+               * which lets the heads hang into the content below. The
+               * watermark lives in here for the same reason. */}
+              <div className="lv-hero-bg" aria-hidden="true">
+                <Emblem team={race.self.team} size={190} className="lv-sheet-ghost" />
+              </div>
               <span className="lv-grabber" aria-hidden="true" />
               <div className="lv-sheet-actions">
                 <button type="button" className="lv-icon-btn" aria-label="Close" onClick={onClose}>
@@ -153,7 +164,6 @@ export function TeamSheet({
                   exit={{ opacity: 0, x: direction * -60 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 36 }}
                 >
-                  <Emblem team={race.self.team} size={190} className="lv-sheet-ghost" />
                   <h2 className="lv-sheet-name">{nameOf(race.self.team)}</h2>
                   {/* No team id. It is a code for a spreadsheet, not a fact
                       about a venture — the rows dropped it for the same

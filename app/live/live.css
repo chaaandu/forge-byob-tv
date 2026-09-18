@@ -705,14 +705,26 @@ body:has(.lv-app[data-locked]) {
 
   .lv-sheet-hero {
     position: relative;
+    /* Above the body, because the squad hangs over it. */
+    z-index: 2;
     flex: none;
-    min-height: 318px;
+    min-height: 300px;
     padding: 10px 20px 0;
-    overflow: hidden;
+    /* **Not `hidden`.** The heads stand between the header and the content,
+       half on each, and a clip here is what used to cut them off at the
+       seam. `.lv-hero-bg` does the clipping instead. */
+    overflow: visible;
     color: var(--livery-ink);
-    background: linear-gradient(140deg, var(--livery-a), var(--livery-b));
     touch-action: none;
     user-select: none;
+  }
+
+  .lv-hero-bg {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: 24px 24px 0 0;
+    background: linear-gradient(140deg, var(--livery-a), var(--livery-b));
   }
 
   .lv-grabber {
@@ -843,9 +855,11 @@ body:has(.lv-app[data-locked]) {
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    /* Standing *on* the hero's bottom edge: the crops bleed off it, which is
-       what stops four heads reading as four stickers. */
-    margin-bottom: -14px;
+    /* **Hanging past the header, not standing on it.** Roughly a third of
+       each crop is over the content below, which is what makes the group sit
+       *between* the two rather than inside the colour. `.lv-sheet-body` pads
+       its top by the same amount so nothing is ever underneath a face. */
+    margin-bottom: -46px;
     pointer-events: none;
   }
 
@@ -917,13 +931,15 @@ body:has(.lv-app[data-locked]) {
   }
 
   .lv-sheet-body {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex: 1;
     flex-direction: column;
     gap: 12px;
-    /* Clear of the chevrons, which float over this rather than scrolling
-       with it. */
-    padding: 16px 16px calc(80px + env(safe-area-inset-bottom));
+    /* Top: clear of the heads hanging down from the header. Bottom: clear of
+       the chevrons, which float over this rather than scrolling with it. */
+    padding: 62px 16px calc(80px + env(safe-area-inset-bottom));
     overflow-y: auto;
     overscroll-behavior: contain;
     /* The browser keeps the vertical scroll; horizontal movement is left for
