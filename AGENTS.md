@@ -576,7 +576,13 @@ is the one page here that a person holds. Added 17 September 2026.
   crop ending on somebody's chest is a straight cut across them.
 
   **A student with no photograph gets a silhouette with their initials**, in
-  the livery. Six of the cohort missed the shoot, so that is a state on the
+  the livery, and **the silhouettes stand at the right-hand end of the
+  line-up**. The roster's own order put one wherever the sheet happened to
+  list that student, which is a gap in the middle of a group; at the edge it
+  reads as where the row ends. The initials then sit exactly on the head,
+  because nothing overlaps a placeholder's face any more — they used to be
+  nudged sideways so an overlapped one still showed its letters, which left
+  them visibly off-centre. Six of the cohort missed the shoot, so that is a state on the
   board today rather than a hypothetical, and a bare pair of letters between
   two cutouts would float where a body should be.
 

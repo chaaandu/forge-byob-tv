@@ -37,30 +37,61 @@ export function Squad({ team }: { team: Team }) {
   const members = membersOf(team)
   if (members.length === 0) return null
 
+  /**
+   * ── Faces first, silhouettes at the right-hand end ──
+   *
+   * The roster's own order put a placeholder wherever the sheet happened to
+   * list that student, so a team with one missing photograph got a gap in the
+   * middle of its line-up. Grouping them moves the gap to the edge, where it
+   * reads as the end of the row rather than as somebody missing from it —
+   * and on nine of the twelve affected teams that is a single silhouette
+   * standing at the side of three faces.
+   *
+   * Stable within each group, so the roster's order still decides who stands
+   * where among the people who have a photograph.
+   */
+  const ordered = members
+    .map((name) => ({ name, hasPhoto: PEOPLE_PHOTOS.includes(`${team.teamId}/${photoSlug(name)}`) }))
+    .sort((a, b) => Number(b.hasPhoto) - Number(a.hasPhoto))
+
   return (
     <div className="lv-squad" aria-label={`Team: ${members.join(', ')}`} role="img">
-      {members.map((name, index) => (
+      {ordered.map(({ name, hasPhoto }, index) => (
         <Person
           key={name}
           teamId={team.teamId}
           name={name}
+          hasPhoto={hasPhoto}
           // The left-most sits on top and each one behind the last, so the
           // stack reads front-to-back rather than as a row of half-faces.
-          style={{ zIndex: members.length - index }}
+          style={{ zIndex: ordered.length - index }}
         />
       ))}
     </div>
   )
 }
 
-function Person({ teamId, name, style }: { teamId: string; name: string; style: React.CSSProperties }) {
-  const path = `${teamId}/${photoSlug(name)}`
-  const hasPhoto = PEOPLE_PHOTOS.includes(path)
-
+function Person({
+  teamId,
+  name,
+  hasPhoto,
+  style,
+}: {
+  teamId: string
+  name: string
+  hasPhoto: boolean
+  style: React.CSSProperties
+}) {
   return (
     <span className="lv-person" style={style} title={name}>
       {hasPhoto ? (
-        <Image src={`/people/${path}.webp`} alt="" width={256} height={256} unoptimized />
+        <Image
+          src={`/people/${teamId}/${photoSlug(name)}.webp`}
+          alt=""
+          width={256}
+          height={256}
+          unoptimized
+        />
       ) : (
         <PlaceholderPortrait initials={initialsOf(name)} />
       )}
@@ -98,7 +129,9 @@ function PlaceholderPortrait({ initials }: { initials: string }) {
             shapes read as a ball above a hill. */}
         <path d="M6 160C6 108 30 78 60 78s54 30 54 82z" />
       </g>
-      <text x="60" y="58" className="lv-person-initials">
+      {/* Dead centre of the head, which is the circle's own centre — not the
+          centre of the 120x160 box, which sits down on the chest. */}
+      <text x="60" y="56" className="lv-person-initials">
         {initials}
       </text>
     </svg>

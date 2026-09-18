@@ -914,13 +914,11 @@ body:has(.lv-app[data-locked]) {
      raising every second one leaves a body hanging in mid-air where its
      crop ends. */
 
-  /* The visible strip of an overlapped crop is its right-hand side, because
-     the one in front covers its left. A face survives that — the centre is in
-     both halves — but centred initials do not, so they shift into the strip
-     that shows. */
-  .lv-person:not(:first-child) .lv-person-initials {
-    transform: translateX(16px);
-  }
+  /* **No nudge on the initials.** They were shifted right so an overlapped
+     placeholder still showed its letters — which left them visibly
+     off-centre in the silhouette. Silhouettes stand at the right-hand end of
+     the line-up now (see `Squad`), so the head is never covered and the
+     letters sit exactly where the head does. */
 
   .lv-person img {
     width: 100%;
