@@ -667,6 +667,21 @@ is the one page here that a person holds. Added 17 September 2026.
   is still crisp two lines down on the placements row, and the mark is on the
   row this sheet opened from and again as the watermark behind the type.
 
+  **`membersOf` falls back to the photographs when the sheet is silent, and
+  that fallback is what production runs today.** `members` is optional and
+  `TV_Feed` does not publish it yet, so the deployed site had no roster — and
+  with no roster there is nothing to hang a photograph on. Every squad
+  rendered empty on the live URL while the same page on a laptop, reading a
+  fixture built from the master, was full of faces. `PEOPLE_PHOTOS` already
+  encodes who is on which team, so the manifest alone can show them.
+
+  **It is a floor, not a replacement.** A student with no photograph is
+  invisible under it, because nothing in the repo knows they exist: the twelve
+  who show initials locally are simply absent on production, and so is every
+  product and every link. Publishing the four columns is still the fix; the
+  moment `members` lands this branch stops running and the sheet decides
+  again, including the order people stand in.
+
   Photographs are `public/people/<TEAM_ID>/<name-slug>.webp`, listed in
   `PEOPLE_PHOTOS` in `config.ts` — **the list, not the filesystem**, exactly as
   `LOGOS` works and for the same reason. **Run

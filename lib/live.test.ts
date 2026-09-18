@@ -1,6 +1,7 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
+import { PEOPLE_PHOTOS } from '@/config'
 import { rankForMode } from '@/lib/board'
 import {
   EMBLEM_COUNT,
@@ -215,9 +216,33 @@ describe('membersOf', () => {
     ])
   })
 
-  it('says nothing when the sheet does not publish the column', () => {
-    expect(membersOf(team())).toEqual([])
-    expect(membersOf(team({ members: '   ' }))).toEqual([])
+  /**
+   * **The published sheet does not carry `members` yet**, so this branch is
+   * what production runs: the manifest already says which students belong to
+   * which team, and the faces can be shown from it alone.
+   */
+  it('falls back to the photographs when the sheet has no roster', () => {
+    const photographed = PEOPLE_PHOTOS[0]
+    if (photographed === undefined) return // nothing committed yet
+    const [teamId, slug] = photographed.split('/')
+    const names = membersOf(team({ teamId, members: undefined }))
+    expect(names.length).toBeGreaterThan(0)
+    // The slug has to round-trip, or the photograph it came from is not found.
+    expect(names.map(photoSlug)).toContain(slug)
+  })
+
+  it('says nothing for a team with neither a roster nor photographs', () => {
+    expect(membersOf(team({ teamId: 'VBC999' }))).toEqual([])
+    expect(membersOf(team({ teamId: 'VBC999', members: '   ' }))).toEqual([])
+  })
+
+  // The sheet wins wherever it speaks: it knows about students who have no
+  // photograph, and it decides the order.
+  it('prefers the sheet over the manifest', () => {
+    const photographed = PEOPLE_PHOTOS[0]
+    if (photographed === undefined) return
+    const [teamId] = photographed.split('/')
+    expect(membersOf(team({ teamId, members: 'Solo Person' }))).toEqual(['Solo Person'])
   })
 
   it('caps a pasted paragraph rather than filling the sheet with faces', () => {

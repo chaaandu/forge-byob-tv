@@ -1,3 +1,4 @@
+import { PEOPLE_PHOTOS } from '@/config'
 import { competingTeams, rankByChallenge, rankByToday, rankByWeek, rankTeams } from '@/lib/ranking'
 import { hashTeamId } from '@/lib/seed'
 import { titleCase } from '@/lib/team'
@@ -242,7 +243,7 @@ export const MAX_MEMBERS = 6
 
 export function membersOf(team: Team): string[] {
   const raw = (team.members ?? '').trim()
-  if (raw === '') return []
+  if (raw === '') return photographedRoster(team.teamId)
   return raw
     .split(/\s*(?:,|;|\band\b|&|\+)\s*/i)
     // Trailing punctuation, and anything that is not a name at all.
@@ -250,6 +251,41 @@ export function membersOf(team: Team): string[] {
     .filter((name) => /\p{L}/u.test(name))
     .map(titleCase)
     .filter((name, index, all) => all.indexOf(name) === index)
+    .slice(0, MAX_MEMBERS)
+}
+
+/**
+ * Who is on a team according to the photographs themselves.
+ *
+ * **A fallback for exactly one situation, and it is the situation production
+ * is in.** `members` is an optional `TV_Feed` column and the published sheet
+ * does not carry it yet — so the deployed site had no roster, and with no
+ * roster there was nothing to hang a photograph on: every squad rendered
+ * empty while the same page on a laptop, reading a fixture built from the
+ * master, was full of faces.
+ *
+ * `PEOPLE_PHOTOS` already knows which students belong to which team — that is
+ * what `<TEAM_ID>/<slug>` means — so the faces can be shown from the manifest
+ * alone. The slug goes back to a name well enough for a screen reader and
+ * exactly enough for `photoSlug` to round-trip.
+ *
+ * **What it cannot do is the reason to still publish the column.** A student
+ * with no photograph is invisible here, because nothing in the repo knows
+ * they exist: the twelve who are initials on a laptop are simply absent on
+ * production, and so are every product and every link. The moment `members`
+ * is published this branch stops running and the sheet decides again —
+ * including the order people stand in.
+ */
+function photographedRoster(teamId: TeamId): string[] {
+  const prefix = `${teamId}/`
+  return PEOPLE_PHOTOS.filter((entry) => entry.startsWith(prefix))
+    .map((entry) =>
+      entry
+        .slice(prefix.length)
+        .split('-')
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' '),
+    )
     .slice(0, MAX_MEMBERS)
 }
 
