@@ -645,6 +645,18 @@ is the one page here that a person holds. Added 17 September 2026.
   board today rather than a hypothetical, and a bare pair of letters between
   two cutouts would float where a body should be.
 
+  **The sheet is one scroll, and that is what the squad cost.** The header was
+  pinned and only the body scrolled, so photographs that hang past the
+  header's edge stayed put while every stat tile travelled up behind them —
+  three torsos floating over the cards, reported as such. Header and body
+  scroll together now; only the close button and the chevrons hold still.
+
+  It costs the phone one thing, and it is the ordinary trade: **drag-to-close
+  lives on the grabber and only at the top of the scroll**, because below that
+  a downward drag is a scroll. The grabber is padded into a 44px target with
+  `touch-action: none` so a finger there still means drag while a finger on a
+  photograph means scroll. The sideways swipe is unaffected.
+
   **They are the middle of the sheet's header, overlapping, with no names** —
   the esports line-up card rather than a row of avatars with captions. Each
   crop is 96x132 with a 30px overlap, so four fit a 350px header and the

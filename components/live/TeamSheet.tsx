@@ -1,7 +1,7 @@
 'use client'
 
 import { AnimatePresence, motion, useDragControls, type PanInfo } from 'motion/react'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Climb } from '@/components/live/Board'
 import { CountUp } from '@/components/live/CountUp'
@@ -54,6 +54,20 @@ export function TeamSheet({
   onClose: () => void
 }) {
   const drag = useDragControls()
+  /**
+   * The scroller, so a drag can ask where it is.
+   *
+   * **The header scrolls with the content now**, which is what stopped the
+   * squad colliding with the stats: the photographs hang past the header's
+   * edge, and while the header was pinned every tile scrolled up *behind*
+   * three floating torsos. Nothing is pinned any more, so nothing can meet
+   * anything.
+   *
+   * It costs the phone one thing, and it is the ordinary trade: dragging the
+   * sheet away is only available at the top of the scroll, because below that
+   * a downward drag is a scroll. Every app with a cover image does this.
+   */
+  const scroller = useRef<HTMLDivElement>(null)
   // Which way the content should slide when the team changes.
   const [direction, setDirection] = useState(0)
   /**
@@ -149,10 +163,8 @@ export function TeamSheet({
             // vertically and horizontal movement reaches this instead.
             onPanEnd={onPanEnd}
           >
-            <motion.header
-              className="lv-sheet-hero"
-              onPointerDown={(event) => (desktop ? undefined : drag.start(event))}
-            >
+            <div className="lv-sheet-scroll" ref={scroller}>
+            <motion.header className="lv-sheet-hero">
               {/* ── The colour is a layer, so the faces can leave the header ──
                *
                * The header used to carry the gradient itself and clip its own
@@ -164,12 +176,20 @@ export function TeamSheet({
               <div className="lv-hero-bg" aria-hidden="true">
                 <Emblem team={race.self.team} size={190} className="lv-sheet-ghost" />
               </div>
-              <span className="lv-grabber" aria-hidden="true" />
-              <div className="lv-sheet-actions">
-                <button type="button" className="lv-icon-btn" aria-label="Close" onClick={onClose}>
-                  ✕
-                </button>
-              </div>
+              {/* **The handle is the only thing that drags now.** The whole
+                  header used to start the gesture, which cannot survive the
+                  header becoming scrollable — a finger on a photograph means
+                  scroll. The grabber keeps `touch-action: none` so it still
+                  means drag, and only when the scroll is already at the top. */}
+              <span
+                className="lv-grabber"
+                aria-hidden="true"
+                onPointerDown={(event) => {
+                  if (desktop) return
+                  if ((scroller.current?.scrollTop ?? 0) > 0) return
+                  drag.start(event)
+                }}
+              />
 
               <AnimatePresence mode="popLayout" initial={false} custom={direction}>
                 <motion.div
@@ -267,6 +287,14 @@ export function TeamSheet({
               <Sells product={race.self.team.product} />
 
               <Links team={race.self.team} />
+            </div>
+            </div>
+
+            {/* Outside the scroller: the way out cannot scroll away. */}
+            <div className="lv-sheet-actions">
+              <button type="button" className="lv-icon-btn" aria-label="Close" onClick={onClose}>
+                ✕
+              </button>
             </div>
 
             {/* ── Two keys, and no names on them ──

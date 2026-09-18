@@ -726,11 +726,28 @@ body:has(.lv-app[data-locked]) {
     color: var(--lv-ink);
   }
 
+  /* ── One scroll, not two ──
+   *
+   * The header was pinned and only the body scrolled, so the photographs that
+   * hang past the header's edge stayed where they were while every stat tile
+   * travelled up behind them — three torsos floating over the cards, which is
+   * what this was reported as. Header and body are one scrolling column now,
+   * and the only things that hold still are the close button and the
+   * chevrons, which sit outside it. */
+  .lv-sheet-scroll {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* The browser takes the vertical scroll; Motion still sees horizontal
+       pans, which is what moves between teams. */
+    touch-action: pan-y;
+  }
+
   .lv-sheet-hero {
     position: relative;
     /* Above the body, because the squad hangs over it. */
     z-index: 2;
-    flex: none;
     min-height: 300px;
     padding: 10px 20px 0;
     /* **Not `hidden`.** The heads stand between the header and the content,
@@ -738,7 +755,6 @@ body:has(.lv-app[data-locked]) {
        seam. `.lv-hero-bg` does the clipping instead. */
     overflow: visible;
     color: var(--livery-ink);
-    touch-action: none;
     user-select: none;
   }
 
@@ -750,19 +766,26 @@ body:has(.lv-app[data-locked]) {
     background: linear-gradient(140deg, var(--livery-a), var(--livery-b));
   }
 
+  /* The drag handle. Padded into a 44px target with a 5px bar drawn inside
+     it, and `touch-action: none` so a finger here means drag while a finger
+     anywhere else on the header means scroll. */
   .lv-grabber {
     display: block;
-    width: 42px;
-    height: 5px;
+    width: 84px;
+    height: 22px;
     margin: 0 auto;
+    padding: 9px 21px;
+    box-sizing: border-box;
+    background-clip: content-box;
+    background-color: currentColor;
     border-radius: 99px;
-    background: currentColor;
     opacity: 0.45;
+    touch-action: none;
   }
 
   .lv-sheet-actions {
     position: absolute;
-    z-index: 2;
+    z-index: 4;
     top: 18px;
     right: 16px;
     display: flex;
@@ -969,22 +992,18 @@ body:has(.lv-app[data-locked]) {
     dominant-baseline: central;
   }
 
+  /* Not a scroller any more — `.lv-sheet-scroll` above is. This is just the
+     column of cards under the header, and it scrolls because its parent
+     does. */
   .lv-sheet-body {
     position: relative;
     z-index: 1;
     display: flex;
-    flex: 1;
     flex-direction: column;
     gap: 12px;
     /* Top: clear of the heads hanging down from the header. Bottom: clear of
        the chevrons, which float over this rather than scrolling with it. */
     padding: 62px 16px calc(80px + env(safe-area-inset-bottom));
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    /* The browser keeps the vertical scroll; horizontal movement is left for
-       Motion's pan, which is what moves between teams. Without this the
-       sideways swipe is swallowed before it is recognised. */
-    touch-action: pan-y;
   }
 
   .lv-placements {
@@ -1768,7 +1787,6 @@ body:has(.lv-app[data-locked]) {
     .lv-sheet-hero {
       min-height: 330px;
       padding: 20px 26px 0;
-      touch-action: auto;
     }
 
     .lv-sheet-id {
@@ -1804,7 +1822,6 @@ body:has(.lv-app[data-locked]) {
       gap: 14px;
       /* Clear of the heads hanging down, as on the phone. */
       padding: 78px 26px 96px;
-      touch-action: auto;
     }
 
     .lv-figure-value {
