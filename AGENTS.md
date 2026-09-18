@@ -707,8 +707,12 @@ is the one page here that a person holds. Added 17 September 2026.
   one file.
 - **No team id on a row, no "Pos", no live chip, no follow, no captions, no
   footer.** All removed by decision, 17–18 September 2026. The id is a
-  spreadsheet code, and the row's second line carries today's takings or the
-  product instead; `Pos` reads as point-of-sale on a board about takings, so
+  spreadsheet code, and the row's second line carries what the venture sells.
+  **The day's takings were on that line and are gone too**: `+₹218 today`
+  showed on whichever handful of teams had traded since the board closed — one
+  row in thirty-nine on a quiet morning — so the line was a figure on one card
+  and a product on the rest, which reads as a board that cannot make its mind
+  up. The day figure lives in the team's own sheet, under a label; `Pos` reads as point-of-sale on a board about takings, so
   the column says `Rank`; following a team was a star, a pinned bar and a
   `localStorage` key for something search does in two taps; and the caption
   read "Proof-backed revenue · all-time" directly beneath a tab already

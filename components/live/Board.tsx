@@ -156,14 +156,19 @@ function Row({
   const climb = climbOf(boardKey, standing)
 
   /**
-   * One line under the name, and **the team id is not a candidate for it.**
-   * A code says nothing to the person reading — the day's takings do, and
-   * what the venture sells does. Today's figure wins when there is one,
-   * because it is the news; the product is what the row says the rest of the
-   * time. A team with neither shows nothing, and the name centres itself.
+   * One line under the name, and it is what the venture sells.
+   *
+   * **The day's takings were on it and are gone.** `+₹218 today` appeared on
+   * whichever handful of teams had traded since the board closed — one row in
+   * thirty-nine on a quiet morning — so the line was a figure on one card and
+   * a product on the rest, which reads as a board that cannot make its mind
+   * up rather than as news. The day figure has a home: the team's own sheet,
+   * where it sits beside the all-time total under a label.
+   *
+   * The team id is not a candidate either. It is a code for a spreadsheet,
+   * not a fact about a venture, and search still matches on it.
    */
-  const today = boardKey !== 'today' && team.todayRevenue > 0
-  const meta = today ? `+${formatRupees(team.todayRevenue)} today` : (team.product ?? '')
+  const meta = team.product ?? ''
 
   return (
     <motion.li
@@ -191,11 +196,7 @@ function Row({
               {meta === '' && climb === null ? null : (
                 <span className="lv-meta">
                   {climb !== null ? <Climb climb={climb} /> : null}
-                  {meta === '' ? null : (
-                    <span className="lv-meta-text" data-today={today ? '' : undefined}>
-                      {meta}
-                    </span>
-                  )}
+                  {meta === '' ? null : <span className="lv-meta-text">{meta}</span>}
                 </span>
               )}
             </span>

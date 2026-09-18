@@ -109,11 +109,18 @@ body:has(.lv-app[data-locked]) {
     pointer-events: none;
   }
 
+  /* ── The stripes run off both edges ──
+   *
+   * They sat inside the header's own 18px padding, so each ended a thumb's
+   * width short of the screen and the band read as a floating rule rather
+   * than as the edge-to-edge strip it is drawn to be. The negative margin is
+   * the padding, exactly; `.lv-hero` clips, so they stop at the screen. */
   .lv-topline {
     display: grid;
     grid-template-columns: 1fr auto 1fr;
     align-items: center;
     gap: 12px;
+    margin: 0 -18px;
   }
 
   .lv-stripes {
@@ -580,11 +587,6 @@ body:has(.lv-app[data-locked]) {
     overflow: hidden;
     text-overflow: ellipsis;
     opacity: 0.8;
-  }
-
-  .lv-meta-text[data-today] {
-    font-weight: 800;
-    opacity: 0.95;
   }
 
   .lv-slab-ghost {
@@ -1512,6 +1514,13 @@ body:has(.lv-app[data-locked]) {
       padding: 26px 24px 20px;
     }
 
+    /* Edge to edge, like the toolbar band below it. Stopping at the column
+       while the band underneath ran to the window made the two disagree
+       about where the page ends. */
+    .lv-topline {
+      margin: 0 calc(50% - 50vw);
+    }
+
     .lv-title {
       font-size: 78px;
     }
@@ -1528,10 +1537,51 @@ body:has(.lv-app[data-locked]) {
       justify-content: space-between;
       gap: 32px;
       padding: 12px 24px;
+      /* A stacking context of its own, so the band below can sit behind the
+         tabs without falling behind the page itself. */
+      isolation: isolate;
+    }
+
+    /* ── The band spans the window; its contents do not ──
+     *
+     * The strip carried its own background, so it stopped where the board's
+     * 980px column stops and drew two hard vertical edges across the page —
+     * a floating box rather than a toolbar. The contents stay in the column
+     * where they line up with the rows; the glass runs to both edges of the
+     * window like an app bar. */
+    .lv-toolbar::before {
+      content: '';
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      left: 50%;
+      width: 100vw;
+      transform: translateX(-50%);
       background: var(--lv-glass);
       backdrop-filter: blur(16px) saturate(1.4);
       -webkit-backdrop-filter: blur(16px) saturate(1.4);
       border-bottom: 1px solid var(--lv-hairline);
+    }
+
+    .lv-tabs-wrap,
+    .lv-summary {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* The header's diagonals reach the window too, for the same reason. */
+    .lv-hero::after {
+      right: calc(50% - 50vw);
+      width: 420px;
+    }
+
+    /* **The header stops clipping.** It is 980px wide — the board's column —
+       and `overflow: hidden` was cropping the very stripes that had just been
+       told to run to the window: the elements measured 0→1440 and painted
+       230→1210. `.lv-app` still clips the page, so nothing can escape
+       sideways. */
+    .lv-hero {
+      overflow: visible;
     }
 
     /* It has given its stickiness and its glass to the strip above. */
