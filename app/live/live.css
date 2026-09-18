@@ -776,21 +776,37 @@ body:has(.lv-app[data-locked]) {
     background: linear-gradient(140deg, var(--livery-a), var(--livery-b));
   }
 
-  /* The drag handle. Padded into a 44px target with a 5px bar drawn inside
-     it, and `touch-action: none` so a finger here means drag while a finger
-     anywhere else on the header means scroll. */
+  /* ── The drag handle: a big target, a small pill ──
+   *
+   * `touch-action: none` so a finger here means drag while a finger anywhere
+   * else on the header means scroll — which is why it needs to be a thumb
+   * wide rather than the 42x5 it looks.
+   *
+   * **The bar is drawn by the pseudo-element, not by clipping the box.** It
+   * was `background-clip: content-box` with a padding making the target, and
+   * a `border-radius` on top — but a radius belongs to the border box, which
+   * that clip makes invisible, so the painted bar came out a sharp-cornered
+   * rectangle. Same size, wrong shape: stretched rather than rounded. */
   .lv-grabber {
+    position: relative;
     display: block;
     width: 84px;
     height: 22px;
     margin: 0 auto;
-    padding: 9px 21px;
-    box-sizing: border-box;
-    background-clip: content-box;
-    background-color: currentColor;
-    border-radius: 99px;
-    opacity: 0.45;
     touch-action: none;
+  }
+
+  .lv-grabber::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: 42px;
+    height: 5px;
+    margin: -2.5px 0 0 -21px;
+    border-radius: 99px;
+    background: currentColor;
+    opacity: 0.45;
   }
 
   .lv-sheet-actions {
