@@ -99,9 +99,12 @@ export function Podium({
                 )}
               </AnimatePresence>
             </div>
-            <div className="lv-pod-step" aria-hidden="true">
-              <span>{['1st', '2nd', '3rd'][slot]}</span>
-            </div>
+            {/* **No `1st` / `2nd` / `3rd` on the blocks.** The numeral is
+                already outlined on the card above it and the three heights
+                say the same thing a second time; a word saying it a third
+                was the only type on the board that carried nothing new. The
+                card's own `aria-label` still opens with the position. */}
+            <div className="lv-pod-step" aria-hidden="true" />
           </div>
         )
       })}
