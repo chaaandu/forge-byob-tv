@@ -110,9 +110,28 @@ export default function LivePage() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="lv-app" data-locked={openId !== null || searching ? '' : undefined}>
-        <LiveHeader />
-        <BoardTabs boardKey={boardKey} mode={mode} onChange={changeBoard} />
+      <div
+        className="lv-app"
+        data-locked={openId !== null || searching ? '' : undefined}
+        data-panel={openId !== null ? '' : undefined}
+      >
+        {/* ── The board is its own element so it can move ──
+         *
+         * On a wide screen the team panel docks to the right, and a panel
+         * that simply covered the board would hide the money band at the end
+         * of every row — the column the whole page is about. So the board
+         * slides sideways to clear it. **Sideways, not narrower**: resizing
+         * re-wraps names, re-truncates them and reflows the podium, which
+         * makes every click feel like a page rebuild. A transform moves the
+         * whole thing as one piece and changes no layout at all.
+         *
+         * It also has to be a separate element from `.lv-app`, because a
+         * transformed ancestor becomes the containing block for `position:
+         * fixed` descendants — transform `.lv-app` and the docked panel
+         * would slide along with the board it is supposed to be revealing. */}
+        <div className="lv-board">
+          <LiveHeader />
+          <BoardTabs boardKey={boardKey} mode={mode} onChange={changeBoard} />
 
         {hasData ? (
           <main className="lv-main">
@@ -144,6 +163,7 @@ export default function LivePage() {
 
           </main>
         ) : null}
+        </div>
 
         <SearchKey onSearch={() => setSearching(true)} />
 

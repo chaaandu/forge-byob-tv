@@ -316,6 +316,22 @@ describe('/live source rules', () => {
   })
 
   /**
+   * **The stylesheet and the hook must ask the same question.**
+   *
+   * `live.css` decides where the panel sits; `useDesktop` decides which edge
+   * it animates in from, whether it can be dragged away and whether the board
+   * behind it is dimmed. If the two queries ever drift, a tablet gets a panel
+   * docked by CSS that still animates up from the bottom and can be thrown
+   * off the screen by a swipe — which looks like a bug in the animation and
+   * is a bug in a media query.
+   */
+  it('asks the same question in the stylesheet and the hook', () => {
+    const query = '(min-width: 1024px) and (hover: hover) and (pointer: fine)'
+    expect(readFileSync('app/live/live.css', 'utf8')).toContain(`@media ${query}`)
+    expect(readFileSync('lib/useDesktop.ts', 'utf8')).toContain(`matchMedia('${query}')`)
+  })
+
+  /**
    * Archivo is variable on 100–900. A weight outside a face's axis is
    * **synthesised rather than refused** — the browser smears the outlines —
    * so the range is read out of the layout that bundles the face, exactly as

@@ -25,6 +25,7 @@ import {
   type Standing,
 } from '@/lib/live'
 import { nameOf } from '@/lib/team'
+import { useDesktop } from '@/lib/useDesktop'
 import type { BoardMode, Team } from '@/lib/types'
 
 /**
@@ -55,18 +56,18 @@ export function TeamSheet({
   const drag = useDragControls()
   // Which way the content should slide when the team changes.
   const [direction, setDirection] = useState(0)
+  /**
+   * **A drawer on a phone, a docked panel on a desktop.** Same component and
+   * the same contents; what changes is which edge it arrives from, whether it
+   * can be dragged away, and whether the board behind it is dimmed. On a wide
+   * screen it is not dimmed, which is the point of the whole layout: the
+   * standings stay live underneath, so clicking another row swaps the panel
+   * rather than closing it.
+   */
+  const desktop = useDesktop()
 
   const open = teamId !== null
   const race = teamId === null ? null : raceFor(boards[boardKey], teamId)
-
-  useEffect(() => {
-    if (!open) return
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onClose()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [open, onClose])
 
   const go = (step: -1 | 1) => {
     if (race === null) return
@@ -75,6 +76,19 @@ export function TeamSheet({
     setDirection(step)
     onNavigate(target.team.teamId)
   }
+
+  useEffect(() => {
+    if (!open) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+      // Walking the standings without reaching for the mouse — the desktop
+      // equivalent of the swipe, and the reason the chevrons have twins.
+      if (event.key === 'ArrowDown') go(1)
+      if (event.key === 'ArrowUp') go(-1)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
 
   const onDragEnd = (_: unknown, info: PanInfo) => {
     if (info.offset.y > 110 || info.velocity.y > 600) onClose()
@@ -101,25 +115,28 @@ export function TeamSheet({
     <AnimatePresence>
       {open && race !== null ? (
         <>
-          <motion.div
-            key="scrim"
-            className="lv-scrim"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-          />
+          {desktop ? null : (
+            <motion.div
+              key="scrim"
+              className="lv-scrim"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
+            />
+          )}
           <motion.section
             key="sheet"
             role="dialog"
             aria-modal="true"
             aria-label={nameOf(race.self.team)}
             className={`lv-sheet lv-livery-${liveryFor(race.self.team.teamId)}`}
-            initial={{ y: '100%' }}
-            animate={{ y: 0 }}
-            exit={{ y: '100%' }}
+            initial={desktop ? { x: '100%' } : { y: '100%' }}
+            animate={desktop ? { x: 0 } : { y: 0 }}
+            exit={desktop ? { x: '100%' } : { y: '100%' }}
             transition={{ type: 'spring', stiffness: 380, damping: 38 }}
-            drag="y"
+            // Dragging a docked panel down would be dragging it nowhere.
+            drag={desktop ? false : 'y'}
             dragControls={drag}
             dragListener={false}
             dragConstraints={{ top: 0, bottom: 0 }}
@@ -134,7 +151,7 @@ export function TeamSheet({
           >
             <motion.header
               className="lv-sheet-hero"
-              onPointerDown={(event) => drag.start(event)}
+              onPointerDown={(event) => (desktop ? undefined : drag.start(event))}
             >
               {/* ── The colour is a layer, so the faces can leave the header ──
                *

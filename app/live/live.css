@@ -1429,3 +1429,317 @@ body:has(.lv-app[data-locked]) {
   .lv-livery-11 { --livery-a: var(--lv-11-a); --livery-b: var(--lv-11-b); --livery-ink: var(--lv-11-ink); --livery-band: var(--lv-11-band); --livery-band-ink: var(--lv-11-band-ink); }
   .lv-livery-12 { --livery-a: var(--lv-12-a); --livery-b: var(--lv-12-b); --livery-ink: var(--lv-12-ink); --livery-band: var(--lv-12-band); --livery-band-ink: var(--lv-12-band-ink); }
 }
+
+/* ============================================================
+   ≥1024px — the desktop board.
+
+   **One board, full width, with the team panel docked over its right-hand
+   side.** Not two permanent columns: the board is the page, and a panel that
+   is always there would take 40% of the screen to show a team nobody asked
+   about.
+
+   The board *slides* to clear the panel rather than shrinking to fit it. That
+   distinction is the whole trick — resizing re-wraps every venture name,
+   re-truncates the long ones and reflows the podium, so each click reads as
+   the page rebuilding itself. A transform moves it as one piece and changes
+   no layout at all.
+
+   Phones and tablets never see any of this. The query asks for width **and** a
+   fine hovering pointer, because an iPad in landscape is 1180px and would
+   otherwise qualify on width alone — and everything below depends on a
+   pointer: hovering a row, clicking one *behind* an open panel, arrow keys.
+   `useDesktop` carries the identical query, so the layout and the animation
+   can never disagree about which one is showing.
+   ============================================================ */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  @layer components {
+    .lv-app {
+      /* The panel's own width, and the board's. Declared here so the slide
+         below can be arithmetic rather than a guess. */
+      --lv-panel-w: min(40vw, 560px);
+      --lv-board-w: 980px;
+      --lv-rank-w: 64px;
+      --lv-band-w: 150px;
+
+      max-width: none;
+      padding-bottom: 72px;
+      /* The search key floats bottom-right on a phone; at this width it would
+         float over the panel. */
+      overflow-x: hidden;
+    }
+
+    /* ── Making room, not sliding out of the way ──
+     *
+     * The first version translated the board left by however much the panel
+     * would have covered. That is only possible when the board and the panel
+     * both fit across the viewport — 980 + 560 + 32 needs 1572px, and a
+     * 1440 laptop does not have it, so the board slid clean off the left
+     * edge: the rank numerals and half the title were gone. Measured.
+     *
+     * So the page reserves the space instead. The board keeps its own
+     * maximum and simply re-centres in what is left, which on a wide monitor
+     * means it moves and nothing else — at 1920 there are 1360px beside the
+     * panel and the board is 980, so it is pure travel. On a 1440 the
+     * remaining 848 is narrower than the board, and the only thing that
+     * gives is the width of the venture-name column. */
+    .lv-board {
+      max-width: var(--lv-board-w);
+      margin: 0 auto;
+    }
+
+    .lv-app {
+      transition: padding-right 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .lv-app[data-panel] {
+      padding-right: calc(var(--lv-panel-w) + 32px);
+    }
+
+    /* The search key is fixed, so padding does not reach it. */
+    .lv-app[data-panel] .lv-dock {
+      right: calc(var(--lv-panel-w) + 32px);
+    }
+
+    /* ── The board, with room to breathe ── */
+
+    .lv-hero {
+      padding: 26px 24px 20px;
+    }
+
+    .lv-title {
+      font-size: 78px;
+    }
+
+    .lv-tabs-wrap {
+      padding: 12px 24px;
+    }
+
+    .lv-tabs {
+      max-width: 560px;
+    }
+
+    .lv-summary {
+      padding: 22px 24px 6px;
+    }
+
+    .lv-summary-value {
+      font-size: 32px;
+    }
+
+    .lv-podium {
+      gap: 14px;
+      padding: 26px 24px 6px;
+    }
+
+    .lv-pod {
+      height: 226px;
+      border-radius: 22px 22px 6px 6px;
+    }
+
+    .lv-pod-slot-1 .lv-pod {
+      height: 272px;
+    }
+
+    .lv-pod-num {
+      font-size: 76px;
+    }
+
+    .lv-pod-slot-1 .lv-pod-num {
+      font-size: 98px;
+    }
+
+    .lv-pod-mark {
+      margin-top: 66px;
+    }
+
+    .lv-pod-slot-1 .lv-pod-mark {
+      margin-top: 82px;
+    }
+
+    .lv-pod-name {
+      font-size: 15px;
+    }
+
+    .lv-pod-fig {
+      font-size: 17px;
+    }
+
+    .lv-pod-slot-1 .lv-pod-name {
+      font-size: 17px;
+    }
+
+    .lv-pod-slot-1 .lv-pod-fig {
+      font-size: 20px;
+    }
+
+    .lv-colheads {
+      padding: 26px 0 10px;
+      font-size: 10.5px;
+    }
+
+    .lv-colheads span:first-child {
+      padding-left: 22px;
+    }
+
+    .lv-colheads span:last-child {
+      padding-right: 22px;
+    }
+
+    .lv-list {
+      gap: 5px;
+    }
+
+    .lv-row {
+      height: 70px;
+    }
+
+    .lv-pos {
+      font-size: 30px;
+    }
+
+    .lv-name {
+      font-size: 18px;
+    }
+
+    .lv-meta {
+      font-size: 12px;
+    }
+
+    .lv-band {
+      padding: 0 22px 0 var(--lv-rake);
+      font-size: 19px;
+    }
+
+    .lv-slab-mark {
+      width: 34px;
+      height: 34px;
+    }
+
+    /* A pointer can hover, so a row may answer. */
+    .lv-row:hover .lv-slab {
+      filter: brightness(1.08);
+    }
+
+    .lv-foot {
+      margin-top: 32px;
+    }
+
+    .lv-dock {
+      max-width: var(--lv-board-w);
+      padding: 24px;
+    }
+
+    /* ── The panel ── */
+
+    .lv-sheet {
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: auto;
+      width: var(--lv-panel-w);
+      max-width: none;
+      height: 100dvh;
+      margin: 0;
+      border-radius: 0;
+      border-left: 1px solid var(--lv-hairline);
+      box-shadow: -30px 0 70px var(--lv-shade);
+    }
+
+    /* The drawer's handle is a phone affordance: there is nothing to drag. */
+    .lv-grabber {
+      display: none;
+    }
+
+    .lv-sheet-hero {
+      min-height: 330px;
+      padding: 20px 26px 0;
+      touch-action: auto;
+    }
+
+    .lv-sheet-id {
+      min-height: 300px;
+      padding-top: 26px;
+    }
+
+    .lv-sheet-name {
+      font-size: 34px;
+    }
+
+    .lv-sheet-pos {
+      font-size: 188px;
+    }
+
+    /* There is room for the faces to be faces. */
+    .lv-person {
+      width: 118px;
+      height: 162px;
+      margin-left: -36px;
+    }
+
+    .lv-squad {
+      margin-bottom: -16px;
+    }
+
+    .lv-sheet-body {
+      gap: 14px;
+      padding: 22px 26px 96px;
+      touch-action: auto;
+    }
+
+    .lv-figure-value {
+      font-size: 50px;
+    }
+
+    /* **The two links go side by side.** At 560px a full-width row carrying
+       an icon and a domain is mostly empty; the phone stacks them because it
+       has no choice.
+       `.lv-sells` is deliberately left alone — it is a card with its own
+       icon-and-text grid inside, and overriding the container's columns here
+       broke that grid and stood the icon on its own line. */
+    .lv-links {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      border: 0;
+      padding: 0;
+      background: none;
+    }
+
+    .lv-link {
+      padding: 12px 14px;
+    }
+
+    /* ── The keys move up beside the close button ──
+     *
+     * Floating at the bottom is right on a phone, where the sheet is as tall
+     * as the screen and a thumb lives down there. In a docked panel the
+     * content is shorter than the panel, so "the bottom" is the middle of a
+     * stat tile — the chevrons landed on top of one. Up here they sit with
+     * the other control, and the pointer that opened the panel is already
+     * near them. */
+    .lv-sheet-nav {
+      top: 18px;
+      right: 74px;
+      bottom: auto;
+      left: auto;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 0;
+    }
+
+    .lv-nav-key {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+    }
+
+    .lv-nav-key svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .lv-sheet-body {
+      padding-bottom: 32px;
+    }
+  }
+}

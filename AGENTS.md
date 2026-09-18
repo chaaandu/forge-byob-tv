@@ -665,6 +665,36 @@ is the one page here that a person holds. Added 17 September 2026.
   against is stronger here than there, because a person holding a phone can
   act on a stale number where a corridor cannot. `useLiveData` still tracks
   `fetchedAt`; putting a line back is one element.
+- **One page, three widths, and the third is a pointer's.** Phones and tablets
+  get the board as a single column with the team sheet as a drawer. A pointer
+  device at 1024px or more gets the same board, wider, with the sheet **docked
+  to the right** at `min(40vw, 560px)`.
+
+  **The query is width *and* `hover: hover` and `pointer: fine`**, because an
+  iPad in landscape is 1180px and an iPad Pro 1366 — both would take the
+  docked panel on width alone, and the docked layout is a pointer's: it
+  assumes hovering a row, clicking a row *behind* an open panel, and arrow
+  keys. `lib/useDesktop.ts` carries the identical query string and
+  `lib/live.test.ts` pins that the two match — if they drift, a tablet gets a
+  panel docked by CSS that still animates up from the bottom and can be thrown
+  off screen by a swipe, which looks like a broken animation and is a broken
+  media query.
+
+  **The board makes room rather than sliding out of the way.** The first
+  version translated it left by however much the panel covered, which is only
+  possible when both fit across the viewport — 980 + 560 + 32 needs 1572px,
+  and on a 1440 laptop the board slid clean off the left edge, numerals and
+  half the title gone. Measured. So `.lv-app` takes a `padding-right` when a
+  team is open and the board re-centres in what is left: at 1920 that is pure
+  travel, at 1440 the venture-name column gives up 130px. **The money band
+  must never end up behind the panel** — that is the column the page is about,
+  and it is what this arithmetic exists to protect.
+
+  There is **no scrim on a desktop**, which is the point of the layout: the
+  standings stay live under the panel, so clicking another row swaps it rather
+  than closing it. The chevrons move up beside the close button, because a
+  panel is shorter than its contents and "the bottom" is the middle of a stat
+  tile.
 - **`allowedDevOrigins` in `next.config.ts`** lets a phone on the same Wi-Fi
   load `next dev` at `http://<laptop-ip>:3000/live`. Without it Next 16 403s
   every script and the page paints a header and nothing else.
