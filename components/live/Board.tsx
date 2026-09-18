@@ -51,7 +51,15 @@ export function Podium({
   arriving: boolean
   onOpen: (teamId: string) => void
 }) {
-  // Visual order 2 · 1 · 3, the way every podium stands.
+  /**
+   * Visual order 2 · 1 · 3, the way every podium stands.
+   *
+   * **The cards are the podium; there are no blocks under them.** Each place
+   * stood on a violet plinth whose height was its rank — the blocks went
+   * first, then their `1st` / `2nd` / `3rd` labels, and now the plinths
+   * themselves. The ranking survives in the cards: first place is tallest and
+   * third is shortest, so the silhouette is the same staircase without a
+   * second object drawing it. */
   return (
     <section className="lv-podium" aria-label="Top three">
       {[1, 0, 2].map((slot) => {
@@ -99,12 +107,6 @@ export function Podium({
                 )}
               </AnimatePresence>
             </div>
-            {/* **No `1st` / `2nd` / `3rd` on the blocks.** The numeral is
-                already outlined on the card above it and the three heights
-                say the same thing a second time; a word saying it a third
-                was the only type on the board that carried nothing new. The
-                card's own `aria-label` still opens with the position. */}
-            <div className="lv-pod-step" aria-hidden="true" />
           </div>
         )
       })}
