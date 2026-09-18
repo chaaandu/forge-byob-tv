@@ -72,11 +72,22 @@ export default function LivePage() {
     meta.content = colour
   }, [])
 
-  // Keep the open team in the URL, so a sheet can be shared as a link.
+  /**
+   * Keep the open team in the URL, so a sheet can be shared as a link.
+   *
+   * **Only when the URL would actually change.** Next patches
+   * `history.replaceState` to keep its router in step, so calling it on mount
+   * — which this did, to delete a `team` parameter that was not there —
+   * dispatches a router action before the router has initialised. That logs
+   * `Internal Next.js error: Router action dispatched before initialization`
+   * and puts an issue badge on the page in development. Nothing broke, which
+   * is exactly why it sat there unnoticed until the badge was photographed.
+   */
   useEffect(() => {
     const url = new URL(window.location.href)
     if (openId === null) url.searchParams.delete('team')
     else url.searchParams.set('team', openId)
+    if (url.href === window.location.href) return
     window.history.replaceState(window.history.state, '', url)
   }, [openId])
 

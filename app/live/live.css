@@ -1270,6 +1270,26 @@ body:has(.lv-app[data-locked]) {
     color: var(--lv-accent);
   }
 
+  /* ── What the keys float on ──
+   *
+   * Two glass buttons dropped straight onto a stat tile read as stuck to it.
+   * The fade gives them a floor: content scrolls up into it and dissolves
+   * rather than colliding, which is what tells the eye the keys are above the
+   * page instead of part of it. Behind the keys, in front of the body —
+   * `.lv-sheet-nav` owns the stacking context, so `z-index: -1` cannot fall
+   * behind the panel itself. */
+  .lv-sheet-nav::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    left: 0;
+    right: 0;
+    bottom: -24px;
+    height: 112px;
+    background: linear-gradient(transparent, var(--lv-page) 64%);
+    pointer-events: none;
+  }
+
   /* Floating over the body, pinned to the sheet's own bottom edge. */
   .lv-sheet-nav {
     position: absolute;
