@@ -38,7 +38,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from PIL import Image, ImageOps
 
-from cutout import QUALITY, cut_out, detector, face_box, portrait
+from cutout import HEADROOM, QUALITY, cut_out, detector, face_box, frame, portrait
+
+ROOT = Path(__file__).resolve().parent.parent
+OUT = ROOT / "public" / "people"
+# One original at a time, deleted before the next: peak disk is 43MB, not 22GB.
+TMP = Path("/tmp/headshot-original.jpg")
 
 FOLDER = (
     "https://www.dropbox.com/scl/fo/m36ozbh9jrqx0xerpsb5d/AAw7rl67gtYNEN0lnT1Co4o"
@@ -95,6 +100,7 @@ def main() -> int:
     written: list[str] = []
     failed: list[str] = []
     faceless: list[str] = []
+    cramped: list[str] = []
     for team, people in sorted(mapping.items()):
         if only and team not in only:
             continue
@@ -117,10 +123,13 @@ def main() -> int:
                 faceless.append(f"{team} {name} (slot {slot})")
                 TMP.unlink(missing_ok=True)
                 continue
-            crop = portrait(image, box)
+            shot, gap = frame(cut_out(portrait(image, box)))
+            if gap < HEADROOM:
+                # The photograph had nothing above the head to give.
+                cramped.append(f"{team} {name}: {gap}px of headroom, wanted {HEADROOM}")
             target.parent.mkdir(parents=True, exist_ok=True)
             # No `exif=`: the camera, the time and any GPS stay behind.
-            cut_out(crop).save(target, "WEBP", quality=QUALITY, method=6, lossless=False)
+            shot.save(target, "WEBP", quality=QUALITY, method=6, lossless=False)
             written.append(f"{team}/{target.stem}")
             TMP.unlink(missing_ok=True)
             # A breath between students. The whole run is an hour either way;
@@ -133,6 +142,8 @@ def main() -> int:
         print(f"  failed: {line}")
     for line in faceless:
         print(f"  no face found, left to initials: {line}")
+    for line in cramped:
+        print(f"  tight at the top: {line}")
     print("\nPaste into PEOPLE_PHOTOS in config.ts:\n")
     print("export const PEOPLE_PHOTOS: readonly string[] = [")
     for entry in written:

@@ -8,7 +8,7 @@ import { CountUp } from '@/components/live/CountUp'
 import { Emblem } from '@/components/live/Emblem'
 import { Squad } from '@/components/live/Lineup'
 import { SellsIcon } from '@/components/live/SellsIcon'
-import { formatCount, formatRupees, ordinal } from '@/lib/format'
+import { formatCount, formatRupees } from '@/lib/format'
 import {
   BOARD_KEYS,
   avgTicket,
@@ -165,12 +165,13 @@ export function TeamSheet({
                   transition={{ type: 'spring', stiffness: 400, damping: 36 }}
                 >
                   <h2 className="lv-sheet-name">{nameOf(race.self.team)}</h2>
-                  {/* No team id. It is a code for a spreadsheet, not a fact
-                      about a venture — the rows dropped it for the same
-                      reason. Search still matches on it. */}
-                  <p className="lv-sheet-sub">
-                    {ordinal(race.self.rank)} of {race.total} · {boardLabel(boardKey, mode)}
-                  </p>
+                  {/* **No caption under the name.** It read "1st of 39 ·
+                      All-time", and every part of that is already on screen:
+                      the rank is the numeral behind the faces and again on the
+                      placements row below, and which board you are looking at
+                      is the tab you pressed to get here. The team id went the
+                      same way and for the same reason — a code for a
+                      spreadsheet, not a fact about a venture. */}
                   {/* ── The stage: the rank behind, the faces in front ──
                    *
                    * The numeral used to be the biggest thing in the header,

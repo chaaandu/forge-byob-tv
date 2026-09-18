@@ -36,7 +36,23 @@ QUALITY = 84
 # distances — or on a phone, or by LinkedIn — still come out the same size.
 FACE_W = 3.4
 FACE_H = 4.6
-EYE_LINE = 0.22
+
+# ── Headroom is measured on the cutout, not guessed from the face box ──
+#
+# The first version placed the eyes a fifth of the way down and hoped. **91 of
+# the first 105 came out with the hair flat against the top edge**, because the
+# face box a detector returns covers eyebrows to chin — it knows nothing about
+# how tall somebody's hair is, and that varies by more than the margin the
+# framing left.
+#
+# So the crop is taken deliberately tall, the background is removed, and *then*
+# the topmost opaque pixel — the real top of the hair — is measured and the
+# final window placed against it. Every student ends up with the same gap above
+# their head whatever their hair is doing.
+HEADROOM = 27  # px in a 440-tall frame ≈ 8px at the 132px the squad renders
+# How much taller than the final frame to cut before measuring. 1.6x covers the
+# tallest hair in the cohort with room to spare.
+OVERSHOOT = 1.6
 # How far a small photograph may be enlarged to fit the crop. Past about three
 # times, a 400px profile picture is mush and the initials are the better card.
 MAX_UPSCALE = 3.0
@@ -71,10 +87,16 @@ def face_box(model: cv2.FaceDetectorYN, image: Image.Image) -> tuple[int, int, i
 
 
 def portrait(image: Image.Image, box: tuple[int, int, int, int]) -> Image.Image:
-    """Head and shoulders, scaled off the face so everyone matches."""
+    """
+    A deliberately tall crop around the face, at the shared scale.
+
+    Taller than the frame that ships, because the top of the head cannot be
+    found until the background is gone — see `HEADROOM`. `frame` does the
+    final placement.
+    """
     x, y, w, h = box
     cw = w * FACE_W
-    ch = cw * HEIGHT / WIDTH
+    ch = cw * HEIGHT / WIDTH * OVERSHOOT
 
     # Enlarge a small source until the crop fits inside it, up to the cap.
     grow = max(cw / image.width, ch / image.height, 1.0)
@@ -82,13 +104,36 @@ def portrait(image: Image.Image, box: tuple[int, int, int, int]) -> Image.Image:
         grow = min(grow, MAX_UPSCALE)
         image = image.resize((round(image.width * grow), round(image.height * grow)), Image.LANCZOS)
         x, y, w, h = (round(v * grow) for v in (x, y, w, h))
-        cw, ch = w * FACE_W, w * FACE_W * HEIGHT / WIDTH
+        cw = w * FACE_W
+        ch = cw * HEIGHT / WIDTH * OVERSHOOT
 
     cw, ch = round(min(cw, image.width)), round(min(ch, image.height))
     cx, cy = x + w // 2, y + h // 2
     left = max(0, min(image.width - cw, round(cx - cw / 2)))
-    top = max(0, min(image.height - ch, round(cy - ch * EYE_LINE)))
-    return image.crop((left, top, left + cw, top + ch)).resize((WIDTH, HEIGHT), Image.LANCZOS)
+    # Centre the *face* in the tall crop and let `frame` decide the rest.
+    top = max(0, min(image.height - ch, round(cy - ch * 0.42)))
+    scale = WIDTH / cw
+    tall = image.crop((left, top, left + cw, top + ch))
+    return tall.resize((WIDTH, round(ch * scale)), Image.LANCZOS)
+
+
+def frame(cut: Image.Image) -> tuple[Image.Image, int]:
+    """
+    The final 330x440 window, placed so the top of the hair sits `HEADROOM`
+    below the top edge.
+
+    Returns the frame and the gap actually achieved — which is smaller only
+    when the photograph itself has nothing above the head, and the caller
+    reports those.
+    """
+    bbox = cut.getchannel("A").getbbox()
+    hair = bbox[1] if bbox else 0
+    top = max(0, hair - HEADROOM)
+    gap = hair - top
+
+    window = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))
+    window.paste(cut.crop((0, top, WIDTH, min(top + HEIGHT, cut.height))), (0, 0))
+    return window, gap
 
 
 def cut_out(image: Image.Image) -> Image.Image:

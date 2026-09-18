@@ -594,6 +594,12 @@ is the one page here that a person holds. Added 17 September 2026.
   as four stickers, and every second one sits 12px higher so the group is a
   group.
 
+  **The header carries a name, a numeral and the faces, and nothing else.**
+  A caption reading "1st of 39 · All-time" sat under the name until 18
+  September 2026; every part of it was already on screen — the rank is the
+  watermark behind the squad and again on the placements row, and the board is
+  the tab you pressed to get there.
+
   **The rank numeral went behind them and the mark's disc went entirely.**
   The faces are what this page has that no leaderboard does, so they take the
   middle at the size that says so; the numeral is a 168px watermark at 0.22
@@ -604,7 +610,12 @@ is the one page here that a person holds. Added 17 September 2026.
 
   Photographs are `public/people/<TEAM_ID>/<name-slug>.webp`, listed in
   `PEOPLE_PHOTOS` in `config.ts` — **the list, not the filesystem**, exactly as
-  `LOGOS` works and for the same reason. The slug is derived from the
+  `LOGOS` works and for the same reason. **Run
+  `scripts/register-people.py` after anything that writes or deletes one**: the
+  page never reads the directory, so a manifest entry with no file behind it is
+  a broken image on somebody's phone. That happened — re-running the fetch
+  meant emptying `public/people/` first, and every card spent that hour asking
+  for 105 files that were not there. The slug is derived from the
   student's name at both ends, so a photograph needs no mapping file. The
   failure mode to know: a filename spelled differently from the sheet's cell
   simply never appears, on one card, silently.

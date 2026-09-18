@@ -43,7 +43,7 @@ from pathlib import Path
 from PIL import Image, ImageOps
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cutout import QUALITY, cut_out, detector, face_box, portrait, subject_share
+from cutout import HEADROOM, QUALITY, cut_out, detector, face_box, frame, portrait, subject_share
 
 try:  # optional, and only needed for iPhone originals
     import pillow_heif  # type: ignore
@@ -117,7 +117,10 @@ def main() -> int:
             )
             continue
 
-        cut = cut_out(portrait(image, box))
+        cut, gap = frame(cut_out(portrait(image, box)))
+        if gap < HEADROOM:
+            skipped.append(f"{path.name} — only {gap}px above the head; crop it looser and resend")
+            continue
         share = subject_share(cut)
         if not 0.18 < share < 0.92:
             skipped.append(f"{path.name} — background removal looks wrong ({share:.0%} subject)")
