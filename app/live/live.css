@@ -717,17 +717,23 @@ body:has(.lv-app[data-locked]) {
     display: flex;
     flex-direction: column;
     max-width: 520px;
-    /* ── Three quarters, not the whole screen ──
+    /* ── Most of the screen, not all of it ──
      *
      * A sheet that fills the screen reads as a page, and people start looking
-     * for a way *back* rather than a way out. Leaving a quarter of the board
+     * for a way *back* rather than a way out. Leaving a strip of the board
      * showing says it is a layer: the scrim above it is visible, tappable and
      * obviously not part of this card.
      *
+     * **85%, and the number is set by what has to be above the fold**: the
+     * header, the three placements and the revenue card, which is the answer
+     * most people opened the sheet for. At 75% the revenue card's foot was
+     * below the edge on a small phone. Anything under it is expected to be
+     * scrolled to.
+     *
      * `min()` keeps the second term for the short screens — a phone in
-     * landscape, a small Android — where three quarters would be less than
-     * the header needs. */
-    height: min(75dvh, calc(100dvh - env(safe-area-inset-top) - 26px));
+     * landscape, a small Android — where the arithmetic would otherwise put
+     * the sheet under the notch. */
+    height: min(85dvh, calc(100dvh - env(safe-area-inset-top) - 26px));
     margin: 0 auto;
     overflow: hidden;
     border-radius: 24px 24px 0 0;
