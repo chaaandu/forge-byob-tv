@@ -9,6 +9,7 @@ import { CountUp } from '@/components/live/CountUp'
 import { TeamSheet } from '@/components/live/TeamSheet'
 import { boardMode } from '@/lib/board'
 import { standingsFor, type BoardKey, type Standing } from '@/lib/live'
+import { useDesktop } from '@/lib/useDesktop'
 import { useLiveData } from '@/lib/useLiveData'
 import type { BoardMode } from '@/lib/types'
 
@@ -43,6 +44,7 @@ export default function LivePage() {
   const [arriving, setArriving] = useState(true)
 
   const hasData = snapshot !== null
+  const desktop = useDesktop()
 
   // A `?team=` deep link, read on the client only: the route is prerendered,
   // so the URL's query is not knowable during render.
@@ -130,7 +132,16 @@ export default function LivePage() {
     <MotionConfig reducedMotion="user">
       <div
         className="lv-app"
-        data-locked={openId !== null || searching ? '' : undefined}
+        /**
+         * **The page stops scrolling only when something covers it.**
+         *
+         * A drawer on a phone does — it is the screen. A docked panel does
+         * not: the board is right there beside it, and locking the page
+         * because a team is open left the standings frozen on a desktop with
+         * two thirds of the window still showing them. Search is a modal at
+         * every width, so it always locks.
+         */
+        data-locked={searching || (openId !== null && !desktop) ? '' : undefined}
         data-panel={openId !== null ? '' : undefined}
       >
         {/* ── The board is its own element so it can move ──

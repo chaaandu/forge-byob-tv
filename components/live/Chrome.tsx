@@ -129,6 +129,21 @@ export function SearchSheet({
   return (
     <AnimatePresence onExitComplete={() => setQuery('')}>
       {open ? (
+        <>
+          {/* ── Somewhere to click that means "no" ──
+           *
+           * On a phone the search fills the screen, so Cancel is the only
+           * outside there is. On a desktop it is a panel with the board
+           * visible around it, and clicking that board did nothing at all —
+           * the one gesture everybody tries on a modal. */}
+          <motion.div
+            key="search-scrim"
+            className="lv-search-scrim"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
+          />
         <motion.div
           key="search"
           className="lv-search"
@@ -173,6 +188,7 @@ export function SearchSheet({
             {results.length === 0 ? <li className="lv-search-none">No team matches “{query}”</li> : null}
           </ul>
         </motion.div>
+        </>
       ) : null}
     </AnimatePresence>
   )

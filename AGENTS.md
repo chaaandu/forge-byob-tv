@@ -782,7 +782,13 @@ is the one page here that a person holds. Added 17 September 2026.
 
   There is **no scrim on a desktop**, which is the point of the layout: the
   standings stay live under the panel, so clicking another row swaps it rather
-  than closing it. The chevrons move up beside the close button, because a
+  than closing it — **and they scroll**. `data-locked` stops the page
+  scrolling only when something actually covers it: a drawer on a phone does,
+  a docked panel does not, and locking for the panel left the board frozen
+  with two thirds of the window still showing it. Search is a modal at every
+  width, so it always locks, and on a desktop it has a scrim that closes it —
+  the board is visible around a 560px card, and clicking the visible page is
+  the gesture everybody tries. The chevrons move up beside the close button, because a
   panel is shorter than its contents and "the bottom" is the middle of a stat
   tile.
 - **`allowedDevOrigins` in `next.config.ts`** lets a phone on the same Wi-Fi

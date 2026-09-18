@@ -1361,6 +1361,17 @@ body:has(.lv-app[data-locked]) {
 
   /* ── Search ─────────────────────────────────────────────── */
 
+  /* Under the search, over everything else. On a phone the panel covers it
+     entirely, which is why it costs nothing there. */
+  .lv-search-scrim {
+    position: fixed;
+    z-index: 59;
+    inset: 0;
+    background: var(--lv-scrim);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+  }
+
   .lv-search {
     position: fixed;
     z-index: 60;
@@ -1861,6 +1872,24 @@ body:has(.lv-app[data-locked]) {
     .lv-sheet-nav {
       bottom: 24px;
       padding: 0 26px;
+    }
+
+    /* A card, not a column. Full height is right on a phone, where the search
+       *is* the screen; here it sits in the middle of the board with the
+       scrim showing it has an outside. */
+    .lv-search {
+      /* **Centred by margins, not by a transform.** Motion animates this
+         element's `y`, which means it writes `transform` inline — so a
+         `translateX(-50%)` here is overwritten the moment the modal opens and
+         the card lands half a screen to the right. Measured. */
+      inset: 12vh 0 auto 0;
+      margin: 0 auto;
+      width: min(560px, 90vw);
+      max-height: 68vh;
+      border: 1px solid var(--lv-hairline-strong);
+      border-radius: 20px;
+      overflow: hidden;
+      box-shadow: 0 30px 80px var(--lv-shade);
     }
 
     .lv-nav-key {
