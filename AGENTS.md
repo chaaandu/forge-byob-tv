@@ -129,8 +129,8 @@ npm run build        # next build
   point. Nothing on the stage loops.
 
   **`/weekly`'s day mark is the third arrival, and it is the first one that
-  fires on something other than a slide mount.** The two chevrons beside a
-  day figure fade up bottom-to-top, 90ms apart, 380ms each — once, `both`, no
+  fires on something other than a slide mount.** The two chevrons beside the
+  figure fade up bottom-to-top, 90ms apart, 380ms each — once, `both`, no
   iteration count — and they do it on exactly two occasions: the slide arriving,
   and *that team's* `todayRevenue` going up. Nothing else, and never at rest.
 
@@ -141,6 +141,23 @@ npm run build        # next build
   the first motion on this wall that is not about rank — a team can sell ₹40,000
   and not pass anybody, and until now the wall had no way to say so.
 
+  **Both of those got stronger when the board became a daily one, and the mark
+  is now the only motion this slide has.** `/weekly`'s figures are a *finished*
+  day and change once a morning, so `boardPeriod` silences that tick and the
+  slide produces no overtake flips at all — see the daily-board rule below.
+  Every other card on the board holds still for the whole thirty seconds; these
+  chevrons are the one thing that can say anything happened, and what they say
+  is exactly the thing the locked figure cannot: this venture has sold *since
+  the board closed*. The day figure that used to sit beside them went with the
+  fold, so the mark carries no number — its presence is the whole statement.
+
+  Measured after the move, because the ground changed and a contrast ratio is a
+  fact about a pair: the leading chevron is **8.64:1** on the solid half of the
+  board and **4.64:1** on the quiet half, the trail 3.83 and 2.49. Better than
+  the folded band's 8.39 / 3.40 where it matters most, and the mark now steps
+  back with its own card's tier, which a band supplying its own ground never
+  did.
+
   **Both triggers are decided in `WeeklyGrid`, and a card is never allowed to
   decide for itself.** That is not tidiness; it is the whole correctness
   argument. A card is remounted whenever it crosses a row boundary, for any
@@ -149,8 +166,13 @@ npm run build        # next build
   made one, convincingly, with nothing to report it. `.tv-card-detail` already
   carries that scar. The grid compares two polls, and it compares with `>`
   rather than `!==`: midnight takes thirty-nine day figures to zero at once, and
-  that is the loudest non-event on the wall. `render.test.tsx` pins all of it,
-  including that the board is still afterwards.
+  that is the loudest non-event on the wall. **Note which midnight** — the
+  chevrons are driven by `todayRevenue`, which is the sheet's `TODAY()` and
+  zeroes at 00:00 IST, and that is *not* the board's own boundary, which is
+  10:00. Two clocks, deliberately: the figure is a settled day and the mark is
+  live, so they are allowed to roll at different hours and the `>` is what keeps
+  both rolls quiet. `render.test.tsx` pins all of it, including that the board is
+  still afterwards.
 
   What it costs is the quiet board between polls being interrupted by up to
   thirty-nine cascades at once on arrival. That is the entrance, it is over in
@@ -445,26 +467,46 @@ npm run build        # next build
   is data, because empty is a valid state here and a stamp with no figures
   beside it states the provenance of nothing.
 
-- **Neither board states its window now, and `/podium` is the one that lost
-  it.** It carried `All time` beside its name until 13 September 2026; removal
-  was asked for directly. `/weekly` never carried anything, because its day chip
-  and its `Revenue since` caption already bound its window.
+- **`/weekly` states its window and `/podium` does not, and the thing that
+  separates them is that one board is locked.** `/podium` carried `All time`
+  beside its name until 13 September 2026 and removal was asked for directly;
+  `/weekly` carried nothing at all, because its day chip and its `Revenue
+  since` caption bound its window between them. From the daily board it carries
+  `17 Sep → 18 Sep, 10am` in `WallHeader`'s `scope` slot.
 
-  What this costs is stated rather than argued away. The same venture reads
-  ₹2,42,546 on one slide and ₹12,400 on the other thirty seconds later, and
-  nothing on either slide now says why. The wall is back to relying on the
-  argument the word was added to stop relying on — that the audience is
-  thirty-nine teams who live the programme daily, so they know which board is
-  which. That is a claim about the people in the corridor rather than about the
-  board, and it is the one being made again.
+  **This is not the `as_of` argument won on appeal.** That rule and this one
+  agree, and the reason they can is that they are about different properties.
+  Every board on this wall before the daily one was **live** — a figure on it
+  was current to within six minutes, so its window was "now" and the only thing
+  a caption could add was provenance, which is furniture on a slide meant to be
+  figures. The daily board is **locked**: it is decided at ten in the morning
+  and does not move for twenty-four hours. At four in the afternoon it is
+  showing figures that stopped six hours ago, and without the line nothing on
+  the frame says that this is the design rather than the failure. A locked board
+  with no window stated is not missing its provenance, it is missing its
+  *subject*.
 
-  **The machinery stays and stays exercised.** `WallHeader`'s `scope` prop is
-  still there, still typed, still styled as `.tv-mast-scope`, and
-  `render.test.tsx` still pins that the prop is what decides — so no slide can
-  come to carry the wrong one, and putting the word back is one prop on one
-  line.
+  It also carries the only visible sign of the window having widened. A laptop
+  that slept through ten o'clock takes its mark at eleven, or the next day, and
+  the figures stay perfectly true while the window silently becomes 25 or 48
+  hours long — `16 Sep → 18 Sep` reads as wrong where `17 → 18` reads as a day.
+  Nothing else in the product can report that.
+
+  **What is still not said is which board is which**, and that cost is
+  unchanged. The same venture reads ₹2,42,546 on `/podium` and ₹1,998 on
+  `/weekly` thirty seconds later; the daily board now says what its own figure
+  covers, and `/podium` still says nothing. The wall still relies on the
+  audience being thirty-nine teams who live the programme daily — a claim about
+  the people in the corridor rather than about the board. Putting `All time`
+  back on `/podium` is one prop on one line, and `render.test.tsx` still pins
+  that the prop is what decides, so no slide can come to carry the wrong one.
 
 - **No trigger types beyond the 15 in the design.** The list was deliberately narrowed.
+- **The bare domain belongs to the students now.** `/` redirects to `/live`,
+  not `/weekly`. `next.config.ts` carries the reasoning: the wall is set up
+  once, by one person, who can type one more word, and the other hundred and
+  eighteen people are opening a link on a phone. **The TV is pointed at
+  `/weekly` explicitly** and rotates itself from there; nothing else changes.
 - **The rotation between the two slides is ours, and it is the only rotation logic
   here.** `components/Rotator.tsx`, thirty seconds a slide, by soft navigation. That
   reverses the original "external system" rule, which assumed the campus slideshow drove
@@ -483,10 +525,27 @@ is the one page here that a person holds. Added 17 September 2026.
 
 - **What it shares with the wall is everything that decides a number**:
   `fetchCsv` (with `no-store`), `parseSnapshot`, `passesRowGate`, the CSV
-  cache, `rankTeams`, `rankForMode` and `challenge_mode`. `lib/live.test.ts`
-  asserts the all-time and period boards sort exactly as `/podium` and
-  `/weekly` do — a phone that disagreed with the TV about who is fourth would
-  be worse than no phone.
+  cache, `rankTeams`, `rankByChallenge` and `challenge_mode`. A phone that
+  disagreed with the TV about who is fourth would be worse than no phone, and
+  `lib/live.test.ts` is where that is held: the all-time board sorts exactly as
+  `/podium` does, and in challenge mode the period board sorts exactly as
+  `/weekly` does.
+
+  **Between challenges the two now measure different windows, and that is
+  physical rather than a choice.** `/weekly` became a daily board on 18
+  September 2026, and its figure is not a published column: it is a finished
+  day computed from two photographs of `total_revenue` that the **laptop
+  driving the TV** took and kept in its own `localStorage`. A phone is a
+  different machine. It has never held those marks and cannot be handed them
+  without the backend this project does not have.
+
+  So the phone's middle tab keeps `week_revenue`, under its own honest label,
+  and `lib/live.test.ts` states the divergence rather than asserting a parity
+  that is gone — including that the tab must not quietly fall through to
+  `rankForMode('daily', …, null)`, which ranks every team at ₹0 and would make
+  it an unlabelled duplicate of `All-time`. What makes this tolerable rather
+  than merely unavoidable is that the tab *beside* it is `Today`, live off
+  `today_revenue`, which is the daily board the wall's locked one cannot be.
 - **What it does not share is the wall's detection.** `lib/useLiveData.ts`
   never writes `board.*` or the kick queue; a phone is not a third writer to
   state the two slides own.
@@ -733,16 +792,73 @@ is the one page here that a person holds. Added 17 September 2026.
   match the code, not the other way round.
 - **`/weekly` shows one of two contests, and `TV_Cohort`'s `challenge_mode` cell
   picks which.** `Yes` ranks and prints `challenge_revenue` under a `10-Day
-  Challenge` heading with the day chip and the `Revenue since` caption; anything
-  else ranks and prints `week_revenue` as `Weekly Leaderboard` with both of those
-  gone. One cell, not two booleans — two have four states and only two mean
-  anything. Not derived from the `challenge_*_iso` dates either: those say *when*
-  and stay put through a switch-off, this says *whether*. Every unreadable value
-  falls to week, because `week_revenue` is required and always real while
-  `challenge_revenue` between challenges is whatever the consolidator last left
-  there — guessing wrong towards challenge is ₹0 on 39 cards, rendered perfectly.
-  `lib/board.ts` owns all of it, including folding the mode into the reset period
-  so flipping the cell does not read as 39 overtakes.
+  Challenge` heading with the day chip; anything else is the **daily board** —
+  `Daily Leaderboard`, the window in the masthead, no chip. One cell, not two
+  booleans: two have four states and only two mean anything. Not derived from
+  the `challenge_*_iso` dates either — those say *when* and stay put through a
+  switch-off, this says *whether*. `lib/board.ts` owns all of it, including
+  folding the mode into the reset period so flipping the cell does not read as
+  39 overtakes.
+
+  **The non-challenge half was `week_revenue` until 18 September 2026** and the
+  daily board replaced it, asked for directly. The fallback asymmetry survives
+  the swap with a new argument: guessing wrong towards daily puts a true,
+  ranked, finished day on the board under a heading that says so, and
+  self-corrects the moment the cell is fixed; guessing wrong towards challenge
+  puts ₹0 on 39 cards under the name of a contest that is not running, and
+  nothing recovers it.
+
+- **The daily board is a *finished* day, it is computed on the laptop, and it
+  does not move.** 10:00 IST yesterday to 10:00 IST today. `lib/daily.ts`
+  photographs every team's `total_revenue` at the first poll at or after ten and
+  keeps the newest two marks in `localStorage`; the figure is the difference.
+  `istWindowKey` in `lib/schedule.ts` decides which window an instant is in and
+  is the only thing that asks the clock — `daily.ts` is scanned for `Date` the
+  way `overtake.ts` and `ranking.ts` are.
+
+  **There is no daily column to read and that was checked rather than assumed.**
+  `TV_Feed`'s `today_revenue` is `SUMIFS(… 'Daily Dump'!B:B, TODAY())` — live,
+  from midnight, and ₹0 for 35 of 41 teams at two in the afternoon on a working
+  Friday. `Daily Team Summary` is cumulative in spite of its name, `Weekly — by
+  Team` is weekly, `Metrics` is empty. So a closed day has to be made from the
+  only material there is, and photograph-and-subtract is the same trick the
+  sheet already uses for `challenge_revenue`. **A `yesterday_revenue` column
+  would replace all of this with one `SUMIFS` and no `localStorage`**; it was
+  offered and declined, so if the sheet ever grows one, this is the machinery it
+  retires.
+
+  Ten rather than midnight for two reasons, both mechanical: the 39 figures that
+  change when the window rolls change while the building is empty, and the
+  previous night's last sales have time to reach the published CSV — which lags
+  the sheet by about five minutes — before the shutter closes on them.
+
+  **Four costs, none of them argued away.**
+
+  - **A wall needs two marks before it has a window.** A fresh laptop, or one
+    whose browser data was cleared, prints ₹0 on all 39 cards until the next
+    10:00 — up to twenty-four hours, rendering perfectly throughout.
+  - **A missed ten o'clock widens the window silently.** Asleep from 09:30 to
+    11:00 and the window is 25 hours; off for a day and it is 48. The figures
+    are true either way — they are the difference between two real photographs
+    — and the board goes on calling whatever it holds a day. The masthead's
+    dates are the only thing that says otherwise.
+  - **This slide produces no overtake flips at all.** Ranks only change at ten,
+    when every figure moves in one poll, which is exactly the tick
+    `boardPeriod` has to silence. Not a weakened detector — a locked board has
+    no moment left where a rank can be seen changing hands. The flip
+    choreography still runs in challenge mode, and `/podium` is what exercises
+    it the rest of the time.
+  - **`/live`'s period tab can no longer agree with `/weekly`.** The marks live
+    on the laptop driving the TV and a phone is a different machine, so that tab
+    keeps `week_revenue` under its own honest label. `lib/live.test.ts` states
+    the divergence as a fact rather than asserting a parity that is gone.
+
+  **A team newly listed in `TV_Feed` is left out of the window, not credited
+  with its whole all-time total as one day's takings.** That is the one bug in
+  here that would have put a false leader at rank 1 for twenty-four hours with
+  nothing to report it; `windowOf` omits any team the opening mark never saw, so
+  it prints ₹0 for one window and a true figure from the next. Same direction
+  `detect` fails in when it meets a team with no previous rank.
 - Currency: `Intl.NumberFormat('en-IN')` — `₹1,04,500`, not `₹104,500`.
 
 ## Traps that report nothing
@@ -789,7 +905,7 @@ not by reading source.
   **There was one permitted exception and it is retired, not widened.** DM Serif
   Display drew the masthead and lacked U+20B9; it was safe because
   `--font-serif` had exactly one reader, `--t-tv-heading`, and that reader drew
-  three strings — `BYOB Leaderboard`, `Weekly Leaderboard`, `10-Day Challenge` —
+  three strings — `BYOB Leaderboard`, `Daily Leaderboard`, `10-Day Challenge` —
   every one a constant in this repo and none a figure. The masthead is Figtree
   800 now and no bundled face on this wall lacks the rupee. `--font-serif`
   survives as generics pointed at nothing, purely to keep the design system's

@@ -17,13 +17,20 @@ const nextConfig: NextConfig = {
   allowedDevOrigins: ['192.168.*.*', '10.*.*.*', '172.*.*.*'],
 
   /**
-   * `/` → `/weekly`, and nothing else.
+   * `/` → `/live`, and nothing else.
    *
    * There is no `app/page.tsx`, so the bare domain used to answer 404. That is
-   * the correct HTTP answer and the wrong product answer: the person who types
-   * `forge-byob-tv.vercel.app` is standing at a TV with an HDMI cable, and a
-   * 404 tells them the deploy is broken when it is fine. It happened on the
-   * first deploy.
+   * the correct HTTP answer and the wrong product answer: a 404 tells whoever
+   * typed the domain that the deploy is broken when it is fine. It happened on
+   * the first deploy.
+   *
+   * **It pointed at `/weekly` until 18 September 2026, and the audience is why
+   * it moved.** The reasoning then was that the only person typing the bare
+   * domain is standing at a TV with an HDMI cable. That stopped being true
+   * when `/live` shipped: the wall is set up once, by one person, who can type
+   * one more word — and the other hundred and eighteen people are students
+   * opening the link on a phone, for whom the standings *are* the product.
+   * So the root belongs to them, and the TV gets the explicit `/weekly`.
    *
    * **Only the root.** Every other unknown path still 404s, loudly, which is
    * deliberate — `components/Rotator.tsx` explains that a wall pointed at a
@@ -37,13 +44,14 @@ const nextConfig: NextConfig = {
    * decision that could reasonably change the day this grows a landing page or
    * a third slide.
    *
-   * `/weekly` rather than `/podium` because the rotation is symmetric, so the
-   * entry point only decides which slide is up for the first thirty seconds —
-   * and `/weekly` shows the whole cohort, which is the more useful thing to be
-   * looking at while you are still confirming the wall works.
+   * **The TV is unaffected by this.** It is pointed at `/weekly` (or
+   * `/podium` — the rotation is symmetric, so the entry point only decides
+   * which slide is up for the first thirty seconds), and `components/
+   * Rotator.tsx` swaps the two every thirty seconds from there. `/live` is not
+   * in that rotation and never navigates anywhere.
    */
   async redirects() {
-    return [{ source: '/', destination: '/weekly', permanent: false }]
+    return [{ source: '/', destination: '/live', permanent: false }]
   },
 }
 
