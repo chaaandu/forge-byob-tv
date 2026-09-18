@@ -41,15 +41,14 @@ export function TeamSheet({
   boards,
   boardKey,
   mode,
-  onBoard,
   onNavigate,
   onClose,
 }: {
   teamId: string | null
   boards: Record<BoardKey, Standing[]>
+  /** Which board the *page* is on. The panel starts here and then has its own. */
   boardKey: BoardKey
   mode: BoardMode
-  onBoard: (key: BoardKey) => void
   onNavigate: (teamId: string) => void
   onClose: () => void
 }) {
@@ -80,8 +79,27 @@ export function TeamSheet({
    */
   const desktop = useDesktop()
 
+  /**
+   * ── The panel's own board, which is not the page's ──
+   *
+   * The placement tiles used to call back and switch the board behind — so
+   * looking at where a team sits *this week* re-sorted the whole page, and
+   * on a desktop you watched the standings you were reading rearrange
+   * themselves. Reported as exactly that.
+   *
+   * They set this instead. It starts wherever the page is when the sheet
+   * opens, so tapping a team on Today opens that team's Today figure, and
+   * from then on the tiles move the panel and nothing else.
+   */
+  const [panelKey, setPanelKey] = useState<BoardKey>(boardKey)
   const open = teamId !== null
-  const race = teamId === null ? null : raceFor(boards[boardKey], teamId)
+
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (open) setPanelKey(boardKey)
+  }, [open, boardKey])
+
+  const race = teamId === null ? null : raceFor(boards[panelKey], teamId)
 
   const go = (step: -1 | 1) => {
     if (race === null) return
@@ -237,9 +255,9 @@ export function TeamSheet({
                       key={key}
                       type="button"
                       role="tab"
-                      aria-selected={key === boardKey}
+                      aria-selected={key === panelKey}
                       className="lv-placement"
-                      onClick={() => onBoard(key)}
+                      onClick={() => setPanelKey(key)}
                     >
                       <span className="lv-placement-label">{boardLabel(key, mode)}</span>
                       <span className="lv-placement-rank">
@@ -251,7 +269,7 @@ export function TeamSheet({
               </div>
 
               <div className="lv-figure">
-                <span className="lv-label">{figureLabel(boardKey, mode)}</span>
+                <span className="lv-label">{figureLabel(panelKey, mode)}</span>
                 <CountUp className="lv-figure-value" value={race.self.figure} />
                 <LeaderBar race={race} />
               </div>
@@ -269,9 +287,9 @@ export function TeamSheet({
                 <Stat
                   label="Share of board"
                   value={
-                    shareOf(boards[boardKey], race.self.team.teamId) === null
+                    shareOf(boards[panelKey], race.self.team.teamId) === null
                       ? '—'
-                      : `${(shareOf(boards[boardKey], race.self.team.teamId)! * 100).toFixed(1)}%`
+                      : `${(shareOf(boards[panelKey], race.self.team.teamId)! * 100).toFixed(1)}%`
                   }
                 />
                 <Stat

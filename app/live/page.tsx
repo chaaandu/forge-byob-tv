@@ -224,7 +224,6 @@ export default function LivePage() {
           boards={boards}
           boardKey={boardKey}
           mode={mode}
-          onBoard={changeBoard}
           onNavigate={setOpenId}
           onClose={close}
         />

@@ -1800,6 +1800,15 @@ body:has(.lv-app[data-locked]) {
       padding: 20px 26px 0;
     }
 
+    /* **Square, like the panel it fills.** The header's paint kept the
+       drawer's rounded top corners, so a docked panel showed the dark page
+       through two notches at the top — the "unfinished" edge this was
+       reported as. A drawer rises from the bottom of a phone and wants them;
+       a panel flush to the top and right of the window does not. */
+    .lv-hero-bg {
+      border-radius: 0;
+    }
+
     .lv-sheet-id {
       min-height: 300px;
       padding-top: 26px;

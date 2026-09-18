@@ -780,6 +780,13 @@ is the one page here that a person holds. Added 17 September 2026.
   must never end up behind the panel** — that is the column the page is about,
   and it is what this arithmetic exists to protect.
 
+  **The placement tiles move the panel, not the page.** They called back and
+  switched the board behind, so reading where a team sits *this week*
+  re-sorted the standings you were looking at — visible on a desktop, where
+  the board stays on screen beside the panel. The panel holds its own board
+  key, starting wherever the page is when it opens, so a team tapped on Today
+  opens on Today and the tiles change nothing else.
+
   There is **no scrim on a desktop**, which is the point of the layout: the
   standings stay live under the panel, so clicking another row swaps it rather
   than closing it — **and they scroll**. `data-locked` stops the page
