@@ -69,20 +69,36 @@ function Person({ teamId, name, style }: { teamId: string; name: string; style: 
 }
 
 /**
- * Initials in the livery, and **no silhouette behind them.**
+ * A student with no photograph: a head-and-shoulders silhouette in the team's
+ * livery, with their initials on it.
  *
- * The first version drew a head and shoulders with the initials over the top;
- * at 68px the two competed and the letters sat in a muddy patch. The disc is
- * already person-shaped by being where a face goes, so the drawing was
- * carrying no information the frame did not — and it cost the one thing the
- * placeholder has to do, which is be legible enough to tell four teammates
- * apart. This is the venture monogram's treatment, at the size a photograph
- * will replace.
+ * **The silhouette was dropped once and has to come back.** While every
+ * portrait sat in its own framed disc the frame was already person-shaped, so
+ * the drawing added nothing and muddied the letters. The photographs are
+ * cutouts now, standing with no frame at all — so a bare pair of letters
+ * floats in the gap where a body should be, which is what it looked like on
+ * `LUMI` before this. The silhouette is what keeps two cutouts and one
+ * placeholder reading as three people.
+ *
+ * Seven of the cohort missed the shoot and five more have no frame recorded
+ * against them, so this is on the board today rather than hypothetically.
  */
 function PlaceholderPortrait({ initials }: { initials: string }) {
   return (
-    <svg viewBox="0 0 100 100" className="lv-person-placeholder" aria-hidden="true">
-      <text x="50" y="50" className="lv-person-initials">
+    <svg viewBox="0 0 120 160" className="lv-person-placeholder" aria-hidden="true">
+      {/* **One group, one opacity.** Drawn as two translucent shapes, the
+          head and the shoulders each showed their own edge and the overlap
+          went darker than both — a person assembled from parts. The group
+          carries the transparency so the union is flat, and the shoulders
+          start above the chin so there is no seam to see. */}
+      <g className="lv-person-body">
+        <circle cx="60" cy="56" r="30" />
+        {/* The shoulders start at y=78, eight units above the head's own
+            bottom edge at 86. They started level with it once and the two
+            shapes read as a ball above a hill. */}
+        <path d="M6 160C6 108 30 78 60 78s54 30 54 82z" />
+      </g>
+      <text x="60" y="58" className="lv-person-initials">
         {initials}
       </text>
     </svg>

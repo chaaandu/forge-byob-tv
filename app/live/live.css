@@ -885,6 +885,12 @@ body:has(.lv-app[data-locked]) {
        group standing in the dark. */
     mask-image: linear-gradient(180deg, black 78%, transparent 100%);
     -webkit-mask-image: linear-gradient(180deg, black 78%, transparent 100%);
+  }
+
+  /* The shadow belongs to a photograph, which is opaque and has an edge. On
+     the translucent silhouette it drew a dark hump under the page's own
+     colour, which looked like a fault rather than a placeholder. */
+  .lv-person:has(img) {
     filter: drop-shadow(0 6px 10px var(--lv-shade));
   }
 
@@ -918,11 +924,18 @@ body:has(.lv-app[data-locked]) {
   .lv-person-placeholder {
     width: 100%;
     height: 100%;
+    /* **Fades out before the seam, unlike a photograph.** A cutout is opaque,
+       so it can cross onto the dark page and still be a person. This is
+       translucent ink, and below the header it turns into a grey hump on the
+       background. So it dissolves inside the colour it was drawn on. */
+    mask-image: linear-gradient(180deg, black 52%, transparent 84%);
+    -webkit-mask-image: linear-gradient(180deg, black 52%, transparent 84%);
   }
 
   .lv-person-body {
     fill: var(--livery-ink);
-    opacity: 0.26;
+    /* On the group, never the shapes: see `PlaceholderPortrait`. */
+    opacity: 0.24;
   }
 
   .lv-person-initials {

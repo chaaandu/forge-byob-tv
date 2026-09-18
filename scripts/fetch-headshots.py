@@ -31,6 +31,7 @@ from __future__ import annotations
 import json
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 import cv2
@@ -90,12 +91,30 @@ def slug(name: str) -> str:
 
 
 def fetch(slot: str) -> bool:
+    """
+    One frame, with retries.
+
+    **Dropbox throttles a run of these.** The first full pass asked for a 40 MB
+    original every ~35 seconds and 83 of 100 came back short or empty — then
+    the same URLs served perfectly a minute later, so the failures were the
+    rate and not the link. Hence three attempts with a widening pause, a
+    breath between students, and a check that what arrived is actually a JPEG
+    rather than an error page with a 200 on it.
+    """
     url = f"{FOLDER}&preview=DSC0{slot}.JPG&dl=1"
-    result = subprocess.run(
-        ["curl", "-sL", "--max-time", "300", "-o", str(TMP), url],
-        capture_output=True,
-    )
-    return result.returncode == 0 and TMP.exists() and TMP.stat().st_size > 100_000
+    for attempt in range(3):
+        if attempt:
+            time.sleep(5 * 2**attempt)
+        subprocess.run(
+            ["curl", "-sL", "--max-time", "600", "-o", str(TMP), url],
+            capture_output=True,
+        )
+        if TMP.exists() and TMP.stat().st_size > 1_000_000:
+            with TMP.open("rb") as handle:
+                if handle.read(2) == b"\xff\xd8":  # JPEG's start-of-image
+                    return True
+        print(f"      retrying ({attempt + 1}/3)", flush=True)
+    return False
 
 
 def detector() -> cv2.FaceDetectorYN:
@@ -204,6 +223,9 @@ def main() -> int:
             cut_out(crop).save(target, "WEBP", quality=QUALITY, method=6, lossless=False)
             written.append(f"{team}/{target.stem}")
             TMP.unlink(missing_ok=True)
+            # A breath between students. The whole run is an hour either way;
+            # what this buys is not being throttled into an 83% failure rate.
+            time.sleep(2)
 
     written.sort()
     print(f"\n{len(written)} written, {len(failed)} failed, {len(faceless)} with no face found")
