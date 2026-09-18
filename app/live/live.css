@@ -717,7 +717,17 @@ body:has(.lv-app[data-locked]) {
     display: flex;
     flex-direction: column;
     max-width: 520px;
-    height: calc(100dvh - env(safe-area-inset-top) - 26px);
+    /* ── Three quarters, not the whole screen ──
+     *
+     * A sheet that fills the screen reads as a page, and people start looking
+     * for a way *back* rather than a way out. Leaving a quarter of the board
+     * showing says it is a layer: the scrim above it is visible, tappable and
+     * obviously not part of this card.
+     *
+     * `min()` keeps the second term for the short screens — a phone in
+     * landscape, a small Android — where three quarters would be less than
+     * the header needs. */
+    height: min(75dvh, calc(100dvh - env(safe-area-inset-top) - 26px));
     margin: 0 auto;
     overflow: hidden;
     border-radius: 24px 24px 0 0;
@@ -1357,6 +1367,50 @@ body:has(.lv-app[data-locked]) {
     width: 92%;
     height: 92%;
     object-fit: contain;
+  }
+
+  /* ── Short screens ───────────────────────────────────────
+   *
+   * The header is content-driven — name, watermark, and a squad 132px tall —
+   * and comes out around 322px whatever the min-height says. On a 667px
+   * phone that is two thirds of a sheet which is now three quarters of the
+   * screen, so the faces get to the size they can be and the type follows
+   * them down. Keyed to *height*, because that is the dimension that ran
+   * out: an iPhone SE and a phone in landscape have the same problem and
+   * different widths. */
+  @media (max-height: 720px) {
+    /* The hero's own floor, or it holds 300px open under a 250px header and
+       the saving goes nowhere. */
+    .lv-sheet-hero {
+      min-height: 250px;
+    }
+
+    .lv-sheet-id {
+      min-height: 218px;
+      padding-top: 14px;
+    }
+
+    .lv-person {
+      width: 84px;
+      height: 116px;
+      margin-left: -26px;
+    }
+
+    .lv-squad {
+      margin-bottom: -38px;
+    }
+
+    .lv-sheet-name {
+      font-size: 23px;
+    }
+
+    .lv-sheet-pos {
+      font-size: 128px;
+    }
+
+    .lv-sheet-body {
+      padding-top: 58px;
+    }
   }
 
   /* ── Search ─────────────────────────────────────────────── */
