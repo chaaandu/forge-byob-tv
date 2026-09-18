@@ -706,8 +706,8 @@ body:has(.lv-app[data-locked]) {
   .lv-sheet-hero {
     position: relative;
     flex: none;
-    min-height: 218px;
-    padding: 10px 20px 20px;
+    min-height: 236px;
+    padding: 10px 20px 0;
     overflow: hidden;
     color: var(--livery-ink);
     background: linear-gradient(140deg, var(--livery-a), var(--livery-b));
@@ -749,6 +749,10 @@ body:has(.lv-app[data-locked]) {
 
   .lv-sheet-id {
     position: relative;
+    /* Tall enough to reach the hero's own bottom edge, which is what the
+       squad hangs off. Without it the block ends where the type does and the
+       faces float in the middle of the colour. */
+    min-height: 208px;
     padding-top: 22px;
   }
 
@@ -791,7 +795,8 @@ body:has(.lv-app[data-locked]) {
   }
 
   .lv-sheet-name {
-    max-width: calc(100% - 76px);
+    /* Clear of the squad, which stands at the hero's right edge. */
+    max-width: calc(100% - 178px);
     margin: 12px 0 0;
     font-family: inherit;
     font-size: 28px;
@@ -803,6 +808,7 @@ body:has(.lv-app[data-locked]) {
   }
 
   .lv-sheet-sub {
+    max-width: calc(100% - 178px);
     margin: 7px 0 0;
     /* Stated: the design system's `p` rule would otherwise paint it muted
        purple, which disappears on every dark livery. */
@@ -812,6 +818,84 @@ body:has(.lv-app[data-locked]) {
     letter-spacing: 0.1em;
     text-transform: uppercase;
     opacity: 0.85;
+  }
+
+  /* ── The squad ──────────────────────────────────────────── */
+
+  .lv-squad {
+    position: absolute;
+    right: -4px;
+    /* Standing *on* the hero's bottom edge: the crops bleed off it, which is
+       what stops four heads reading as four stickers. */
+    bottom: -12px;
+    display: flex;
+    align-items: flex-end;
+    pointer-events: none;
+  }
+
+  .lv-person {
+    position: relative;
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 58px;
+    height: 80px;
+    overflow: hidden;
+    /* Square, with the corners eased. A disc crops a head tighter than a
+       phone headshot allows and leaves gaps where they overlap. */
+    border-radius: 14px 14px 10px 10px;
+    /* Overlapped by a third. Enough that the stack reads as one object,
+       little enough that every face keeps an eye and a cheek. */
+    margin-left: -20px;
+    background: linear-gradient(160deg, var(--livery-a), var(--livery-b));
+    /* The ring is the page behind, not a colour: it separates two faces that
+       touch without drawing a frame around either. */
+    box-shadow:
+      0 0 0 2px var(--lv-page),
+      0 10px 22px var(--lv-shade);
+  }
+
+  .lv-person:first-child {
+    margin-left: 0;
+  }
+
+  /* A slight zigzag. Four crops on one baseline read as a row of cards; an
+     alternating 9px makes them a group standing together, which is what the
+     reference line-ups do. */
+  .lv-person:nth-child(even) {
+    margin-bottom: 9px;
+  }
+
+  /* The visible strip of an overlapped crop is its right-hand side, because
+     the one in front covers its left. A face survives that — the centre is in
+     both halves — but centred initials do not, so they shift into the strip
+     that shows. */
+  .lv-person:not(:first-child) .lv-person-initials {
+    transform: translateX(11px);
+  }
+
+  .lv-person img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* The head sits above centre in a headshot, so the crop is biased up —
+       the same 38% `scripts/prepare-people.py` uses. */
+    object-position: 50% 32%;
+  }
+
+  .lv-person-placeholder {
+    width: 100%;
+    height: 100%;
+  }
+
+  .lv-person-initials {
+    fill: var(--livery-ink);
+    font-family: var(--font-live), var(--font-sans);
+    font-size: 26px;
+    font-weight: 900;
+    font-stretch: 78%;
+    text-anchor: middle;
+    dominant-baseline: central;
   }
 
   .lv-sheet-body {
@@ -1059,88 +1143,6 @@ body:has(.lv-app[data-locked]) {
     -webkit-box-orient: vertical;
   }
 
-  /* ── Line-up ────────────────────────────────────────────── */
-
-  .lv-lineup {
-    padding: 13px 14px 14px;
-    border: 1px solid var(--lv-hairline);
-    border-radius: 16px;
-    background: var(--lv-panel);
-  }
-
-  .lv-lineup-rail {
-    display: flex;
-    gap: 10px;
-    margin: 0 -14px;
-    padding: 12px 14px 2px;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-
-  .lv-lineup-rail::-webkit-scrollbar {
-    display: none;
-  }
-
-  .lv-person {
-    display: flex;
-    flex: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 7px;
-    width: 76px;
-    margin: 0;
-  }
-
-  /* The frame is the same disc a photograph will land in, so the layout being
-     looked at now is the finished one. */
-  .lv-person-frame {
-    position: relative;
-    display: grid;
-    place-items: center;
-    width: 68px;
-    height: 68px;
-    overflow: hidden;
-    border-radius: 50%;
-    background: linear-gradient(150deg, var(--livery-a), var(--livery-b));
-    box-shadow:
-      inset 0 1px 0 var(--lv-sheen),
-      0 8px 18px var(--lv-shade);
-  }
-
-  .lv-person-frame img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .lv-person-placeholder {
-    width: 100%;
-    height: 100%;
-  }
-
-  .lv-person-initials {
-    fill: var(--livery-ink);
-    font-family: var(--font-live), var(--font-sans);
-    font-size: 34px;
-    font-weight: 900;
-    font-stretch: 78%;
-    text-anchor: middle;
-    /* Optically centred: capitals sit high in their em box, so a box centred
-       in a circle leaves the letters looking a touch above centre. The wall's
-       monogram carries the same correction. */
-    dominant-baseline: central;
-  }
-
-  .lv-person-name {
-    overflow: hidden;
-    max-width: 100%;
-    font-size: 11.5px;
-    font-weight: 700;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-    color: var(--lv-ink-muted);
-  }
-
   /* ── Links ──────────────────────────────────────────────── */
 
   .lv-links {
@@ -1213,17 +1215,16 @@ body:has(.lv-app[data-locked]) {
     place-items: center;
     width: 52px;
     height: 52px;
-    padding-bottom: 4px;
     border: 1px solid var(--lv-hairline-strong);
-    border-radius: 50%;
+    /* Square, eased — the sheet's own corner radius at this size. The glyph
+       inside is an SVG rather than `‹`, whose side bearings are uneven enough
+       to sit visibly off-centre in a box this small. */
+    border-radius: 16px;
     background: var(--lv-glass);
     backdrop-filter: blur(14px) saturate(1.4);
     -webkit-backdrop-filter: blur(14px) saturate(1.4);
     box-shadow: 0 12px 26px var(--lv-shade);
     color: var(--lv-ink);
-    font-size: 30px;
-    font-weight: 700;
-    line-height: 1;
     pointer-events: auto;
   }
 

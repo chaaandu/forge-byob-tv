@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react'
 import { Climb } from '@/components/live/Board'
 import { CountUp } from '@/components/live/CountUp'
 import { Emblem } from '@/components/live/Emblem'
-import { Lineup } from '@/components/live/Lineup'
+import { Squad } from '@/components/live/Lineup'
 import { SellsIcon } from '@/components/live/SellsIcon'
 import { formatCount, formatRupees, ordinal } from '@/lib/format'
 import {
@@ -158,9 +158,6 @@ export function TeamSheet({
                     <small>P</small>
                     {race.self.rank}
                   </span>
-                  <span className="lv-sheet-badge">
-                    <Emblem team={race.self.team} size={44} />
-                  </span>
                   <h2 className="lv-sheet-name">{nameOf(race.self.team)}</h2>
                   {/* No team id. It is a code for a spreadsheet, not a fact
                       about a venture — the rows dropped it for the same
@@ -168,6 +165,10 @@ export function TeamSheet({
                   <p className="lv-sheet-sub">
                     {ordinal(race.self.rank)} of {race.total} · {boardLabel(boardKey, mode)}
                   </p>
+                  {/* Where the mark's disc used to be. The mark is on the row
+                      this sheet opened from and again as the watermark behind
+                      all this; the faces are the thing that is only here. */}
+                  <Squad team={race.self.team} />
                 </motion.div>
               </AnimatePresence>
             </motion.header>
@@ -230,8 +231,6 @@ export function TeamSheet({
 
               <Sells product={race.self.team.product} />
 
-              <Lineup team={race.self.team} />
-
               <Links team={race.self.team} />
             </div>
 
@@ -254,7 +253,7 @@ export function TeamSheet({
                 }
                 onClick={() => go(-1)}
               >
-                <span aria-hidden="true">‹</span>
+                <Chevron direction="left" />
               </button>
               <button
                 type="button"
@@ -267,7 +266,7 @@ export function TeamSheet({
                 }
                 onClick={() => go(1)}
               >
-                <span aria-hidden="true">›</span>
+                <Chevron direction="right" />
               </button>
             </nav>
           </motion.section>
@@ -441,6 +440,26 @@ function GlobeIcon() {
       <circle cx="12" cy="12" r="9" />
       <path d="M3.5 9.5h17M3.5 14.5h17" />
       <path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z" />
+    </svg>
+  )
+}
+
+/** A drawn chevron: `‹` and `›` carry uneven side bearings and sit off-centre. */
+function Chevron({ direction }: { direction: 'left' | 'right' }) {
+  return (
+    <svg
+      width="22"
+      height="22"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      style={direction === 'left' ? { transform: 'scaleX(-1)' } : undefined}
+    >
+      <path d="m9 5 7 7-7 7" />
     </svg>
   )
 }

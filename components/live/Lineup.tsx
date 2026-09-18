@@ -5,8 +5,14 @@ import { initialsOf, membersOf, photoSlug } from '@/lib/live'
 import type { Team } from '@/lib/types'
 
 /**
- * The team's line-up: the students behind the venture, the way a race graphic
- * shows a driver.
+ * The team's squad, overlapping in the sheet's header — the way an esports
+ * line-up card stacks its players rather than listing them.
+ *
+ * **No names, and the photographs bleed off the bottom of the header.** The
+ * heads are the information; a caption under each 58px crop would be four
+ * ellipsised first names. Whose face is whose is answered by the roster the
+ * cohort already knows, and by the sheet's own header saying which venture
+ * this is.
  *
  * ── A photograph is never requested unless it exists ──
  *
@@ -27,40 +33,38 @@ import type { Team } from '@/lib/types'
  * obviously a placeholder, and it is the same shape and size as the real
  * thing, so the layout is already the finished one.
  */
-export function Lineup({ team }: { team: Team }) {
+export function Squad({ team }: { team: Team }) {
   const members = membersOf(team)
   if (members.length === 0) return null
 
   return (
-    <section className="lv-lineup">
-      <span className="lv-label">The team</span>
-      <div className="lv-lineup-rail">
-        {members.map((name) => (
-          <Person key={name} teamId={team.teamId} name={name} />
-        ))}
-      </div>
-    </section>
+    <div className="lv-squad" aria-label={`Team: ${members.join(', ')}`} role="img">
+      {members.map((name, index) => (
+        <Person
+          key={name}
+          teamId={team.teamId}
+          name={name}
+          // The left-most sits on top and each one behind the last, so the
+          // stack reads front-to-back rather than as a row of half-faces.
+          style={{ zIndex: members.length - index }}
+        />
+      ))}
+    </div>
   )
 }
 
-function Person({ teamId, name }: { teamId: string; name: string }) {
+function Person({ teamId, name, style }: { teamId: string; name: string; style: React.CSSProperties }) {
   const path = `${teamId}/${photoSlug(name)}`
   const hasPhoto = PEOPLE_PHOTOS.includes(path)
 
   return (
-    <figure className="lv-person">
-      <span className="lv-person-frame">
-        {hasPhoto ? (
-          <Image src={`/people/${path}.webp`} alt="" width={200} height={200} unoptimized />
-        ) : (
-          <PlaceholderPortrait initials={initialsOf(name)} />
-        )}
-      </span>
-      {/* The first name only. Four full names in a 358px rail is four
-          ellipses; the whole name is one tap away in the sheet's own header
-          and nowhere else it would fit. */}
-      <figcaption className="lv-person-name">{name.split(/\s+/)[0]}</figcaption>
-    </figure>
+    <span className="lv-person" style={style} title={name}>
+      {hasPhoto ? (
+        <Image src={`/people/${path}.webp`} alt="" width={256} height={256} unoptimized />
+      ) : (
+        <PlaceholderPortrait initials={initialsOf(name)} />
+      )}
+    </span>
   )
 }
 

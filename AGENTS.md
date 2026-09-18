@@ -563,6 +563,15 @@ is the one page here that a person holds. Added 17 September 2026.
   stray spaces. Casing goes through `titleCase`, so `Preethi S` keeps its
   initial.
 
+  **They stand in the sheet's header, overlapping, with no names** — the
+  esports line-up card rather than a row of avatars with captions. Each crop
+  is 58x80 with a 20px overlap, so the visible strip of a covered photograph
+  still holds a whole face; they hang 12px past the header's bottom edge,
+  which is what stops four heads reading as four stickers, and every second
+  one sits 9px higher so the group is a group. The mark's disc used to be
+  here and is gone: it is on the row this sheet opened from and again as the
+  watermark behind the type.
+
   Photographs are `public/people/<TEAM_ID>/<name-slug>.webp`, listed in
   `PEOPLE_PHOTOS` in `config.ts` — **the list, not the filesystem**, exactly as
   `LOGOS` works and for the same reason. `scripts/prepare-people.py` crops,
