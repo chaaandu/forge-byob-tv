@@ -251,7 +251,13 @@ body:has(.lv-app[data-locked]) {
     position: relative;
   }
 
-  /* ── Summary ────────────────────────────────────────────── */
+  /* ── Toolbar and summary ────────────────────────────────── */
+
+  /* On a phone the wrapper is not a box at all: the tabs keep sticking to the
+     top of the screen and the figures keep scrolling away below them. */
+  .lv-toolbar {
+    display: contents;
+  }
 
   .lv-summary {
     display: grid;
@@ -1510,20 +1516,49 @@ body:has(.lv-app[data-locked]) {
       font-size: 78px;
     }
 
-    .lv-tabs-wrap {
+    /* The strip: tabs left, the board's figures right, one sticky rule under
+       both. `display: contents` is dropped here, so the wrapper becomes the
+       row. */
+    .lv-toolbar {
+      position: sticky;
+      z-index: 20;
+      top: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 32px;
       padding: 12px 24px;
+      background: var(--lv-glass);
+      backdrop-filter: blur(16px) saturate(1.4);
+      -webkit-backdrop-filter: blur(16px) saturate(1.4);
+      border-bottom: 1px solid var(--lv-hairline);
+    }
+
+    /* It has given its stickiness and its glass to the strip above. */
+    .lv-tabs-wrap {
+      position: static;
+      padding: 0;
+      border: 0;
+      background: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
     }
 
     .lv-tabs {
-      max-width: 560px;
+      width: 420px;
     }
 
     .lv-summary {
-      padding: 22px 24px 6px;
+      display: flex;
+      align-items: baseline;
+      gap: 34px;
+      padding: 0;
+      text-align: right;
     }
 
     .lv-summary-value {
-      font-size: 32px;
+      margin-top: 2px;
+      font-size: 24px;
     }
 
     .lv-podium {
@@ -1676,13 +1711,19 @@ body:has(.lv-app[data-locked]) {
       margin-left: -36px;
     }
 
+    /* **The same straddle as the phone, scaled up.** This was -16px, which
+       left the group standing inside the colour with its bodies fading out
+       against the header's own edge — a hard horizontal line across three
+       people. The hang is what makes them stand *between* the header and the
+       content, so it grows with the photographs rather than shrinking. */
     .lv-squad {
-      margin-bottom: -16px;
+      margin-bottom: -54px;
     }
 
     .lv-sheet-body {
       gap: 14px;
-      padding: 22px 26px 96px;
+      /* Clear of the heads hanging down, as on the phone. */
+      padding: 78px 26px 96px;
       touch-action: auto;
     }
 

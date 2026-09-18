@@ -44,9 +44,16 @@ const liveFace = localFont({
   variable: '--font-live',
 })
 
+/**
+ * What a student sees on a tab, a bookmark and a shared link.
+ *
+ * The icons are not declared here: `app/icon.png`, `app/apple-icon.png` and
+ * `app/favicon.ico` are picked up by filename for every route, the wall
+ * included. `scripts/make-icons.py` writes all three from Mesa's logomark.
+ */
 export const metadata: Metadata = {
-  title: 'BYOB Standings · Forge C1',
-  description: 'Live team standings for BYOB, Mesa Forge C1.',
+  title: 'Forge BYOB Leaderboard',
+  description: 'Live team standings for BYOB — Mesa Forge C1.',
 }
 
 /**
