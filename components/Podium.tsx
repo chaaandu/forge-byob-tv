@@ -478,7 +478,7 @@ function Strip({
    *
    * `if (kick !== null) return` is what makes this safe to run on every render:
    * the rows only ever carry a transform during a kick, so the recorded numbers
-   * are always untransformed layout. Same discipline as `cuesFor` on /weekly —
+   * are always untransformed layout. Same discipline as `cuesFor` on /daily —
    * measure at rest, then animate from pure numbers and touch no DOM.
    *
    * Positions rather than a pitch, so nothing assumes the gaps are equal.
@@ -498,7 +498,7 @@ function Strip({
     // may still be carrying the transform Motion is about to clear. Ordering
     // between Motion's own layout effects and this one is not something to bet a
     // wall on. `offsetTop` ignores transforms outright, which is the same reason
-    // `slotOf` in components/WeeklyGrid.tsx reads it.
+    // `slotOf` in components/DailyGrid.tsx reads it.
     //
     // The cost is that it is rounded to whole pixels, so a 118.7px pitch is
     // recorded as 119 — 0.3px of error at the far end of a move whose last act
@@ -516,7 +516,7 @@ function Strip({
 
   /* ── A bare numeral, and the tab it replaced needed an edge ──
    *
-   * This has been right-aligned type, then a round chip, then `/weekly`'s tag.
+   * This has been right-aligned type, then a round chip, then `/daily`'s tag.
    * The tag is the one worth recording, because it was asked for and it was
    * wrong for a structural reason: on a card that shape works because its
    * square side *is* the card's edge, so it reads as a tab fixed to something.
@@ -686,7 +686,7 @@ function Strip({
           the next, and put every row high in its segment.
 
           A row with its own four edges does not need a line drawn between it
-          and the next one. `/weekly` retired its row rules on the identical
+          and the next one. `/daily` retired its row rules on the identical
           argument the day its cells became cards: a hairline in the gap is a
           second horizontal edge a few pixels from thirty-nine first ones. The
           measurement that fix was built on is kept in `.tv-pod-row`, because
@@ -777,7 +777,7 @@ function Strip({
           //
           // A travel holds at the start, moves through its window, and holds at
           // the destination — `[0, 0, far, far]`. That is what
-          // `components/VentureCard.tsx` does on /weekly, and it is what this
+          // `components/VentureCard.tsx` does on /daily, and it is what this
           // should always have been. The extra midpoint keyframe is what carries
           // the lane and the dip, which only exist during the crossing.
           animate={

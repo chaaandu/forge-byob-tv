@@ -4,7 +4,7 @@ import { dailyEarned, windowPeriod, type DailyWindow } from '@/lib/daily'
 import { rankByChallenge, rankByDaily } from '@/lib/ranking'
 
 /**
- * Which contest `/weekly` is showing, and everything that follows from it.
+ * Which contest `/daily` is showing, and everything that follows from it.
  *
  * ── One cell, because two would contradict each other ──
  *
@@ -153,7 +153,7 @@ function shortDate(key: string): string {
  * ── What this costs, and it is the largest cost of the daily board ──
  *
  * The daily board's figures only ever change at the tick this guard silences.
- * So **`/weekly` no longer produces overtakes at all** — not because the
+ * So **`/daily` no longer produces overtakes at all** — not because the
  * detector was weakened, but because a locked board has no moment left where a
  * rank can be seen changing hands. The flip choreography in `lib/flipTimeline.ts`
  * and `lib/useKick.ts` is still wired, still tested, and still runs in challenge

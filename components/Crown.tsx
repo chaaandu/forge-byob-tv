@@ -113,25 +113,25 @@ export function Crown({
   /**
    * Whether the six sparks are drawn at all.
    *
-   * **`false` on `/weekly`, and that is a rule boundary rather than a taste.**
+   * **`false` on `/daily`, and that is a rule boundary rather than a taste.**
    * `AGENTS.md` states the motion rule as *nothing moves at rest except the
    * crown's glint*, and scopes the exception to "one object, on one slide".
    * The crown itself now appears on both slides — the leader wears it wherever
    * the leader is drawn — but the loop does not follow it across, for a reason
    * that is specific to the board it would follow it onto.
    *
-   * `/weekly` has exactly one thing it must be able to say: a rank changed
+   * `/daily` has exactly one thing it must be able to say: a rank changed
    * hands, said with a two-and-a-half-second interrupt against thirty-nine
    * still cards. **An interrupt only reads as one against a still frame.** A
    * permanent twinkle on rank 1 is the only other moving thing on that board,
    * so it competes directly with the single event the board exists to show —
    * which is the identical argument that removed row 1's idle and `/podium`'s
-   * numeral dance, both recorded in `WeeklyGrid` and `Podium`.
+   * numeral dance, both recorded in `DailyGrid` and `Podium`.
    *
    * The drop is unaffected and stays on both slides. It runs once on mount and
    * stops, so it is an entrance rather than motion at rest — and on this board
    * it is a real one: when rank 1 changes hands the crown lands on the new
-   * leader, which is precisely the event `/weekly` is built around.
+   * leader, which is precisely the event `/daily` is built around.
    */
   glint?: boolean
 }) {

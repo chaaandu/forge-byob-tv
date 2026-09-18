@@ -4,8 +4,8 @@ import { useEffect, useState } from 'react'
 
 import { DevFlipTrigger } from '@/components/DevFlipTrigger'
 import { WallHeader } from '@/components/WallHeader'
-import { WeeklyGrid } from '@/components/WeeklyGrid'
-import { WATCH_RANKS_WEEKLY } from '@/config'
+import { DailyGrid } from '@/components/DailyGrid'
+import { WATCH_RANKS_DAILY } from '@/config'
 import {
   boardHeading,
   boardEarned,
@@ -42,7 +42,7 @@ import { useWallData, type BoardSpec } from '@/lib/useWallData'
  * What does still move is the chevrons, and they are the only live thing on the
  * slide: a card wears them when that team has sold *today* — `today_revenue`,
  * current to the last poll — so they say "this venture is already trading again"
- * against a board whose figures stopped at ten. See `WeeklyGrid`.
+ * against a board whose figures stopped at ten. See `DailyGrid`.
  *
  * **No `layout` prop anywhere in this tree**: a team's figure ticking up by ₹200
  * without moving changes the sort input, and Motion's layout animation would
@@ -60,7 +60,18 @@ import { useWallData, type BoardSpec } from '@/lib/useWallData'
 // Exported so `board.test.ts` can assert the wiring. Both ways of getting this
 // wrong are invisible on screen — see that file for why they earn a test.
 export const BOARD: BoardSpec = {
-  name: 'weekly',
+  // **This is a `localStorage` namespace, not a label.** It keys
+  // `byob-tv.v2.board.daily` and `byob-tv.v2.queue.daily`, and it was `weekly`
+  // until the route was renamed on 18 September 2026.
+  //
+  // Renaming it makes every running wall's stored state simply *absent*, which
+  // routes into the branch a brand-new TV already takes: `detect` records what
+  // it sees and animates nothing. That is the documented safe path — the same
+  // one `lib/storage.ts` describes for a version bump — and it is the reason
+  // this could be renamed at all rather than left saying `weekly` forever. The
+  // old keys are orphaned rather than migrated; there is no migration code,
+  // because everything in them can be rebuilt from the sheet in one poll.
+  name: 'daily',
   // **Both read the mode off the cohort they are handed**, rather than closing
   // over one. The spec is a module constant so the 60-second loop is never torn
   // down (see `useWallData`), which means the mode cannot be captured here — it
@@ -69,8 +80,8 @@ export const BOARD: BoardSpec = {
   earned: (team, cohort, day) => boardEarned(boardMode(cohort), team, day),
   // Ranks 1–20 are the top two rows of the grid. The old justification was "the
   // whole first column", which the columns took with them — see the spec's
-  // WATCH_RANKS_WEEKLY note for why the number survived the reasoning.
-  watchTo: WATCH_RANKS_WEEKLY,
+  // WATCH_RANKS_DAILY note for why the number survived the reasoning.
+  watchTo: WATCH_RANKS_DAILY,
   // **Not `openWeek`, which is the default**, and not `currentChallenge`
   // either. This board has three ticks where every figure changes at once —
   // ten o'clock each morning, a challenge rolling over, and the
@@ -105,7 +116,7 @@ export default function WeeklyPage() {
     commit: devCommit,
     reset: devReset,
   } = useDevOvertakes(mode, day, competingTeams(snapshot?.teams ?? []))
-  // The order the grid is about to render — `WeeklyGrid` sorts the same list the
+  // The order the grid is about to render — `DailyGrid` sorts the same list the
   // same way. What the gate compares an event against is the board a passer-by
   // can see, so it has to be this list and not the freshest fetch.
   const ranked = rankForMode(mode, teams, devDay)
@@ -226,7 +237,7 @@ export default function WeeklyPage() {
           padding: 'calc(var(--s-rule-board) + var(--s-board-top)) 0 var(--s-board-bottom)',
         }}
       >
-        <WeeklyGrid
+        <DailyGrid
           teams={teams}
           mode={mode}
           day={devDay}

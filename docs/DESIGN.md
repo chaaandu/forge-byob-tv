@@ -225,7 +225,7 @@ two instants:
 - `istHour` — is the wall in its end-of-day state, 18:00 IST to midnight?
 - `isFestival`'s bounds — still instants, deliberately, and its docblock is
   where the distinction is argued.
-- `istWindowKey` — which 10:00-to-10:00 day is this, for `/weekly`'s daily
+- `istWindowKey` — which 10:00-to-10:00 day is this, for `/daily`'s daily
   board? Added 18 September 2026, and it is the one that made the sheet stop
   owning "today" entirely: the board's figure is now computed on the client
   from two photographs of `total_revenue`.
@@ -371,7 +371,7 @@ the cross-tab clobber window by sixty for no benefit.
 rather than the list. `lib/storage.ts` is the live inventory: `csv`, a `board.*`
 and a `queue.*` per board — namespaced, because two boards ranking different
 figures must not share a memory of what the board looked like — and, from 18
-September 2026, `daily`, which holds the two photographs `/weekly`'s figure is
+September 2026, `daily`, which holds the two photographs `/daily`'s figure is
 the difference between.
 
 `daily` is the one that tests the write-pattern argument rather than just
@@ -457,7 +457,7 @@ Neither slide carries the `as_of` stamp any more — it was the only element on 
 that was not in the brief's list, and it was removed on 13 September 2026. §2 has what
 that costs.
 
-**`/weekly` has become the Daily Leaderboard**, on 18 September 2026, and the
+**`/daily` has become the Daily Leaderboard**, on 18 September 2026, and the
 part of it that belongs in a design record rather than in `AGENTS.md` is that it
 is the wall's first **locked** board: a finished day, 10:00 to 10:00, decided
 once a morning and identical for the next twenty-four hours.

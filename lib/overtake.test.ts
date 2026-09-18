@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
-import { WATCH_RANKS_WEEKLY } from '@/config'
+import { WATCH_RANKS_DAILY } from '@/config'
 import { detect, matchesBoard } from '@/lib/overtake'
 import { rankByChallenge, rankByWeek } from '@/lib/ranking'
 import { teams } from '@/test/fixtures'
@@ -20,7 +20,7 @@ function run(
   prev: BoardState | null,
   rows: readonly Team[],
   week: number | null = 4,
-  watchTo: number = WATCH_RANKS_WEEKLY,
+  watchTo: number = WATCH_RANKS_DAILY,
 ) {
   return detect(prev, {
     ranked: rankByWeek(rows),
@@ -30,7 +30,7 @@ function run(
   })
 }
 
-/** `board`, scored the way `/weekly` now scores: on the challenge figure. */
+/** `board`, scored the way `/daily` now scores: on the challenge figure. */
 function challengeBoard(overrides: Partial<Team>[] = []): Team[] {
   return teams(overrides).map((team, index) => ({
     ...team,
@@ -39,7 +39,7 @@ function challengeBoard(overrides: Partial<Team>[] = []): Team[] {
   }))
 }
 
-/** `run`, ranked and scored the way `/weekly`'s spec now does. */
+/** `run`, ranked and scored the way `/daily`'s spec now does. */
 function runChallenge(
   prev: BoardState | null,
   rows: readonly Team[],
@@ -48,7 +48,7 @@ function runChallenge(
   return detect(prev, {
     ranked: rankByChallenge(rows),
     week: challenge,
-    watchTo: WATCH_RANKS_WEEKLY,
+    watchTo: WATCH_RANKS_DAILY,
     earned: (team) => team.challengeRevenue,
   })
 }

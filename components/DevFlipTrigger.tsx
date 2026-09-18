@@ -20,7 +20,7 @@ import type { BoardMode, OvertakeEvent, Team } from '@/lib/types'
  * From there it goes through `enqueueKicks` — the same function, the same
  * localStorage queue, the same replace-by-id, the same cap — and is drained by
  * the same `takeKick` inside `useKick`, which remains the only reader. Nothing
- * here touches `WeeklyGrid` or the cues. What you watch is what live data
+ * here touches `DailyGrid` or the cues. What you watch is what live data
  * produces.
  *
  * ── The board does re-sort at the end, and that is the point ──
@@ -106,7 +106,11 @@ export function DevFlipTrigger({
     // is worth so the settle has somewhere to arrive. Applied on settle, not
     // here — see lib/devOvertake.ts.
     devQueueClimb(mode, day, attacker, defender, ranked[to - 2])
-    enqueueKicks('weekly', [event])
+    // **The board's `localStorage` namespace, spelled out.** It has to match
+    // `BOARD.name` in `app/daily/page.tsx` — writing to `weekly` after the route
+    // was renamed puts events in a queue nothing drains, so every dev trigger
+    // would silently do nothing while looking like it had fired.
+    enqueueKicks('daily', [event])
     onQueued()
   }
 
@@ -155,7 +159,7 @@ export function DevFlipTrigger({
         type="button"
         style={button}
         onClick={() => {
-          clearKicks('weekly')
+          clearKicks('daily')
           onReset()
         }}
       >

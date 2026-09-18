@@ -61,7 +61,7 @@ npm run build        # next build
   way in §2a.
 
   **Both slides are `.surface-dark` today**, and this rule used to add that
-  `/weekly` is `.surface-light` and that the rotation carries the Forge deck's own
+  `/daily` is `.surface-light` and that the rotation carries the Forge deck's own
   dark/light rhythm. That half was a brand argument rather than a correctness one
   and it was overruled deliberately: on Lavender Mist every one of thirty-nine
   venture marks needed a white ground to have an edge, and the venture names
@@ -128,7 +128,7 @@ npm run build        # next build
   mid-flight. The three CSS podiums that preceded this each had to argue the
   point. Nothing on the stage loops.
 
-  **`/weekly`'s day mark is the third arrival, and it is the first one that
+  **`/daily`'s day mark is the third arrival, and it is the first one that
   fires on something other than a slide mount.** The two chevrons beside the
   figure fade up bottom-to-top, 90ms apart, 380ms each — once, `both`, no
   iteration count — and they do it on exactly two occasions: the slide arriving,
@@ -142,7 +142,7 @@ npm run build        # next build
   and not pass anybody, and until now the wall had no way to say so.
 
   **Both of those got stronger when the board became a daily one, and the mark
-  is now the only motion this slide has.** `/weekly`'s figures are a *finished*
+  is now the only motion this slide has.** `/daily`'s figures are a *finished*
   day and change once a morning, so `boardPeriod` silences that tick and the
   slide produces no overtake flips at all — see the daily-board rule below.
   Every other card on the board holds still for the whole thirty seconds; these
@@ -158,7 +158,7 @@ npm run build        # next build
   back with its own card's tier, which a band supplying its own ground never
   did.
 
-  **Both triggers are decided in `WeeklyGrid`, and a card is never allowed to
+  **Both triggers are decided in `DailyGrid`, and a card is never allowed to
   decide for itself.** That is not tidiness; it is the whole correctness
   argument. A card is remounted whenever it crosses a row boundary, for any
   reason including being *pushed down* by somebody else's sale — so an animation
@@ -199,7 +199,7 @@ npm run build        # next build
   this one will cite the glint rather than the crown, because a looping
   precedent is a far cheaper thing to argue from than a one-shot one — so the
   budget is the count, and the count is **six positions, two lit**. A spark on
-  every stone, or one on a `/weekly` card, is not an extension of this decision.
+  every stone, or one on a `/daily` card, is not an extension of this decision.
   Nor is putting the six on one beat: that is a crown flashing all over at once,
   and it is the same six elements.
 
@@ -467,10 +467,10 @@ npm run build        # next build
   is data, because empty is a valid state here and a stamp with no figures
   beside it states the provenance of nothing.
 
-- **`/weekly` states its window and `/podium` does not, and the thing that
+- **`/daily` states its window and `/podium` does not, and the thing that
   separates them is that one board is locked.** `/podium` carried `All time`
   beside its name until 13 September 2026 and removal was asked for directly;
-  `/weekly` carried nothing at all, because its day chip and its `Revenue
+  `/daily` carried nothing at all, because its day chip and its `Revenue
   since` caption bound its window between them. From the daily board it carries
   `17 Sep → 18 Sep, 10am` in `WallHeader`'s `scope` slot.
 
@@ -494,7 +494,7 @@ npm run build        # next build
 
   **What is still not said is which board is which**, and that cost is
   unchanged. The same venture reads ₹2,42,546 on `/podium` and ₹1,998 on
-  `/weekly` thirty seconds later; the daily board now says what its own figure
+  `/daily` thirty seconds later; the daily board now says what its own figure
   covers, and `/podium` still says nothing. The wall still relies on the
   audience being thirty-nine teams who live the programme daily — a claim about
   the people in the corridor rather than about the board. Putting `All time`
@@ -503,10 +503,10 @@ npm run build        # next build
 
 - **No trigger types beyond the 15 in the design.** The list was deliberately narrowed.
 - **The bare domain belongs to the students now.** `/` redirects to `/live`,
-  not `/weekly`. `next.config.ts` carries the reasoning: the wall is set up
+  not `/daily`. `next.config.ts` carries the reasoning: the wall is set up
   once, by one person, who can type one more word, and the other hundred and
   eighteen people are opening a link on a phone. **The TV is pointed at
-  `/weekly` explicitly** and rotates itself from there; nothing else changes.
+  `/daily` explicitly** and rotates itself from there; nothing else changes.
 - **The rotation between the two slides is ours, and it is the only rotation logic
   here.** `components/Rotator.tsx`, thirty seconds a slide, by soft navigation. That
   reverses the original "external system" rule, which assumed the campus slideshow drove
@@ -529,10 +529,10 @@ is the one page here that a person holds. Added 17 September 2026.
   disagreed with the TV about who is fourth would be worse than no phone, and
   `lib/live.test.ts` is where that is held: the all-time board sorts exactly as
   `/podium` does, and in challenge mode the period board sorts exactly as
-  `/weekly` does.
+  `/daily` does.
 
   **Between challenges the two now measure different windows, and that is
-  physical rather than a choice.** `/weekly` became a daily board on 18
+  physical rather than a choice.** `/daily` became a daily board on 18
   September 2026, and its figure is not a published column: it is a finished
   day computed from two photographs of `total_revenue` that the **laptop
   driving the TV** took and kept in its own `localStorage`. A phone is a
@@ -794,7 +794,7 @@ is the one page here that a person holds. Added 17 September 2026.
   name-or-ID rather than not at all. Decided in
   `docs/superpowers/specs/2026-08-12-weekly-card-grid.md` §3; the doc was corrected to
   match the code, not the other way round.
-- **`/weekly` shows one of two contests, and `TV_Cohort`'s `challenge_mode` cell
+- **`/daily` shows one of two contests, and `TV_Cohort`'s `challenge_mode` cell
   picks which.** `Yes` ranks and prints `challenge_revenue` under a `10-Day
   Challenge` heading with the day chip; anything else is the **daily board** —
   `Daily Leaderboard`, the window in the masthead, no chip. One cell, not two
@@ -852,7 +852,7 @@ is the one page here that a person holds. Added 17 September 2026.
     no moment left where a rank can be seen changing hands. The flip
     choreography still runs in challenge mode, and `/podium` is what exercises
     it the rest of the time.
-  - **`/live`'s period tab can no longer agree with `/weekly`.** The marks live
+  - **`/live`'s period tab can no longer agree with `/daily`.** The marks live
     on the laptop driving the TV and a phone is a different machine, so that tab
     keeps `week_revenue` under its own honest label. `lib/live.test.ts` states
     the divergence as a fact rather than asserting a parity that is gone.
@@ -947,7 +947,7 @@ not by reading source.
   with no exception list.
 
   It is applied in `nameOf`, which was already the shared funnel both boards
-  use, so `/weekly` and `/podium` cannot come to disagree. **The team-ID
+  use, so `/daily` and `/podium` cannot come to disagree. **The team-ID
   fallback deliberately bypasses it**: `SLE-C407` has no lowercase, so the rule
   would read it as un-cased and print `Sle-c407`.
 

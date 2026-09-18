@@ -20,7 +20,7 @@ export function formatRupees(value: number): string {
   // zero, so the sign describes precision already discarded, and a minus in
   // front of a zero on a wall reads as a fault rather than a fact.
   //
-  // Every real negative passes through untouched. Reached only by `/weekly`'s
+  // Every real negative passes through untouched. Reached only by `/daily`'s
   // challenge figure, which can sit below its baseline when proof is revoked on
   // a sale logged before the photograph was taken; every figure `/podium` prints
   // is a non-negative all-time total.

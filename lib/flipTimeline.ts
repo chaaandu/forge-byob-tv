@@ -75,7 +75,7 @@ export function at(beat: Beat, shift = 0): [number, number] {
 /**
  * What one card does during a flip.
  *
- * The grid is the brain and the cards are the actors: `WeeklyGrid` reads the
+ * The grid is the brain and the cards are the actors: `DailyGrid` reads the
  * event once and hands each involved card a cue; a card never looks at the
  * event, the other cards, or its own rank to decide what to do. Cards without a
  * cue are inert — nothing about them is animated, or even configured to be.

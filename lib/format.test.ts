@@ -13,7 +13,7 @@ describe('formatRupees', () => {
   })
 
   /**
-   * `/weekly`'s challenge figure can legitimately be negative: a baseline is a
+   * `/daily`'s challenge figure can legitimately be negative: a baseline is a
    * photograph of a proof-gated total, and proof can be revoked after the
    * shutter closes. The card prints it rather than hiding it.
    */
@@ -119,7 +119,7 @@ describe('the widest output the layout is sized against', () => {
     expect(glyphs(1_00_00_000)).toBe(glyphs(9_99_99_999))
   })
 
-  it('a negative is one glyph wider, and only /weekly prints one', () => {
+  it('a negative is one glyph wider, and only /daily prints one', () => {
     // The challenge figure can sit below its baseline when proof is revoked.
     // `/podium` prints all-time totals, which cannot be negative — so the
     // thirteen-glyph case never reaches the column that is tightest.

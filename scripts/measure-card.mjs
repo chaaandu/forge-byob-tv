@@ -1,5 +1,5 @@
 /**
- * Does `/weekly`'s card still hold its rhythm now the day band is gone?
+ * Does `/daily`'s card still hold its rhythm now the day band is gone?
  *
  *   node scripts/measure-card.mjs [url]
  *
@@ -30,7 +30,7 @@
  *
  * ── It seeds the daily window, because the board cannot draw one ──
  *
- * `/weekly`'s figures are the difference between two photographs of
+ * `/daily`'s figures are the difference between two photographs of
  * `total_revenue` taken at 10:00 IST and kept in `localStorage`, so a browser
  * that has never run the wall has no window and every card prints ₹0. That is
  * a true state of the product — it is what a fresh laptop shows for up to a day
@@ -45,7 +45,7 @@
 
 import { launch } from './measure-browser.mjs'
 
-const url = process.argv[2] ?? 'http://localhost:3100/weekly'
+const url = process.argv[2] ?? 'http://localhost:3100/daily'
 
 /** Roughly the live sheet's own shape: six teams trading, the rest quiet. */
 const TRADED = {

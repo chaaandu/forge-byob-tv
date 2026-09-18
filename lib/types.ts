@@ -23,7 +23,7 @@ export type Team = {
   /** All-time. Ranks `/podium`, and breaks ties everywhere else. */
   totalRevenue: number
   /**
-   * Since Monday 00:00 IST. **Ranks no slide.** It ranked `/weekly` until the
+   * Since Monday 00:00 IST. **Ranks no slide.** It ranked `/daily` until the
    * challenge took that board, and again between challenges until the daily
    * window replaced it; `/live`'s week tab is its only reader now. Still
    * required, still correct, and the fallback nothing falls back to.
@@ -33,7 +33,7 @@ export type Team = {
    * Today, IST — live, from midnight, not from the daily window's ten o'clock.
    *
    * **Never a sort key on the wall, and never a figure on it either.** It is
-   * what `/weekly`'s chevrons are driven by: a card wearing them has sold since
+   * what `/daily`'s chevrons are driven by: a card wearing them has sold since
    * the board's window closed, which is the only live thing on a locked board.
    * The figure beside them went with the fold. `/live` prints it and ranks its
    * today tab on it.
@@ -45,7 +45,7 @@ export type Team = {
    * Revenue banked since the current challenge's baseline was photographed —
    * `total_revenue` minus a frozen snapshot of itself, computed in the sheet.
    *
-   * **Ranks `/weekly` while `challenge_mode` is `Yes`.** The rest of the time
+   * **Ranks `/daily` while `challenge_mode` is `Yes`.** The rest of the time
    * that board ranks a daily window this project computes itself — see
    * `lib/daily.ts`, which uses precisely the trick described below, for
    * precisely the reason described below. `/podium` is unaffected.
@@ -146,7 +146,7 @@ export type Team = {
 export type Cohort = Readonly<Record<string, string>>
 
 /**
- * Which contest `/weekly` is showing. Set by `challenge_mode` in `TV_Cohort`;
+ * Which contest `/daily` is showing. Set by `challenge_mode` in `TV_Cohort`;
  * everything that follows from it lives in `lib/board.ts`.
  *
  * **`week` is gone and `daily` is what replaced it.** The board's ordinary state

@@ -13,16 +13,16 @@ import type { BoardMode, Team, TeamId } from '@/lib/types'
  * the line. A phone that disagreed with the TV in the corridor about who is
  * fourth would be worse than no phone.
  *
- * ── The period board followed `/weekly` and now only half can ──
+ * ── The period board followed `/daily` and now only half can ──
  *
  * It used to call `rankForMode` directly, so the phone's middle tab *was*
- * `/weekly`'s board, week or challenge, decided by the same cell. In challenge
+ * `/daily`'s board, week or challenge, decided by the same cell. In challenge
  * mode that is still exactly what happens: `rankByChallenge` is the comparator
  * `rankForMode` reaches for, and `challenge_revenue` is a published column both
  * devices read.
  *
  * The rest of the time it cannot be, and the reason is physical rather than a
- * choice. `/weekly`'s figure is no longer a column: it is a **finished day**,
+ * choice. `/daily`'s figure is no longer a column: it is a **finished day**,
  * 10:00 to 10:00, computed from two photographs of `total_revenue` that the
  * laptop driving the TV took and kept in its own `localStorage` — see
  * `lib/daily.ts`. A phone is a different machine. It has never held those marks

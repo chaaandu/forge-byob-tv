@@ -3,7 +3,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { FEED_CSV_URL, POLL_INTERVAL_MS, WATCH_RANKS_WEEKLY } from '@/config'
+import { FEED_CSV_URL, POLL_INTERVAL_MS, WATCH_RANKS_DAILY } from '@/config'
 import { rankByWeek } from '@/lib/ranking'
 import { KEYS } from '@/lib/storage'
 import type { Team } from '@/lib/types'
@@ -24,7 +24,7 @@ const BOARD: BoardSpec = {
   name: 'weekly-test',
   rank: rankByWeek,
   earned: (team) => team.weekRevenue,
-  watchTo: WATCH_RANKS_WEEKLY,
+  watchTo: WATCH_RANKS_DAILY,
 }
 
 /** Teams with week revenue descending by fixture order: C401 leads on 42k. */

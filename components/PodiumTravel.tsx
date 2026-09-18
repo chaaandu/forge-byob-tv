@@ -19,13 +19,13 @@ import type { Team } from '@/lib/types'
  * ── Why there is a back face ──
  *
  * `backface-visibility: hidden` needs two faces to work against. Without a back,
- * a disc turned past 90° shows its own front mirrored — measured on `/weekly`
+ * a disc turned past 90° shows its own front mirrored — measured on `/daily`
  * before that disc had one.
  *
  * **The shadow is a `box-shadow` on the faces, never a `filter` on the disc.** A
  * filter of any kind forces the used value of `transform-style` to `flat`, which
  * silently destroys the 3D context and turns the flip into a horizontal squash.
- * That one cost an afternoon on the weekly board.
+ * That one cost an afternoon on the daily board.
  */
 
 /** The lockup's share of the disc's width on the back face. */

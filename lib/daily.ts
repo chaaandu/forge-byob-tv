@@ -1,7 +1,7 @@
 import type { Team, TeamId } from '@/lib/types'
 
 /**
- * `/weekly`'s figure: what each venture banked between 10:00 yesterday and
+ * `/daily`'s figure: what each venture banked between 10:00 yesterday and
  * 10:00 today.
  *
  * ── Why this is computed on the laptop rather than read from a column ──

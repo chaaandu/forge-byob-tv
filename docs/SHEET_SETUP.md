@@ -258,7 +258,7 @@ lowercased before parsing, but the *keys* in column A are only trimmed — so
 will never find it. Type the key lowercase. The value in B is read case-
 insensitively: `Yes`, `yes`, `Y` and a ticked checkbox all read the same.
 
-### `challenge_mode` — which contest `/weekly` shows
+### `challenge_mode` — which contest `/daily` shows
 
 `Yes` → the board is the **10-Day Challenge**: it ranks and prints
 `challenge_revenue`, the band reads `10-Day Challenge`, the `Day 7 of 10` chip
@@ -302,7 +302,7 @@ screen:
 - **A laptop that has never run the wall shows ₹0 on every card** until its
   second 10:00 — up to twenty-four hours. So does one whose browser data has
   been cleared. The board looks completely healthy throughout. If you set up a
-  new laptop, open `/weekly` on it the day before you need it.
+  new laptop, open `/daily` on it the day before you need it.
 - **A laptop that is asleep or off at 10:00 takes its photograph late**, and the
   window silently becomes 25 or 48 hours long. The figures stay true — they are
   the difference between two real photographs — and the **two dates in the
@@ -331,7 +331,7 @@ but the programme runs to 30 Sep, and a clamp would freeze anything reading it o
 week 8's numbers for the last fortnight. On 11 Sep 2026 it reads **2**.
 
 **Nothing on the wall ranks `week_revenue` any more**, as of 18 Sep 2026 —
-`/weekly` is the daily board and `/podium` is all-time. Keep both the column and
+`/daily` is the daily board and `/podium` is all-time. Keep both the column and
 this key: `/live`'s middle tab still ranks the week, and `current_open_week` is
 still what tells the wall a week rolled over. Neither is dead, but neither
 decides a figure on a TV.

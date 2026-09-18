@@ -194,7 +194,7 @@ export function VentureCard({
    * thirty-eight other ventures on ₹0. There is no leader, and a crown on
    * `SLE-C401` for being alphabetically early is this wall's stated failure
    * mode: it renders perfectly and it is false, for however many days it takes
-   * somebody to sell something. On `/weekly` that is not a rare state — it is
+   * somebody to sell something. On `/daily` that is not a rare state — it is
    * every Monday morning, and the whole of a challenge's first day.
    *
    * **The figure it reads is the one the board sorted by**, not `totalRevenue`.

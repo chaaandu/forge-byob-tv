@@ -100,7 +100,7 @@ export function FleaDial({ state, label }: { state: CountdownState; label?: Reac
           className="tv-figure"
           style={{
             font: 'var(--t-tv-cal-figure)',
-            // The figure is the loud half of this pair on the weekly band, so
+            // The figure is the loud half of this pair on the daily band, so
             // it takes the warm accent whether or not the clock is urgent;
             // urgency is then carried by the arc and by the mode change.
             color: 'var(--tangerine-glow)',

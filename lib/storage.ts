@@ -30,7 +30,7 @@ const PREFIX = 'byob-tv.v2'
 /**
  * One key per write pattern, and one board state per board.
  *
- * `/podium` and `/weekly` rank on different figures, so they see different rank
+ * `/podium` and `/daily` rank on different figures, so they see different rank
  * changes and must not share a memory of "what the board looked like". A single
  * shared key would have each page overwriting the other's history and both
  * animating nonsense.

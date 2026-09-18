@@ -25,7 +25,7 @@ import type { Cohort, Snapshot, Team } from '@/lib/types'
  *
  * ── Only a visible page fetches ──
  *
- * `/podium` and `/weekly` stay reachable as standalone URLs for inspection, so
+ * `/podium` and `/daily` stay reachable as standalone URLs for inspection, so
  * two of them can be open at once with only one on screen. Without this gate,
  * two renderers would each run a read-compute-write cycle every 60 seconds
  * against the same localStorage: duplicated animations and clobbered writes.
@@ -37,7 +37,7 @@ import type { Cohort, Snapshot, Team } from '@/lib/types'
 export type WallData = {
   snapshot: Snapshot | null
   /**
-   * The finished day `/weekly` is showing, or `null` before a wall has two
+   * The finished day `/daily` is showing, or `null` before a wall has two
    * marks. `/podium` ignores it.
    *
    * **Applied in the same commit as the snapshot it was computed beside**, which
@@ -62,10 +62,10 @@ export type WallData = {
  * on different figures and a shared answer would be wrong for one of them.
  */
 export type BoardSpec = {
-  /** Storage namespace. `/podium` and `/weekly` must not share a memory. */
+  /** Storage namespace. `/podium` and `/daily` must not share a memory. */
   name: string
   /**
-   * Both are handed the cohort as well as the teams, because `/weekly` ranks on
+   * Both are handed the cohort as well as the teams, because `/daily` ranks on
    * a figure the *sheet* chooses — `challenge_mode` decides between the
    * challenge total and the week's. The spec itself must stay a stable module
    * constant (see the note at the foot of `tick`), so the mode cannot be baked
@@ -82,7 +82,7 @@ export type BoardSpec = {
    * where every figure on the board drops to zero together and forty resets
    * must not read as forty overtakes.
    *
-   * `/weekly` overrides it with `boardPeriod`, which folds three such ticks into
+   * `/daily` overrides it with `boardPeriod`, which folds three such ticks into
    * one number space: ten o'clock every morning, a challenge rolling over, and
    * the `challenge_mode` cell being edited. `/podium` leaves it alone — its
    * figure is the all-time total, which never resets at all.
@@ -230,7 +230,7 @@ export function useWallData(board: BoardSpec): WallData {
       const { state, events } = detect(readBoard(name), {
         ranked: rank(fresh.teams, fresh.cohort, day),
         // `BoardState.week` keeps its name while carrying a challenge number on
-        // `/weekly`. Renaming the stored field would change the shape of what
+        // `/daily`. Renaming the stored field would change the shape of what
         // every TV holds in localStorage and force a storage key version bump —
         // and buy nothing, because the mismatch heals itself: a wall's stored
         // `week: 5` meets the new `period: 1` on the first poll after deploy,

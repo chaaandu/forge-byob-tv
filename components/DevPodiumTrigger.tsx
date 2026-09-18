@@ -72,7 +72,7 @@ export function DevPodiumTrigger({
       // The same shape a real event carries, so queue behaviour under repeated
       // clicks is identical to queue behaviour under repeated detection rather
       // than merely similar. `/podium` ranks all-time, which has no week, so the
-      // slot a week number occupies on the weekly board is a literal here.
+      // slot a week number occupies on the daily board is a literal here.
       id: `all:${attacker.teamId}:${to}`,
       attacker: attacker.teamId,
       attackerName: attacker.ventureName,

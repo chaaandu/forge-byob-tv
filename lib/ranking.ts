@@ -54,7 +54,7 @@ export function compareWeek(a: Team, b: Team): number {
  * reason survives the change of first key intact: day one of a challenge has
  * every team on ₹0, and falling back to the standing the wall showed all of last
  * fortnight is the reading a passer-by already has in their head. Ordering forty
- * zeroes by team ID would look arbitrary, and would make `/weekly` disagree with
+ * zeroes by team ID would look arbitrary, and would make `/daily` disagree with
  * `/podium` for no reason anyone could see.
  *
  * **A total order, like every comparator in this file.** On the morning a
@@ -99,7 +99,7 @@ export function rankByToday(teams: readonly Team[]): Team[] {
 }
 
 /**
- * `/weekly`'s standing: the daily window desc → **all-time** revenue desc →
+ * `/daily`'s standing: the daily window desc → **all-time** revenue desc →
  * team ID asc.
  *
  * ── The only comparator here that is handed its first key ──
@@ -122,7 +122,7 @@ export function rankByToday(teams: readonly Team[]): Team[] {
  * is ₹0 for most teams on any quiet day. Falling back to the standing the wall
  * showed yesterday is the reading a passer-by already has in their head.
  * Ordering thirty-five zeroes by team ID would look arbitrary and would make
- * `/weekly` disagree with `/podium` for no reason anyone could see.
+ * `/daily` disagree with `/podium` for no reason anyone could see.
  *
  * **A total order, like every comparator in this file** — and the `?? 0` is part
  * of what makes it one. A team the window cannot measure compares equal to a
@@ -154,7 +154,7 @@ export function rankByChallenge(teams: readonly Team[]): Team[] {
  * The forty teams actually competing.
  *
  * `TV_Feed` publishes all 42 workbooks because it reads `Team Links`, and the
- * two spares would otherwise take up two of the eighty slots on the weekly board
+ * two spares would otherwise take up two of the eighty slots on the daily board
  * while never trading. Filtered here rather than in `feed.ts` so the row gate
  * still counts what the sheet published: the gate's job is "did we get a whole
  * fetch", which is a question about the sheet, not about the cohort.

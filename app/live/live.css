@@ -140,19 +140,34 @@ body:has(.lv-app[data-locked]) {
     clip-path: polygon(var(--lv-rake) 0, 100% 0, 100% 100%, 0 100%);
   }
 
+  /* ── The stripes line up with BYOB, not with BYOB-plus-its-caption ──
+   *
+   * The row centres its three cells against each other, so while `FORGE C1`
+   * was part of the wordmark's box it pulled that box's middle down and the
+   * stripes sat 4px below the word they flank. Measured: stripe mid 43,
+   * `BYOB` mid 39.
+   *
+   * The caption is therefore hung *out* of the flow, under the word it
+   * belongs to. Nothing is nudged by a magic number — the box the grid
+   * centres against is now exactly the word. */
   .lv-wordmark {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    position: relative;
+    display: block;
     font-size: 25px;
     font-weight: 900;
     line-height: 0.9;
     letter-spacing: 0.01em;
+    text-align: center;
     transform: skewX(-11deg);
   }
 
   .lv-wordmark span {
-    margin-top: 4px;
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    margin-top: 5px;
+    white-space: nowrap;
     font-size: 8.5px;
     font-weight: 700;
     font-stretch: 100%;
@@ -1514,11 +1529,12 @@ body:has(.lv-app[data-locked]) {
       padding: 26px 24px 20px;
     }
 
-    /* Edge to edge, like the toolbar band below it. Stopping at the column
-       while the band underneath ran to the window made the two disagree
-       about where the page ends. */
+    /* **The strip stays inside the board's column**, asked for directly. It
+       ran to the window for one revision, to match the toolbar band below —
+       and the band is chrome, which belongs to the window, while the strip is
+       the board's own masthead and belongs to the board. */
     .lv-topline {
-      margin: 0 calc(50% - 50vw);
+      margin: 0 -24px;
     }
 
     .lv-title {
@@ -1800,37 +1816,29 @@ body:has(.lv-app[data-locked]) {
       padding: 12px 14px;
     }
 
-    /* ── The keys move up beside the close button ──
+    /* ── The keys float at the foot of the panel ──
      *
-     * Floating at the bottom is right on a phone, where the sheet is as tall
-     * as the screen and a thumb lives down there. In a docked panel the
-     * content is shorter than the panel, so "the bottom" is the middle of a
-     * stat tile — the chevrons landed on top of one. Up here they sit with
-     * the other control, and the pointer that opened the panel is already
-     * near them. */
+     * They spent a revision at the top, beside the close button, because a
+     * panel is taller than its contents and "the bottom" was landing on a
+     * stat tile. Three controls in one corner is what that cost: two of them
+     * move you between teams and the third shuts the panel, and there is
+     * nothing in the shapes to say which does what.
+     *
+     * So they are back at the foot, floating over the content the way they do
+     * on a phone, with the body padded to match — the tile they used to sit
+     * on now scrolls clear beneath them. */
     .lv-sheet-nav {
-      top: 18px;
-      right: 74px;
-      bottom: auto;
-      left: auto;
-      justify-content: flex-end;
-      gap: 8px;
-      padding: 0;
+      bottom: 24px;
+      padding: 0 26px;
     }
 
     .lv-nav-key {
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-    }
-
-    .lv-nav-key svg {
-      width: 18px;
-      height: 18px;
+      width: 46px;
+      height: 46px;
     }
 
     .lv-sheet-body {
-      padding-bottom: 32px;
+      padding-bottom: 104px;
     }
   }
 }

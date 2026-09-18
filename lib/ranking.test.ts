@@ -121,7 +121,7 @@ describe('rankByChallenge', () => {
 
   /**
    * Day one of a challenge: every team on ₹0, exactly as Monday morning is for
-   * the weekly board. The order has to be the *same* order on the next fetch, or
+   * the daily board. The order has to be the *same* order on the next fetch, or
    * forty cards reshuffle and every shuffle reads as an overtake.
    */
   it('is total when the whole cohort is on zero for the challenge', () => {

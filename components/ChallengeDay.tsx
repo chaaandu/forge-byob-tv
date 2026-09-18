@@ -6,7 +6,7 @@ import { TICK_SLOW_MS } from '@/config'
 import { challengeDay } from '@/lib/challenge'
 
 /**
- * `Day 2 of 14`, in the slot `/weekly`'s band used to give the Mesa Flea.
+ * `Day 2 of 14`, in the slot `/daily`'s band used to give the Mesa Flea.
  *
  * ── The Flea has not left the wall ──
  *

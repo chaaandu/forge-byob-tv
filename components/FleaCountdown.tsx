@@ -16,10 +16,10 @@ import { computeCountdownState, mastheadCountdown } from '@/lib/countdown'
  * **The figure was `--t-pod-count` at 4.2vw — 88px — in Tangerine Glow, between
  * two labels stacked above and below it.** It is one line at the masthead's own
  * apparatus size now, with the figure a weight up and in the surface's accent,
- * exactly like `/weekly`'s day chip. The spine existed partly to give this
+ * exactly like `/daily`'s day chip. The spine existed partly to give this
  * somewhere to be large, and the spine is gone.
  *
- * "Exactly like `/weekly`'s day chip" is now enforced rather than described:
+ * "Exactly like `/daily`'s day chip" is now enforced rather than described:
  * `--t-pod-count` is deleted and both chips read `--t-tv-mast-figure`. It was
  * only a description for one commit, during which the day numeral went to 28px
  * and this stayed at 18px.

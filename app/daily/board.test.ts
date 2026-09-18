@@ -1,6 +1,7 @@
+import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
-import { BOARD } from '@/app/weekly/page'
+import { BOARD } from '@/app/daily/page'
 import { boardHeading, boardMode, rankForMode } from '@/lib/board'
 import type { DailyWindow } from '@/lib/daily'
 import { currentChallenge, openWeek } from '@/lib/feed'
@@ -8,7 +9,7 @@ import { SPARE_TEAM_IDS } from '@/config'
 import { COMPETING_SIZE, team, teams } from '@/test/fixtures'
 
 /**
- * `/weekly`'s board spec, asserted directly.
+ * `/daily`'s board spec, asserted directly.
  *
  * ── Why a wiring test rather than a behaviour test ──
  *
@@ -44,7 +45,7 @@ const DAY: DailyWindow = {
 /** The next morning's window. Same teams, different day. */
 const NEXT: DailyWindow = { ...DAY, opened: '2026-09-18', closed: '2026-09-19' }
 
-describe('/weekly board spec', () => {
+describe('/daily board spec', () => {
   describe('challenge mode — challenge_mode is Yes', () => {
     it('ranks and scores on the challenge figure', () => {
       expect(
@@ -201,6 +202,43 @@ describe('/weekly board spec', () => {
    */
   it('does not call both contests by the same name', () => {
     expect(boardHeading(boardMode(ON))).not.toBe(boardHeading(boardMode(OFF)))
+  })
+
+  /**
+   * ── The board's name is a storage namespace, and three places have to agree ──
+   *
+   * `BOARD.name` keys `byob-tv.v2.board.<name>` and `byob-tv.v2.queue.<name>`.
+   * `DevFlipTrigger` writes to that queue and clears it, and it cannot import
+   * `BOARD` to find the name — the page imports the trigger, so the trigger
+   * importing the page is a cycle. So it spells the string out, and the two
+   * spellings can drift.
+   *
+   * **This is not hypothetical; it happened during the `/weekly` → `/daily`
+   * rename on 18 September 2026.** `BOARD.name` moved and the trigger's two
+   * literals did not, which puts every triggered overtake into a queue that
+   * nothing drains: the button reports success, the queue grows, and the board
+   * never animates. Dev-only, invisible, and exactly the shape of failure this
+   * project is built around — so it is pinned by reading the trigger's source
+   * rather than by trusting a comment.
+   */
+  it('is the storage namespace the dev trigger writes to', () => {
+    const trigger = readFileSync('components/DevFlipTrigger.tsx', 'utf8')
+    expect(trigger).toContain(`enqueueKicks('${BOARD.name}'`)
+    expect(trigger).toContain(`clearKicks('${BOARD.name}')`)
+    // And it must not be the old one, which is what the rename left behind.
+    expect(trigger).not.toContain("'weekly'")
+  })
+
+  /**
+   * The route and the namespace are separate strings and both moved in the
+   * rename. A namespace that still said `weekly` under a page served at
+   * `/daily` would work perfectly — it is just a key — right up until somebody
+   * grepped for one and found the other.
+   */
+  it('matches the route it is served at', () => {
+    expect(BOARD.name).toBe('daily')
+    expect(existsSync('app/daily/page.tsx')).toBe(true)
+    expect(existsSync('app/weekly/page.tsx')).toBe(false)
   })
 
   /** Neither raw reader is wired directly any more; both go through the mode. */

@@ -85,7 +85,7 @@ const RISE_TOTAL_MS = 380 + 90 + 16
  * height for all four leaves the board with no direction: rank 1 and rank 31
  * the same object in different places.
  *
- * **Direction is not this slide's job.** `/podium` is the hierarchy, `/weekly`
+ * **Direction is not this slide's job.** `/podium` is the hierarchy, `/daily`
  * is the cohort, and they rotate thirty seconds apart precisely so each can do
  * one of those properly. Rank here is carried by reading order and by a
  * numeral, both exact, and a 23% spread over four rows is too small to read as
@@ -108,7 +108,7 @@ const ROW_HEIGHTS = [
  * **This sorts again, independently of the page's board spec, and the two must
  * agree.** If the grid renders in one order while `detect` reasons about
  * another, an overtake animates the wrong two cards — on a board that otherwise
- * looks entirely correct. `app/weekly/board.test.ts` pins them together.
+ * looks entirely correct. `app/daily/board.test.ts` pins them together.
  */
 export function rowsOf(
   teams: readonly Team[],
@@ -189,7 +189,7 @@ export function cuesFor(grid: HTMLElement, kick: OvertakeEvent): Map<number, Fli
   return cues
 }
 
-export function WeeklyGrid({
+export function DailyGrid({
   teams,
   mode = 'challenge',
   day = null,

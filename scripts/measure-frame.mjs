@@ -2,7 +2,7 @@
  * The full report for one slide, at a stated viewport.
  *
  *   node scripts/measure-frame.mjs [url] [screenshot.png] [--reduce-motion]
- *   node scripts/measure-frame.mjs http://localhost:3000/weekly weekly.png
+ *   node scripts/measure-frame.mjs http://localhost:3000/daily weekly.png
  *
  * Reach for this after any change to a board's geometry, colour or motion. It
  * answers the questions a DOM assertion cannot: did anything leave the frame,
@@ -105,7 +105,7 @@ const report = await page.evaluate(() => {
       .filter((el) => !el.getAttribute('aria-label')?.includes('Mesa Flea'))
       .map((el) => ({ label: el.getAttribute('aria-label'), ...box(el) })),
 
-    // `.tv-pill` is /weekly's language. Its absence here is a design rule.
+    // `.tv-pill` is /daily's language. Its absence here is a design rule.
     pills: document.querySelectorAll('.tv-pill').length,
 
     rows: [...document.querySelectorAll('main > div > div:last-child > div')].map((el) => ({

@@ -248,7 +248,7 @@ export function openWeek(cohort: Cohort): number | null {
 /**
  * Which challenge is open, or `null` if the sheet has not said.
  *
- * This is `/weekly`'s answer to the question `openWeek` answers for a weekly
+ * This is `/daily`'s answer to the question `openWeek` answers for a weekly
  * board: *did the figure this board ranks on just reset to zero for everyone at
  * once?* The two are different clocks and always will be — challenges run
  * Tuesday→Monday and programme weeks run Monday→Sunday, so week 7 spans both the

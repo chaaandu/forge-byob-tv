@@ -143,7 +143,7 @@ comment in `config.ts` and deliberately never shown on screen.
 
 ## How the two slides rotate
 
-`components/Rotator.tsx` swaps `/weekly` and `/podium` every **30 seconds**. It is
+`components/Rotator.tsx` swaps `/daily` and `/podium` every **30 seconds**. It is
 mounted once in the root layout and renders nothing.
 
 The swap is a **client-side navigation, never a reload** — the document is never
@@ -159,7 +159,7 @@ otherwise be measuring whichever board happened to be up.
 If this wall also sits inside a wider campus slideshow, that outer rotation is
 someone else's and this project knows nothing about it. **Do not point it at
 these two URLs** — two rotators produce a slide that changes early, at irregular
-intervals, for no visible reason. Point it at `/weekly` alone and let this handle
+intervals, for no visible reason. Point it at `/daily` alone and let this handle
 the rest.
 
 Each page is self-sufficient. On becoming visible it fetches immediately,

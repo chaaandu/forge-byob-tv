@@ -16,7 +16,7 @@ import { useWallData, type BoardSpec } from '@/lib/useWallData'
 /**
  * Slide 1 — the absolute leaderboard.
  *
- * **The same five-row editorial frame `/weekly` uses**: masthead, rule, board,
+ * **The same five-row editorial frame `/daily` uses**: masthead, rule, board,
  * rule, footer, inside a safe margin on all four sides. This slide had a
  * 240px-wide full-height spine down its left edge instead — `PodiumMasthead`,
  * now deleted — carrying the lockup, BYOB as four stacked 187px letters, a rule
@@ -32,7 +32,7 @@ import { useWallData, type BoardSpec } from '@/lib/useWallData'
  * the furniture is most of what a passer-by sees of it. Sharing the data and not
  * the arrangement is how the rotation came to read as two designs. The lockup,
  * the countdown and the stamp are all still here; they are on one line across
- * the top, in the order `/weekly` puts them, at the sizes `/weekly` uses.
+ * the top, in the order `/daily` puts them, at the sizes `/daily` uses.
  *
  * The cost is stated in `components/WallHeader.tsx`: the Flea countdown is a
  * line of apparatus now rather than an 88px figure.
@@ -42,7 +42,7 @@ const BOARD: BoardSpec = {
   // the board rank the same list. Ranking all 42 while rendering 40 would let a
   // spare hold a rank the wall never shows, and every team below it would carry
   // a rank one lower than the board's — including the rank changes that fire an
-  // overtake. `/weekly` composes its spec the same way, for the same reason.
+  // overtake. `/daily` composes its spec the same way, for the same reason.
   name: 'podium',
   rank: (teams) => rankTeams(competingTeams(teams)),
   earned: (team) => team.totalRevenue,
@@ -96,13 +96,13 @@ export default function PodiumPage() {
     // brand's own rhythm. The class is what re-points `--ink`, `--accent` and
     // the hairlines for a dark field; nothing inside this tree names a colour.
     //
-    // The five rows are `/weekly`'s, exactly — see the note there on why the
+    // The five rows are `/daily`'s, exactly — see the note there on why the
     // masthead no longer bleeds to the frame's edge.
     <main
       className="tv-frame surface-dark"
       style={{
         display: 'grid',
-        // Three bands: masthead, rule, board — `/weekly`'s exactly. It was
+        // Three bands: masthead, rule, board — `/daily`'s exactly. It was
         // five until the footer line was removed; see the note there.
         gridTemplateRows: 'auto auto minmax(0, 1fr)',
         // Top and bottom differ — 20px over the masthead, 40 under the board.
@@ -112,12 +112,12 @@ export default function PodiumPage() {
       }}
     >
       {/* **No day chip on this slide**, which is what `mode="week"` buys: the
-          10-day challenge is `/weekly`'s contest and these figures are all-time.
+          10-day challenge is `/daily`'s contest and these figures are all-time.
           A `Day 7 of 10` chip over a board of cumulative revenue is precisely
           the plausible-and-unreported failure this project is built around.
 
           The Flea countdown takes that slot instead, as `trailing`. It is the
-          one piece of apparatus this slide has that `/weekly` does not. */}
+          one piece of apparatus this slide has that `/daily` does not. */}
       <WallHeader
         snapshot={snapshot}
         label="BYOB Leaderboard"
@@ -144,7 +144,7 @@ export default function PodiumPage() {
           The stamp's removal is the part worth recording: this wall shows no
           error state, so a failed fetch renders perfectly healthy stale numbers
           for days and that was the only tell. See the same note in
-          app/weekly/page.tsx. */}
+          app/daily/page.tsx. */}
 
       <DevPodiumTrigger
         teams={teams}

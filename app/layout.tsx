@@ -138,7 +138,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Renders nothing. It is the wall's slideshow — thirty seconds a slide,
             by soft navigation, so the page never reloads and never drops out of
             fullscreen. Mounted here rather than in either page because it has to
-            outlive both of them: a rotator inside `/weekly` would unmount at the
+            outlive both of them: a rotator inside `/daily` would unmount at the
             moment it navigated away and never arm the swap back. */}
         <Rotator />
         {/* Ganesh Chaturthi, 14–17 September 2026, bottom-left of both slides.
@@ -146,7 +146,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
             **Here rather than in either page, and for the load-bearing half of
             `Rotator`'s reason rather than the obvious one.** A looping animation
-            mounted inside `/weekly` would be destroyed and rebuilt every thirty
+            mounted inside `/daily` would be destroyed and rebuilt every thirty
             seconds — 877KB re-parsed and a fresh SVG tree written, twice a
             minute, forever — and the loop would restart from frame 0 on every
             rotation, so the idol would perform the same first second of its

@@ -5,7 +5,7 @@ import type { DailyWindow } from '@/lib/daily'
 import { team } from '@/test/fixtures'
 
 /**
- * `challenge_mode`, the one cell that decides which contest `/weekly` shows.
+ * `challenge_mode`, the one cell that decides which contest `/daily` shows.
  *
  * Every assertion here is about a *silent* failure. Nothing in this module can
  * throw, and every wrong answer it could give renders a complete, plausible

@@ -40,11 +40,11 @@ describe('standingsFor', () => {
   })
 
   /**
-   * **In challenge mode the phone's middle tab is still `/weekly`'s board**, to
+   * **In challenge mode the phone's middle tab is still `/daily`'s board**, to
    * the line: `challenge_revenue` is a published column and both devices read
    * it, so `rankForMode` is the authority for both.
    */
-  it('ranks the challenge exactly as /weekly does', () => {
+  it('ranks the challenge exactly as /daily does', () => {
     expect(standingsFor('period', 'challenge', cohort).map((s) => s.team.teamId)).toEqual(
       rankForMode('challenge', competingTeams(cohort), null).map((t) => t.teamId),
     )
@@ -54,7 +54,7 @@ describe('standingsFor', () => {
    * ── The one place the phone and the wall deliberately measure different
    * things, stated rather than asserted away ──
    *
-   * `/weekly`'s daily figure is not a column. It is a finished day, 10:00 to
+   * `/daily`'s daily figure is not a column. It is a finished day, 10:00 to
    * 10:00, computed from two photographs of `total_revenue` that the **laptop
    * driving the TV** took and kept in its own `localStorage`. A phone is a
    * different machine; it has never held those marks and cannot be handed them

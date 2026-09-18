@@ -105,7 +105,7 @@ export const POLL_INTERVAL_MS = 60_000
  */
 export const SPARE_TEAM_IDS: readonly TeamId[] = ['VBC140', 'VBC141']
 
-// ── Weekly board ────────────────────────────────────────────────────────────
+// ── Daily board ─────────────────────────────────────────────────────────────
 
 /**
  * A day's revenue at or above this reads as a strong day and is emphasised.
@@ -117,7 +117,7 @@ export const SPARE_TEAM_IDS: readonly TeamId[] = ['VBC140', 'VBC141']
 export const HOT_TODAY_MIN = 5_000
 
 /**
- * How far down the weekly board a card is a solid Deep Forest object. Below it,
+ * How far down the daily board a card is a solid Deep Forest object. Below it,
  * the card is the pale outlined kind.
  *
  * **A property of the slot, not of the team.** The rule this replaced was
@@ -133,7 +133,7 @@ export const HOT_TODAY_MIN = 5_000
  * the board a card claims, and a team that made ₹6,440 has a number the wall is
  * not entitled to swallow.
  *
- * Equal to `WATCH_RANKS_WEEKLY` today, and not derived from it: one says how far
+ * Equal to `WATCH_RANKS_DAILY` today, and not derived from it: one says how far
  * down an overtake is worth animating, the other how far down the board reads as
  * the contest. They would move for different reasons.
  */
@@ -284,7 +284,7 @@ export const EOD_FROM_HOUR_IST = 18
 // ── The daily window ────────────────────────────────────────────────────────
 
 /**
- * The hour, IST, at which `/weekly`'s window closes and the board locks for the
+ * The hour, IST, at which `/daily`'s window closes and the board locks for the
  * next twenty-four hours.
  *
  * **Not midnight, and the difference is the whole point.** The board shows a
@@ -314,7 +314,7 @@ export const DAILY_CLOSE_HOUR_IST = 10
 /**
  * How far down each board a rank change is worth animating.
  *
- * The weekly board watches its whole first column; a change at rank 34 is real
+ * The daily board watches its whole first column; a change at rank 34 is real
  * but nobody is watching that far down, and animating it would spend the wall's
  * one interrupt on it.
  *
@@ -325,7 +325,7 @@ export const DAILY_CLOSE_HOUR_IST = 10
  * which get a slide. Rank 11 is off the board, so ten is the whole of what it
  * can show.
  */
-export const WATCH_RANKS_WEEKLY = 20
+export const WATCH_RANKS_DAILY = 20
 export const WATCH_RANKS_PODIUM = 10
 
 /**

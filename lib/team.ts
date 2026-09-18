@@ -82,7 +82,7 @@ export function titleCase(name: string): string {
  * nobody is close enough to query.
  *
  * **Shared, not copied.** It lived privately inside `components/Podium.tsx`
- * until `/weekly`'s cards started printing names too. Two boards in one rotation
+ * until `/daily`'s cards started printing names too. Two boards in one rotation
  * disagreeing about what an unnamed team is called — one showing an ID, the
  * other a blank — is exactly the kind of quiet inconsistency that runs for weeks
  * on a wall nobody is actively watching. It now owns the casing as well, so the

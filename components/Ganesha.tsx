@@ -340,7 +340,7 @@ function GaneshaFigure({
         } as React.CSSProperties
       }
       // Presentational, for the same reason the crown is: this restates nothing
-      // the board says, and `/weekly` and `/podium` are display pages. A screen
+      // the board says, and `/daily` and `/podium` are display pages. A screen
       // reader announcing an SVG's worth of unnamed groups in the corner of a
       // leaderboard is noise rather than help.
       aria-hidden="true"

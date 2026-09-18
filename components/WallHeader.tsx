@@ -19,7 +19,7 @@ import type { BoardMode, Snapshot } from '@/lib/types'
  * **The two outer columns are equal `1fr`s and that is the whole centring
  * mechanism.** The heading is centred on the *frame*, not inside whatever the
  * slide's apparatus leaves over — `/podium` carries a Flea countdown on the
- * right and `/weekly` carries a day chip or nothing at all, so a heading
+ * right and `/daily` carries a day chip or nothing at all, so a heading
  * centred in the remainder would sit at three different x positions across the
  * rotation, on two slides thirty seconds apart. The empty cell is doing work.
  *
@@ -69,7 +69,7 @@ import type { BoardMode, Snapshot } from '@/lib/types'
  *
  * ── What this replaced ──
  *
- * `/weekly` had `.tv-band`: a full-bleed gradient bar 82px tall carrying a 70px
+ * `/daily` had `.tv-band`: a full-bleed gradient bar 82px tall carrying a 70px
  * display heading tracked to 973px — half the width of the wall — with the
  * lockup at 67px on one side and 15px metadata on the other. `/podium` had
  * `PodiumMasthead`, a 240px full-height spine with BYOB set as four stacked
@@ -86,7 +86,7 @@ import type { BoardMode, Snapshot } from '@/lib/types'
  * ── `tone` went with the lockup, and nothing branches on the surface now ──
  *
  * This was the **one** place in the tree that knew which surface it was sitting
- * on: `/weekly` is light in the design and `/podium` is dark, the green-on-white
+ * on: `/daily` is light in the design and `/podium` is dark, the green-on-white
  * lockup vanishes on aubergine and the reversed one vanishes on lavender, so the
  * lockup picked itself with an explicit `tone` prop rather than by reading a
  * class — a component that guesses its own surface guesses wrong the first time
@@ -123,7 +123,7 @@ export function WallHeader({
    * What the board's figures are measured over, set beside its name.
    *
    * Nothing passes it today. `/podium` passed `All time` until 13 September
-   * 2026 and the removal was asked for directly; `/weekly` never passed
+   * 2026 and the removal was asked for directly; `/daily` never passed
    * anything, because its own day chip and its `Revenue since` caption already
    * say what its window is. The prop stays because it is what decides — a
    * slide cannot come to carry the wrong window, and putting the word back on
@@ -132,7 +132,7 @@ export function WallHeader({
   scope?: string
   /**
    * Slide-specific apparatus, drawn between the heading and the stamp.
-   * `/podium` hands its Flea countdown in here; `/weekly` hands nothing and
+   * `/podium` hands its Flea countdown in here; `/daily` hands nothing and
    * gets its day chip from `mode` instead.
    */
   trailing?: React.ReactNode
@@ -185,7 +185,7 @@ export function WallHeader({
           {/* ── What the figures below are measured over ──
 
               The same venture reads ₹2,42,546 on `/podium` and ₹12,400 on
-              `/weekly` thirty seconds later, and until this line neither slide
+              `/daily` thirty seconds later, and until this line neither slide
               said why. The wall's audience is thirty-nine teams who live the
               programme daily and know the difference, which is the argument
               that removed the old caption — but it is an argument about the

@@ -30,7 +30,7 @@
  * unmounted mid-sequence — a rotation moving on, a resize — and one unmount stops
  * everything, where a chain of callbacks would need teardown at every beat.
  *
- * This is the same argument `lib/flipTimeline.ts` makes for `/weekly`, and the
+ * This is the same argument `lib/flipTimeline.ts` makes for `/daily`, and the
  * two are deliberately separate files: the beats differ, the geometry differs,
  * and a shared "flip timeline" that both boards bent would be a worse thing than
  * two clocks that each say what their own board does.

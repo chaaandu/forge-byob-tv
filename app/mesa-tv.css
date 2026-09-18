@@ -36,7 +36,7 @@
      Every foreground token in the system was measured against Soft Mint. White
      is lighter, so each one gains contrast here rather than losing it. */
   /* **No page surface is set here any more.** It used to be white for both
-     slides. Forge alternates — `/podium` dark, `/weekly` light — so the surface
+     slides. Forge alternates — `/podium` dark, `/daily` light — so the surface
      is chosen by `.surface-dark` / `.surface-light` on each page's `<main>`,
      and `app/forge-tokens.css` carries the defaults. Setting `--bg` here would
      win over neither and confuse both. */
@@ -136,10 +136,10 @@
 
      Twenty-two live tokens, each with its own hand-picked `clamp()`. Read back
      from the running board at 1920x1080, that produced fourteen distinct sizes
-     on `/weekly` and fourteen on `/podium`, and several of them were
+     on `/daily` and fourteen on `/podium`, and several of them were
      accidentally almost identical:
 
-       /weekly   16.9  16.1  15.9   — the rank, the legend and the day chip,
+       /daily   16.9  16.1  15.9   — the rank, the legend and the day chip,
                                       three sizes inside one pixel
        /podium   15.9  15.4  15.0   — three more
                  29.8  28.8  27.8   — the podium name, a list figure, a list name
@@ -159,7 +159,7 @@
 
      ── And two sizes that are no longer on it ──
 
-     `/weekly`'s card name and card figure left for `--fs-card-name` (17px) and
+     `/daily`'s card name and card figure left for `--fs-card-name` (17px) and
      `--fs-card-money` (26px), which are declared below this block with the
      reason. They are derived against the card rather than against the ladder,
      the way `--t-stage-figure` is derived against a podium block's face and
@@ -407,7 +407,7 @@
      they are for, and `--d-card-logo` already caps them at the card's width at
      one end and the legibility floor at the other.
 
-     **Every term in `--h-board` must match `app/weekly/page.tsx`'s grid.** They
+     **Every term in `--h-board` must match `app/daily/page.tsx`'s grid.** They
      are two statements of one layout, and they have to move together — in
      either direction. The footer line and the second rule were removed from
      both pages and subtracted from here in the same commit; had they been left
@@ -427,7 +427,7 @@
      object in different places.
 
      **Direction is not this slide's job.** `/podium` is the hierarchy and
-     `/weekly` is the cohort; they rotate thirty seconds apart precisely so each
+     `/daily` is the cohort; they rotate thirty seconds apart precisely so each
      can do one of those properly. Rank here is already carried by reading order
      and by a numeral, both exact. A 23% spread over four rows is too small to
      read as intent and too large to be invisible, and what it actually reads as
@@ -633,7 +633,7 @@
   /* ══ THE EDITORIAL FRAME ══════════════════════════════════════════════════
 
      Both slides are built on one frame now: a safe margin, a masthead, a
-     hairline, the board, a footer line. `/weekly` had a full-bleed dark band
+     hairline, the board, a footer line. `/daily` had a full-bleed dark band
      and `/podium` had a full-height vertical spine, which meant two slides
      rotating on one screen every thirty seconds built their chrome two
      different ways. They share it.
@@ -686,13 +686,13 @@
      The bottom keeps `--s-safe-y`'s 40, and the asymmetry is the point rather
      than an oversight. What sits against the top edge is one line of type that
      the eye reads as a masthead whether or not its very tops are clipped; what
-     sits against the bottom edge is the last row of `/weekly`'s cards and the
+     sits against the bottom edge is the last row of `/daily`'s cards and the
      Ganesha, where a crop takes a figure. The protection is spent where it buys
      the most.
 
      **It is a token rather than a literal because `--h-board` subtracts it.**
      The board's height is the frame minus every band above and below it, and
-     `app/podium/page.tsx` and `app/weekly/page.tsx` both state the same padding;
+     `app/podium/page.tsx` and `app/daily/page.tsx` both state the same padding;
      the three are one layout written three times and they move together. */
   --s-mast-top: 1.0417vw; /* 20px */
   --s-safe-x: var(--s-12); /* 48px — unchanged, so the columns do not move */
@@ -720,7 +720,7 @@
      day and needed two edits every time.
 
      **`--h-board` is the other half of this and subtracts it.** Trimming the
-     leading hands 5.6px back to `/weekly`'s four rows even as the type goes up
+     leading hands 5.6px back to `/daily`'s four rows even as the type goes up
      1.3x, which is the whole of what the board pays for this change. */
   --h-mast: calc(var(--fs-2) * 0.7); /* 57px — Figtree's cap height at --fs-2 */
   /* ── The heading is centred in the header band, and this is how ──
@@ -737,7 +737,7 @@
 
      **20px, and the hairline did not move down to get it.** This was 40 for one
      commit, matching the frame's old top margin, and it centred the heading by
-     pushing the rule 24px into the board — which on `/weekly` is six pixels off
+     pushing the rule 24px into the board — which on `/daily` is six pixels off
      each of four card rows and made the cards read short. The air came out of
      the frame's top instead: see `--s-mast-top`, which is 20 and carries the
      overscan cost that decision takes on.
@@ -813,7 +813,7 @@
      reservation that collapses per card would give one card in a row a bigger
      mark than its neighbours, and one that collapses per row would give the
      quiet bottom rows bigger marks than the busy top ones. That inversion is
-     measured and recorded in `WeeklyGrid`; it is the reason the row was
+     measured and recorded in `DailyGrid`; it is the reason the row was
      reserved in the first place.
 
      So the capsule goes where a reservation already exists. The rank numeral is
@@ -1058,7 +1058,7 @@
      0.01px at 1920 (175.19 measured, all four rows), and it is the only place
      that arithmetic is written down.
 
-     **`WeeklyGrid` reads it as a length, not just the mark.** The last row of a
+     **`DailyGrid` reads it as a length, not just the mark.** The last row of a
      39-team cohort holds nine cards, and it is centred by giving it nine columns
      of exactly this width — so the agreement above is what keeps a centred row
      and a full row the same card. The 171.6 this comment used to claim was left
@@ -1399,7 +1399,7 @@
      **Title case is what collapsed the width**, not the face: the line is now
      shorter than any of the three all-caps settings before it, by 129px against
      the sans it started as. Clearance from the title's right edge to
-     `/podium`'s countdown is **1090px at 1920**, and `/weekly` carries no
+     `/podium`'s countdown is **1090px at 1920**, and `/daily` carries no
      apparatus at all outside challenge mode. `measure-fit` reports zero
      overflow at all four viewports.
 
@@ -1469,7 +1469,7 @@
      **What bounds it is the apparatus, not the frame**, and the number is
      getting close. The masthead is three columns with matched `1fr`s, so the
      title is centred only while each `1fr` still clears the slide's apparatus:
-     `/podium`'s Flea countdown measures 254px of content and `/weekly`'s day
+     `/podium`'s Flea countdown measures 254px of content and `/daily`'s day
      chip less. At 62px the wider heading left 500px a side; at 81px it leaves
      **382px**, so one more 1.3x leaves about 220px and the countdown starts
      pushing the title off centre. The failure is not an overflow — it is the
@@ -1495,7 +1495,7 @@
      44px on a 1920 frame, read as speckle rather than as a calendar. */
   /* ── The masthead's apparatus scale ──
 
-     Everything to the right of the heading — the day chip on `/weekly`, the
+     Everything to the right of the heading — the day chip on `/daily`, the
      Flea countdown on `/podium` — sets its *labels* at one size, with weight
      and ink carrying the difference between a label and its figure. One size
      for the words, because the right of the masthead is a *line*, and a line
@@ -1541,7 +1541,7 @@
   --w-tv-cal-stroke: 5;
   --t-tv-cal-figure: 850 var(--fs-5) / 1 var(--font-sans);
 
-  /* ── `/weekly`'s band, and what it makes loud ──
+  /* ── `/daily`'s band, and what it makes loud ──
 
      The band is deeper than the strip it replaces because it is a material
      rather than a gap: 4.8vw carries a lockup, a heading and a countdown on one
@@ -1560,7 +1560,7 @@
      — provenance, present, never competing. */
 
   /* The thinnest line the wall draws, and now the wall's main structural
-     device: four row separators on `/weekly`, the two frame rules on both
+     device: four row separators on `/daily`, the two frame rules on both
      slides, seven list rules on `/podium`. **Not a podium token**, though it
      lived in the podium block until the pillars were removed and nearly took it
      with them — `VentureLogo` and the dev flip trigger both ask for it too.
@@ -1727,7 +1727,7 @@
   /* **210 and 170, down from 280 and 216, because the mark no longer has to
      be the podium.** With a plinth under each place the height is carried by
      the block and the metal by its edge, so the disc is back to being what
-     it is on `/weekly`: the venture's identity, floating over its seat. Both
+     it is on `/daily`: the venture's identity, floating over its seat. Both
      are still three to four times the 48px legibility floor. */
 
   /* ── The stage ──
@@ -1833,7 +1833,7 @@
   /* ── The list of seven ──
 
      `--s-pod-row-gap` is air *between* rows and it holds the hairline, exactly
-     as `--s-row-gap` does on `/weekly`. The rows themselves take whatever the
+     as `--s-row-gap` does on `/daily`. The rows themselves take whatever the
      column has left, distributed evenly, so the first row's top edge and the
      last row's bottom edge are the column's own — which is what puts the list's
      floor on the same line as the podium's. */
@@ -1859,7 +1859,7 @@
      profile of a 5.8px corner differs, on a slide read at six metres. */
   --r-pod-row: 1.3542vw; /* 26px */
   /* The rank column is the tag that stands in it — see `.tv-pod-row-rank`,
-     which is `/weekly`'s. Stated as that token rather than as 31px, so the
+     which is `/daily`'s. Stated as that token rather than as 31px, so the
      two boards' ranks cannot come to differ by a pixel nobody chose. */
   --w-pod-rank: var(--w-card-ribbon);
   /* **64px, up from 44 — and that reverses the note this replaced**, which
@@ -2067,7 +2067,7 @@
 
      Measured, on both slides at 1920x1080. `/podium` has 1010x242 of clear
      space in its bottom-left corner and does not care where this sits.
-     `/weekly` does: its fourth row holds nine cards rather than ten, so the row
+     `/daily` does: its fourth row holds nine cards rather than ten, so the row
      is centred and card 31's left edge lands at **x=140**. That leaves 92px
      between the safe margin and the board — and the ornament is **103px wide**.
 
@@ -2982,7 +2982,7 @@
      thirty-nine first ones — it reads as a rule drawn *through* the gap rather
      than as a separator, because there is nothing left for it to separate.
 
-     `WeeklyGrid` no longer applies the class. */
+     `DailyGrid` no longer applies the class. */
 
   /* ── The three text lines under the mark ──
 
@@ -3394,7 +3394,7 @@
      card that has been sitting at ₹12,400 since 11am does not redraw.
 
      **Neither trigger is a mount**, and that distinction is the whole of the
-     wiring in `WeeklyGrid`. A card remounts whenever it crosses a row boundary,
+     wiring in `DailyGrid`. A card remounts whenever it crosses a row boundary,
      for any reason — including being *pushed down* by somebody else's sale. If
      the animation lived on the base rule it would run on that remount, and the
      board would announce a sale on the one card that had not made one. That is
@@ -3506,7 +3506,7 @@
 
      ── What it replaced, on each slide, and why both had to go ──
 
-     `/weekly` carried a full-bleed gradient band 82px tall with a 70px display
+     `/daily` carried a full-bleed gradient band 82px tall with a 70px display
      title tracked to 973px across the middle of it. `/podium` carried a
      240px-wide full-height spine with BYOB set as four stacked 187px letters.
      Both were the loudest element on their frame and neither carried
@@ -3550,8 +3550,8 @@
        edge. Two matched `1fr`s are what put the title on the *frame's* centre
        line; centring it in the remainder instead would move it every time the
        apparatus changed width, and the apparatus is a Flea countdown on
-       `/podium`, a day chip on `/weekly` in challenge mode, and nothing on
-       `/weekly` out of it — three x positions for one heading, on two slides
+       `/podium`, a day chip on `/daily` in challenge mode, and nothing on
+       `/daily` out of it — three x positions for one heading, on two slides
        that rotate every thirty seconds.
 
        It was `auto auto auto minmax(0, 1fr)` — lockup, tick, title, apparatus —
@@ -3637,7 +3637,7 @@
   }
 
   /* The right-hand group: whatever apparatus the slide has — `/podium`'s Flea
-     countdown, `/weekly`'s day chip. It carried the provenance stamp as its
+     countdown, `/daily`'s day chip. It carried the provenance stamp as its
      last child until 13 September 2026; `WallHeader`'s docblock has why that
      went and where it goes if it returns.
 
@@ -3674,7 +3674,7 @@
   /* ══ /PODIUM ═══════════════════════════════════════════════════════════════
 
      Three entries and a list of seven, inside the same editorial frame
-     `/weekly` uses.
+     `/daily` uses.
 
      ── What went, and what it cost ──
 
@@ -4064,7 +4064,7 @@
 
      A band has four edges of its own. Once the rows became bands the pane was
      drawing a second boundary around a set of objects that already had one,
-     which is the identical argument `/weekly` retired its own row rules on.
+     which is the identical argument `/daily` retired its own row rules on.
      What is left is one inset — the band's own padding — and the seven bands
      now run the column's full width, which is 48px each row got back.
 
@@ -4110,7 +4110,7 @@
     height: 100%;
     position: relative;
     padding: 0 var(--s-pod-row-pad);
-    /* A continuous corner, matching `/weekly`'s cards. `--r-pod-row` is the
+    /* A continuous corner, matching `/daily`'s cards. `--r-pod-row` is the
        number that keeps it the same depth — the two lines move together. */
     corner-shape: squircle;
     border-radius: var(--r-pod-row);
@@ -4146,14 +4146,14 @@
 
   /* ── The rank: a folio, not a badge ──
 
-     It has been right-aligned type, a round chip, and `/weekly`'s tag. The tag
+     It has been right-aligned type, a round chip, and `/daily`'s tag. The tag
      is the one worth recording: it was asked for, and it failed for a reason
      that is structural rather than aesthetic. On a card that shape reads as a
      tab because its square side *is* the card's edge. A row inside a pane has
      no edge, so seven of them floated with a square side against nothing.
 
      What made the two boards one system was never the shape — it was the
-     condensed face and the ink, which this keeps. `/weekly` numbers a card;
+     condensed face and the ink, which this keeps. `/daily` numbers a card;
      this numbers a line, and a line takes a folio.
 
      Right-aligned, because these are tabular figures in a vertical column and
@@ -4169,7 +4169,7 @@
   /* `.tv-pod-rule` stood here: a hairline in the middle of each grid gap, on a
      static layer of its own so it could not ride a row's transform during a
      swap. It is gone because the rows are bands with four edges of their own,
-     which is the same argument `/weekly` retired its row rules on. The half-gap
+     which is the same argument `/daily` retired its row rules on. The half-gap
      arithmetic it was built from survives one line down, in the pane's padding,
      where it still decides whether all seven segments are equal. */
 
@@ -4207,7 +4207,7 @@
      that setting exists to stop.
 
      **Exactly one object is left for this to switch off, in two parts.** The
-     plinth sheens and the numeral lustre went with the metals, `/weekly`'s
+     plinth sheens and the numeral lustre went with the metals, `/daily`'s
      row-1 idle went with the cards, and `/podium`'s three marks no longer idle
      either — so what remains is the crown: its drop, which ends, and the two
      glints, which do not. The block stays because the overtake sequence

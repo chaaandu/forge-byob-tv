@@ -2,7 +2,7 @@
  * Which day of the current challenge it is. One pure function.
  *
  * It was two: `baselineLabel` derived the day the baseline was photographed —
- * `17 Aug` for a challenge opening on the 18th — for `/weekly`'s legend to
+ * `17 Aug` for a challenge opening on the 18th — for `/daily`'s legend to
  * caption the board with. The legend was removed and it went with it, along
  * with the `Intl.DateTimeFormat` it was the only consumer of.
  *

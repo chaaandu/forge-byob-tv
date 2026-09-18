@@ -10,7 +10,7 @@ import { Podium, podiumTeams } from '@/components/Podium'
 import { VentureCard } from '@/components/VentureCard'
 import { pagesOf } from '@/components/VentureName'
 import { WallHeader } from '@/components/WallHeader'
-import { ROW_LENGTH, WeeklyGrid, rowsOf } from '@/components/WeeklyGrid'
+import { ROW_LENGTH, DailyGrid, rowsOf } from '@/components/DailyGrid'
 import { SOLID_RANKS, SPARE_TEAM_IDS } from '@/config'
 import type { CountdownState } from '@/lib/countdown'
 import type { Team } from '@/lib/types'
@@ -217,8 +217,8 @@ describe('Podium', () => {
   })
 
 
-  it('draws three places and seven ruled rows, borrowing nothing from /weekly', () => {
-    // `.tv-pill` is /weekly's language — rows that close around their own mark.
+  it('draws three places and seven ruled rows, borrowing nothing from /daily', () => {
+    // `.tv-pill` is /daily's language — rows that close around their own mark.
     // Borrowing it here made slide 1 look like a shorter slide 2. This is the
     // executable form of "do not borrow it back".
     //
@@ -301,7 +301,7 @@ describe('Podium', () => {
      * they sat 16px under one row and 50px over the next, and drawn by a row
      * they rode that row's transform during a swap.
      *
-     * A band has four edges of its own, which is the argument `/weekly` retired
+     * A band has four edges of its own, which is the argument `/daily` retired
      * its own row rules on. Zero is the assertion, because a rule creeping back
      * between two bounded objects is a second horizontal edge a few pixels from
      * fourteen first ones, and it reads as a fault rather than as structure.
@@ -413,7 +413,7 @@ describe('Podium', () => {
     // unlike every other assertion in this test they are not a thing that
     // stops. The count is therefore the whole of the budget: six positions on
     // the crown, on `/podium`, firing two at a time. A spark on every stone, or
-    // one added to `/weekly`'s cards, renders beautifully and turns three brief
+    // one added to `/daily`'s cards, renders beautifully and turns three brief
     // events into a wall of twinkling, and it would pass every other test here.
     //
     // **Six elements, two lit.** The number that governs what a passer-by sees
@@ -484,10 +484,10 @@ describe('Podium', () => {
     expect(host.querySelectorAll('.tv-crown')).toHaveLength(0)
   })
 
-  it('crowns one card on /weekly, and its crown does not glint', () => {
+  it('crowns one card on /daily, and its crown does not glint', () => {
     // ── THIS TEST USED TO ASSERT THE OPPOSITE, AND THE OLD ARGUMENT STANDS ──
     //
-    // It read: `/podium` ranks all-time revenue and `/weekly` ranks the week or
+    // It read: `/podium` ranks all-time revenue and `/daily` ranks the week or
     // the challenge, so the two boards' rank 1 is usually a **different
     // venture** — crowning both means the wall crowns two teams thirty seconds
     // apart, which a passer-by reads as a fault rather than as two contests.
@@ -495,7 +495,7 @@ describe('Podium', () => {
     // That cost is real and was accepted rather than answered: the crown was
     // asked for on this board directly. What is *not* accepted is the glint.
     // The sparks loop, and this board's whole discipline is that movement means
-    // a rank changed hands — so the crown crosses to `/weekly` and its loop
+    // a rank changed hands — so the crown crosses to `/daily` and its loop
     // does not. `AGENTS.md` scopes the motion exception to "one object, on one
     // slide"; that scope is what this second assertion keeps.
     //
@@ -509,7 +509,7 @@ describe('Podium', () => {
     const root = createRoot(host)
     act(() =>
       root.render(
-        <WeeklyGrid
+        <DailyGrid
           teams={teams([
             { teamId: 'VBC101', ventureName: 'Aurora Bakes', challengeRevenue: 42_000 },
             { teamId: 'VBC102', ventureName: 'Kite Coffee', challengeRevenue: 31_500 },
@@ -523,7 +523,7 @@ describe('Podium', () => {
     host.remove()
   })
 
-  it('crowns nobody on /weekly before the first sale of the contest', () => {
+  it('crowns nobody on /daily before the first sale of the contest', () => {
     // `/podium` has refused to crown an untraded board since the crown existed;
     // this is the same refusal on the board that is actually in that state
     // regularly. Every Monday morning, and the whole of a challenge's first
@@ -535,11 +535,11 @@ describe('Podium', () => {
     const root = createRoot(host)
 
     // All-time revenue on the leader and nothing this fortnight, which is the
-    // case a gate written against `totalRevenue` would pass: `/weekly` did not
+    // case a gate written against `totalRevenue` would pass: `/daily` did not
     // rank on that figure and does not print it.
     act(() =>
       root.render(
-        <WeeklyGrid
+        <DailyGrid
           teams={teams([
             { teamId: 'VBC101', ventureName: 'Aurora Bakes', totalRevenue: 240_000 },
           ])}
@@ -552,7 +552,7 @@ describe('Podium', () => {
     // count of teams or a flag somebody has to remember to set.
     act(() =>
       root.render(
-        <WeeklyGrid
+        <DailyGrid
           teams={teams([
             {
               teamId: 'VBC101',
@@ -570,7 +570,7 @@ describe('Podium', () => {
     host.remove()
   })
 
-  it('idles nothing at all on /weekly', () => {
+  it('idles nothing at all on /daily', () => {
     // The crown is on this board now, and the glint is not — see the test
     // above. This is where a change that let the sparks follow it across has to
     // fail.
@@ -582,7 +582,7 @@ describe('Podium', () => {
     const host = document.createElement('div')
     document.body.append(host)
     const root = createRoot(host)
-    act(() => root.render(<WeeklyGrid teams={TRADING} />))
+    act(() => root.render(<DailyGrid teams={TRADING} />))
     expect(host.querySelectorAll('[class*="tv-idle-"]')).toHaveLength(0)
     expect(host.querySelectorAll('[class*="tv-look-"]')).toHaveLength(0)
     expect(host.querySelectorAll('.tv-crown-glint')).toHaveLength(0)
@@ -636,7 +636,7 @@ describe('Podium', () => {
       const host = document.createElement('div')
       document.body.append(host)
       const root = createRoot(host)
-      act(() => root.render(<WeeklyGrid teams={teams(rows)} />))
+      act(() => root.render(<DailyGrid teams={teams(rows)} />))
       return { host, root }
     }
 
@@ -675,7 +675,7 @@ describe('Podium', () => {
       const after = LADDER.map((row) =>
         row.teamId === 'VBC111' ? { ...row, challengeRevenue: 105_000, todayRevenue: 96_000 } : row,
       )
-      act(() => root.render(<WeeklyGrid teams={teams(after)} />))
+      act(() => root.render(<DailyGrid teams={teams(after)} />))
 
       expect(risingNames(host)).toEqual(['Venture 11'])
 
@@ -694,7 +694,7 @@ describe('Podium', () => {
       vi.useFakeTimers()
       const { host, root } = mount(LADDER)
       act(() => vi.advanceTimersByTime(2_000))
-      act(() => root.render(<WeeklyGrid teams={teams(LADDER)} />))
+      act(() => root.render(<DailyGrid teams={teams(LADDER)} />))
       expect(host.querySelectorAll('.tv-day-rising')).toHaveLength(0)
       act(() => root.unmount())
       host.remove()
@@ -711,7 +711,7 @@ describe('Podium', () => {
       const corrected = LADDER.map((row) =>
         row.teamId === 'VBC101' ? { ...row, todayRevenue: 100 } : row,
       )
-      act(() => root.render(<WeeklyGrid teams={teams(corrected)} />))
+      act(() => root.render(<DailyGrid teams={teams(corrected)} />))
       expect(host.querySelectorAll('.tv-day-rising')).toHaveLength(0)
       act(() => root.unmount())
       host.remove()
@@ -870,10 +870,10 @@ describe('WallHeader', () => {
   /**
    * ── What the figures are measured over, said once ──
    *
-   * The same venture reads ₹2,42,546 on `/podium` and ₹1,998 on `/weekly`
-   * thirty seconds later, and **`/weekly` is the board that now says so**.
+   * The same venture reads ₹2,42,546 on `/podium` and ₹1,998 on `/daily`
+   * thirty seconds later, and **`/daily` is the board that now says so**.
    * `/podium` carried `All time` beside its name until 13 September 2026 and
-   * was asked to drop it; `/weekly` carried nothing at all until it became a
+   * was asked to drop it; `/daily` carried nothing at all until it became a
    * locked board, which is the one condition that changes the argument — see
    * `boardScope`. A live board's window is "now" and a caption could only add
    * provenance; this one stopped at ten this morning, and at four in the
@@ -881,7 +881,7 @@ describe('WallHeader', () => {
    *
    * Asserted on the prop rather than on either page, as it always was: it is
    * what decides, so a slide cannot come to carry the wrong window, and
-   * `board.test.ts` pins what `/weekly` puts in it.
+   * `board.test.ts` pins what `/daily` puts in it.
    */
   it('says what a board is measured over, only when told', () => {
     const withScope = render(
@@ -907,7 +907,7 @@ describe('WallHeader', () => {
    *
    * It is asserted here rather than left to the measurement script because the
    * failure is a *missing element*, which no contrast probe and no screenshot
-   * diff of a single slide would ever report: `/weekly` alone looks entirely
+   * diff of a single slide would ever report: `/daily` alone looks entirely
    * correct off centre. Both counts matter — two copies when there is a scope,
    * because one is the counterweight, and none when there is not, because an
    * empty counterweight on `/podium` would push *its* masthead off centre by
@@ -964,7 +964,7 @@ it('declares every custom property that anything reads', () => {
     'app/forge-tokens.css',
     'app/globals.css',
     ...readdirSync('components').filter((f) => f.endsWith('.tsx')).map((f) => `components/${f}`),
-    'app/weekly/page.tsx',
+    'app/daily/page.tsx',
     'app/podium/page.tsx',
     'app/live/page.tsx',
     'app/live/layout.tsx',
@@ -1107,7 +1107,7 @@ describe('type tokens against the axis of the face they name', () => {
   })
 })
 
-describe('WeeklyGrid', () => {
+describe('DailyGrid', () => {
   const board = () =>
     competingTeams(teams().map((row, index) => ({ ...row, challengeRevenue: 1_000 * (42 - index) })))
 
@@ -1117,7 +1117,7 @@ describe('WeeklyGrid', () => {
    * the figures are what say who is on the board.
    */
   it('puts every competing team on screen at once', () => {
-    const text = render(<WeeklyGrid teams={board()} />)
+    const text = render(<DailyGrid teams={board()} />)
     const ranked = rankByChallenge(board())
     expect(text).toContain(formatRupees(ranked[0].challengeRevenue))
     expect(text).toContain(formatRupees(ranked[COMPETING_SIZE - 1].challengeRevenue))
@@ -1160,7 +1160,7 @@ describe('WeeklyGrid', () => {
   })
 
   it('renders an empty board without inventing anything to put in it', () => {
-    expect(render(<WeeklyGrid teams={[]} />)).toBe('')
+    expect(render(<DailyGrid teams={[]} />)).toBe('')
   })
 
   /**
@@ -1197,12 +1197,12 @@ describe('WeeklyGrid', () => {
       toRank: 5,
     }
     const first = vi.fn()
-    act(() => root.render(<WeeklyGrid teams={board()} kick={kick} onSettled={first} />))
+    act(() => root.render(<DailyGrid teams={board()} kick={kick} onSettled={first} />))
     expect(first).not.toHaveBeenCalled()
 
     // Same flip, new callback identity — a page re-render, and nothing else.
     const second = vi.fn()
-    act(() => root.render(<WeeklyGrid teams={board()} kick={kick} onSettled={second} />))
+    act(() => root.render(<DailyGrid teams={board()} kick={kick} onSettled={second} />))
     expect(first).not.toHaveBeenCalled()
     expect(second).not.toHaveBeenCalled()
 
@@ -1251,7 +1251,7 @@ describe('WeeklyGrid', () => {
       toRank: to,
     })
 
-    act(() => root.render(<WeeklyGrid teams={board()} kick={kickTo(2, 1)} />))
+    act(() => root.render(<DailyGrid teams={board()} kick={kickTo(2, 1)} />))
     expect(host.querySelectorAll('.tv-crown-off')).toHaveLength(1)
     // On the crown itself, not on some other gold thing: there is one crown on
     // this board and the class belongs to it.
@@ -1261,7 +1261,7 @@ describe('WeeklyGrid', () => {
     // only ever be a defender — an attacker is climbing *into* the slot and a
     // slide cue only ever goes to a rank below `toRank` — so this is the whole
     // of the other case.
-    act(() => root.render(<WeeklyGrid teams={board()} kick={kickTo(12, 11)} />))
+    act(() => root.render(<DailyGrid teams={board()} kick={kickTo(12, 11)} />))
     expect(host.querySelectorAll('.tv-crown')).toHaveLength(1)
     expect(host.querySelectorAll('.tv-crown-off')).toHaveLength(0)
 
@@ -1695,7 +1695,7 @@ describe('formatting', () => {
  */
 describe('silent reflow', () => {
   it('no component in the board tree uses Motion layout animation', () => {
-    for (const file of ['VentureCard.tsx', 'WeeklyGrid.tsx', 'Podium.tsx']) {
+    for (const file of ['VentureCard.tsx', 'DailyGrid.tsx', 'Podium.tsx']) {
       const source = readFileSync(`${process.cwd()}/components/${file}`, 'utf8')
       expect(source, file).not.toMatch(/\blayout(Id)?\b\s*[=:]|\blayout\}/)
     }

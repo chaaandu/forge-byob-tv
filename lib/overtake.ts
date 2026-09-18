@@ -42,7 +42,7 @@ export type DetectInput = {
   week: number | null
   /** How far down the board a change is worth animating. */
   watchTo: number
-  /** The figure that earned the climb — week revenue on `/weekly`, all-time on `/podium`. */
+  /** The figure that earned the climb — week revenue on `/daily`, all-time on `/podium`. */
   earned: (team: Team) => number
 }
 
@@ -76,7 +76,7 @@ export function detect(prev: BoardState | null, input: DetectInput): DetectResul
     // **Cross-row moves are events like any other.**
     //
     // A `columnLength` check used to live here and suppress any climb that
-    // crossed between the weekly board's two columns, because the boot kick
+    // crossed between the daily board's two columns, because the boot kick
     // rendered as vertical slides *inside* one column and a crossing climb had
     // no line to travel. The flip has no such constraint: a card goes face-down,
     // travels anywhere on the grid — changing size mid-travel when it crosses

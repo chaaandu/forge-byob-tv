@@ -53,7 +53,7 @@ const IST_DATE = new Intl.DateTimeFormat('en-CA', {
  * on: `2026-09-18` means the window `10:00 on the 17th → 10:00 on the 18th`.
  *
  * This is the only thing in the project that knows where a day begins for
- * `/weekly`, and the answer is deliberately *not* midnight — see
+ * `/daily`, and the answer is deliberately *not* midnight — see
  * `DAILY_CLOSE_HOUR_IST`.
  *
  * ── Before ten o'clock belongs to yesterday ──

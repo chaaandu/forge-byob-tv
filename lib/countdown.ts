@@ -173,7 +173,7 @@ export function computeCountdownState(
  * **A second presentation, not a second brain.** Every comparison against the
  * clock still happened in `computeCountdownState` above; this reads the figures
  * it published and decides which of them to show. The dial in the shared header
- * bands the identical state differently, and `/weekly` is untouched by anything
+ * bands the identical state differently, and `/daily` is untouched by anything
  * here.
  *
  * The escalation, from far out to done:

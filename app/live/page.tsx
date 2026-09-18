@@ -15,7 +15,7 @@ import type { BoardMode } from '@/lib/types'
 /**
  * `/live` — the standings on a phone.
  *
- * Not a slide. It is not on the rotation (`Rotator` only swaps `/weekly` and
+ * Not a slide. It is not on the rotation (`Rotator` only swaps `/daily` and
  * `/podium`), it carries no Ganesha, and it is the one page on this project a
  * person touches — so it is built the other way round from the wall: it moves
  * when you do, and it honours `prefers-reduced-motion`, which the wall

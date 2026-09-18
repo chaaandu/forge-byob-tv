@@ -82,7 +82,7 @@ figure, and `lib/format.test.ts` pins where that line is.
 
 ```bash
 node scripts/measure-frame.mjs [url] [screenshot.png] [--reduce-motion]
-node scripts/measure-frame.mjs http://localhost:3000/weekly weekly.png
+node scripts/measure-frame.mjs http://localhost:3000/daily weekly.png
 ```
 
 Dumps JSON: viewport and scroll extent, every element leaving the frame, the
@@ -176,7 +176,7 @@ This is the reverse of what it used to do. The old sources were arbitrary
 rectangles, so it squared each one onto its own background colour and a
 circular frame could then be filled rather than the artwork cropped. The
 sources are now circles and both boards draw discs — `/podium` clips to one and
-`/weekly` stands them on a green panel — so a baked-in background would put a
+`/daily` stands them on a green panel — so a baked-in background would put a
 white or black square corner behind a disc on a green field.
 
 The sources are only mostly uniform: JPG and PNG, on white, on black and on
@@ -243,7 +243,7 @@ flip on a public wall.
 Both are deliberately not emitted, and both teams show the coloured initial.
 To place them, rename the files `Team 22.png` / `Team 35.png` and re-run.
 
-### ~~4. Four fallback discs are the same colour as `/weekly`'s green panel~~ — RESOLVED
+### ~~4. Four fallback discs are the same colour as `/daily`'s green panel~~ — RESOLVED
 
 The panel was removed. The marks now float as discs on the page's white, where every tint
 reads, and the mint hairline that was propping them up went with it. Kept below for the

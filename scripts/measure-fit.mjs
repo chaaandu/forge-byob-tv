@@ -44,7 +44,7 @@ for (const [width, height] of SIZES) {
     const header = document.querySelector('header')?.getBoundingClientRect()
     // The topmost thing under the header on either slide: the podium's marks and
     // capitals, or the weekly grid's first row of cards. **The weekly selector
-    // is not optional here** — without it this returned `null` on /weekly, and a
+    // is not optional here** — without it this returned `null` on /daily, and a
     // null clearance prints as "no number" rather than as a failure, which is
     // the quietest possible way for the one measurement this script exists for
     // to stop being taken. Measured while it was missing: -9.6px at 1600x900,
@@ -60,7 +60,7 @@ for (const [width, height] of SIZES) {
     // no longer the top of the slide — measured, a board reporting 86.4px of
     // clearance had its first-place numeral 42.8px from the frame edge. This is
     // the third time this script has described the wrong edge: `.tv-card` on
-    // /weekly reported 207.5px on a grid whose real top was 24px, and the medal
+    // /daily reported 207.5px on a grid whose real top was 24px, and the medal
     // that preceded these numerals reported 26.1px on a board whose real top was
     // 3.9px. The rule that keeps falling over is that the outermost *ink* is not
     // always the outermost *box*.
@@ -72,7 +72,7 @@ for (const [width, height] of SIZES) {
     // has to mean the same thing on both slides: air above the topmost thing.
     //
     // **`.tv-card-numeral` is the fifth correction, and it is the same mistake
-    // a fifth time.** /weekly's ranks 1-3 now carry the podium's metal numeral,
+    // a fifth time.** /daily's ranks 1-3 now carry the podium's metal numeral,
     // breaking above their cards exactly as the podium's break above their
     // pillars — so `.tv-card-cell` stopped being the top of that slide the
     // moment they landed. Measured with it missing: 63.5px of clearance

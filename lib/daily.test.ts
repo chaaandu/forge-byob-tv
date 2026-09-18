@@ -9,7 +9,7 @@ import { team } from '@/test/fixtures'
 const at = (iso: string) => new Date(iso)
 
 /**
- * Where a day begins for `/weekly`.
+ * Where a day begins for `/daily`.
  *
  * Every assertion here is about a boundary that is wrong by exactly one day, and
  * a board that is one day out is a complete, plausible, well-ranked leaderboard

@@ -40,7 +40,7 @@ import type { Team } from '@/lib/types'
  * ── This component owns its own mount ──
  *
  * The white disc under a mark used to be painted by whatever was holding it —
- * `.tv-disc-face` on `/weekly`, `.tv-pod-disc` and `.tv-pod-row-mark` on
+ * `.tv-disc-face` on `/daily`, `.tv-pod-disc` and `.tv-pod-row-mark` on
  * `/podium`, `.tv-pod-mover-mark` in the footer. Four places, one decision, and
  * the decision is not theirs: a white ground exists so pale *artwork* has an
  * edge, and a tinted monogram is its own ground. With the mounts painting it
