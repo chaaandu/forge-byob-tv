@@ -1,6 +1,7 @@
 import { boardEarned, rankForMode } from '@/lib/board'
 import { competingTeams, rankByToday, rankTeams } from '@/lib/ranking'
 import { hashTeamId } from '@/lib/seed'
+import { titleCase } from '@/lib/team'
 import type { BoardMode, Team, TeamId } from '@/lib/types'
 
 /**
@@ -190,6 +191,66 @@ export function sellsCategory(product: string): Sells {
     if (words.some((word) => text.includes(word))) return category
   }
   return 'other'
+}
+
+/**
+ * The students on a team, split out of the one cell the sheet keeps them in.
+ *
+ * **Every separator here was measured in the live master**, not imagined. The
+ * forty-one cells are written at least five ways:
+ *
+ *     TANISHQUE JAIN, NIRMALYA SAH, SACHIDANANDA DEHURY   all caps
+ *     Harsh Malani, Meith Jain and Ritesh Oswal           the last one joined by "and"
+ *     Aarav, Divy, Tushar.                                a trailing full stop
+ *     happy panjwani, diya harish , rishika choudhary     lowercase, stray spaces
+ *     Rohit, Preethi S, Udhav Kothari                     an initial as a surname
+ *
+ * `titleCase` from `lib/team.ts` does the casing, which is the same rule the
+ * whole project uses on venture names: a name with both cases in it is left
+ * exactly as typed, so `Preethi S` keeps its initial and `McCarthy` would keep
+ * its capital, while an all-caps or all-lowercase name is normalised.
+ *
+ * **The cap is six.** The largest real team is four; six leaves room without
+ * letting a pasted paragraph become a wall of faces.
+ */
+export const MAX_MEMBERS = 6
+
+export function membersOf(team: Team): string[] {
+  const raw = (team.members ?? '').trim()
+  if (raw === '') return []
+  return raw
+    .split(/\s*(?:,|;|\band\b|&|\+)\s*/i)
+    // Trailing punctuation, and anything that is not a name at all.
+    .map((name) => name.replace(/[.\s]+$/, '').trim())
+    .filter((name) => /\p{L}/u.test(name))
+    .map(titleCase)
+    .filter((name, index, all) => all.indexOf(name) === index)
+    .slice(0, MAX_MEMBERS)
+}
+
+/**
+ * Where a student's photograph lives, if one has been committed:
+ * `public/people/<TEAM_ID>/<slug>.webp`.
+ *
+ * The slug is derived from the name so a photograph needs no mapping file —
+ * `scripts/prepare-people.py` writes the file and the manifest entry
+ * together, exactly as `prepare-logos.py` does for a venture's mark.
+ */
+export function photoSlug(name: string): string {
+  return name
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+}
+
+/** A person's initials, for the placeholder portrait. `Preethi S` → `PS`. */
+export function initialsOf(name: string): string {
+  const words = name.split(/\s+/).filter((word) => /\p{L}/u.test(word))
+  if (words.length === 0) return '?'
+  if (words.length === 1) return words[0]!.slice(0, 2).toUpperCase()
+  return (words[0]!.charAt(0) + words[words.length - 1]!.charAt(0)).toUpperCase()
 }
 
 /**

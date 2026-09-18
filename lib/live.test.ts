@@ -5,11 +5,15 @@ import { rankForMode } from '@/lib/board'
 import {
   EMBLEM_COUNT,
   LIVERY_COUNT,
+  MAX_MEMBERS,
   avgTicket,
   climbOf,
   emblemFor,
+  initialsOf,
   instagramUrl,
   linkLabel,
+  membersOf,
+  photoSlug,
   liveryFor,
   matchesQuery,
   raceFor,
@@ -151,6 +155,65 @@ describe('figures', () => {
     )
     expect(shareOf(board, 'VBC101')).toBe(1)
     expect(shareOf(board, 'VBC102')).toBe(0)
+  })
+})
+
+describe('membersOf', () => {
+  /**
+   * **Every separator here was measured in the live master**, not imagined —
+   * `Team Links` col D on 18 September 2026 writes forty-one cells at least
+   * five different ways.
+   */
+  it('splits the cell however the sheet wrote it', () => {
+    const cases: [string, string[]][] = [
+      ['TANISHQUE JAIN, NIRMALYA SAH, SACHIDANANDA DEHURY', ['Tanishque Jain', 'Nirmalya Sah', 'Sachidananda Dehury']],
+      ['Harsh Malani, Meith Jain and Ritesh Oswal', ['Harsh Malani', 'Meith Jain', 'Ritesh Oswal']],
+      ['Aarav, Divy, Tushar.', ['Aarav', 'Divy', 'Tushar']],
+      ['happy panjwani, diya harish , rishika choudhary', ['Happy Panjwani', 'Diya Harish', 'Rishika Choudhary']],
+      ['Satvik & Soumanshu', ['Satvik', 'Soumanshu']],
+    ]
+    for (const [cell, expected] of cases) {
+      expect(membersOf(team({ members: cell })), cell).toEqual(expected)
+    }
+  })
+
+  // `titleCase`'s rule, inherited: a name the student cased themselves is left
+  // alone, so an initial survives and `McCarthy` would too.
+  it('keeps a name that was cased by a human', () => {
+    expect(membersOf(team({ members: 'Rohit, Preethi S, Udhav Kothari' }))).toEqual([
+      'Rohit',
+      'Preethi S',
+      'Udhav Kothari',
+    ])
+  })
+
+  it('says nothing when the sheet does not publish the column', () => {
+    expect(membersOf(team())).toEqual([])
+    expect(membersOf(team({ members: '   ' }))).toEqual([])
+  })
+
+  it('caps a pasted paragraph rather than filling the sheet with faces', () => {
+    const many = Array.from({ length: 12 }, (_, i) => `Person ${i}`).join(', ')
+    expect(membersOf(team({ members: many })).length).toBe(MAX_MEMBERS)
+  })
+
+  /**
+   * The slug is the **whole mapping** between a photograph and a student:
+   * `scripts/prepare-people.py` writes the file from the filename and this
+   * derives the same string from the sheet. They must agree character for
+   * character or a photo silently never appears.
+   */
+  it('derives a file name from a person\'s name', () => {
+    expect(photoSlug('Tanishque Jain')).toBe('tanishque-jain')
+    expect(photoSlug('  Preethi   S ')).toBe('preethi-s')
+    expect(photoSlug('Zuha Fathima')).toBe('zuha-fathima')
+    expect(photoSlug('José Núñez')).toBe('jose-nunez')
+  })
+
+  it('initials a person for the placeholder portrait', () => {
+    expect(initialsOf('Tanishque Jain')).toBe('TJ')
+    expect(initialsOf('Aarav')).toBe('AA')
+    expect(initialsOf('Preethi S')).toBe('PS')
   })
 })
 

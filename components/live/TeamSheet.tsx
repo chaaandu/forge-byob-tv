@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react'
 import { Climb } from '@/components/live/Board'
 import { CountUp } from '@/components/live/CountUp'
 import { Emblem } from '@/components/live/Emblem'
+import { Lineup } from '@/components/live/Lineup'
 import { SellsIcon } from '@/components/live/SellsIcon'
 import { formatCount, formatRupees, ordinal } from '@/lib/format'
 import {
@@ -212,6 +213,8 @@ export function TeamSheet({
 
               <Sells product={race.self.team.product} />
 
+              <Lineup team={race.self.team} />
+
               <Links team={race.self.team} />
 
               <nav className="lv-sheet-nav">
@@ -265,13 +268,17 @@ function LeaderBar({ race }: { race: NonNullable<ReturnType<typeof raceFor>> }) 
         animate={{ scaleX: share }}
         transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
       />
-      {/* Spelled out. "88% of the leader" was on screen for a day and had to
-          be asked about — the figure is this team's revenue as a share of the
-          top team's, and the sentence now says so. */}
+      {/* ── A rupee figure, not a percentage ──
+       *
+       * This said "88% of the leader", then "77% of Dosa Crisps, who leads",
+       * and both had to be asked about. A share of somebody else's total is a
+       * second thing to work out before the sentence means anything. The gap
+       * itself needs no working out, and it is the number a team would act
+       * on. The bar still shows the proportion, which is what a bar is for. */}
       <span className="lv-leaderbar-caption">
         {race.self.rank === 1
           ? 'Top of this board'
-          : `${Math.round(share * 100)}% of ${nameOf(race.leader.team)}, who leads`}
+          : `${formatRupees(race.leader.figure - race.self.figure)} behind ${nameOf(race.leader.team)}`}
       </span>
     </div>
   )

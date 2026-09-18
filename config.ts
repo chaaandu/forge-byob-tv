@@ -371,3 +371,44 @@ export const KICK_MS = 3_000
  * mark is a board with one venture further along, not a broken grid.
  */
 export const LOGOS: readonly TeamId[] = []
+
+// ── Student photographs ─────────────────────────────────────────────────────
+
+/**
+ * Students who have a photograph committed at
+ * `public/people/<TEAM_ID>/<name-slug>.webp`.
+ *
+ * ── IT IS EMPTY, AND EVERY LINE-UP IS DRAWN PORTRAITS TODAY ──
+ *
+ * `components/live/Lineup.tsx` shows a silhouette in the team's livery with
+ * the person's initials until a real photograph lands. That is a first-class
+ * treatment rather than a degraded one, for the reason the monogram is on the
+ * wall: **a stock face standing in for a student is the `LOGOS` mistake with a
+ * person's face in it.** Borrowed artwork says something false about who a
+ * team is; a borrowed face says it about who a person is.
+ *
+ * ── The list, not the filesystem, is what `/live` reads ──
+ *
+ * Presence is known before the render, so no broken image is ever requested
+ * and there is no error-handler flash. A file on disk missing from this list
+ * is invisible; an entry here with no file is a broken image on somebody's
+ * phone. They arrive together, in one commit.
+ *
+ * ── The spec for real photographs ──
+ *
+ * **256x256 WebP, square, face in the upper middle.**
+ * `scripts/prepare-people.py` takes whatever the cohort sends — JPEG, PNG,
+ * HEIC, any size, any aspect — centre-crops to a square biased towards the
+ * head, resizes, compresses and prints the list to paste here. At that size
+ * each is about 15-25KB, and a team sheet loads three or four of them.
+ *
+ * Entries are `<TEAM_ID>/<slug>`, where the slug comes from `photoSlug` in
+ * lib/live.ts: the student's name, lowercased, non-letters to hyphens —
+ * `VBC101/tanishque-jain`. Deriving it from the name is what removes the need
+ * for a mapping file that could drift from the photographs.
+ *
+ * **Consent is upstream of this list.** These are photographs of named people
+ * on a page anybody with the link can open, which no other asset in this
+ * project is. Removing one person is deleting one entry and one file.
+ */
+export const PEOPLE_PHOTOS: readonly string[] = []

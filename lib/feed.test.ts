@@ -189,10 +189,14 @@ describe('the product column', () => {
         `${head},product`,
         'VBC101,Dosa Crisps,1,1,1,1,Type your product here',
         'VBC102,ROOH,1,1,1,1,',
+        // Measured in the live master: three of the forty-one teams still
+        // read this on 18 September 2026.
+        "VBC103,Snackerly,1,1,1,1,What you're selling",
       ].join('\n'),
     )
     expect(rows[0].product).toBeUndefined()
     expect(rows[1].product).toBeUndefined()
+    expect(rows[2].product).toBeUndefined()
   })
 })
 

@@ -529,6 +529,13 @@ is the one page here that a person holds. Added 17 September 2026.
   `components/live/SellsIcon.tsx` reads a *category* off the same words, and
   an unrecognised product draws a plain tag rather than a wrong picture.
   `lib/live.test.ts` fails if `sampleProducts` ever comes back.
+- **Four optional columns, one shape.** `product`, `instagram`, `website` and
+  `members` are all read the way `challenge_revenue` is: absent is a valid
+  state, a missing column cannot throw away a fetch, and each lights up the
+  moment the sheet publishes it. **All four already exist in the master** —
+  `Team Links` carries Team Members, Product, Website Link and Instagram Link,
+  maintained by the consolidator — so each is one `INDEX`/`MATCH` away in
+  `TV_Feed` rather than new data anyone has to collect.
 - **A venture's own links, when the sheet has them.** `instagram` and
   `website` are optional `TV_Feed` columns, read like `product`, and shown at
   the foot of the team sheet. **They are untrusted input**: forty teams type
@@ -540,6 +547,28 @@ is the one page here that a person holds. Added 17 September 2026.
   `lib/live.test.ts` pins that it cannot. The parse layer carries the cells
   verbatim on purpose — `lib/feed.ts` judges the sheet's *shape*, and whether
   a string is a safe URL is a different question answered where it is used.
+- **The line-up: the students behind a venture.** `members` is one more
+  optional `TV_Feed` column (`Team Links` col D), and `membersOf` in
+  `lib/live.ts` splits it. **Every separator it handles was measured in the
+  live master rather than imagined** — the forty-one cells are written at
+  least five ways: all caps, lowercase, `A, B and C`, a trailing full stop,
+  stray spaces. Casing goes through `titleCase`, so `Preethi S` keeps its
+  initial.
+
+  Photographs are `public/people/<TEAM_ID>/<name-slug>.webp`, listed in
+  `PEOPLE_PHOTOS` in `config.ts` — **the list, not the filesystem**, exactly as
+  `LOGOS` works and for the same reason. `scripts/prepare-people.py` crops,
+  resizes, strips EXIF and prints the list; the slug is derived from the
+  student's name at both ends, so a photograph needs no mapping file. The
+  failure mode to know: a filename spelled differently from the sheet's cell
+  simply never appears, on one card, silently.
+
+  **Until a photograph exists, a student is initials in the team's livery, and
+  that is not a placeholder to be filled with a stock face.** A borrowed
+  venture logo says something false about who a team is; a borrowed face says
+  it about who a person is, and these are named students on a public URL.
+  Consent is upstream of `PEOPLE_PHOTOS`; removing one person is one entry and
+  one file.
 - **No team id on a row, no "Pos", no live chip, no follow, no captions, no
   footer.** All removed by decision, 17–18 September 2026. The id is a
   spreadsheet code, and the row's second line carries today's takings or the

@@ -106,6 +106,15 @@ export type Team = {
    */
   instagram?: string
   website?: string
+  /**
+   * The team's students, as one cell — `Team Links` col D, published as a
+   * `members` column in `TV_Feed`.
+   *
+   * Kept verbatim, because the sheet writes it five ways: `A, B, C`, `A, B and
+   * C`, ALL CAPS, lowercase, with trailing full stops and double spaces.
+   * Splitting and casing it is `membersOf` in `lib/live.ts`.
+   */
+  members?: string
 }
 
 /**

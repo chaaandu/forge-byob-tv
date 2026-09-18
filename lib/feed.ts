@@ -115,6 +115,7 @@ function toTeam(row: Record<string, string>): Team | null {
     ...productOf(row.product),
     ...textOf('instagram', row.instagram),
     ...textOf('website', row.website),
+    ...textOf('members', row.members),
   }
 }
 
@@ -150,9 +151,21 @@ function prevWeekRankOf(raw: string | undefined): { prevWeekRank?: number } {
  */
 function productOf(raw: string | undefined): { product?: string } {
   const product = (raw ?? '').trim()
-  if (product === '' || product.toLowerCase().startsWith('type your')) return {}
+  if (product === '' || PLACEHOLDER_PRODUCT.some((p) => product.toLowerCase().startsWith(p))) {
+    return {}
+  }
   return { product }
 }
+
+/**
+ * What the workbook template leaves in the product cell.
+ *
+ * **Both were measured in the live master**, not guessed: three of the
+ * forty-one teams still read `What you're selling` on 18 September 2026. A
+ * card printing that says "nobody is looking after this wall", which is the
+ * reasoning `ventureNameOf` records for its own placeholder.
+ */
+const PLACEHOLDER_PRODUCT = ['type your', "what you're selling", 'what you are selling']
 
 /**
  * An optional free-text column, absent rather than empty.
