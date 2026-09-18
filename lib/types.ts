@@ -22,9 +22,22 @@ export type Team = {
   ventureName: string
   /** All-time. Ranks `/podium`, and breaks ties everywhere else. */
   totalRevenue: number
-  /** Since Monday 00:00 IST. Ranks `/weekly`. */
+  /**
+   * Since Monday 00:00 IST. **Ranks no slide.** It ranked `/weekly` until the
+   * challenge took that board, and again between challenges until the daily
+   * window replaced it; `/live`'s week tab is its only reader now. Still
+   * required, still correct, and the fallback nothing falls back to.
+   */
   weekRevenue: number
-  /** Today, IST. Shown on `/weekly`; never a sort key. */
+  /**
+   * Today, IST — live, from midnight, not from the daily window's ten o'clock.
+   *
+   * **Never a sort key on the wall, and never a figure on it either.** It is
+   * what `/weekly`'s chevrons are driven by: a card wearing them has sold since
+   * the board's window closed, which is the only live thing on a locked board.
+   * The figure beside them went with the fold. `/live` prints it and ranks its
+   * today tab on it.
+   */
   todayRevenue: number
   /** First tie-break for absolute ranking only. */
   totalUnits: number
@@ -32,9 +45,10 @@ export type Team = {
    * Revenue banked since the current challenge's baseline was photographed —
    * `total_revenue` minus a frozen snapshot of itself, computed in the sheet.
    *
-   * **Ranks `/weekly`.** `weekRevenue` is still published and still correct; it
-   * simply is not what that board is about any more. `/podium` and the mover
-   * panel are unaffected.
+   * **Ranks `/weekly` while `challenge_mode` is `Yes`.** The rest of the time
+   * that board ranks a daily window this project computes itself — see
+   * `lib/daily.ts`, which uses precisely the trick described below, for
+   * precisely the reason described below. `/podium` is unaffected.
    *
    * ── Why the sheet subtracts rather than sums a date range ──
    *
@@ -134,8 +148,14 @@ export type Cohort = Readonly<Record<string, string>>
 /**
  * Which contest `/weekly` is showing. Set by `challenge_mode` in `TV_Cohort`;
  * everything that follows from it lives in `lib/board.ts`.
+ *
+ * **`week` is gone and `daily` is what replaced it.** The board's ordinary state
+ * is now a finished day — 10:00 to 10:00, computed on the laptop by
+ * `lib/daily.ts` — rather than the open programme week. `weekRevenue` is still
+ * published and still correct, and `/live` still ranks a board on it; no slide
+ * does.
  */
-export type BoardMode = 'challenge' | 'week'
+export type BoardMode = 'challenge' | 'daily'
 
 /**
  * Both CSVs, parsed together, and always constructed as a unit.

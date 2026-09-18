@@ -4,7 +4,8 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { VentureCard } from '@/components/VentureCard'
 import { STAGGER, type FlipCue } from '@/lib/flipTimeline'
-import { rankForMode } from '@/lib/board'
+import { boardEarned, rankForMode } from '@/lib/board'
+import type { DailyWindow } from '@/lib/daily'
 import type { BoardMode, OvertakeEvent, Team } from '@/lib/types'
 
 /**
@@ -109,8 +110,12 @@ const ROW_HEIGHTS = [
  * another, an overtake animates the wrong two cards — on a board that otherwise
  * looks entirely correct. `app/weekly/board.test.ts` pins them together.
  */
-export function rowsOf(teams: readonly Team[], mode: BoardMode = 'challenge'): Team[][] {
-  const ranked = rankForMode(mode, teams)
+export function rowsOf(
+  teams: readonly Team[],
+  mode: BoardMode = 'challenge',
+  day: DailyWindow | null = null,
+): Team[][] {
+  const ranked = rankForMode(mode, teams, day)
   return ROW_HEIGHTS.map((_, i) => ranked.slice(i * ROW_LENGTH, (i + 1) * ROW_LENGTH))
 }
 
@@ -187,6 +192,7 @@ export function cuesFor(grid: HTMLElement, kick: OvertakeEvent): Map<number, Fli
 export function WeeklyGrid({
   teams,
   mode = 'challenge',
+  day = null,
   kick = null,
   onSettled,
 }: {
@@ -194,6 +200,10 @@ export function WeeklyGrid({
   /** Which contest is on, from `challenge_mode`. Decides the sort and the
       figure every card prints — the two must never disagree. */
   mode?: BoardMode
+  /** The finished day, in daily mode. **The only place the figure comes from**:
+      it is not on the `Team` row, so a card cannot look it up and this grid
+      hands each one the number it printed the board in. */
+  day?: DailyWindow | null
   /** The flip in progress, so the cards involved know what to do. */
   kick?: OvertakeEvent | null
   /** Called once, by the attacker's card, when the last beat finishes. */
@@ -287,7 +297,7 @@ export function WeeklyGrid({
     return () => clearTimeout(done)
   }, [kick])
 
-  const rows = rowsOf(teams, mode)
+  const rows = rowsOf(teams, mode, day)
   const gridRef = useRef<HTMLDivElement>(null)
   const [cues, setCues] = useState<Map<number, FlipCue> | null>(null)
 
@@ -431,7 +441,12 @@ export function WeeklyGrid({
                 key={team.teamId}
                 team={team}
                 rank={rank}
-                mode={mode}
+                // **Handed down, never looked up.** The board is sorted here and
+                // the figure is read here, in one expression, so a card cannot
+                // come to print a number the sort did not use — which on a
+                // leaderboard turns every rank on it into a visible lie that
+                // nothing reports.
+                earned={boardEarned(mode, team, day)}
                 arriving={arriving.has(team.teamId)}
                 rise={entering || rising.has(team.teamId)}
                 cue={cue}

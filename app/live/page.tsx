@@ -10,6 +10,7 @@ import { TeamSheet } from '@/components/live/TeamSheet'
 import { boardMode } from '@/lib/board'
 import { standingsFor, type BoardKey, type Standing } from '@/lib/live'
 import { useLiveData } from '@/lib/useLiveData'
+import type { BoardMode } from '@/lib/types'
 
 /**
  * `/live` — the standings on a phone.
@@ -79,7 +80,13 @@ export default function LivePage() {
     window.history.replaceState(window.history.state, '', url)
   }, [openId])
 
-  const mode = snapshot === null ? 'week' : boardMode(snapshot.cohort)
+  // **`daily` before the first fetch, matching `boardMode`'s own fallback.** On
+  // this page the two non-challenge modes are the same board — `figureOf` and
+  // `standingsFor` both read `week_revenue` for anything that is not a
+  // challenge — so the only thing this decides is which label the middle tab
+  // wears for the moment before data lands, and it should be the one the sheet
+  // is about to confirm.
+  const mode: BoardMode = snapshot === null ? 'daily' : boardMode(snapshot.cohort)
 
   const boards = useMemo<Record<BoardKey, Standing[]>>(() => {
     const teams = snapshot?.teams ?? []
@@ -131,24 +138,37 @@ export default function LivePage() {
          * would slide along with the board it is supposed to be revealing. */}
         <div className="lv-board">
           <LiveHeader />
-          <BoardTabs boardKey={boardKey} mode={mode} onChange={changeBoard} />
+
+          {/* ── Tabs and the board's own figures are one strip ──
+           *
+           * `display: contents` on a phone, so these two behave exactly as
+           * they did when they were separate: the tabs stick to the top of
+           * the screen and the figures scroll away underneath. On a desktop
+           * the wrapper becomes the row it looks like — tabs at the left,
+           * board total and trading count at the right — which takes a band
+           * off the page and stops the tabs sitting alone in a strip of
+           * their own. */}
+          <div className="lv-toolbar">
+            <BoardTabs boardKey={boardKey} mode={mode} onChange={changeBoard} />
+            {hasData ? (
+              <div className="lv-summary">
+                <div>
+                  <span className="lv-label">Board total</span>
+                  <CountUp className="lv-summary-value" value={boardTotal} from={arriving ? 0 : undefined} />
+                </div>
+                <div>
+                  <span className="lv-label">Trading</span>
+                  <span className="lv-summary-value">
+                    {trading}
+                    <small>/{standings.length}</small>
+                  </span>
+                </div>
+              </div>
+            ) : null}
+          </div>
 
         {hasData ? (
           <main className="lv-main">
-            <div className="lv-summary">
-              <div>
-                <span className="lv-label">Board total</span>
-                <CountUp className="lv-summary-value" value={boardTotal} from={arriving ? 0 : undefined} />
-              </div>
-              <div>
-                <span className="lv-label">Trading</span>
-                <span className="lv-summary-value">
-                  {trading}
-                  <small>/{standings.length}</small>
-                </span>
-              </div>
-            </div>
-
             <Podium podium={podium} arriving={arriving} onOpen={open} />
 
             {/* **Not "Pos".** On a board about takings that reads as

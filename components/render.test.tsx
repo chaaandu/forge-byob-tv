@@ -822,14 +822,14 @@ describe('WallHeader', () => {
    * figures below are a fortnight's, in the second-loudest element on the
    * frame, with nothing anywhere to report it.
    */
-  it('drops the day count in week mode even with a live window', () => {
+  it('drops the day count in daily mode even with a live window', () => {
     vi.useFakeTimers({ toFake: ['Date'] })
     vi.setSystemTime(new Date('2026-08-19T12:41:00+05:30'))
     const text = render(
-      <WallHeader snapshot={snapshotAt(...WINDOW)} label="Weekly Leaderboard" mode="week" />,
+      <WallHeader snapshot={snapshotAt(...WINDOW)} label="Daily Leaderboard" mode="daily" />,
     )
-    expect(text).toContain('Weekly Leaderboard')
-    expect(text).not.toContain('Day')
+    expect(text).toContain('Daily Leaderboard')
+    expect(text).not.toContain('Day ')
   })
 
   /**
@@ -870,13 +870,18 @@ describe('WallHeader', () => {
   /**
    * ── What the figures are measured over, said once ──
    *
-   * The same venture reads ₹2,42,546 on `/podium` and ₹12,400 on `/weekly`
-   * thirty seconds later. Neither board says so today — `/podium` carried
-   * `All time` beside its name until 13 September 2026 and was asked to drop
-   * it; `/weekly` never carried anything, because its day chip and its
-   * `Revenue since` caption already bound its window. So this asserts the
-   * prop rather than either page: it is what decides, a slide cannot come to
-   * carry the wrong window, and the word is one prop away from returning.
+   * The same venture reads ₹2,42,546 on `/podium` and ₹1,998 on `/weekly`
+   * thirty seconds later, and **`/weekly` is the board that now says so**.
+   * `/podium` carried `All time` beside its name until 13 September 2026 and
+   * was asked to drop it; `/weekly` carried nothing at all until it became a
+   * locked board, which is the one condition that changes the argument — see
+   * `boardScope`. A live board's window is "now" and a caption could only add
+   * provenance; this one stopped at ten this morning, and at four in the
+   * afternoon nothing else on the frame would say which day it is holding.
+   *
+   * Asserted on the prop rather than on either page, as it always was: it is
+   * what decides, so a slide cannot come to carry the wrong window, and
+   * `board.test.ts` pins what `/weekly` puts in it.
    */
   it('says what a board is measured over, only when told', () => {
     const withScope = render(
@@ -1223,21 +1228,49 @@ describe('WeeklyGrid', () => {
 
 describe('VentureCard', () => {
   /**
-   * Forty cards showing ₹0 every morning is noise, and the figure exists to say
-   * who is moving today. Silence is the honest answer for everyone else.
+   * ── One amount on the card, and it is the one the board sorted on ──
+   *
+   * The card used to print two: the board's figure and, under it, today's
+   * takings in a folded band. Both are deleted, and with them the whole class
+   * of test that asked which of two amounts appeared where.
+   *
+   * What replaced them is a single `earned` prop **handed down by the grid that
+   * sorted the board on it**. That is a narrower contract than the card reading
+   * `boardEarned(mode, team)` for itself, and this pins the narrowing: whatever
+   * is in that prop is what is on the card, and no column on the `Team` can
+   * reach the figure. The failure it forecloses is a card printing a number the
+   * comparator never used, which turns every rank on the board into a visible
+   * lie with nothing to report it.
    */
-  it('shows nothing rather than a zero for a team that has not sold today', () => {
-    const text = render(<VentureCard team={team({ challengeRevenue: 4_000, todayRevenue: 0 })} rank={7} />)
-    expect(text).toContain(formatRupees(4_000))
-    expect(text).not.toContain(formatRupees(0))
+  it('prints the figure it is handed and no column of the team', () => {
+    const text = render(
+      <VentureCard
+        team={team({ challengeRevenue: 16_141, weekRevenue: 999, totalRevenue: 240_000 })}
+        rank={7}
+        earned={6_167}
+      />,
+    )
+    expect(text).toContain(formatRupees(6_167))
+    expect(text).not.toContain(formatRupees(16_141))
+    expect(text).not.toContain(formatRupees(999))
+    expect(text).not.toContain(formatRupees(240_000))
   })
 
-  it('prints the challenge figure, not the week', () => {
-    const text = render(
-      <VentureCard team={team({ challengeRevenue: 16_141, weekRevenue: 999 })} rank={7} />,
-    )
-    expect(text).toContain(formatRupees(16_141))
-    expect(text).not.toContain(formatRupees(999))
+  /**
+   * **There is no second amount to leave out.** This used to assert that a team
+   * with no sales today printed nothing where the day figure went — the honest
+   * answer for the thirty-three cards that had not traded by lunchtime. The
+   * board's figure is a day now, so the only rupee amount on the card is the
+   * one it is ranked by, and a zero in *that* is a figure rather than a blank
+   * (see below). This is the inverse: exactly one amount is drawn, whatever the
+   * day has done.
+   */
+  it('draws one amount whether or not the team has sold today', () => {
+    const traded = render(<VentureCard team={team({ todayRevenue: 1_998 })} rank={7} earned={6_167} />)
+    const quiet = render(<VentureCard team={team({ todayRevenue: 0 })} rank={7} earned={6_167} />)
+    expect(traded).toContain(formatRupees(6_167))
+    expect(quiet).toContain(formatRupees(6_167))
+    expect(traded).not.toContain(formatRupees(1_998))
   })
 
   /**
@@ -1248,23 +1281,38 @@ describe('VentureCard', () => {
    * that have simply not traded.
    */
   it('prints a team below its baseline in full', () => {
-    const text = render(<VentureCard team={team({ challengeRevenue: -3_850 })} rank={38} />)
+    const text = render(<VentureCard team={team({})} rank={38} earned={-3_850} />)
     expect(text).toContain('-₹3,850')
   })
 
   /**
-   * **Both figures, and the week is the larger.** The card carries the week's
-   * revenue and, under it, today's — the anatomy is rank, mark, week, today.
-   * The venture name that briefly sat between them is gone: the mark identifies
-   * the venture, and today was the only thing on the board saying who is moving
-   * now.
+   * ── THE DAY'S FOLDED BAND IS GONE, AND THIS PINS THE ABSENCE ──
+   *
+   * The inverse of the test that stood here, which asserted both amounts: the
+   * board's figure and today's underneath it. The anatomy was rank, mark, week,
+   * today; it is rank, mark, name, figure now.
+   *
+   * **Why the band could not survive the board becoming a day.** Its whole
+   * justification was that it was the only thing on the wall saying who was
+   * moving *right now*, under a figure that was a week's. Once the figure above
+   * it is itself a finished day, the two are `₹6,167` for yesterday over
+   * `₹1,998` for today — two windows on one card, differing only by size and
+   * ink, on thirty-nine cards, with nothing on the frame to tell them apart.
+   * That is the failure this project is built around.
+   *
+   * Asserted by class as well as by absence of the amount, because the row
+   * (`tv-card-today`) reserved its height whether or not anything was drawn in
+   * it: a band that renders nothing and a row that no longer exists look
+   * identical in the output and are 28px apart on the card.
    */
-  it('prints the week figure and today underneath it', () => {
-    const text = render(
-      <VentureCard team={team({ challengeRevenue: 12_000, todayRevenue: 3_000 })} rank={7} />,
+  it('draws no day band, no day row and no second amount', () => {
+    const html = markup(<VentureCard team={team({ todayRevenue: 3_000 })} rank={7} earned={12_000} />)
+    expect(html).not.toContain('tv-card-today')
+    expect(html).not.toContain('tv-day-delta')
+    expect(html).not.toContain('tv-day-figure')
+    expect(render(<VentureCard team={team({ todayRevenue: 3_000 })} rank={7} earned={12_000} />)).not.toContain(
+      formatRupees(3_000),
     )
-    expect(text).toContain(formatRupees(12_000))
-    expect(text).toContain(formatRupees(3_000))
   })
 
   /**
@@ -1303,33 +1351,47 @@ describe('VentureCard', () => {
    * that had sold well still read as failing when the cohort's average was
    * higher.
    */
-  it('marks a day that happened and shows nothing for one that did not', () => {
-    // **The capsule is the state.** This asserted a `tv-card-today-traded`
-    // modifier alongside the mark; that class switched a bare line to a heavier
-    // weight and the accent ink, and it was applied on exactly the condition
-    // that decides whether anything renders here at all. A card that has not
-    // traded draws no capsule, so its presence carries what the modifier did.
-    const traded = markup(<VentureCard team={team({ todayRevenue: 900 })} rank={4} />)
-    const quiet = markup(<VentureCard team={team({ todayRevenue: 0 })} rank={4} />)
-    expect(traded).toContain('tv-day-delta')
+  /**
+   * ── The mark is the only live thing on a locked board ──
+   *
+   * **The condition did not change and its meaning did.** It is still
+   * `todayRevenue > 0`, but the figure it sits beside stopped at ten this
+   * morning while `todayRevenue` is current to the last poll. So a card wearing
+   * chevrons is a venture that is *already trading again* — which is a thing
+   * the board could not say at all while its own figure was live.
+   *
+   * The amount that used to sit beside it is gone; the presence of the mark is
+   * the whole statement. That is the same argument that removed
+   * `tv-card-today-traded` — a modifier applied on exactly the condition that
+   * decided whether anything rendered — carried one step further.
+   */
+  it('marks a venture that has sold today and nothing for one that has not', () => {
+    const traded = markup(<VentureCard team={team({ todayRevenue: 900 })} rank={4} earned={0} />)
+    const quiet = markup(<VentureCard team={team({ todayRevenue: 0 })} rank={4} earned={6_440} />)
     expect(traded).toContain('tv-day-mark')
-    expect(quiet).not.toContain('tv-day-delta')
     expect(quiet).not.toContain('tv-day-mark')
-    // The row itself is reserved either way, so thirty-nine cards keep their
-    // figures on one line as the day's first sales land.
-    expect(quiet).toContain('tv-card-today')
+  })
+
+  /**
+   * **It is set against the figure, not laid out with it.** As a flex sibling
+   * the mark would be measured with the amount and the pair would be centred,
+   * so the figure on the six cards that had traded would sit a few pixels right
+   * of the figure on the thirty-three that had not — six numbers out of a
+   * column of thirty-nine, which on a grid reads as a rendering fault. The
+   * anchor span is what makes the amount's position independent of the mark,
+   * and it has to be there on every card for the column to hold.
+   */
+  it('hangs the mark off an anchor that exists whether or not it is drawn', () => {
+    const traded = markup(<VentureCard team={team({ todayRevenue: 900 })} rank={4} earned={900} />)
+    const quiet = markup(<VentureCard team={team({ todayRevenue: 0 })} rank={4} earned={0} />)
+    expect(traded).toContain('tv-card-fig')
+    expect(quiet).toContain('tv-card-fig')
   })
 
   it('has no second direction to draw', () => {
-    const html = markup(<VentureCard team={team({ todayRevenue: 50 })} rank={4} />)
+    const html = markup(<VentureCard team={team({ todayRevenue: 50 })} rank={4} earned={50} />)
     expect(html).not.toContain('tv-day-down')
     expect(html).not.toContain('tv-card-today-below')
-  })
-
-  it('prints no today tag on a card with no day yet', () => {
-    const html = markup(<VentureCard team={team({ challengeRevenue: 9_000, todayRevenue: 0 })} rank={4} />)
-    expect(html).toContain('tv-card-today')
-    expect(html).not.toContain('tv-card-today-tag')
   })
 
   /**
@@ -1339,8 +1401,8 @@ describe('VentureCard', () => {
    * load rather than ten teams on nothing — every other card in the column has a
    * number where those had a gap. The em dash stays gone; a zero is not a dash.
    */
-  it('prints a zero week as a figure', () => {
-    const text = render(<VentureCard team={team({ challengeRevenue: 0, todayRevenue: 0 })} rank={38} />)
+  it('prints a zero day as a figure', () => {
+    const text = render(<VentureCard team={team({ todayRevenue: 0 })} rank={38} earned={0} />)
     expect(text).toContain(formatRupees(0))
     expect(text).not.toContain('—')
   })
@@ -1354,20 +1416,24 @@ describe('VentureCard', () => {
    * a forty-card board.
    */
   it('keeps the figure on a pale card when the team traded', () => {
-    const text = render(<VentureCard team={team({ challengeRevenue: 6_440 })} rank={25} />)
+    const text = render(<VentureCard team={team({})} rank={25} earned={6_440} />)
     expect(text).toContain(formatRupees(6_440))
   })
 
   it('prints the zero on a solid card too', () => {
-    // A Monday: someone holds rank 3 on a week that has barely started.
-    const text = render(<VentureCard team={team({ challengeRevenue: 0, todayRevenue: 0 })} rank={3} />)
+    // Nine in the morning: someone holds rank 3 on a day nobody has opened yet.
+    const text = render(<VentureCard team={team({ todayRevenue: 0 })} rank={3} earned={0} />)
     expect(text).toContain(formatRupees(0))
   })
 
   it('takes the surface from the rank and not from the revenue', () => {
-    const earner = team({ challengeRevenue: 6_440 })
-    expect(markup(<VentureCard team={earner} rank={SOLID_RANKS} />)).not.toContain('tv-card-quiet')
-    expect(markup(<VentureCard team={earner} rank={SOLID_RANKS + 1} />)).toContain('tv-card-quiet')
+    const earner = team({})
+    expect(markup(<VentureCard team={earner} rank={SOLID_RANKS} earned={6_440} />)).not.toContain(
+      'tv-card-quiet',
+    )
+    expect(markup(<VentureCard team={earner} rank={SOLID_RANKS + 1} earned={6_440} />)).toContain(
+      'tv-card-quiet',
+    )
   })
 
   /**
@@ -1391,9 +1457,9 @@ describe('VentureCard', () => {
    * fact, in the element that is pure apparatus, is what got removed.
    */
   it('gives every rank below the top three the same numeral', () => {
-    const earner = team({ challengeRevenue: 6_440 })
+    const earner = team({})
     for (const rank of [4, SOLID_RANKS, SOLID_RANKS + 1, COMPETING_SIZE]) {
-      const html = markup(<VentureCard team={earner} rank={rank} />)
+      const html = markup(<VentureCard team={earner} rank={rank} earned={6_440} />)
       expect(html).toContain('tv-card-rank')
       expect(html).not.toContain('tv-card-rank-lead')
       expect(html).not.toContain('tv-card-rank-quiet')
@@ -1401,11 +1467,15 @@ describe('VentureCard', () => {
   })
 
   it('gives the top three the lead numeral, and nobody else', () => {
-    const earner = team({ challengeRevenue: 6_440 })
+    const earner = team({})
     for (const rank of [1, 2, 3]) {
-      expect(markup(<VentureCard team={earner} rank={rank} />)).toContain('tv-card-rank-lead')
+      expect(markup(<VentureCard team={earner} rank={rank} earned={6_440} />)).toContain(
+        'tv-card-rank-lead',
+      )
     }
-    expect(markup(<VentureCard team={earner} rank={4} />)).not.toContain('tv-card-rank-lead')
+    expect(markup(<VentureCard team={earner} rank={4} earned={6_440} />)).not.toContain(
+      'tv-card-rank-lead',
+    )
   })
 
   /**
@@ -1444,40 +1514,45 @@ describe('VentureCard', () => {
    * carries a figure, and the second half of this test is the zero.
    */
   it('crowns rank 1 and nobody else', () => {
-    const traded = team({ challengeRevenue: 12_400 })
-    expect(markup(<VentureCard team={traded} rank={1} />)).toContain('tv-crown')
+    const traded = team({})
+    expect(markup(<VentureCard team={traded} rank={1} earned={12_400} />)).toContain('tv-crown')
     for (const rank of [2, 3, 4, COMPETING_SIZE]) {
-      expect(markup(<VentureCard team={traded} rank={rank} />)).not.toContain('tv-crown')
+      expect(markup(<VentureCard team={traded} rank={rank} earned={12_400} />)).not.toContain(
+        'tv-crown',
+      )
     }
   })
 
   /**
    * ── And nothing is crowned on a board where nobody has traded ──
    *
-   * The three cases are one rule read through `boardEarned`, so each is worth
-   * its own line: a zero is not a lead, a figure below the fortnight's baseline
-   * is even less of one, and the figure that counts is the contest's rather
-   * than the all-time one `/podium` ranks. The last is the one a plausible
-   * wrong fix produces — a card crowned for a lakh it earned in August, on a
-   * board printing `₹0` beneath the crown.
+   * Every case here is one rule read through the `earned` prop, and each is
+   * worth its own line: a zero is not a lead, a figure below the window's
+   * opening total is even less of one, and **no column on the team can crown
+   * anybody**. The last is the one a plausible wrong fix produces — a card
+   * crowned for a lakh it earned in August, on a board printing `₹0` beneath
+   * the crown.
+   *
+   * The pair that used to close this test asserted that the week board crowned
+   * on the week's figure and not the challenge's. It is a stronger assertion
+   * now and needs no mode: a card that is handed `0` is not crowned however
+   * rich the row it is drawn from, because there is no path from the row to the
+   * figure at all.
+   *
+   * A wall with fewer than two marks is exactly this state on all thirty-nine
+   * cards, which is what a fresh laptop shows for up to a day — so an
+   * uncrowned board is a real morning rather than a hypothetical.
    */
-  it('crowns nobody on a figure of zero or below, whatever the all-time total', () => {
-    expect(markup(<VentureCard team={team({})} rank={1} />)).not.toContain('tv-crown')
-    expect(markup(<VentureCard team={team({ challengeRevenue: -3_850 })} rank={1} />)).not.toContain(
+  it('crowns nobody on a figure of zero or below, whatever the row says', () => {
+    expect(markup(<VentureCard team={team({})} rank={1} earned={0} />)).not.toContain('tv-crown')
+    expect(markup(<VentureCard team={team({})} rank={1} earned={-3_850} />)).not.toContain(
       'tv-crown',
     )
-    expect(markup(<VentureCard team={team({ totalRevenue: 240_000 })} rank={1} />)).not.toContain(
-      'tv-crown',
-    )
-
-    // The week board is gated on the week's figure, so a card carrying a
-    // challenge figure between challenges is not crowned for it either.
-    expect(
-      markup(<VentureCard team={team({ challengeRevenue: 12_400 })} rank={1} mode="week" />),
-    ).not.toContain('tv-crown')
-    expect(
-      markup(<VentureCard team={team({ weekRevenue: 12_400 })} rank={1} mode="week" />),
-    ).toContain('tv-crown')
+    const rich = team({ totalRevenue: 240_000, weekRevenue: 96_167, challengeRevenue: 12_400 })
+    expect(markup(<VentureCard team={rich} rank={1} earned={0} />)).not.toContain('tv-crown')
+    // And the default is the uncrowned one, so a card nobody hands a figure to
+    // cannot crown on a row it happens to be carrying.
+    expect(markup(<VentureCard team={rich} rank={1} />)).not.toContain('tv-crown')
   })
 
   /**
@@ -1493,7 +1568,7 @@ describe('VentureCard', () => {
   it('fades a card in a flip and leaves its surface alone', () => {
     const cue = { role: 'attacker', dx: 0, dy: -120, shift: 0, scale: 0.82 } as const
     const html = markup(
-      <VentureCard team={team({ challengeRevenue: 6_440 })} rank={SOLID_RANKS + 3} cue={cue} />,
+      <VentureCard team={team({})} rank={SOLID_RANKS + 3} earned={6_440} cue={cue} />,
     )
     expect(html).toContain('tv-card-away')
     expect(html).toContain('tv-card-detail')
@@ -1503,7 +1578,7 @@ describe('VentureCard', () => {
   })
 
   it('leaves a card with no cue unfaded', () => {
-    const html = markup(<VentureCard team={team({ challengeRevenue: 6_440 })} rank={9} />)
+    const html = markup(<VentureCard team={team({})} rank={9} earned={6_440} />)
     expect(html).not.toContain('tv-card-away')
   })
 })

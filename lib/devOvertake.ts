@@ -3,6 +3,7 @@
 import { useCallback, useMemo, useState } from 'react'
 
 import { boardEarned } from '@/lib/board'
+import type { DailyWindow } from '@/lib/daily'
 import type { BoardMode, Team, TeamId } from '@/lib/types'
 
 /**
@@ -59,13 +60,14 @@ let pending: { teamId: TeamId; earned: number }[] = []
  */
 export function devQueueClimb(
   mode: BoardMode,
+  day: DailyWindow | null,
   attacker: Team,
   defender: Team,
   above: Team | undefined,
 ): void {
   if (!DEV) return
-  const held = boardEarned(mode, defender)
-  const ceiling = above === undefined ? held + 2 : boardEarned(mode, above)
+  const held = boardEarned(mode, defender, day)
+  const ceiling = above === undefined ? held + 2 : boardEarned(mode, above, day)
   const gap = ceiling - held
   const earned = gap > 2 ? held + Math.floor(gap / 2) : held + 1
   pending.push({ teamId: attacker.teamId, earned })
@@ -73,9 +75,11 @@ export function devQueueClimb(
 
 export function useDevOvertakes(
   mode: BoardMode,
+  day: DailyWindow | null,
   teams: readonly Team[],
 ): {
   teams: readonly Team[]
+  day: DailyWindow | null
   commit: () => void
   reset: () => void
 } {
@@ -113,5 +117,26 @@ export function useDevOvertakes(
     })
   }, [teams, applied])
 
-  return { teams: adjusted, commit, reset }
+  /**
+   * The daily half of the same override.
+   *
+   * It has to be a second one, because the daily figure is not on the row: it
+   * lives in the window's map. Patching only the row above would have made
+   * every dev-triggered flip on the daily board a no-op that looked like a
+   * working animation — the choreography would play and the board would re-sort
+   * to exactly the order it started in, which is the bug this whole module's
+   * docblock exists to describe, reintroduced by the change of figure.
+   *
+   * **Nothing is written back to `localStorage`.** A dev trigger that rewrote a
+   * real photograph would leave the laptop holding a fabricated day, locked, for
+   * twenty-four hours, and the only way out would be clearing the store.
+   */
+  const adjustedDay = useMemo(() => {
+    if (!DEV || applied.size === 0 || day === null) return day
+    const earned = { ...day.earned }
+    for (const [teamId, figure] of applied) earned[teamId] = figure
+    return { ...day, earned }
+  }, [day, applied])
+
+  return { teams: adjusted, day: adjustedDay, commit, reset }
 }

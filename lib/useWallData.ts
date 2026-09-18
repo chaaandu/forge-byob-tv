@@ -3,10 +3,20 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { POLL_INTERVAL_MS } from '@/config'
+import { markWindow, windowOf, type DailyWindow } from '@/lib/daily'
 import { fetchCsv, parseSnapshot, passesRowGate } from '@/lib/feed'
 import { openWeek } from '@/lib/feed'
 import { detect } from '@/lib/overtake'
-import { enqueueKicks, readBoard, readCsvCache, writeBoard, writeCsvCache } from '@/lib/storage'
+import { istWindowKey } from '@/lib/schedule'
+import {
+  enqueueKicks,
+  readBoard,
+  readCsvCache,
+  readDailyMarks,
+  writeBoard,
+  writeCsvCache,
+  writeDailyMarks,
+} from '@/lib/storage'
 import type { Cohort, Snapshot, Team } from '@/lib/types'
 
 /**
@@ -26,6 +36,17 @@ import type { Cohort, Snapshot, Team } from '@/lib/types'
  */
 export type WallData = {
   snapshot: Snapshot | null
+  /**
+   * The finished day `/weekly` is showing, or `null` before a wall has two
+   * marks. `/podium` ignores it.
+   *
+   * **Applied in the same commit as the snapshot it was computed beside**, which
+   * is why the two are held in one piece of state rather than two. A window that
+   * landed a render before or after its snapshot would rank the board on one
+   * poll's figures while printing another's — briefly, silently, and at exactly
+   * the tick a flip might be reading positions.
+   */
+  day: DailyWindow | null
   /** Bumped whenever kicks were queued, so the player knows to look. */
   queueVersion: number
   /** Start holding snapshots instead of applying them. Called when a kick starts. */
@@ -50,27 +71,39 @@ export type BoardSpec = {
    * constant (see the note at the foot of `tick`), so the mode cannot be baked
    * into it at construction; it has to be read per fetch, from the fetch.
    */
-  rank: (teams: readonly Team[], cohort: Cohort) => Team[]
-  earned: (team: Team, cohort: Cohort) => number
+  rank: (teams: readonly Team[], cohort: Cohort, day: DailyWindow | null) => Team[]
+  earned: (team: Team, cohort: Cohort, day: DailyWindow | null) => number
   watchTo: number
   /**
    * What counts as "the period this board's figure resets with", read off the
-   * cohort. Defaults to the programme week.
+   * cohort and the day. Defaults to the programme week.
    *
    * `detect` goes silent when this number changes, because that is the tick
    * where every figure on the board drops to zero together and forty resets
    * must not read as forty overtakes.
    *
-   * `/weekly` overrides it with `currentChallenge`: its figure resets when a
-   * challenge rolls over, which is a Tuesday, and not on the Monday a programme
-   * week turns. `/podium` leaves it alone — its figure is the all-time total,
-   * which never resets at all.
+   * `/weekly` overrides it with `boardPeriod`, which folds three such ticks into
+   * one number space: ten o'clock every morning, a challenge rolling over, and
+   * the `challenge_mode` cell being edited. `/podium` leaves it alone — its
+   * figure is the all-time total, which never resets at all.
    */
-  period?: (cohort: Cohort) => number | null
+  period?: (cohort: Cohort, day: DailyWindow | null) => number | null
 }
 
+/**
+ * What the board renders from, applied as one unit.
+ *
+ * The snapshot and the window are a pair by construction: the window is
+ * computed from the marks as they stood when that snapshot was gated, and the
+ * comparator reads one while the cards print the other. Two `useState` calls
+ * would let them land in separate commits, and a board sorted on one poll's
+ * window while printing the next poll's figures is the precise failure this
+ * project is built around — plausible, well-ranked, and reported by nothing.
+ */
+type Applied = { snapshot: Snapshot; day: DailyWindow | null }
+
 export function useWallData(board: BoardSpec): WallData {
-  const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
+  const [applied, setApplied] = useState<Applied | null>(null)
   const [queueVersion, setQueueVersion] = useState(0)
   const running = useRef(false)
 
@@ -98,7 +131,7 @@ export function useWallData(board: BoardSpec): WallData {
    * path. Ticks run on their clock; only `setSnapshot` is deferred.
    */
   const frozen = useRef(false)
-  const pending = useRef<Snapshot | null>(null)
+  const pending = useRef<Applied | null>(null)
 
   const freeze = useCallback(() => {
     frozen.current = true
@@ -109,13 +142,21 @@ export function useWallData(board: BoardSpec): WallData {
     if (pending.current === null) return
     const held = pending.current
     pending.current = null
-    setSnapshot(held)
+    setApplied(held)
   }, [])
 
   /**
    * First paint reads the cached CSV, before the browser paints. This is why
    * the wall never shows a spinner: it comes up holding the last thing it knew,
    * and a cold cache renders the empty structure, which is a valid state.
+   */
+  /**
+   * First paint reads the cached CSV **and the stored marks**, so a wall that
+   * has been running comes up with a full board rather than with thirty-nine
+   * names and thirty-nine zeroes for the first minute. The window is the half
+   * that matters here: the CSV cache alone would paint the right teams under the
+   * right heading with every figure missing, which looks like a wall whose feed
+   * has died and is exactly what the cache exists to prevent.
    */
   useLayoutEffect(() => {
     const cached = readCsvCache()
@@ -131,7 +172,7 @@ export function useWallData(board: BoardSpec): WallData {
       // needs no spinner. The rule guards against cascading renders; this runs
       // once, on mount, and sets state that nothing else in the effect reads.
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSnapshot(parseSnapshot(cached))
+      setApplied({ snapshot: parseSnapshot(cached), day: windowOf(readDailyMarks()) })
     } catch (error) {
       // A cache written by an older schema. Nothing to repair — the next
       // successful fetch overwrites it.
@@ -158,12 +199,36 @@ export function useWallData(board: BoardSpec): WallData {
 
       writeCsvCache(raw)
 
+      /**
+       * ── Ten o'clock is closed here, on a gated fetch, and nowhere else ──
+       *
+       * **After the row gate, deliberately.** The mark is a photograph of what
+       * the sheet held, and it is the opening edge of tomorrow's board as well
+       * as the closing edge of today's — so a short feed must never be allowed
+       * to become one. Google's CSV export can be read inside a rebuild's
+       * `clearContent` → `setValues` window, and a photograph taken then would
+       * record a handful of teams at ₹0 and hand every one of them its whole
+       * all-time revenue as the next day's takings, on the board, for
+       * twenty-four hours. The gate already discards that tick; this simply
+       * sits behind it.
+       *
+       * **Written only when the window actually rolled.** `markWindow` returns
+       * the array it was given, by identity, when the current window is already
+       * closed — which is 1,439 of the 1,440 polls in a day — so the reference
+       * check is what keeps this from being a `localStorage` write a minute
+       * forever.
+       */
+      const marks = readDailyMarks()
+      const marked = markWindow(marks, fresh.teams, istWindowKey(new Date()))
+      if (marked !== marks) writeDailyMarks(marked)
+      const day = windowOf(marked)
+
       // Detection runs only on a freshly gated fetch. The boot cache is
       // render-only: reconciling it would emit nothing anyway, since detection
       // is idempotent, and would cost a write for nothing.
       const { name, rank, earned, watchTo, period = openWeek } = board
       const { state, events } = detect(readBoard(name), {
-        ranked: rank(fresh.teams, fresh.cohort),
+        ranked: rank(fresh.teams, fresh.cohort, day),
         // `BoardState.week` keeps its name while carrying a challenge number on
         // `/weekly`. Renaming the stored field would change the shape of what
         // every TV holds in localStorage and force a storage key version bump —
@@ -171,11 +236,11 @@ export function useWallData(board: BoardSpec): WallData {
         // `week: 5` meets the new `period: 1` on the first poll after deploy,
         // the guard fires once, and the wall records what it sees and animates
         // nothing. Which is exactly the seeding the version bump was for.
-        week: period(fresh.cohort),
+        week: period(fresh.cohort, day),
         watchTo,
-        // Bound to this tick's cohort rather than passed bare: `detect` calls it
-        // per team and has no cohort of its own to hand it.
-        earned: (team) => earned(team, fresh.cohort),
+        // Bound to this tick's cohort and window rather than passed bare:
+        // `detect` calls it per team and has neither of its own to hand it.
+        earned: (team) => earned(team, fresh.cohort, day),
       })
       writeBoard(name, state)
       if (events.length > 0) {
@@ -188,10 +253,10 @@ export function useWallData(board: BoardSpec): WallData {
       // newest hold is kept; an older held snapshot is superseded, never
       // replayed.
       if (frozen.current || events.length > 0) {
-        pending.current = fresh
+        pending.current = { snapshot: fresh, day }
       } else {
         pending.current = null
-        setSnapshot(fresh)
+        setApplied({ snapshot: fresh, day })
       }
     } finally {
       running.current = false
@@ -237,5 +302,11 @@ export function useWallData(board: BoardSpec): WallData {
     }
   }, [tick])
 
-  return { snapshot, queueVersion, freeze, thaw }
+  return {
+    snapshot: applied?.snapshot ?? null,
+    day: applied?.day ?? null,
+    queueVersion,
+    freeze,
+    thaw,
+  }
 }

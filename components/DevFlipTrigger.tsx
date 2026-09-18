@@ -3,6 +3,7 @@
 import { devQueueClimb } from '@/lib/devOvertake'
 import { rankForMode } from '@/lib/board'
 import { clearKicks, enqueueKicks } from '@/lib/storage'
+import type { DailyWindow } from '@/lib/daily'
 import type { BoardMode, OvertakeEvent, Team } from '@/lib/types'
 
 /**
@@ -64,11 +65,16 @@ const CASES: readonly { label: string; from: number; to: number }[] = [
 export function DevFlipTrigger({
   teams,
   mode = 'challenge',
+  day = null,
   week,
   onQueued,
   onReset,
 }: {
   teams: readonly Team[]
+  /** The daily window, so a triggered climb lands on the figure this board is
+      actually ranking. Without it every daily-mode trigger is a no-op wearing a
+      working animation — see `useDevOvertakes`. */
+  day?: DailyWindow | null
   /** Ranked the way the board is ranked, so "rank 4 overtakes rank 2" picks the
       two cards actually sitting in those slots. */
   mode?: BoardMode
@@ -78,7 +84,7 @@ export function DevFlipTrigger({
 }) {
   if (process.env.NODE_ENV === 'production') return null
 
-  const ranked = rankForMode(mode, teams)
+  const ranked = rankForMode(mode, teams, day)
   const fire = (from: number, to: number) => {
     const attacker = ranked[from - 1]
     const defender = ranked[to - 1]
@@ -99,7 +105,7 @@ export function DevFlipTrigger({
     // then settles onto the board it started from; this records what the climb
     // is worth so the settle has somewhere to arrive. Applied on settle, not
     // here — see lib/devOvertake.ts.
-    devQueueClimb(mode, attacker, defender, ranked[to - 2])
+    devQueueClimb(mode, day, attacker, defender, ranked[to - 2])
     enqueueKicks('weekly', [event])
     onQueued()
   }

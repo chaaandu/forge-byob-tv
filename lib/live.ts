@@ -1,5 +1,4 @@
-import { boardEarned, rankForMode } from '@/lib/board'
-import { competingTeams, rankByToday, rankTeams } from '@/lib/ranking'
+import { competingTeams, rankByChallenge, rankByToday, rankByWeek, rankTeams } from '@/lib/ranking'
 import { hashTeamId } from '@/lib/seed'
 import { titleCase } from '@/lib/team'
 import type { BoardMode, Team, TeamId } from '@/lib/types'
@@ -10,15 +9,37 @@ import type { BoardMode, Team, TeamId } from '@/lib/types'
  *
  * ── `/live` is a reader of the wall's rules, not a second copy of them ──
  *
- * The phone shows three boards and **two of them are the wall's own**: the
- * all-time board ranks with `rankTeams`, which is `/podium`'s comparator, and
- * the period board ranks with `rankForMode`, which is `/weekly`'s — including
- * `challenge_mode` deciding whether that is the week or the challenge. A phone
- * that disagreed with the TV in the corridor about who is fourth would be worse
- * than no phone.
+ * The all-time board ranks with `rankTeams`, which is `/podium`'s comparator to
+ * the line. A phone that disagreed with the TV in the corridor about who is
+ * fourth would be worse than no phone.
  *
- * The third, today, is new, and its comparator (`compareToday`) lives in
- * `lib/ranking.ts` beside the others for the same reason they do.
+ * ── The period board followed `/weekly` and now only half can ──
+ *
+ * It used to call `rankForMode` directly, so the phone's middle tab *was*
+ * `/weekly`'s board, week or challenge, decided by the same cell. In challenge
+ * mode that is still exactly what happens: `rankByChallenge` is the comparator
+ * `rankForMode` reaches for, and `challenge_revenue` is a published column both
+ * devices read.
+ *
+ * The rest of the time it cannot be, and the reason is physical rather than a
+ * choice. `/weekly`'s figure is no longer a column: it is a **finished day**,
+ * 10:00 to 10:00, computed from two photographs of `total_revenue` that the
+ * laptop driving the TV took and kept in its own `localStorage` — see
+ * `lib/daily.ts`. A phone is a different machine. It has never held those marks
+ * and cannot be handed them without this project growing the backend it does not
+ * have.
+ *
+ * So the phone's period tab keeps the **week**, and says `This week`. That is
+ * not a fudge of the wall's board, it is a different published figure under its
+ * own honest label, and it is the more useful of the two on a phone: somebody
+ * holding this wants *live*, and the tab beside it — `Today`, `today_revenue`,
+ * current to the last poll — is the live daily board the wall's locked one
+ * cannot be. What is genuinely lost is that between challenges the two surfaces
+ * now measure different windows, and `lib/live.test.ts` states that as a fact
+ * rather than asserting a parity that is no longer true.
+ *
+ * Today's comparator (`compareToday`) lives in `lib/ranking.ts` beside the
+ * others for the same reason they all do.
  */
 
 export type BoardKey = 'all' | 'period' | 'today'
@@ -36,7 +57,9 @@ export type Standing = {
 export function figureOf(key: BoardKey, mode: BoardMode, team: Team): number {
   if (key === 'all') return team.totalRevenue
   if (key === 'today') return team.todayRevenue
-  return boardEarned(mode, team)
+  // Read off the row in both modes, which is what keeps this page a reader of
+  // published columns. The wall's daily window is not one of them.
+  return mode === 'challenge' ? team.challengeRevenue : team.weekRevenue
 }
 
 /** One board, ranked, spares removed. */
@@ -47,7 +70,9 @@ export function standingsFor(key: BoardKey, mode: BoardMode, teams: readonly Tea
       ? rankTeams(competing)
       : key === 'today'
         ? rankByToday(competing)
-        : rankForMode(mode, competing)
+        : mode === 'challenge'
+          ? rankByChallenge(competing)
+          : rankByWeek(competing)
   return ranked.map((team, index) => ({ team, rank: index + 1, figure: figureOf(key, mode, team) }))
 }
 

@@ -181,13 +181,9 @@
   --ink-2: var(--royal-purple);
   --ink-muted: var(--ink-muted-light);
   --accent: var(--vivid-violet);
-  /* The band carries its own ground, so it does not need to change with the
-     surface — and it is stated here anyway rather than left to `:root`,
-     because the pair existing on both surfaces is what lets the band diverge
-     later without a component learning a colour. It agrees with the dark
-     surface today only because `--accent` is Vivid Violet on this one. */
-  --card-day-fill: var(--vivid-violet);
-  --card-day-ink: var(--ink-on-solid);
+  /* `--card-day-fill` and `--card-day-ink` are deleted here too — the day band
+     they grounded is gone from `/weekly`. §5's note on the dark surface carries
+     the measurements and what replaced it. */
   --accent-quiet: var(--orchid-700);
   --hairline: rgba(42, 24, 73, 0.14);
   --hairline-strong: rgba(42, 24, 73, 0.26);
@@ -358,33 +354,34 @@
   --ink-muted: var(--violet-300); /* 5.60:1. NOT --vivid-violet, which is 2.86:1 */
   --accent: var(--orchid); /* 8.39:1 */
 
-  /* ── `/weekly`'s day band, and why it is no longer `--accent` ──
+  /* ── `/weekly`'s day band is deleted, and its pair with it ──
 
-     The band was orchid as a solid with the page colour as ink. Measured on
-     the board, its mean luminance was **0.441** against **0.204** for the zone
-     holding the venture name and the week figure — so the *day* figure was
-     2.2x louder than the week figure, on a slide called Weekly Leaderboard
-     that is ranked by the week figure. The secondary number was winning the
-     card.
+     `--card-day-fill` and `--card-day-ink` were the band's own ground and ink,
+     stated on all three surfaces so that the band could supply its own contrast
+     and hold on either page. They are gone from all three, and the record of
+     what they cost to get right is worth keeping because the next filled object
+     on a card will meet both faults:
 
-     It also put orchid on the card as a **surface** thirty pixels from orchid
-     as **ink** — the venture name is `--orchid-300` — which is one step of one
-     ramp doing two opposite jobs. This file's header names that pattern as the
-     failure it is; it survived here only because the band's ink flips with the
-     surface too, but it is why the card read muddled rather than layered.
+     - **It was `--accent` as a solid and lost the card.** Measured on the
+       board, an orchid band's mean luminance was **0.441** against **0.204**
+       for the zone holding the venture name and the figure — so the secondary
+       number was 2.2x louder than the one the board is ranked by. Vivid Violet
+       at 0.212 sat level with it instead of over it, white on it at 5.54:1.
+     - **It put one ramp step on the card as a surface thirty pixels from
+       another step of the same ramp as ink** — the venture name is
+       `--orchid-300`. This file's header names that pattern as the failure it
+       is, and it is why the card read muddled rather than layered even once
+       the contrast passed.
 
-     Vivid Violet at 0.212 sits level with the week figure instead of over it,
-     and takes the band off the orchid ramp entirely. White on it measures
-     5.54:1.
+     Teal was the other candidate and lost on dominance: same 0.210, same two
+     fixes, and a cool hue shared with `/podium`'s second block — but a new hue
+     on a purple card reads as a louder claim than a footnote to a figure.
 
-     **Teal was the other candidate and lost on dominance.** It measured the
-     same 0.210, fixed the same two faults, and would have given the wall one
-     cool accent shared with `/podium`'s second block — but a new hue on a
-     purple card reads as a louder claim than the band is making, and the band
-     is a footnote to the figure above it. Reviewed side by side on the first
-     two cards of the real board. */
-  --card-day-fill: var(--vivid-violet);
-  --card-day-ink: var(--ink-on-solid);
+     What replaced the whole band is a direction mark positioned off the figure,
+     inheriting `--card-fig-ink`. A mark that takes the amount's own ink is the
+     two reading as one object, which is what a band supplying its own ground
+     could never be. And nothing on the card reads a colour it does not get from
+     the surface, so the flip is untouched. */
   --accent-quiet: var(--violet-300);
   --hairline: rgba(255, 255, 255, 0.14);
   --hairline-strong: rgba(255, 255, 255, 0.28);
@@ -526,13 +523,9 @@
   --ink-2: var(--royal-purple);
   --ink-muted: var(--ink-muted-light);
   --accent: var(--vivid-violet);
-  /* The band carries its own ground, so it does not need to change with the
-     surface — and it is stated here anyway rather than left to `:root`,
-     because the pair existing on both surfaces is what lets the band diverge
-     later without a component learning a colour. It agrees with the dark
-     surface today only because `--accent` is Vivid Violet on this one. */
-  --card-day-fill: var(--vivid-violet);
-  --card-day-ink: var(--ink-on-solid);
+  /* `--card-day-fill` and `--card-day-ink` are deleted here too — the day band
+     they grounded is gone from `/weekly`. §5's note on the dark surface carries
+     the measurements and what replaced it. */
   --accent-quiet: var(--orchid-700);
   --hairline: rgba(42, 24, 73, 0.14);
   --hairline-strong: rgba(42, 24, 73, 0.26);

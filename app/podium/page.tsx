@@ -121,7 +121,9 @@ export default function PodiumPage() {
       <WallHeader
         snapshot={snapshot}
         label="BYOB Leaderboard"
-        mode="week"
+        // Anything that is not `challenge`, which is what suppresses the day
+        // chip. This slide is showing neither contest — it is all-time.
+        mode="daily"
         trailing={<FleaCountdown at={snapshot === null ? null : fleaInstant(snapshot.cohort)} />}
       />
 

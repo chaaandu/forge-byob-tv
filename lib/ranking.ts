@@ -1,5 +1,5 @@
 import { SPARE_TEAM_IDS } from '@/config'
-import type { Team } from '@/lib/types'
+import type { Team, TeamId } from '@/lib/types'
 
 /**
  * Ordering, and who is in the running. Nothing else.
@@ -96,6 +96,54 @@ export function rankByWeek(teams: readonly Team[]): Team[] {
 
 export function rankByToday(teams: readonly Team[]): Team[] {
   return [...teams].sort(compareToday)
+}
+
+/**
+ * `/weekly`'s standing: the daily window desc → **all-time** revenue desc →
+ * team ID asc.
+ *
+ * ── The only comparator here that is handed its first key ──
+ *
+ * Every other one reads a field off the `Team`, because every other figure on
+ * this wall is a column in `TV_Feed`. The daily window is not: it is the
+ * difference between two photographs of `total_revenue` taken by the laptop at
+ * ten o'clock, so it lives in a map keyed by team id rather than on the row —
+ * see `lib/daily.ts` for why the sheet cannot supply it.
+ *
+ * **A factory rather than a `Team` carrying an extra field.** Writing the
+ * window's figure onto each row would make a `Team` mean "a row of `TV_Feed`,
+ * plus something this machine worked out", and the day one of those is cached,
+ * persisted or compared against a fresh fetch, the two would be
+ * indistinguishable. The map is passed in and stays outside the row.
+ *
+ * All-time revenue is the second key for the reason `compareWeek` gives, and the
+ * reason is at its strongest here: this board's first key is **₹0 for every team
+ * a wall has just been plugged in at**, because a window needs two marks, and it
+ * is ₹0 for most teams on any quiet day. Falling back to the standing the wall
+ * showed yesterday is the reading a passer-by already has in their head.
+ * Ordering thirty-five zeroes by team ID would look arbitrary and would make
+ * `/weekly` disagree with `/podium` for no reason anyone could see.
+ *
+ * **A total order, like every comparator in this file** — and the `?? 0` is part
+ * of what makes it one. A team the window cannot measure compares equal to a
+ * team that earned nothing, and is then separated by all-time revenue, so it
+ * holds one stable position rather than floating.
+ */
+export function compareDaily(earned: Readonly<Record<TeamId, number>>) {
+  return (a: Team, b: Team): number => {
+    const ea = earned[a.teamId] ?? 0
+    const eb = earned[b.teamId] ?? 0
+    if (eb !== ea) return eb - ea
+    if (b.totalRevenue !== a.totalRevenue) return b.totalRevenue - a.totalRevenue
+    return a.teamId.localeCompare(b.teamId)
+  }
+}
+
+export function rankByDaily(
+  teams: readonly Team[],
+  earned: Readonly<Record<TeamId, number>>,
+): Team[] {
+  return [...teams].sort(compareDaily(earned))
 }
 
 export function rankByChallenge(teams: readonly Team[]): Team[] {

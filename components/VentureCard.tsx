@@ -6,11 +6,10 @@ import { motion, type Easing } from 'motion/react'
 import { Crown } from '@/components/Crown'
 import { VentureDisc } from '@/components/VentureDisc'
 import { SOLID_RANKS } from '@/config'
-import { boardEarned } from '@/lib/board'
 import { formatRupees } from '@/lib/format'
 import { BEATS, TOTAL, at, type FlipCue } from '@/lib/flipTimeline'
 import { nameOf } from '@/lib/team'
-import type { BoardMode, Team } from '@/lib/types'
+import type { Team } from '@/lib/types'
 
 /**
  * One team's card: a solid Deep Forest object carrying rank, mark, venture name
@@ -124,7 +123,7 @@ function travelMotion(cue: FlipCue) {
 export function VentureCard({
   team,
   rank,
-  mode = 'challenge',
+  earned = 0,
   idle,
   delaySeconds,
   cue,
@@ -134,10 +133,21 @@ export function VentureCard({
 }: {
   team: Team
   rank: number
-  /** Which contest is on, from `challenge_mode`. The figure below is the one
-      the board sorted by — a card printing the other one turns every rank on
-      the board into a visible lie, with nothing to report it. */
-  mode?: BoardMode
+  /**
+   * The figure this card prints, **handed down by the grid that sorted the
+   * board on it**.
+   *
+   * It used to be `mode` plus a `boardEarned` call in here, which was one
+   * expression too many: the card had to agree with the page about which
+   * contest was on, and a card printing the other figure turns every rank on
+   * the board into a visible lie with nothing to report it. It also stopped
+   * being possible — the daily window is not a field on `Team`, so there is
+   * nothing here to read it off.
+   *
+   * `0` by default, which is the honest reading of "nobody told this card what
+   * the team earned" and is a state this board is in every morning anyway.
+   */
+  earned?: number
   /** Set for one render on the two cards an overtake just settled, and on
       nobody else. It is what lets their details fade in after a remount without
       every unrelated re-sort doing the same. */
@@ -188,37 +198,39 @@ export function VentureCard({
    * every Monday morning, and the whole of a challenge's first day.
    *
    * **The figure it reads is the one the board sorted by**, not `totalRevenue`.
-   * `boardEarned` is what the ranking, the ink and the printed number all go
-   * through, so a crown gated on anything else could appear over a `₹0` or sit
-   * out a board that has traded. Rounded for the same reason the ink is: this
-   * agrees with what `formatRupees` prints rather than with what the sheet
-   * happens to hold, so a leader on ₹0.40 — who prints `₹0` — is not crowned
-   * for a fraction of a rupee nobody on the wall can see.
+   * `earned` is what the ranking, the ink and the printed number all come from
+   * now — one number, arriving once — so a crown gated on anything else could
+   * appear over a `₹0` or sit out a board that has traded. Rounded for the same
+   * reason the ink is: this agrees with what `formatRupees` prints rather than
+   * with what the sheet happens to hold, so a leader on ₹0.40 — who prints `₹0`
+   * — is not crowned for a fraction of a rupee nobody on the wall can see.
    *
    * **`> 0` rather than `!== 0`.** A negative leader means every team on the
-   * board is below the total it started the fortnight on, which is the absence
-   * of a leader rather than the presence of one.
+   * board is below the total it started the window on, which is the absence of
+   * a leader rather than the presence of one.
    */
-  const crowned = rank === 1 && Math.round(boardEarned(mode, team)) > 0
+  const crowned = rank === 1 && Math.round(earned) > 0
 
   /**
-   * ── Today is shown, or it is not ──
+   * ── Has this venture sold since the board was locked? ──
    *
-   * A team that has traded today gets a capsule carrying the figure and a mark
-   * pointing up. A team that has not gets no capsule, and the row stays empty —
-   * reserved, so the board does not re-flow as the day's first sales land.
+   * The condition is `todayRevenue > 0` and it has not changed, but what it now
+   * *means* has, and the new meaning is the better one. The board's figure
+   * stopped at ten this morning; `today_revenue` is live from midnight and
+   * current to the last poll. So a card wearing the chevrons is a venture that
+   * is **already trading again** against a column of settled numbers — the only
+   * live thing on a locked board.
+   *
+   * **The figure that used to sit beside them is gone with the fold.** It was
+   * today's takings in small type under the week's in large, which was two
+   * windows on one card and, once the big figure became a day of its own, two
+   * days on one card. The mark alone says the thing worth saying; how much is a
+   * question `/live` answers, on the device held by the person asking it.
    *
    * **One condition, read once.** This was computed here and then re-derived
    * inline for the render, which is two expressions that have to agree about
    * what "traded" means — and they did agree, right up until the modifier class
    * one of them fed was deleted and the other was left behind.
-   *
-   * **There is no second state and no comparison.** The figure was coloured
-   * against the board's average for a while, green above and red below, which
-   * meant a team that had sold well still read as failing if the cohort's
-   * average happened to be higher. Trading today is the thing worth saying; how
-   * it ranks against everyone else's day is what the board itself already shows
-   * by putting them in order.
    */
   const traded = team.todayRevenue > 0
 
@@ -487,8 +499,11 @@ export function VentureCard({
           //
           // No `gap`. Every one of these tracks carries its own separation, so
           // nothing leaves a gap behind if it ever stops being drawn.
-          gridTemplateRows:
-            'var(--h-mark-in) var(--h-card-name) var(--h-card-fig) var(--h-card-today)',
+          // Three tracks, not four. `--h-card-today` was the day band's row at
+          // the card's foot and it is deleted; the figure is the last row now,
+          // sitting above the bottom padding that row had borrowed. See
+          // `--s-card-pad-y`.
+          gridTemplateRows: 'var(--h-mark-in) var(--h-card-name) var(--h-card-fig)',
           justifyItems: 'center',
           alignContent: 'start',
           minWidth: 0,
@@ -562,107 +577,73 @@ export function VentureCard({
             // prints `₹0` and reads as one. Negative zero rounds to `-0`, and
             // `-0 === 0`, so a sub-rupee shortfall lands quiet with the zeroes
             // it is indistinguishable from.
-            Math.round(boardEarned(mode, team)) === 0
+            Math.round(earned) === 0
               ? 'tv-figure tv-card-week tv-card-week-idle tv-card-detail'
               : 'tv-figure tv-card-week tv-card-detail'
           }
           style={{ font: 'var(--t-tv-card-week)' }}
         >
-          {formatRupees(boardEarned(mode, team))}
-        </div>
-        {/* ── Today, back on the card ──
+          {/* ── One anchor, so the figure keeps the card's centre line ──
 
-            The line the venture name occupied is today's again. The name went
-            because the mark already identifies the venture at this size — forty
-            logos and forty names is the same fact printed twice — and what the
-            board lost when today went was the only thing on it that said who is
-            moving *right now*. A wall glanced at on a busy Friday answers that
-            question or it is a weekly summary that happens to be on a screen.
+              The chevrons hang off this span rather than sitting beside the
+              amount as a flex sibling, and the difference is the whole point.
+              As a sibling they would be laid out *with* the number, so the pair
+              would be centred and every figure on a card that traded would sit
+              a few pixels right of every figure on one that had not — thirty-nine
+              numbers on a grid, six of them off the column. Absolutely
+              positioned off a span whose width is the text's, the amount is
+              centred whether the mark is there or not, and the mark hangs into
+              the air the card already has.
 
-            **It appears only when there is a day to report.** A permanent
-            caption over an empty line would be apparatus describing absence, on
-            all thirty-nine cards every morning before the first sale. */}
-        {/* ── A delta, not a capsule, and not a badge ──
+              No `overflow` on this span, deliberately: the mark lives outside
+              its box, so clipping here would hide the thing being drawn. */}
+          <span className="tv-card-fig">
+            {traded ? (
+              /* ── The rising stack, beside the figure the board is sorted by ──
 
-            This has been three things. A **bare line** in the same type as the
-            week's figure, which failed for a stated reason: two centred rupee
-            amounts one under the other, differing only in size and ink, are the
-            hardest pair of things to tell apart at six metres. Then a **filled
-            capsule**, which fixed that by form — a pill reads as a tag before it
-            reads as a number — and which then moved to the head band, where it
-            cost no height at all.
+                 It used to sit in a folded band across the card's foot with its
+                 own rupee amount beside it. Both are gone: the amount because
+                 the big figure is now a day of its own, and two days on one
+                 card is two windows a passer-by has to tell apart; the band
+                 because it was a whole row of card height spent on a mark.
 
-            Both of those were true about the element and wrong about the card.
-            In the corner the capsule was **the loudest thing on it**: the only
-            filled object among five pieces of type, so the eye landed on the
-            smallest number on six cards in thirty-nine, ahead of the figure the
-            whole board is sorted by. And a filled capsule in a top corner is a
-            *badge* — a count, an alert, something that wants dealing with — set
-            opposite a rank it has no relationship to.
+                 **What it says changed with the board, and for the better.**
+                 The figure above stopped at ten this morning. `todayRevenue` is
+                 live. So a card wearing these is a venture that is *already
+                 trading again* — the only live thing on a locked board, and the
+                 one channel left that says who is moving right now.
 
-            It is a delta now, and the shape of the fix is the original bare
-            line with the thing that was actually missing put back. The failure
-            was never "two amounts stacked"; it was two amounts stacked that
-            differed in **two** attributes, both of which were busy elsewhere on
-            the card. This differs in four: half the size, the accent rather
-            than the ink, a direction mark in front, and adjacency to the figure
-            it is a fraction of. That is Stocks, Fitness and every other Apple
-            surface carrying a value and its change — big number, small coloured
-            number beneath — and it puts the two numbers where relating them
-            costs no eye travel.
+                 **Two chevrons, from Material's `chevron-triple-up`.** The icon
+                 ships three and the third is gone — asked for directly, three
+                 read as too much on a 10px mark — and it was the right one of
+                 the three to lose: it carried opacity 0.3 and 1.7:1, so it was
+                 the one part of the mark deliberately below the contrast a
+                 graphic needs to be read at all.
 
-            **No `tv-card-today-traded` modifier.** It switched the line to a
-            heavier weight and the accent ink on exactly the condition that
-            decides whether anything renders here at all, so it was a modifier
-            that could never appear on the thing it modified being absent. The
-            element's existence is the state. */}
-        <div className="tv-card-today tv-card-detail">
-          {traded ? (
-            <span className="tv-day-delta">
-              {/* ── The rising stack ──
+                 It is deleted rather than cropped away by the viewBox. A path
+                 the box does not reach still sits here taking a resting opacity
+                 and an animation beat, invisibly, and an element that animates
+                 where nothing can see it is the exact shape of bug this wall
+                 cannot report. Both numbers move together: the box ends at the
+                 second chevron's trailing edge.
 
-                  Three chevrons, brightest at the top and fading down. It was
-                  one filled triangle, which is a *state* — and this element
-                  only renders when a team has traded, so that state never
-                  varied and the mark carried no information. A fading stack
-                  reads as a trail and a trail reads as direction of travel,
-                  which is what the figure beside it actually means.
+                 `6 2 12 13.42` is that box — the icon's own `0 0 24 24`
+                 artboard carries 6 units of air either side and 2 above, which
+                 on a 10.2px mark is 2.5px of nothing pushing the mark off the
+                 figure it is set against. Cropping to the ink is what lets the
+                 width token mean the width of the mark.
 
-                  Shapes rather than glyphs, as the triangle was: `▲` and `»`
-                  are drawn by whichever font in the stack answers for them, at
-                  whatever weight that font chose. Three boxes with one polygon
-                  clipped out of each are the same mark on every machine. */}
-              {/* **Two chevrons, from Material's `chevron-triple-up`.** The
-                  icon ships three and the third is gone — asked for directly,
-                  three read as too much on a 10px mark — and it was the right
-                  one of the three to lose: it carried opacity 0.3 and 1.7:1 on
-                  the band, so it was the one part of the mark deliberately
-                  below the contrast a graphic needs to be read at all.
+                 **Document order is the stack, top to bottom, and the cascade
+                 runs against it.** `nth-child` carries both the resting
+                 opacities and the animation beats, and the two read in opposite
+                 directions — child 1 is the leading chevron at full strength
+                 and fades in *last*, child 2 is the trail and goes first. Swap
+                 these two and the mark at rest is identical while the trail
+                 drains downward instead of climbing, which is the class of
+                 change nothing here reports.
 
-                  It is deleted rather than cropped away by the viewBox. A path
-                  the box does not reach still sits here taking a resting
-                  opacity and an animation beat, invisibly, and an element that
-                  animates where nothing can see it is the exact shape of bug
-                  this wall cannot report. Both numbers move together: the box
-                  ends at the second chevron's trailing edge.
-
-                  `6 2 12 13.42` is that box — the icon's own `0 0 24 24`
-                  artboard carries 6 units of air either side and 2 above,
-                  which on a 10.2px mark is 2.5px of nothing pushing the figure
-                  along. Cropping to the ink is what lets the width token mean
-                  the width of the mark.
-
-                  **Document order is the stack, top to bottom, and the cascade
-                  runs against it.** `nth-child` carries both the resting
-                  opacities and the animation beats, and the two read in
-                  opposite directions — child 1 is the leading chevron at full
-                  strength and fades in *last*, child 2 is the trail and goes
-                  first. Swap these two and the mark at rest is identical while
-                  the trail drains downward instead of climbing, which is the
-                  class of change nothing here reports.
-
-                  The `d`s are the icon's own subpaths, split apart so each can
-                  hold an opacity of its own. */}
+                 The `d`s are the icon's own subpaths, split apart so each can
+                 hold an opacity of its own. */
               <svg
                 className={`tv-day-mark${rise ? ' tv-day-rising' : ''}`}
                 aria-hidden="true"
@@ -672,17 +653,9 @@ export function VentureCard({
                 <path className="tv-day-chev" d="M16.59 9.42L12 4.83L7.41 9.42L6 8l6-6l6 6z" />
                 <path className="tv-day-chev" d="M16.59 15.42L12 10.83l-4.59 4.59L6 14l6-6l6 6z" />
               </svg>
-              {/* **The figure is its own element, and that is not cosmetic.**
-                  As a bare text node it was an *anonymous* flex item, which
-                  `text-overflow` does not apply to — measured with a crore-scale
-                  day, the figure drew straight out past the card's edge with
-                  the ellipsis the CSS asks for never appearing. A real element
-                  can shrink, clip and ellipsise. */}
-              <span className="tv-day-figure">{formatRupees(team.todayRevenue)}</span>
-            </span>
-          ) : (
-            ''
-          )}
+            ) : null}
+            {formatRupees(earned)}
+          </span>
         </div>
       </motion.div>
     </div>

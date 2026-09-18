@@ -21,7 +21,7 @@ import {
   standingsFor,
   websiteUrl,
 } from '@/lib/live'
-import { competingTeams, rankTeams } from '@/lib/ranking'
+import { competingTeams, rankByWeek, rankTeams } from '@/lib/ranking'
 import { COMPETING_SIZE, team, teams } from '@/test/fixtures'
 
 describe('standingsFor', () => {
@@ -34,33 +34,61 @@ describe('standingsFor', () => {
   // The phone must never disagree with the TV in the corridor about who is
   // ahead, so the two wall boards are asserted against the wall's own sorts.
   it('ranks all-time exactly as /podium does', () => {
-    expect(standingsFor('all', 'week', cohort).map((s) => s.team.teamId)).toEqual(
+    expect(standingsFor('all', 'daily', cohort).map((s) => s.team.teamId)).toEqual(
       rankTeams(competingTeams(cohort)).map((t) => t.teamId),
     )
   })
 
-  it('ranks the period exactly as /weekly does, in both modes', () => {
-    for (const mode of ['week', 'challenge'] as const) {
-      expect(standingsFor('period', mode, cohort).map((s) => s.team.teamId)).toEqual(
-        rankForMode(mode, competingTeams(cohort)).map((t) => t.teamId),
-      )
-    }
+  /**
+   * **In challenge mode the phone's middle tab is still `/weekly`'s board**, to
+   * the line: `challenge_revenue` is a published column and both devices read
+   * it, so `rankForMode` is the authority for both.
+   */
+  it('ranks the challenge exactly as /weekly does', () => {
+    expect(standingsFor('period', 'challenge', cohort).map((s) => s.team.teamId)).toEqual(
+      rankForMode('challenge', competingTeams(cohort), null).map((t) => t.teamId),
+    )
+  })
+
+  /**
+   * ── The one place the phone and the wall deliberately measure different
+   * things, stated rather than asserted away ──
+   *
+   * `/weekly`'s daily figure is not a column. It is a finished day, 10:00 to
+   * 10:00, computed from two photographs of `total_revenue` that the **laptop
+   * driving the TV** took and kept in its own `localStorage`. A phone is a
+   * different machine; it has never held those marks and cannot be handed them
+   * without the backend this project does not have.
+   *
+   * So the phone's period tab keeps the week, under its own honest label, and
+   * the live daily board is the tab beside it. This pins that the middle tab is
+   * `week_revenue` — because the direction this could fail in is the phone
+   * quietly falling through to `rankForMode('daily', …, null)`, which ranks
+   * every team at ₹0 and makes the tab an unlabelled duplicate of `All-time`.
+   */
+  it('ranks its period tab on the week, which is no longer what the wall shows', () => {
+    expect(standingsFor('period', 'daily', cohort).map((s) => s.team.teamId)).toEqual(
+      rankByWeek(competingTeams(cohort)).map((t) => t.teamId),
+    )
+    expect(standingsFor('period', 'daily', cohort).map((s) => s.team.teamId)).not.toEqual(
+      standingsFor('all', 'daily', cohort).map((s) => s.team.teamId),
+    )
   })
 
   it('prints the figure it ranks on', () => {
     expect(standingsFor('period', 'challenge', cohort)[0]).toMatchObject({ rank: 1, figure: 500 })
-    expect(standingsFor('period', 'week', cohort)[0]).toMatchObject({ rank: 1, figure: 9_000 })
+    expect(standingsFor('period', 'daily', cohort)[0]).toMatchObject({ rank: 1, figure: 9_000 })
   })
 
   it('ranks today by today, falling back to all-time', () => {
-    const today = standingsFor('today', 'week', cohort)
+    const today = standingsFor('today', 'daily', cohort)
     expect(today.slice(0, 3).map((s) => s.team.teamId)).toEqual(['VBC103', 'VBC102', 'VBC101'])
     expect(today[0]!.figure).toBe(900)
   })
 
   it('leaves the spares off every board', () => {
     for (const key of ['all', 'period', 'today'] as const) {
-      expect(standingsFor(key, 'week', cohort)).toHaveLength(COMPETING_SIZE)
+      expect(standingsFor(key, 'daily', cohort)).toHaveLength(COMPETING_SIZE)
     }
   })
 })
@@ -97,7 +125,7 @@ describe('liveries and emblems', () => {
 describe('raceFor', () => {
   const board = standingsFor(
     'all',
-    'week',
+    'daily',
     teams([
       { teamId: 'VBC101', totalRevenue: 300 },
       { teamId: 'VBC102', totalRevenue: 200 },
@@ -141,7 +169,7 @@ describe('figures', () => {
   })
 
   it('has no share on an empty board', () => {
-    expect(shareOf(standingsFor('today', 'week', teams()), 'VBC101')).toBeNull()
+    expect(shareOf(standingsFor('today', 'daily', teams()), 'VBC101')).toBeNull()
   })
 
   it('does not let a negative challenge figure inflate anyone’s share', () => {

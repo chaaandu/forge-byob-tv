@@ -6,7 +6,14 @@ import { DevFlipTrigger } from '@/components/DevFlipTrigger'
 import { WallHeader } from '@/components/WallHeader'
 import { WeeklyGrid } from '@/components/WeeklyGrid'
 import { WATCH_RANKS_WEEKLY } from '@/config'
-import { boardHeading, boardEarned, boardMode, boardPeriod, rankForMode } from '@/lib/board'
+import {
+  boardHeading,
+  boardEarned,
+  boardMode,
+  boardPeriod,
+  boardScope,
+  rankForMode,
+} from '@/lib/board'
 import { openWeek } from '@/lib/feed'
 import { matchesBoard } from '@/lib/overtake'
 import { competingTeams } from '@/lib/ranking'
@@ -15,12 +22,32 @@ import { useKick } from '@/lib/useKick'
 import { useWallData, type BoardSpec } from '@/lib/useWallData'
 
 /**
- * Slide 2 — the weekly board, forty cards in a 4 × 10 grid.
+ * Slide 2 — the daily board, thirty-nine cards in a 4 × 10 grid.
  *
- * The board is inert unless a rank changed hands. **No `layout` prop anywhere in
- * this tree**: a team's week revenue ticking up by ₹200 without moving changes
- * the sort input, and Motion's layout animation would answer that with a small
- * shift on every poll. Movement on this wall means something happened.
+ * ── It is a finished day, and it does not move ──
+ *
+ * The figure every card prints is what that venture banked between 10:00
+ * yesterday and 10:00 today, computed in `lib/daily.ts` from two photographs of
+ * `total_revenue` this laptop took and kept. So the board is **locked**: it is
+ * decided once a morning and is identical for the next twenty-four hours.
+ *
+ * That has one consequence worth stating at the top of the file rather than
+ * burying: **this slide no longer produces overtakes.** Not because the detector
+ * was weakened — `boardPeriod` is what silences the ten o'clock roll, and it has
+ * to, since every figure on the board changes in that one poll. A locked board
+ * simply has no moment left where a rank can be seen changing hands. The flip
+ * choreography below is still wired and still runs in challenge mode; `/podium`
+ * is what exercises it the rest of the time.
+ *
+ * What does still move is the chevrons, and they are the only live thing on the
+ * slide: a card wears them when that team has sold *today* — `today_revenue`,
+ * current to the last poll — so they say "this venture is already trading again"
+ * against a board whose figures stopped at ten. See `WeeklyGrid`.
+ *
+ * **No `layout` prop anywhere in this tree**: a team's figure ticking up by ₹200
+ * without moving changes the sort input, and Motion's layout animation would
+ * answer that with a small shift on every poll. Movement on this wall means
+ * something happened.
  *
  * ── The freeze rides the flip exactly ──
  *
@@ -38,45 +65,50 @@ export const BOARD: BoardSpec = {
   // over one. The spec is a module constant so the 60-second loop is never torn
   // down (see `useWallData`), which means the mode cannot be captured here — it
   // is a property of each fetch, and `challenge_mode` can change between two.
-  rank: (teams, cohort) => rankForMode(boardMode(cohort), competingTeams(teams)),
-  earned: (team, cohort) => boardEarned(boardMode(cohort), team),
+  rank: (teams, cohort, day) => rankForMode(boardMode(cohort), competingTeams(teams), day),
+  earned: (team, cohort, day) => boardEarned(boardMode(cohort), team, day),
   // Ranks 1–20 are the top two rows of the grid. The old justification was "the
   // whole first column", which the columns took with them — see the spec's
   // WATCH_RANKS_WEEKLY note for why the number survived the reasoning.
   watchTo: WATCH_RANKS_WEEKLY,
   // **Not `openWeek`, which is the default**, and not `currentChallenge`
-  // either. Which of those two this board resets with is itself decided by
-  // `challenge_mode`, and the flip between them is a third reset that neither
-  // one can see — every card's figure changes in the poll the cell is edited.
-  // `boardPeriod` folds all three into one number so `detect` stays silent
-  // through each of them. Its docblock has the arithmetic.
+  // either. This board has three ticks where every figure changes at once —
+  // ten o'clock each morning, a challenge rolling over, and the
+  // `challenge_mode` cell being edited — and no single sheet reader can see all
+  // three. `boardPeriod` folds them into one number space so `detect` stays
+  // silent through each. Its docblock has the arithmetic, and the note about
+  // what the first of the three costs this slide.
   period: boardPeriod,
 }
 
 export default function WeeklyPage() {
-  const { snapshot, queueVersion, freeze, thaw } = useWallData(BOARD)
+  const { snapshot, day, queueVersion, freeze, thaw } = useWallData(BOARD)
   // The dev trigger writes to the same queue the detector writes to; this
   // counter is only the nudge that tells `useKick` to look, exactly as
   // `queueVersion` does. Adding to it keeps one drain and one reader.
   const [devTicks, setDevTicks] = useState(0)
 
   const week = snapshot === null ? null : openWeek(snapshot.cohort)
-  // **Week mode until the sheet says otherwise**, including before the first
-  // fetch lands. `boardMode`'s docblock has the argument: the safe guess is the
-  // one whose column always holds real figures.
-  const mode = snapshot === null ? 'week' : boardMode(snapshot.cohort)
+  // **Daily until the sheet says otherwise**, including before the first fetch
+  // lands. `boardMode`'s docblock has the argument: guessing wrong towards
+  // daily puts a true, ranked, finished day under a heading that says so, and
+  // self-corrects; guessing wrong towards challenge puts ₹0 on thirty-nine
+  // cards under the name of a contest that is not running.
+  const mode = snapshot === null ? 'daily' : boardMode(snapshot.cohort)
   // In production this hook returns its argument — see lib/devOvertake.ts. In
   // development it is what makes a triggered climb change the standings, so a
   // flip settles onto a board that has actually re-sorted rather than onto the
   // one it started from.
-  const { teams, commit: devCommit, reset: devReset } = useDevOvertakes(
-    mode,
-    competingTeams(snapshot?.teams ?? []),
-  )
+  const {
+    teams,
+    day: devDay,
+    commit: devCommit,
+    reset: devReset,
+  } = useDevOvertakes(mode, day, competingTeams(snapshot?.teams ?? []))
   // The order the grid is about to render — `WeeklyGrid` sorts the same list the
   // same way. What the gate compares an event against is the board a passer-by
   // can see, so it has to be this list and not the freshest fetch.
-  const ranked = rankForMode(mode, teams)
+  const ranked = rankForMode(mode, teams, devDay)
   const { playing: kick, waiting, settled } = useKick(
     BOARD.name,
     queueVersion + devTicks,
@@ -168,7 +200,22 @@ export default function WeeklyPage() {
 
           `openWeek` is still read: it is what the dev trigger stamps into an
           event id, whichever contest is on. */}
-      <WallHeader snapshot={snapshot} label={boardHeading(mode)} mode={mode} />
+      {/* ── The board says which day it is locked on ──
+
+          `scope` has sat unused since `/podium`'s `All time` was removed, and
+          this is the first board that genuinely needs it: every previous one was
+          live, so its window was "now" and a caption could only add
+          provenance. This one stopped at ten this morning, and at four in the
+          afternoon nothing else on the frame would say so. It is also the only
+          visible sign of a window having quietly widened to 25 or 48 hours
+          after a laptop slept through the roll. `boardScope` has the full
+          argument; challenge mode still passes nothing. */}
+      <WallHeader
+        snapshot={snapshot}
+        label={boardHeading(mode)}
+        scope={boardScope(mode, day)}
+        mode={mode}
+      />
 
       <div className="tv-rule" style={{ marginTop: 'var(--s-mast-rule)' }} />
 
@@ -182,6 +229,7 @@ export default function WeeklyPage() {
         <WeeklyGrid
           teams={teams}
           mode={mode}
+          day={devDay}
           kick={kick}
           // **`settled` and nothing else.** This used to be an inline arrow
           // that also ran `devCommit`, and a new function identity every render
@@ -208,6 +256,7 @@ export default function WeeklyPage() {
       <DevFlipTrigger
         teams={teams}
         mode={mode}
+        day={devDay}
         week={week}
         onQueued={() => setDevTicks((n) => n + 1)}
         onReset={() => {
