@@ -600,10 +600,10 @@
      here — a rupee amount sitting on the card's own edge reads as a number that
      has been cut off. **The arithmetic is what makes this a move rather than a
      change:** `--h-card-today` was 28px, 18 of band and 10 of borrowed padding,
-     and both terms came out of `--d-card-logo`'s subtraction. Ten returns here
-     and the mark keeps the other **18**. That is the whole of what the marks
-     gained, and it is why the ramp still descends — see the measurements on
-     `--d-card-logo`. */
+     and both terms came out of `--d-card-logo`'s subtraction. Ten returns here,
+     and the other **18** went to the mark and has since been taken back off it
+     — see `--h-card-foot`, which holds it as air under the figure. So this
+     padding is the only part of the band's height that was actually spent. */
   --s-card-pad-y: 0.5208vw; /* 10px */
 
   /* How far the card's contents sit above where the padding alone would put
@@ -966,6 +966,32 @@
      there, because their spare line sits in the same gap. */
   --h-card-name: 2.8385vw; /* 54.5px */
   --h-card-fig: 1.6406vw; /* 31.5px */
+  /* ── The 18px the day band left behind, held as air rather than as mark ──
+
+     When `.tv-card-today` was deleted its 28px split 10 back to
+     `--s-card-pad-y` and 18 into `--d-card-logo`'s diameter. That second half
+     is reverted here, and the reason is proportion rather than the band: the
+     row is a fixed height, so the 18 grew the mark while the name, the figure,
+     the rank and the card all stayed exactly as they were. One element at 50%
+     of a card whose other elements did not move reads as an enlarged mark, not
+     as a scaled card. Everything on this wall is in `vw` and scales with the
+     panel together; this was the one thing that had moved on its own.
+
+     It is subtracted from the mark and given to nothing, so the card keeps its
+     height and its place in the row and the figure gains 18px of clearance
+     above the card's foot. **That empty band is the stated cost** — it is the
+     same hole under every `₹0` that moving the day capsule into the rank's
+     band set out to close, and it is back, uniformly, on all thirty-nine cards
+     rather than on the thirty-three that had not traded. What makes it
+     tolerable is that it is now the *same* band on every card in every row: a
+     reservation that is always empty is a margin, where one that is empty on
+     some cards and full on others is a hole.
+
+     Marks return to ~87.3px from 105.3px at 1920, which is where they sat
+     before `e0fd733`. Stated in `vw` so it scales with the board like every
+     other token here; a literal 18px would be the one number on the card that
+     did not follow the panel. */
+  --h-card-foot: 0.9375vw; /* 18px */
   /* ── The figure's lift ──
 
      4px up, and it changes no box — `position: relative` shifts paint, not
@@ -991,7 +1017,8 @@
      There is nothing to hold open. The board's figure *is* a day now, so a
      second amount under it was two windows on one card; the mark that survives
      is positioned off the figure and reserves nothing. The 10px is back on
-     `--s-card-pad-y` and the marks have the 18. */
+     `--s-card-pad-y`; the marks had the 18 and no longer do — `--h-card-foot`
+     keeps it as clearance under the figure. */
   /* `--s-day-tag-x` is deleted with the band it padded. It kept a crore-scale
      day off the band's rounded corners; there is no band and no second figure,
      so there are no corners to keep it off. */
@@ -2446,7 +2473,7 @@
         calc(
           (
               var(--h-row) - var(--s-card-pad-y) - var(--h-card-name) -
-                var(--h-card-fig)
+                var(--h-card-fig) - var(--h-card-foot)
             ) * var(--k-mark, 1)
         ),
         calc(var(--w-card) - 2 * var(--s-card-inset))
@@ -3184,11 +3211,13 @@
      something the band never could: the figure above stopped at ten this
      morning, so a card wearing chevrons is a venture already trading again.
 
-     The 28px of `--h-card-today` went to the marks. It is out of
-     `--d-card-logo`'s subtraction, which is the only place that height was
-     spent, and the ramp was re-measured at 1920 afterwards — see the note on
-     that token. The card's bottom padding is unchanged and is what the figure
-     now sits above; it used to be the band that ended the card.
+     The 28px of `--h-card-today` went to the marks, and 18 of it came back:
+     the mark grew inside a row that did not, so it went from 40% of the card
+     to 50% while nothing else on the card moved. `--h-card-foot` subtracts
+     those 18 again and gives them to nothing, so the figure sits 28px above
+     the card's foot rather than 10. The card's bottom padding is unchanged and
+     is what the figure now sits above; it used to be the band that ended the
+     card.
 
   ── The figure's anchor, and why the mark hangs off it ──
 
