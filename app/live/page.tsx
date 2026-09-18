@@ -8,7 +8,6 @@ import { BoardTabs, LiveHeader, SearchKey, SearchSheet } from '@/components/live
 import { CountUp } from '@/components/live/CountUp'
 import { TeamSheet } from '@/components/live/TeamSheet'
 import { boardMode } from '@/lib/board'
-import { openWeek } from '@/lib/feed'
 import { standingsFor, type BoardKey, type Standing } from '@/lib/live'
 import { useLiveData } from '@/lib/useLiveData'
 
@@ -30,7 +29,13 @@ import { useLiveData } from '@/lib/useLiveData'
 const ARRIVAL_MS = 1_400
 
 export default function LivePage() {
-  const { snapshot, fetchedAt } = useLiveData()
+  // `fetchedAt` is deliberately not read. The footer that printed it went on
+  // 18 September 2026, which puts this page where the wall already is: **it
+  // shows no staleness and no error state.** A revoked sheet or a stalled
+  // consolidator keeps the last good figures and renders a perfectly healthy
+  // board. `AGENTS.md` carries the full cost of that on the wall; the hook
+  // still tracks the time, so a line or a chip is one element to put back.
+  const { snapshot } = useLiveData()
   const [boardKey, setBoardKey] = useState<BoardKey>('all')
   const [openId, setOpenId] = useState<string | null>(null)
   const [searching, setSearching] = useState(false)
@@ -103,30 +108,10 @@ export default function LivePage() {
     buzz()
   }, [])
 
-  const week = snapshot === null ? null : openWeek(snapshot.cohort)
-  const subtitle =
-    boardKey === 'all' ? (
-      <>
-        Proof-backed revenue · <b>all-time</b>
-      </>
-    ) : boardKey === 'today' ? (
-      <>
-        Revenue logged <b>today</b>
-      </>
-    ) : mode === 'challenge' ? (
-      <>
-        Revenue in the <b>10-Day Challenge</b>
-      </>
-    ) : (
-      <>
-        Revenue in <b>{week === null ? 'this week' : `Week ${week}`}</b>
-      </>
-    )
-
   return (
     <MotionConfig reducedMotion="user">
       <div className="lv-app" data-locked={openId !== null || searching ? '' : undefined}>
-        <LiveHeader subtitle={subtitle} />
+        <LiveHeader />
         <BoardTabs boardKey={boardKey} mode={mode} onChange={changeBoard} />
 
         {hasData ? (
@@ -157,23 +142,6 @@ export default function LivePage() {
 
             <Standings rest={rest} boardKey={boardKey} arriving={arriving} onOpen={open} />
 
-            {/* The only provenance on the page, and it is a line rather than a
-                status light. The wall carries none at all — `AGENTS.md` has
-                what that costs there; a phone is held by somebody who can act
-                on a stale figure, so it says so. */}
-            <footer className="lv-foot">
-              Logged, proof-backed revenue from the BYOB master
-              {fetchedAt === null ? null : (
-                <>
-                  {' · checked '}
-                  {new Date(fetchedAt).toLocaleTimeString('en-IN', {
-                    hour: 'numeric',
-                    minute: '2-digit',
-                  })}
-                </>
-              )}
-              {snapshot.cohort.as_of ? <> · sheet as of {snapshot.cohort.as_of}</> : null}
-            </footer>
           </main>
         ) : null}
 

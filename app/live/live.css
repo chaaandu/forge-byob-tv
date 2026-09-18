@@ -1053,6 +1053,60 @@ body:has(.lv-app[data-locked]) {
     -webkit-box-orient: vertical;
   }
 
+  /* ── Links ──────────────────────────────────────────────── */
+
+  .lv-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .lv-link {
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border: 1px solid var(--lv-hairline);
+    border-radius: 16px;
+    background: var(--lv-panel);
+    color: var(--lv-ink);
+    text-decoration: none;
+  }
+
+  .lv-link-icon {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    /* The rake the rows use, on the one element small enough to carry it
+       without bending the type inside. */
+    border-radius: 13px;
+    background: linear-gradient(140deg, var(--livery-a), var(--livery-b));
+    color: var(--livery-ink);
+  }
+
+  .lv-link-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .lv-link-handle {
+    overflow: hidden;
+    font-size: 14.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  .lv-link-go {
+    font-size: 17px;
+    font-weight: 900;
+    color: var(--lv-accent);
+  }
+
   .lv-sheet-nav {
     display: grid;
     grid-template-columns: 1fr 1fr;

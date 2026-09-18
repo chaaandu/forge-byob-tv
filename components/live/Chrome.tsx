@@ -12,15 +12,15 @@ import type { BoardMode } from '@/lib/types'
  * The page's own furniture: masthead, board tabs, the search key and the
  * search sheet.
  *
- * **There is no live chip and no follow button.** Both were here and both
- * were removed by decision. The chip was a status light on a page that polls
- * itself every sixty seconds; what it actually said — how fresh the figures
- * are — is one line in the footer now, where it is provenance rather than
- * chrome. Following a team was a star, a pinned bar and a `localStorage` key
- * for something search already does in two taps.
+ * **No live chip, no follow button, no caption under the title.** All three
+ * were here and all three were removed by decision on 18 September 2026. The
+ * chip was a status light on a page that polls itself every sixty seconds;
+ * following a team was a star, a pinned bar and a `localStorage` key for
+ * something search does in two taps; and the caption read "Proof-backed
+ * revenue · all-time" directly under a tab bar already reading *All-time*.
+ * What the tabs say, the header does not repeat.
  */
-
-export function LiveHeader({ subtitle }: { subtitle: React.ReactNode }) {
+export function LiveHeader() {
   return (
     <header className="lv-hero">
       <div className="lv-topline" aria-hidden="true">
@@ -39,7 +39,6 @@ export function LiveHeader({ subtitle }: { subtitle: React.ReactNode }) {
         <span className="lv-title-line">Team</span>
         <span className="lv-title-line">Standings</span>
       </motion.h1>
-      <p className="lv-subtitle">{subtitle}</p>
     </header>
   )
 }

@@ -113,6 +113,8 @@ function toTeam(row: Record<string, string>): Team | null {
     challengeRevenue: toNumber(row.challenge_revenue ?? '') ?? 0,
     ...prevWeekRankOf(row.prev_week_rank),
     ...productOf(row.product),
+    ...textOf('instagram', row.instagram),
+    ...textOf('website', row.website),
   }
 }
 
@@ -150,6 +152,21 @@ function productOf(raw: string | undefined): { product?: string } {
   const product = (raw ?? '').trim()
   if (product === '' || product.toLowerCase().startsWith('type your')) return {}
   return { product }
+}
+
+/**
+ * An optional free-text column, absent rather than empty.
+ *
+ * The same shape as `productOf` for the same reason: `/live` asks
+ * `team.instagram === undefined` and renders nothing, rather than rendering an
+ * empty link. Validation is deliberately **not** here — `lib/feed.ts` decides
+ * whether the sheet's shape is trustworthy, and whether a string is a safe URL
+ * is a different question, answered in `lib/live.ts` where it is used.
+ */
+function textOf<K extends string>(key: K, raw: string | undefined): Partial<Record<K, string>> {
+  const value = (raw ?? '').trim()
+  if (value === '' || value.toLowerCase().startsWith('type your')) return {}
+  return { [key]: value } as Record<K, string>
 }
 
 function rows(csv: string): Record<string, string>[] {

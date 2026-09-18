@@ -90,6 +90,22 @@ export type Team = {
    * sentence, and the wall is figures at six metres.
    */
   product?: string
+  /**
+   * The venture's own Instagram handle and website, published as `instagram`
+   * and `website` columns in `TV_Feed`.
+   *
+   * **Optional, like `product`**, and stored as the sheet typed them: a
+   * handle, an `@handle`, a full profile URL, a bare domain. Turning one into
+   * something a browser may open is `instagramUrl` / `websiteUrl` in
+   * `lib/live.ts`, which is also where anything that is not plainly `http(s)`
+   * is refused — a cell in a spreadsheet forty people can edit is untrusted
+   * input, and `javascript:` in an `href` is the one way this page could do
+   * something worse than look wrong.
+   *
+   * Read by `/live` only.
+   */
+  instagram?: string
+  website?: string
 }
 
 /**

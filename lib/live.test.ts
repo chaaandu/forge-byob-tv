@@ -8,11 +8,14 @@ import {
   avgTicket,
   climbOf,
   emblemFor,
+  instagramUrl,
+  linkLabel,
   liveryFor,
   matchesQuery,
   raceFor,
   shareOf,
   standingsFor,
+  websiteUrl,
 } from '@/lib/live'
 import { competingTeams, rankTeams } from '@/lib/ranking'
 import { COMPETING_SIZE, team, teams } from '@/test/fixtures'
@@ -148,6 +151,60 @@ describe('figures', () => {
     )
     expect(shareOf(board, 'VBC101')).toBe(1)
     expect(shareOf(board, 'VBC102')).toBe(0)
+  })
+})
+
+describe('links', () => {
+  /**
+   * **These cells are untrusted input**: `TV_Feed` is published from a
+   * workbook forty teams type into, so a cell reading `javascript:…` would
+   * become script on a page other people open. Only `https` is ever produced.
+   */
+  it('refuses any scheme that is not http(s)', () => {
+    for (const hostile of [
+      'javascript:alert(1)',
+      'data:text/html,<script>alert(1)</script>',
+      'file:///etc/passwd',
+      'JavaScript:alert(1)',
+    ]) {
+      expect(websiteUrl(hostile), hostile).toBeNull()
+      expect(instagramUrl(hostile), hostile).toBeNull()
+    }
+  })
+
+  it('accepts a handle however the sheet writes it', () => {
+    for (const written of [
+      'aks.perfumes',
+      '@aks.perfumes',
+      'instagram.com/aks.perfumes',
+      'https://www.instagram.com/aks.perfumes/',
+      'https://instagram.com/aks.perfumes?igsh=abc',
+    ]) {
+      expect(instagramUrl(written), written).toBe('https://instagram.com/aks.perfumes')
+    }
+  })
+
+  it('refuses a handle that is not one, and an empty cell', () => {
+    expect(instagramUrl('we are on insta! dm us')).toBeNull()
+    expect(instagramUrl('   ')).toBeNull()
+    expect(instagramUrl(undefined)).toBeNull()
+  })
+
+  it('gives a bare domain a scheme and keeps a real URL', () => {
+    expect(websiteUrl('rooh.in')).toBe('https://rooh.in/')
+    expect(websiteUrl('http://rooh.in/shop')).toBe('https://rooh.in/shop')
+    expect(websiteUrl('https://rooh.in/shop?ref=tv')).toBe('https://rooh.in/shop?ref=tv')
+  })
+
+  it('refuses something that is not a domain at all', () => {
+    for (const written of ['coming soon', 'localhost:3000', 'ask us', '']) {
+      expect(websiteUrl(written), written).toBeNull()
+    }
+  })
+
+  it('labels a link as a lockup rather than a URL', () => {
+    expect(linkLabel('https://instagram.com/aks.perfumes')).toBe('instagram.com/aks.perfumes')
+    expect(linkLabel('https://www.rooh.in/')).toBe('rooh.in')
   })
 })
 

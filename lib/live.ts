@@ -192,6 +192,65 @@ export function sellsCategory(product: string): Sells {
   return 'other'
 }
 
+/**
+ * A venture's own links, turned into something a browser may open — or
+ * `null`.
+ *
+ * ── These cells are untrusted input ──
+ *
+ * `TV_Feed` is published from a workbook forty teams type into. Putting a cell
+ * straight into an `href` means a cell reading `javascript:…` becomes script
+ * on a page other people open, and `data:` means a page that looks like this
+ * one and is not. So the scheme is decided **here** and only `https` is ever
+ * produced: a handle becomes a profile URL, a bare domain gets `https://`, and
+ * anything already carrying a scheme must be `http(s)` or it is refused.
+ *
+ * The parse layer deliberately does not do this — `lib/feed.ts` judges whether
+ * the sheet's *shape* is trustworthy; whether a string is a safe URL is a
+ * different question and belongs where it is used.
+ */
+const HANDLE = /^[A-Za-z0-9._]{1,30}$/
+
+export function instagramUrl(raw: string | undefined): string | null {
+  const value = (raw ?? '').trim()
+  if (value === '') return null
+
+  // A full profile URL, in any of the forms people paste: with or without a
+  // scheme, with or without `www.`, with or without a trailing slash or query.
+  const asUrl = value.match(/^(?:https?:\/\/)?(?:www\.)?instagram\.com\/([^/?#\s]+)/i)
+  const handle = (asUrl?.[1] ?? value).replace(/^@/, '')
+  return HANDLE.test(handle) ? `https://instagram.com/${handle}` : null
+}
+
+export function websiteUrl(raw: string | undefined): string | null {
+  const value = (raw ?? '').trim()
+  if (value === '') return null
+  // A scheme that is not http(s) — `javascript:`, `data:`, `file:` — is
+  // refused outright rather than repaired.
+  if (/^[a-z][a-z0-9+.-]*:/i.test(value) && !/^https?:\/\//i.test(value)) return null
+
+  const withScheme = /^https?:\/\//i.test(value) ? value : `https://${value}`
+  let url: URL
+  try {
+    url = new URL(withScheme)
+  } catch {
+    return null
+  }
+  // A hostname with a dot and no spaces. `localhost`, an IP, or a stray
+  // sentence in the cell are all not a venture's website.
+  if (!/^[a-z0-9.-]+\.[a-z]{2,}$/i.test(url.hostname)) return null
+  url.protocol = 'https:'
+  return url.toString()
+}
+
+/** What a link is called on screen. `instagram.com/aks.perfumes` reads as a lockup; a full URL does not. */
+export function linkLabel(url: string): string {
+  const { hostname, pathname } = new URL(url)
+  const host = hostname.replace(/^www\./, '')
+  const path = pathname.replace(/\/$/, '')
+  return `${host}${path}`
+}
+
 /** Case- and accent-insensitive search over venture name and team id. */
 export function matchesQuery(team: Team, query: string): boolean {
   const fold = (text: string) =>

@@ -529,13 +529,36 @@ is the one page here that a person holds. Added 17 September 2026.
   `components/live/SellsIcon.tsx` reads a *category* off the same words, and
   an unrecognised product draws a plain tag rather than a wrong picture.
   `lib/live.test.ts` fails if `sampleProducts` ever comes back.
-- **No team id on a row, no "Pos", no live chip, no follow.** All four removed
-  by decision on 18 September 2026. The id is a spreadsheet code and the row's
-  second line carries today's takings or the product instead; `Pos` reads as
-  point-of-sale on a board about takings, so the column says `Rank`; the live
-  chip was a status light, and what it actually said is one line in the
-  footer; following a team was a star, a pinned bar and a `localStorage` key
-  for something search does in two taps.
+- **A venture's own links, when the sheet has them.** `instagram` and
+  `website` are optional `TV_Feed` columns, read like `product`, and shown at
+  the foot of the team sheet. **They are untrusted input**: forty teams type
+  into that workbook, so `instagramUrl` / `websiteUrl` in `lib/live.ts` decide
+  the scheme rather than trusting the cell — a handle in any of the five
+  shapes people write becomes one profile URL, a bare domain gets `https://`,
+  and anything carrying another scheme is refused. `javascript:` in an `href`
+  is the one way this page could do something worse than look wrong;
+  `lib/live.test.ts` pins that it cannot. The parse layer carries the cells
+  verbatim on purpose — `lib/feed.ts` judges the sheet's *shape*, and whether
+  a string is a safe URL is a different question answered where it is used.
+- **No team id on a row, no "Pos", no live chip, no follow, no captions, no
+  footer.** All removed by decision, 17–18 September 2026. The id is a
+  spreadsheet code, and the row's second line carries today's takings or the
+  product instead; `Pos` reads as point-of-sale on a board about takings, so
+  the column says `Rank`; following a team was a star, a pinned bar and a
+  `localStorage` key for something search does in two taps; and the caption
+  read "Proof-backed revenue · all-time" directly beneath a tab already
+  reading *All-time*.
+
+  **What the last two cost is the same thing the wall gave up, and it is now
+  given up here too.** The live chip and the footer between them were the only
+  elements saying how fresh the figures were. `/live` shows **no staleness and
+  no error state**: a revoked sheet, a stalled consolidator or a phone with no
+  signal keeps the last good data and renders a perfectly healthy board. The
+  argument for removing them is the one that carried the wall's `as_of` stamp
+  — this is a board of figures, not provenance apparatus — and the argument
+  against is stronger here than there, because a person holding a phone can
+  act on a stale number where a corridor cannot. `useLiveData` still tracks
+  `fetchedAt`; putting a line back is one element.
 - **`allowedDevOrigins` in `next.config.ts`** lets a phone on the same Wi-Fi
   load `next dev` at `http://<laptop-ip>:3000/live`. Without it Next 16 403s
   every script and the page paints a header and nothing else.

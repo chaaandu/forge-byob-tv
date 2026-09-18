@@ -196,6 +196,36 @@ describe('the product column', () => {
   })
 })
 
+describe('the link columns', () => {
+  const head = 'team_id,venture_name,total_revenue,week_revenue,today_revenue,total_units'
+
+  it('carries instagram and website when the sheet has them, and nothing when it does not', () => {
+    const rows = parseTeams(
+      [
+        `${head},instagram,website`,
+        'VBC101,Dosa Crisps,1,1,1,1,@dosacrisps,dosacrisps.in',
+        'VBC102,ROOH,1,1,1,1,,',
+      ].join('\n'),
+    )
+    expect(rows[0].instagram).toBe('@dosacrisps')
+    expect(rows[0].website).toBe('dosacrisps.in')
+    expect(rows[1].instagram).toBeUndefined()
+    expect(rows[1].website).toBeUndefined()
+  })
+
+  /**
+   * The cells are carried **verbatim** — whether a string is a safe URL is
+   * decided in `lib/live.ts`, at the point of use, not here. This file's job
+   * is whether the sheet's shape can be trusted.
+   */
+  it('does not judge what a link says', () => {
+    const rows = parseTeams(
+      [`${head},website`, 'VBC101,Dosa Crisps,1,1,1,1,javascript:alert(1)'].join('\n'),
+    )
+    expect(rows[0].website).toBe('javascript:alert(1)')
+  })
+})
+
 describe('parseCohort', () => {
   it('reads every key', () => {
     const parsed = parseCohort(cohortCsv(cohort({ current_open_week: '4' })))

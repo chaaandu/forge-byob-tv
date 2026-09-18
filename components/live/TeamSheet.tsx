@@ -14,14 +14,17 @@ import {
   boardLabel,
   climbOf,
   figureLabel,
+  instagramUrl,
+  linkLabel,
   liveryFor,
   raceFor,
   shareOf,
+  websiteUrl,
   type BoardKey,
   type Standing,
 } from '@/lib/live'
 import { nameOf } from '@/lib/team'
-import type { BoardMode } from '@/lib/types'
+import type { BoardMode, Team } from '@/lib/types'
 
 /**
  * One team, opened from any row: where it stands on every board, the gap to
@@ -209,6 +212,8 @@ export function TeamSheet({
 
               <Sells product={race.self.team.product} />
 
+              <Links team={race.self.team} />
+
               <nav className="lv-sheet-nav">
                 <button type="button" disabled={race.ahead === undefined} onClick={() => go(-1)}>
                   <span aria-hidden="true">‹</span>
@@ -260,8 +265,13 @@ function LeaderBar({ race }: { race: NonNullable<ReturnType<typeof raceFor>> }) 
         animate={{ scaleX: share }}
         transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
       />
+      {/* Spelled out. "88% of the leader" was on screen for a day and had to
+          be asked about — the figure is this team's revenue as a share of the
+          top team's, and the sentence now says so. */}
       <span className="lv-leaderbar-caption">
-        {race.self.rank === 1 ? 'Leading the board' : `${Math.round(share * 100)}% of the leader`}
+        {race.self.rank === 1
+          ? 'Top of this board'
+          : `${Math.round(share * 100)}% of ${nameOf(race.leader.team)}, who leads`}
       </span>
     </div>
   )
@@ -331,5 +341,69 @@ function Sells({ product }: { product?: string }) {
         <span className="lv-sells-line">{product}</span>
       </span>
     </section>
+  )
+}
+
+/**
+ * The venture's own links, at the foot of the sheet.
+ *
+ * **Absent until the sheet publishes them.** `instagram` and `website` are
+ * optional `TV_Feed` columns, like `product`; a team with neither gets no
+ * block at all rather than a dead button. Anything that is not plainly
+ * `https` is refused by `instagramUrl` / `websiteUrl` — these cells are typed
+ * by forty teams into a workbook, which makes them untrusted input.
+ *
+ * `rel="noreferrer"` with `target="_blank"`: without `noopener` (which
+ * `noreferrer` implies) the opened page gets a handle on this one.
+ */
+function Links({ team }: { team: Team }) {
+  const links = [
+    { kind: 'instagram' as const, href: instagramUrl(team.instagram) },
+    { kind: 'website' as const, href: websiteUrl(team.website) },
+  ].filter((link): link is { kind: 'instagram' | 'website'; href: string } => link.href !== null)
+
+  if (links.length === 0) return null
+
+  return (
+    <section className="lv-links">
+      {links.map(({ kind, href }) => (
+        <a
+          key={kind}
+          className="lv-link"
+          href={href}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <span className="lv-link-icon">{kind === 'instagram' ? <InstagramIcon /> : <GlobeIcon />}</span>
+          <span className="lv-link-text">
+            <span className="lv-label">{kind === 'instagram' ? 'Instagram' : 'Website'}</span>
+            <span className="lv-link-handle">{linkLabel(href)}</span>
+          </span>
+          <span className="lv-link-go" aria-hidden="true">
+            ↗
+          </span>
+        </a>
+      ))}
+    </section>
+  )
+}
+
+function InstagramIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5.4" />
+      <circle cx="12" cy="12" r="4.2" />
+      <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+function GlobeIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3.5 9.5h17M3.5 14.5h17" />
+      <path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z" />
+    </svg>
   )
 }
