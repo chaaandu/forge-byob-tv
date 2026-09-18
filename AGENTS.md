@@ -547,6 +547,14 @@ is the one page here that a person holds. Added 17 September 2026.
   `lib/live.test.ts` pins that it cannot. The parse layer carries the cells
   verbatim on purpose — `lib/feed.ts` judges the sheet's *shape*, and whether
   a string is a safe URL is a different question answered where it is used.
+- **Moving between teams is a swipe or two chevrons.** The sideways swipe is
+  on the whole sheet rather than its header, and takes twice the horizontal
+  distance as vertical plus 64px, because a thumb flicking down a list travels
+  sideways too. **The OS owns the screen edges** — iOS and Android both read an
+  edge-swipe as "go back" — so the gesture can never be the only way: two
+  floating chevrons sit over the body, always reachable, carrying the next
+  team's name for a screen reader and nothing on screen. They replaced two
+  full-width buttons that sat below the fold on any team with a line-up.
 - **The line-up: the students behind a venture.** `members` is one more
   optional `TV_Feed` column (`Team Links` col D), and `membersOf` in
   `lib/live.ts` splits it. **Every separator it handles was measured in the

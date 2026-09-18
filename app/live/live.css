@@ -819,9 +819,15 @@ body:has(.lv-app[data-locked]) {
     flex: 1;
     flex-direction: column;
     gap: 12px;
-    padding: 16px 16px calc(28px + env(safe-area-inset-bottom));
+    /* Clear of the chevrons, which float over this rather than scrolling
+       with it. */
+    padding: 16px 16px calc(80px + env(safe-area-inset-bottom));
     overflow-y: auto;
     overscroll-behavior: contain;
+    /* The browser keeps the vertical scroll; horizontal movement is left for
+       Motion's pan, which is what moves between teams. Without this the
+       sideways swipe is swallowed before it is recognised. */
+    touch-action: pan-y;
   }
 
   .lv-placements {
@@ -1189,51 +1195,41 @@ body:has(.lv-app[data-locked]) {
     color: var(--lv-accent);
   }
 
+  /* Floating over the body, pinned to the sheet's own bottom edge. */
   .lv-sheet-nav {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-    margin-top: 6px;
-  }
-
-  .lv-sheet-nav button {
+    position: absolute;
+    z-index: 3;
+    left: 0;
+    right: 0;
+    bottom: calc(14px + env(safe-area-inset-bottom));
     display: flex;
-    align-items: center;
-    gap: 8px;
-    min-width: 0;
+    justify-content: space-between;
+    padding: 0 16px;
+    pointer-events: none;
+  }
+
+  .lv-nav-key {
+    display: grid;
+    place-items: center;
+    width: 52px;
     height: 52px;
-    padding: 0 12px;
-    border: 1px solid var(--lv-hairline);
-    border-radius: 14px;
-    background: var(--lv-panel);
-    font-size: 13px;
-    font-weight: 800;
+    padding-bottom: 4px;
+    border: 1px solid var(--lv-hairline-strong);
+    border-radius: 50%;
+    background: var(--lv-glass);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    box-shadow: 0 12px 26px var(--lv-shade);
+    color: var(--lv-ink);
+    font-size: 30px;
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: auto;
   }
 
-  .lv-sheet-nav button:last-child {
-    justify-content: flex-end;
-    text-align: right;
-  }
-
-  .lv-sheet-nav button:disabled {
-    opacity: 0.35;
-  }
-
-  .lv-sheet-nav button > span:not([aria-hidden]) {
-    overflow: hidden;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-
-  .lv-sheet-nav button > span[aria-hidden] {
-    font-size: 22px;
-    color: var(--lv-accent);
-  }
-
-  .lv-sheet-nav small {
-    font-size: 11px;
-    font-weight: 900;
-    color: var(--lv-accent);
+  .lv-nav-key:disabled {
+    opacity: 0.28;
+    pointer-events: none;
   }
 
   .lv-logo {

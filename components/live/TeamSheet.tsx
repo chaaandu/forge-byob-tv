@@ -80,9 +80,21 @@ export function TeamSheet({
     if (info.offset.y > 110 || info.velocity.y > 600) onClose()
   }
 
+  /**
+   * A sideways swipe moves to the next team; a vertical one is a scroll and
+   * must not.
+   *
+   * **Twice the horizontal distance, and 64px of it.** A thumb flicking down a
+   * list travels a little sideways too, and a 1:1 comparison turned some of
+   * those into a team change. The OS owns the screen *edges* — both iOS and
+   * Android read an edge-swipe as "go back" — which is the other reason the
+   * chevrons exist: the gesture is a shortcut for people who find it, and the
+   * buttons are what everyone else uses.
+   */
   const onPanEnd = (_: unknown, info: PanInfo) => {
-    if (Math.abs(info.offset.x) < 70 || Math.abs(info.offset.x) < Math.abs(info.offset.y)) return
-    go(info.offset.x < 0 ? 1 : -1)
+    const { x, y } = info.offset
+    if (Math.abs(x) < 64 || Math.abs(x) < Math.abs(y) * 2) return
+    go(x < 0 ? 1 : -1)
   }
 
   return (
@@ -113,11 +125,16 @@ export function TeamSheet({
             dragConstraints={{ top: 0, bottom: 0 }}
             dragElastic={{ top: 0, bottom: 0.7 }}
             onDragEnd={onDragEnd}
+            // **The sideways swipe is on the whole sheet, not just the hero.**
+            // It was on the header alone, which is the one part of a phone
+            // screen a thumb does not rest on. `.lv-sheet-body` carries
+            // `touch-action: pan-y`, so the browser still scrolls it
+            // vertically and horizontal movement reaches this instead.
+            onPanEnd={onPanEnd}
           >
             <motion.header
               className="lv-sheet-hero"
               onPointerDown={(event) => drag.start(event)}
-              onPanEnd={onPanEnd}
             >
               <span className="lv-grabber" aria-hidden="true" />
               <div className="lv-sheet-actions">
@@ -216,30 +233,43 @@ export function TeamSheet({
               <Lineup team={race.self.team} />
 
               <Links team={race.self.team} />
-
-              <nav className="lv-sheet-nav">
-                <button type="button" disabled={race.ahead === undefined} onClick={() => go(-1)}>
-                  <span aria-hidden="true">‹</span>
-                  {race.ahead ? (
-                    <span>
-                      <small>P{race.ahead.rank}</small> {nameOf(race.ahead.team)}
-                    </span>
-                  ) : (
-                    <span>Leader</span>
-                  )}
-                </button>
-                <button type="button" disabled={race.behind === undefined} onClick={() => go(1)}>
-                  {race.behind ? (
-                    <span>
-                      {nameOf(race.behind.team)} <small>P{race.behind.rank}</small>
-                    </span>
-                  ) : (
-                    <span>Last</span>
-                  )}
-                  <span aria-hidden="true">›</span>
-                </button>
-              </nav>
             </div>
+
+            {/* ── Two keys, and no names on them ──
+             *
+             * This was a pair of full-width buttons carrying the next team's
+             * rank and name. They read as more content at the foot of a sheet
+             * that already has plenty, and on any team with a line-up they sat
+             * below the fold — a control you have to scroll to is not a
+             * control. Chevrons say the same thing in the space of a thumb,
+             * stay put while the body scrolls, and keep the names for a screen
+             * reader. */}
+            <nav className="lv-sheet-nav" aria-label="Other teams on this board">
+              <button
+                type="button"
+                className="lv-nav-key"
+                disabled={race.ahead === undefined}
+                aria-label={
+                  race.ahead ? `Up to ${nameOf(race.ahead.team)}, P${race.ahead.rank}` : 'Top of the board'
+                }
+                onClick={() => go(-1)}
+              >
+                <span aria-hidden="true">‹</span>
+              </button>
+              <button
+                type="button"
+                className="lv-nav-key"
+                disabled={race.behind === undefined}
+                aria-label={
+                  race.behind
+                    ? `Down to ${nameOf(race.behind.team)}, P${race.behind.rank}`
+                    : 'Bottom of the board'
+                }
+                onClick={() => go(1)}
+              >
+                <span aria-hidden="true">›</span>
+              </button>
+            </nav>
           </motion.section>
         </>
       ) : null}
