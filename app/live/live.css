@@ -1578,21 +1578,18 @@ body:has(.lv-app[data-locked]) {
       isolation: isolate;
     }
 
-    /* ── The band spans the window; its contents do not ──
+    /* ── The band is the width of the board ──
      *
-     * The strip carried its own background, so it stopped where the board's
-     * 980px column stops and drew two hard vertical edges across the page —
-     * a floating box rather than a toolbar. The contents stay in the column
-     * where they line up with the rows; the glass runs to both edges of the
-     * window like an app bar. */
+     * It spanned the window for a revision, on the argument that a toolbar is
+     * chrome and chrome belongs to the window. Overruled: on this page the
+     * board *is* the page, and a black strip running past it while the strip
+     * above and the rows below both stop at 980px was the one element
+     * disagreeing about where the page ends. */
     .lv-toolbar::before {
       content: '';
       position: absolute;
       z-index: 0;
       inset: 0;
-      left: 50%;
-      width: 100vw;
-      transform: translateX(-50%);
       background: var(--lv-glass);
       backdrop-filter: blur(16px) saturate(1.4);
       -webkit-backdrop-filter: blur(16px) saturate(1.4);
@@ -1606,18 +1603,15 @@ body:has(.lv-app[data-locked]) {
     }
 
     /* The header's diagonals reach the window too, for the same reason. */
+    /* ── Both of these stay inside the board's column ──
+     *
+     * The diagonals ran to the window and the header stopped clipping so
+     * they could. Asked for directly: the strip, the band and the decoration
+     * all end where the board ends, and the window's edges belong to nothing
+     * on this page. */
     .lv-hero::after {
-      right: calc(50% - 50vw);
-      width: 420px;
-    }
-
-    /* **The header stops clipping.** It is 980px wide — the board's column —
-       and `overflow: hidden` was cropping the very stripes that had just been
-       told to run to the window: the elements measured 0→1440 and painted
-       230→1210. `.lv-app` still clips the page, so nothing can escape
-       sideways. */
-    .lv-hero {
-      overflow: visible;
+      right: -30px;
+      width: 300px;
     }
 
     /* It has given its stickiness and its glass to the strip above. */
