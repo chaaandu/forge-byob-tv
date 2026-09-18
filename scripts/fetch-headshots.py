@@ -35,13 +35,16 @@ from pathlib import Path
 
 import cv2
 import numpy as np
-from PIL import Image, ImageOps
+from PIL import Image, ImageFilter, ImageOps
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "public" / "people"
 TMP = Path("/tmp/headshot-original.jpg")
-SIZE = 256
-QUALITY = 82
+# The cutout, not a thumbnail: wide enough for shoulders, tall enough to run
+# off the bottom of the frame the way a line-up card does.
+WIDTH = 330
+HEIGHT = 440
+QUALITY = 84
 
 # ── The crop is found, not assumed ──
 #
@@ -60,12 +63,16 @@ YUNET_URL = (
     "https://media.githubusercontent.com/media/opencv/opencv_zoo/main/models/"
     "face_detection_yunet/face_detection_yunet_2023mar.onnx"
 )
-# How much of the crop the head should be. 2.8x the face box leaves the
-# shoulders in and the ceiling out, which is what a broadcast line-up looks
-# like at 96px wide.
-FACE_ZOOM = 2.8
-# The eyes sit about a third down a portrait rather than in the middle.
-EYE_LINE = 0.42
+# ── One scale for everybody ──
+#
+# The students were shot at different distances, so a fixed crop would give a
+# line-up of people at four different sizes — which reads as a mistake rather
+# than a group. Every crop is therefore measured **in face widths**: the frame
+# is 3.4 faces across and 4.6 faces tall, with the eyes a fifth of the way
+# down. Heads then come out the same size whoever took two steps back.
+FACE_W = 3.4
+FACE_H = 4.6
+EYE_LINE = 0.22
 
 FOLDER = (
     "https://www.dropbox.com/scl/fo/m36ozbh9jrqx0xerpsb5d/AAw7rl67gtYNEN0lnT1Co4o"
@@ -113,21 +120,47 @@ def face_box(model: cv2.FaceDetectorYN, image: Image.Image) -> tuple[int, int, i
     return int(x / scale), int(y / scale), int(w / scale), int(h / scale)
 
 
-def square(image: Image.Image, box: tuple[int, int, int, int] | None) -> Image.Image:
-    width, height = image.size
+def portrait(image: Image.Image, box: tuple[int, int, int, int] | None) -> Image.Image | None:
+    """Head and shoulders, scaled off the face so everyone matches."""
     if box is None:
-        # No face found: fall back to a centre square biased upwards, and the
-        # caller reports it so a human can look.
-        side = min(width, height)
-        return image.crop(((width - side) // 2, 0, (width - side) // 2 + side, side))
-
+        return None
+    width, height = image.size
     x, y, w, h = box
-    side = min(int(h * FACE_ZOOM), width, height)
+    cw = int(w * FACE_W)
+    ch = int(cw * HEIGHT / WIDTH)
     cx = x + w // 2
     cy = y + h // 2
-    left = max(0, min(width - side, cx - side // 2))
-    top = max(0, min(height - side, int(cy - side * EYE_LINE)))
-    return image.crop((left, top, left + side, top + side))
+    left = cx - cw // 2
+    top = int(cy - ch * EYE_LINE)
+    # Clamp into the frame, keeping the box's size — a cutout that shrank at
+    # the edge of a photograph would break the one-scale rule above.
+    left = max(0, min(width - cw, left)) if cw <= width else 0
+    top = max(0, min(height - ch, top)) if ch <= height else 0
+    return image.crop((left, top, left + cw, top + ch)).resize((WIDTH, HEIGHT), Image.LANCZOS)
+
+
+def cut_out(image: Image.Image) -> Image.Image:
+    """
+    The background removed, so the line-up is a group rather than four framed
+    pictures.
+
+    `rembg`'s human-segmentation model, which is trained on exactly this —
+    a person, a room behind them. The alpha is eroded by a pixel and blurred
+    by one more: the raw matte leaves a bright halo of the office wall around
+    the hair, and on a dark header that halo is the first thing the eye finds.
+    """
+    from rembg import new_session, remove
+
+    global _SESSION
+    if _SESSION is None:
+        _SESSION = new_session("u2net_human_seg")
+    cut = remove(image, session=_SESSION, post_process_mask=True)
+    alpha = cut.getchannel("A").filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.8))
+    cut.putalpha(alpha)
+    return cut
+
+
+_SESSION = None
 
 
 def main() -> int:
@@ -159,13 +192,16 @@ def main() -> int:
             with Image.open(TMP) as raw:
                 image = ImageOps.exif_transpose(raw).convert("RGB")
             box = face_box(model, image)
-            if box is None:
+            crop = portrait(image, box)
+            if crop is None:
+                # No face, no cutout. A guessed crop of a person is worse than
+                # the initials the page already draws.
                 faceless.append(f"{team} {name} (slot {slot})")
+                TMP.unlink(missing_ok=True)
+                continue
             target.parent.mkdir(parents=True, exist_ok=True)
             # No `exif=`: the camera, the time and any GPS stay behind.
-            square(image, box).resize((SIZE, SIZE), Image.LANCZOS).save(
-                target, "WEBP", quality=QUALITY, method=6
-            )
+            cut_out(crop).save(target, "WEBP", quality=QUALITY, method=6, lossless=False)
             written.append(f"{team}/{target.stem}")
             TMP.unlink(missing_ok=True)
 
@@ -174,7 +210,7 @@ def main() -> int:
     for line in failed:
         print(f"  failed: {line}")
     for line in faceless:
-        print(f"  no face, centre-cropped instead: {line}")
+        print(f"  no face found, left to initials: {line}")
     print("\nPaste into PEOPLE_PHOTOS in config.ts:\n")
     print("export const PEOPLE_PHOTOS: readonly string[] = [")
     for entry in written:

@@ -563,6 +563,23 @@ is the one page here that a person holds. Added 17 September 2026.
   stray spaces. Casing goes through `titleCase`, so `Preethi S` keeps its
   initial.
 
+  **They are cutouts standing together, not pictures in frames.**
+  `scripts/fetch-headshots.py` removes each background with `rembg`'s
+  human-segmentation model and every crop is measured **in face widths** —
+  3.4 across, 4.6 tall, eyes a fifth down — so students photographed at
+  different distances still come out the same size. Without that one rule a
+  line-up is four people at four scales, which reads as a mistake rather than
+  a group. The alpha is eroded a pixel and blurred: the raw matte leaves a
+  halo of the office wall around the hair, and on a dark header that halo is
+  the first thing the eye finds. There is no frame, no ring and no radius —
+  the silhouette is the shape — and the bottom fifth fades out, because a
+  crop ending on somebody's chest is a straight cut across them.
+
+  **A student with no photograph gets a silhouette with their initials**, in
+  the livery. Six of the cohort missed the shoot, so that is a state on the
+  board today rather than a hypothetical, and a bare pair of letters between
+  two cutouts would float where a body should be.
+
   **They are the middle of the sheet's header, overlapping, with no names** —
   the esports line-up card rather than a row of avatars with captions. Each
   crop is 96x132 with a 30px overlap, so four fit a 350px header and the

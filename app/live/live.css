@@ -863,56 +863,56 @@ body:has(.lv-app[data-locked]) {
     pointer-events: none;
   }
 
+  /* ── Cutouts, not framed pictures ──
+   *
+   * The photographs arrive with their backgrounds removed and everyone
+   * scaled off their own face, so the line-up is one group standing
+   * together rather than four portraits in four boxes. No frame, no ring,
+   * no radius — the silhouette is the shape. */
   .lv-person {
     position: relative;
     display: grid;
-    place-items: center;
+    place-items: end center;
     flex: none;
     /* Four of these plus their overlaps is 294px inside a 350px header. Three
        or two centre themselves in the same space. */
     width: 96px;
     height: 132px;
-    overflow: hidden;
-    /* Square, with the corners eased. A disc crops a head tighter than a
-       phone headshot allows and leaves gaps where they overlap. */
-    border-radius: 18px 18px 12px 12px;
-    /* Overlapped by a third. Enough that the stack reads as one object,
-       little enough that every face keeps an eye and a cheek. */
+    /* Shoulders overlap; heads do not. */
     margin-left: -30px;
-    background: linear-gradient(160deg, var(--livery-a), var(--livery-b));
-    /* The ring is the page behind, not a colour: it separates two faces that
-       touch without drawing a frame around either. */
-    box-shadow:
-      0 0 0 2px var(--lv-page),
-      0 10px 22px var(--lv-shade);
+    /* The bodies end where the crop ends, which on a dark page is a straight
+       cut across somebody's chest. Fading the last fifth turns that into the
+       group standing in the dark. */
+    mask-image: linear-gradient(180deg, black 78%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, black 78%, transparent 100%);
+    filter: drop-shadow(0 6px 10px var(--lv-shade));
   }
 
   .lv-person:first-child {
     margin-left: 0;
   }
 
-  /* A slight zigzag. Four crops on one baseline read as a row of cards; an
-     alternating 9px makes them a group standing together, which is what the
-     reference line-ups do. */
-  .lv-person:nth-child(even) {
-    margin-bottom: 12px;
-  }
+  /* **No zigzag any more.** It was what made four framed cards read as a
+     group; cutouts standing shoulder to shoulder do that by themselves, and
+     raising every second one leaves a body hanging in mid-air where its
+     crop ends. */
 
   /* The visible strip of an overlapped crop is its right-hand side, because
      the one in front covers its left. A face survives that — the centre is in
      both halves — but centred initials do not, so they shift into the strip
      that shows. */
   .lv-person:not(:first-child) .lv-person-initials {
-    transform: translateX(14px);
+    transform: translateX(16px);
   }
 
   .lv-person img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    /* The head sits above centre in a headshot, so the crop is biased up —
-       the same 38% `scripts/prepare-people.py` uses. */
-    object-position: 50% 32%;
+    /* `contain`, not `cover`: the crop was already composed around the face
+       by the fetch script, and a second crop here would undo the one scale
+       every head shares. */
+    object-fit: contain;
+    object-position: bottom center;
   }
 
   .lv-person-placeholder {
@@ -920,10 +920,15 @@ body:has(.lv-app[data-locked]) {
     height: 100%;
   }
 
+  .lv-person-body {
+    fill: var(--livery-ink);
+    opacity: 0.26;
+  }
+
   .lv-person-initials {
     fill: var(--livery-ink);
     font-family: var(--font-live), var(--font-sans);
-    font-size: 24px;
+    font-size: 30px;
     font-weight: 900;
     font-stretch: 78%;
     text-anchor: middle;
