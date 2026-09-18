@@ -83,8 +83,7 @@ body:has(.lv-app[data-locked]) {
   .lv-wordmark,
   .lv-pod-num,
   .lv-sheet-pos,
-  .lv-placement-rank,
-  .lv-search-pos {
+  .lv-placement-rank {
     font-stretch: 72%;
     font-variant-numeric: tabular-nums;
   }
@@ -1545,7 +1544,7 @@ body:has(.lv-app[data-locked]) {
 
   .lv-search-pick {
     display: grid;
-    grid-template-columns: 30px 32px minmax(0, 1fr);
+    grid-template-columns: 58px 32px minmax(0, 1fr);
     align-items: center;
     gap: 12px;
     flex: 1;

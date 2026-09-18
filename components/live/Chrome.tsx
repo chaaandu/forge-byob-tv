@@ -174,7 +174,10 @@ export function SearchSheet({
             {results.map((s) => (
               <li key={s.team.teamId} className="lv-search-item">
                 <button type="button" className="lv-search-pick" onClick={() => onPick(s.team.teamId)}>
-                  <span className="lv-search-pos">{s.rank}</span>
+                  {/* The team id, not the rank. Somebody looking for their
+                      own team knows `VBC118`; the rank is on the board they
+                      are about to be taken to. */}
+                  <span className="lv-search-id">{s.team.teamId}</span>
                   <span className={`lv-search-mark lv-livery-${liveryFor(s.team.teamId)}`}>
                     <Emblem team={s.team} size={20} />
                   </span>
