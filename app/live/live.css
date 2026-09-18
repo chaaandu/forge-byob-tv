@@ -706,7 +706,7 @@ body:has(.lv-app[data-locked]) {
   .lv-sheet-hero {
     position: relative;
     flex: none;
-    min-height: 236px;
+    min-height: 318px;
     padding: 10px 20px 0;
     overflow: hidden;
     color: var(--livery-ink);
@@ -749,35 +749,43 @@ body:has(.lv-app[data-locked]) {
 
   .lv-sheet-id {
     position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     /* Tall enough to reach the hero's own bottom edge, which is what the
        squad hangs off. Without it the block ends where the type does and the
        faces float in the middle of the colour. */
-    min-height: 208px;
-    padding-top: 22px;
+    min-height: 290px;
+    padding-top: 18px;
+    text-align: center;
   }
 
   .lv-sheet-ghost {
     position: absolute;
-    right: -70px;
-    top: -34px;
-    opacity: 0.17;
+    right: -66px;
+    top: -30px;
+    opacity: 0.14;
     transform: rotate(-14deg);
     pointer-events: none;
   }
 
+  /* The rank, behind the faces. Drawn in the livery's own ink at low opacity
+     so it reads as a number painted on the backdrop rather than as type
+     somebody forgot to finish. */
   .lv-sheet-pos {
-    display: inline-block;
-    font-size: 86px;
+    position: absolute;
+    /* Anchored to the top of the stage, not its centre: the heads stand on
+       the bottom edge, so a centred numeral is a numeral nobody sees. This
+       leaves its shoulders above them and lets the rest go behind. */
+    top: -18px;
+    left: 50%;
+    font-size: 168px;
     font-weight: 900;
-    line-height: 0.82;
-    letter-spacing: -0.02em;
-    transform: skewX(-11deg);
-  }
-
-  .lv-sheet-pos small {
-    margin-right: 2px;
-    font-size: 34px;
-    letter-spacing: 0;
+    line-height: 0.8;
+    letter-spacing: -0.04em;
+    opacity: 0.22;
+    transform: translateX(-50%) skewX(-11deg);
+    pointer-events: none;
   }
 
   .lv-sheet-badge {
@@ -795,9 +803,8 @@ body:has(.lv-app[data-locked]) {
   }
 
   .lv-sheet-name {
-    /* Clear of the squad, which stands at the hero's right edge. */
-    max-width: calc(100% - 178px);
-    margin: 12px 0 0;
+    max-width: 100%;
+    margin: 6px 0 0;
     font-family: inherit;
     font-size: 28px;
     font-weight: 900;
@@ -808,7 +815,6 @@ body:has(.lv-app[data-locked]) {
   }
 
   .lv-sheet-sub {
-    max-width: calc(100% - 178px);
     margin: 7px 0 0;
     /* Stated: the design system's `p` rule would otherwise paint it muted
        purple, which disappears on every dark livery. */
@@ -822,14 +828,24 @@ body:has(.lv-app[data-locked]) {
 
   /* ── The squad ──────────────────────────────────────────── */
 
+  .lv-sheet-stage {
+    position: relative;
+    display: flex;
+    flex: 1;
+    align-items: flex-end;
+    justify-content: center;
+    width: 100%;
+    margin-top: 10px;
+  }
+
   .lv-squad {
-    position: absolute;
-    right: -4px;
-    /* Standing *on* the hero's bottom edge: the crops bleed off it, which is
-       what stops four heads reading as four stickers. */
-    bottom: -12px;
+    position: relative;
     display: flex;
     align-items: flex-end;
+    justify-content: center;
+    /* Standing *on* the hero's bottom edge: the crops bleed off it, which is
+       what stops four heads reading as four stickers. */
+    margin-bottom: -14px;
     pointer-events: none;
   }
 
@@ -838,15 +854,17 @@ body:has(.lv-app[data-locked]) {
     display: grid;
     place-items: center;
     flex: none;
-    width: 58px;
-    height: 80px;
+    /* Four of these plus their overlaps is 294px inside a 350px header. Three
+       or two centre themselves in the same space. */
+    width: 96px;
+    height: 132px;
     overflow: hidden;
     /* Square, with the corners eased. A disc crops a head tighter than a
        phone headshot allows and leaves gaps where they overlap. */
-    border-radius: 14px 14px 10px 10px;
+    border-radius: 18px 18px 12px 12px;
     /* Overlapped by a third. Enough that the stack reads as one object,
        little enough that every face keeps an eye and a cheek. */
-    margin-left: -20px;
+    margin-left: -30px;
     background: linear-gradient(160deg, var(--livery-a), var(--livery-b));
     /* The ring is the page behind, not a colour: it separates two faces that
        touch without drawing a frame around either. */
@@ -863,7 +881,7 @@ body:has(.lv-app[data-locked]) {
      alternating 9px makes them a group standing together, which is what the
      reference line-ups do. */
   .lv-person:nth-child(even) {
-    margin-bottom: 9px;
+    margin-bottom: 12px;
   }
 
   /* The visible strip of an overlapped crop is its right-hand side, because
@@ -871,7 +889,7 @@ body:has(.lv-app[data-locked]) {
      both halves — but centred initials do not, so they shift into the strip
      that shows. */
   .lv-person:not(:first-child) .lv-person-initials {
-    transform: translateX(11px);
+    transform: translateX(14px);
   }
 
   .lv-person img {
@@ -891,7 +909,7 @@ body:has(.lv-app[data-locked]) {
   .lv-person-initials {
     fill: var(--livery-ink);
     font-family: var(--font-live), var(--font-sans);
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 900;
     font-stretch: 78%;
     text-anchor: middle;

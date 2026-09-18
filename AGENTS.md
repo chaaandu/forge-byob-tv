@@ -563,14 +563,21 @@ is the one page here that a person holds. Added 17 September 2026.
   stray spaces. Casing goes through `titleCase`, so `Preethi S` keeps its
   initial.
 
-  **They stand in the sheet's header, overlapping, with no names** — the
-  esports line-up card rather than a row of avatars with captions. Each crop
-  is 58x80 with a 20px overlap, so the visible strip of a covered photograph
-  still holds a whole face; they hang 12px past the header's bottom edge,
-  which is what stops four heads reading as four stickers, and every second
-  one sits 9px higher so the group is a group. The mark's disc used to be
-  here and is gone: it is on the row this sheet opened from and again as the
-  watermark behind the type.
+  **They are the middle of the sheet's header, overlapping, with no names** —
+  the esports line-up card rather than a row of avatars with captions. Each
+  crop is 96x132 with a 30px overlap, so four fit a 350px header and the
+  visible strip of a covered photograph still holds a whole face; they hang
+  14px past the header's bottom edge, which is what stops four heads reading
+  as four stickers, and every second one sits 12px higher so the group is a
+  group.
+
+  **The rank numeral went behind them and the mark's disc went entirely.**
+  The faces are what this page has that no leaderboard does, so they take the
+  middle at the size that says so; the numeral is a 168px watermark at 0.22
+  behind them, anchored to the top of the stage rather than its centre,
+  because heads standing on the bottom edge hide anything centred. The rank
+  is still crisp two lines down on the placements row, and the mark is on the
+  row this sheet opened from and again as the watermark behind the type.
 
   Photographs are `public/people/<TEAM_ID>/<name-slug>.webp`, listed in
   `PEOPLE_PHOTOS` in `config.ts` — **the list, not the filesystem**, exactly as

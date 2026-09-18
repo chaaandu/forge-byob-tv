@@ -153,11 +153,7 @@ export function TeamSheet({
                   exit={{ opacity: 0, x: direction * -60 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 36 }}
                 >
-                  <Emblem team={race.self.team} size={210} className="lv-sheet-ghost" />
-                  <span className="lv-sheet-pos">
-                    <small>P</small>
-                    {race.self.rank}
-                  </span>
+                  <Emblem team={race.self.team} size={190} className="lv-sheet-ghost" />
                   <h2 className="lv-sheet-name">{nameOf(race.self.team)}</h2>
                   {/* No team id. It is a code for a spreadsheet, not a fact
                       about a venture — the rows dropped it for the same
@@ -165,10 +161,21 @@ export function TeamSheet({
                   <p className="lv-sheet-sub">
                     {ordinal(race.self.rank)} of {race.total} · {boardLabel(boardKey, mode)}
                   </p>
-                  {/* Where the mark's disc used to be. The mark is on the row
-                      this sheet opened from and again as the watermark behind
-                      all this; the faces are the thing that is only here. */}
-                  <Squad team={race.self.team} />
+                  {/* ── The stage: the rank behind, the faces in front ──
+                   *
+                   * The numeral used to be the biggest thing in the header,
+                   * top left, with the faces small in the opposite corner.
+                   * The faces are what this page has that no leaderboard
+                   * does, so they take the middle at the size they deserve
+                   * and the rank goes behind them — the way a broadcast card
+                   * sets a driver against their own number. It is still
+                   * crisp two lines down, on the placements row. */}
+                  <div className="lv-sheet-stage">
+                    <span className="lv-sheet-pos" aria-hidden="true">
+                      {race.self.rank}
+                    </span>
+                    <Squad team={race.self.team} />
+                  </div>
                 </motion.div>
               </AnimatePresence>
             </motion.header>
