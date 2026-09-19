@@ -79,6 +79,50 @@ const nextConfig: NextConfig = {
    * every rule this project has, and it is where the overtake choreography and
    * the daily-window machinery live until the static wall is ported onto them.
    */
+  /**
+   * ── The wall re-downloads the whole cohort twice a minute without this ──
+   *
+   * `warmPhotos` in `public/tv/tv.js` pulls all 105 headshots into the cache
+   * after a board paints, and its comment says "fetched once, on a machine
+   * that then runs for weeks". **It is not once.** The rotator gives each
+   * slide a fresh document every thirty seconds, so the warm re-runs on every
+   * mount — and Next serves `public/` with `max-age=0, must-revalidate`, which
+   * turns each re-run into 105 network requests.
+   *
+   * Measured on `/wall` at 1920x1080 over 70 seconds: **218 photo requests,
+   * 194 of them full 200s, 2.6 MB over the wire.** On a TV that is plugged in
+   * and left alone that projects to roughly 269,000 requests and 3 GB a day,
+   * for pictures that only change when someone re-runs the shoot.
+   *
+   * A day of freshness with a week of background revalidation turns that into
+   * one request per photo per day. `immutable` would be wrong: these filenames
+   * come from a student's name rather than a content hash, so a re-shot
+   * photograph replaces the same URL and has to be able to propagate.
+   *
+   * **`tv.css` and `tv.js` are deliberately not here.** The wall never
+   * reloads its top-level page, so a fresh slide document every thirty seconds
+   * is the ONLY way a deploy reaches the TV. Cache those and the wall keeps
+   * running the old build until the header expires — the one failure this
+   * project cannot see, on the one screen nobody is watching.
+   */
+  async headers() {
+    return [
+      {
+        source: '/people/:path*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
+        ],
+      },
+      {
+        // One file, 185KB, re-fetched on every slide mount for the same reason.
+        source: '/tv/Archivo-Variable.woff2',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=86400, stale-while-revalidate=604800' },
+        ],
+      },
+    ]
+  },
+
   async rewrites() {
     return [
       { source: '/podium', destination: '/tv/ladder.html' },
