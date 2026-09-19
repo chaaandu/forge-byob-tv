@@ -1,4 +1,4 @@
-import { PEOPLE_PHOTOS } from '@/config'
+import { PEOPLE_PHOTOS, TEAM_LINKS } from '@/config'
 import { competingTeams, rankByChallenge, rankByToday, rankByWeek, rankTeams } from '@/lib/ranking'
 import { hashTeamId } from '@/lib/seed'
 import { titleCase } from '@/lib/team'
@@ -332,6 +332,38 @@ export function initialsOf(name: string): string {
  * different question and belongs where it is used.
  */
 const HANDLE = /^[A-Za-z0-9._]{1,30}$/
+
+/**
+ * A venture's own links, preferring the sheet and falling back to the manifest.
+ *
+ * **The sheet always wins.** `TV_Feed` publishes eight columns and `website` /
+ * `instagram` are not among them, so `TEAM_LINKS` in `config.ts` is what
+ * production actually reads today — transcribed from `Team Links`, which has
+ * carried both all along. The moment those columns are selected into
+ * `TV_Feed`, every published cell takes over here and the manifest stops being
+ * consulted for that team, so a venture that changes its own Instagram is
+ * right on the next poll rather than at the next deploy.
+ *
+ * Per FIELD rather than per team, deliberately. A team with a published
+ * website and no published Instagram should keep the Instagram the manifest
+ * knows about, rather than losing it because the row went half-silent.
+ *
+ * The raw cell is returned, never a URL: whether a string is safe to put in an
+ * `href` is `instagramUrl` / `websiteUrl`'s job, and answering it in two
+ * places is how two answers drift apart. `lib/live.test.ts` pins that nothing
+ * in the manifest is refused by them.
+ */
+export function linksOf(team: Team): { website?: string; instagram?: string } {
+  const fallback = TEAM_LINKS[team.teamId] ?? {}
+  const pick = (cell: string | undefined, spare: string | undefined) => {
+    const value = (cell ?? '').trim()
+    return value !== '' ? value : spare
+  }
+  return {
+    website: pick(team.website, fallback.website),
+    instagram: pick(team.instagram, fallback.instagram),
+  }
+}
 
 export function instagramUrl(raw: string | undefined): string | null {
   const value = (raw ?? '').trim()

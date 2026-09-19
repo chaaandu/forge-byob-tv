@@ -1,27 +1,10 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
-import { PEOPLE_PHOTOS } from '@/config'
+import { PEOPLE_PHOTOS, SPARE_TEAM_IDS, TEAM_LINKS } from '@/config'
+import type { Team, TeamId } from '@/lib/types'
 import { rankForMode } from '@/lib/board'
-import {
-  EMBLEM_COUNT,
-  LIVERY_COUNT,
-  MAX_MEMBERS,
-  avgTicket,
-  climbOf,
-  emblemFor,
-  initialsOf,
-  instagramUrl,
-  linkLabel,
-  membersOf,
-  photoSlug,
-  liveryFor,
-  matchesQuery,
-  raceFor,
-  shareOf,
-  standingsFor,
-  websiteUrl,
-} from '@/lib/live'
+import { EMBLEM_COUNT, LIVERY_COUNT, MAX_MEMBERS, avgTicket, climbOf, emblemFor, initialsOf, instagramUrl, linkLabel, linksOf, liveryFor, matchesQuery, membersOf, photoSlug, raceFor, shareOf, standingsFor, websiteUrl } from '@/lib/live'
 import { competingTeams, rankByWeek, rankTeams } from '@/lib/ranking'
 import { COMPETING_SIZE, team, teams } from '@/test/fixtures'
 
@@ -401,5 +384,62 @@ describe('/live source rules', () => {
       expect(weight).toBeGreaterThanOrEqual(Number(lo))
       expect(weight).toBeLessThanOrEqual(Number(hi ?? lo))
     }
+  })
+})
+
+/**
+ * ── The links manifest, and the one thing that makes it safe ──
+ *
+ * `TEAM_LINKS` is transcribed from `Team Links` because `TV_Feed` publishes
+ * eight columns and neither `website` nor `instagram` is one of them. It is a
+ * floor: the sheet wins the moment it speaks. These hold the two properties
+ * that stop it becoming a liability — that nothing in it can reach an `href`
+ * unchecked, and that a published cell always beats it.
+ */
+describe('TEAM_LINKS', () => {
+  const linkTeam = (id: string, over: Partial<Team> = {}): Team =>
+    ({
+      teamId: id as TeamId,
+      ventureName: id,
+      totalRevenue: 0,
+      weekRevenue: 0,
+      todayRevenue: 0,
+      totalUnits: 0,
+      challengeBaseline: 0,
+      challengeRevenue: 0,
+      ...over,
+    }) as Team
+
+  it('holds only values the URL guards accept', () => {
+    for (const [id, link] of Object.entries(TEAM_LINKS)) {
+      if (link.website !== undefined) expect(websiteUrl(link.website), `${id} website`).not.toBeNull()
+      if (link.instagram !== undefined) expect(instagramUrl(link.instagram), `${id} instagram`).not.toBeNull()
+    }
+  })
+
+  it('is keyed by real team ids and never by a spare', () => {
+    for (const id of Object.keys(TEAM_LINKS)) {
+      expect(id).toMatch(/^VBC1\d\d$/)
+      expect(SPARE_TEAM_IDS).not.toContain(id as TeamId)
+    }
+  })
+
+  /** A published cell wins, so a team editing the sheet is right on the next poll. */
+  it('yields to the sheet, per field', () => {
+    const id = Object.keys(TEAM_LINKS).find((k) => TEAM_LINKS[k].instagram !== undefined)!
+    const fromSheet = linksOf(linkTeam(id, { instagram: 'https://instagram.com/published' }))
+    expect(fromSheet.instagram).toBe('https://instagram.com/published')
+    // …and the other field still falls back rather than going dark with it.
+    expect(fromSheet.website).toBe(TEAM_LINKS[id].website)
+  })
+
+  it('falls back only when the cell is absent or blank', () => {
+    const id = Object.keys(TEAM_LINKS)[0]
+    expect(linksOf(linkTeam(id)).website).toBe(TEAM_LINKS[id].website)
+    expect(linksOf(linkTeam(id, { website: '   ' })).website).toBe(TEAM_LINKS[id].website)
+  })
+
+  it('has nothing to say about a team it does not know', () => {
+    expect(linksOf(linkTeam('VBC199'))).toEqual({ website: undefined, instagram: undefined })
   })
 })

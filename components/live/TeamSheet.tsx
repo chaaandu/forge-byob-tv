@@ -16,6 +16,7 @@ import {
   climbOf,
   figureLabel,
   instagramUrl,
+  linksOf,
   linkLabel,
   liveryFor,
   raceFor,
@@ -474,9 +475,11 @@ function Sells({ product }: { product?: string }) {
  * `noreferrer` implies) the opened page gets a handle on this one.
  */
 function Links({ team }: { team: Team }) {
+  // The sheet when it speaks, `TEAM_LINKS` when it does not; see `linksOf`.
+  const own = linksOf(team)
   const links = [
-    { kind: 'instagram' as const, href: instagramUrl(team.instagram) },
-    { kind: 'website' as const, href: websiteUrl(team.website) },
+    { kind: 'instagram' as const, href: instagramUrl(own.instagram) },
+    { kind: 'website' as const, href: websiteUrl(own.website) },
   ].filter((link): link is { kind: 'instagram' | 'website'; href: string } => link.href !== null)
 
   if (links.length === 0) return null

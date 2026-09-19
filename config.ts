@@ -442,6 +442,69 @@ export const LOGOS: readonly TeamId[] = []
  * on a page anybody with the link can open, which no other asset in this
  * project is. Removing one person is deleting one entry and one file.
  */
+/**
+ * ── A venture's own links, until `TV_Feed` publishes them ──
+ *
+ * `Team Links` has carried Website Link and Instagram Link all along, and
+ * `TV_Feed` does not select them: the published CSV is eight columns wide and
+ * has never included `website`, `instagram`, `product` or `members`. So
+ * `/live` has had the code to show a team's links since it was built and has
+ * had nothing to show.
+ *
+ * This is the same shape `PEOPLE_PHOTOS` is, for the same reason and with the
+ * same warning attached. **It is a floor, not a replacement.** The sheet wins
+ * whenever the sheet speaks — `linksOf` prefers a published cell and only
+ * falls back here — so the moment those columns land in `TV_Feed` this list
+ * stops being read and a team that updates its own Instagram is right on the
+ * wall the next poll. Until then it goes stale silently, and the only fix for
+ * that is publishing the columns.
+ *
+ * Transcribed from `Team Links` cols G and I on 19 September 2026: 41 teams,
+ * 29 websites, 24 Instagram handles, 31 teams with at least one. Every value
+ * was put through `websiteUrl` / `instagramUrl` before being written here and
+ * all 53 produce a link; none is refused. **Cells are stored verbatim**, in
+ * whatever shape the team typed — bare domain, full URL, with or without
+ * `www.` — because deciding what is a safe URL is `lib/live.ts`'s job and
+ * doing it twice is how the two answers drift apart.
+ *
+ * Facebook is deliberately absent. Three of the 41 have one and `/live` has no
+ * Facebook affordance; adding a third link type for three teams is a design
+ * decision, not a transcription.
+ */
+export const TEAM_LINKS: Readonly<Record<string, { website?: string; instagram?: string }>> = {
+  'VBC101': { website: 'https://aksperfumes.in/', instagram: 'https://www.instagram.com/aks.perfumes_' },   // AKS Perfumes
+  'VBC102': { website: 'https://getlumi.in/', instagram: 'https://www.instagram.com/shop_lumii?stkn=c3BtY2pubGVremU3' },   // LUMI
+  'VBC103': { website: 'houseofpravaah.com', instagram: 'https://www.instagram.com/houseofpravaah?stkn=a280dDNucDlyY2V6' },   // House of Pravaah
+  'VBC104': { website: 'thetrigo.in' },   // Trigo
+  'VBC105': { website: 'https://chaklebro.myshopify.com' },   // Chakle Bro
+  'VBC106': { website: 'https://dadofbags.in/', instagram: 'https://www.instagram.com/dadofbags1947/' },   // Dad Of Bags.
+  'VBC107': { website: 'https://madhosh.co.in/', instagram: 'https://www.instagram.com/madhosh.co.in/' },   // Madhosh
+  'VBC109': { website: 'https://www.wekrave.in/', instagram: 'https://www.instagram.com/wekravehealthy?stkn=bWFmZTVkeDI0ZGZh' },   // WeKravehealthy
+  'VBC112': { website: 'fakesocietystudio.com', instagram: 'https://www.instagram.com/fakesocietystudio?stkn=cjRjZ283cWM2dHk5' },   // Fake society studio
+  'VBC113': { website: 'munchco.in', instagram: 'https://www.instagram.com/shopmunchandco?stkn=MWkzd3lzNGh1aWRrOQ%3D%3D&utm_source=qr' },   // Munch&co
+  'VBC114': { website: 'https://tea-riffic.in/', instagram: 'https://www.instagram.com/tea.riffic__?stkn=MXQxa3M0enh0amc4eA%3D%3D&utm_source=qr' },   // Tea-riffic
+  'VBC115': { website: 'https://chipmonk.co.in/', instagram: 'https://www.instagram.com/chip.monk.snacks?stkn=ZjRzM3JoZjhlNTYw&utm_source=qr' },   // ChipMonk
+  'VBC116': { website: 'https://caughtinnasha.store', instagram: 'https://www.instagram.com/caughtinnasha?stkn=MWk3M2x5ZTl5YWw5Nw%3D%3D&utm_source=qr' },   // Nasha
+  'VBC117': { website: 'https://juzzle-store.myshopify.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAcGRvZgJleHRuA2FlbQIxMQBzcnRjBmFwcF9pZA85MzY2MTk3NDMzOTI0NTkAAadkSeDj0_1sTkLwmLs-pYSbp-ttUGNxZzMoBBv8IAdIjRXS89g0ci9l9mw84A_aem_uS6MOQTIglIwVhIZptHq0Q', instagram: 'https://www.instagram.com/just.juzzle/' },   // Juzzle
+  'VBC119': { website: 'https://getnekt.in', instagram: 'https://www.instagram.com/getnekt.in?stkn=cGhvbWNxbDR4NG1z' },   // NEKT
+  'VBC120': { website: 'https://nobiggie.shop/', instagram: 'https://www.instagram.com/nobiggie.crumbs?stkn=N2cxdGFnNjVjeDly' },   // No Biggie
+  'VBC121': { website: 'https://kirdaaar.com/' },   // Kirdaaar
+  'VBC122': { website: 'Meltyk.in', instagram: 'https://www.instagram.com/meltyk.in?stkn=NWhoMnpieHdkbm9z' },   // MELTYK
+  'VBC123': { instagram: 'https://www.instagram.com/haulties_s?stkn=dWZrMHp2YTV0cXRm&utm_source=qr' },   // HAULTIES
+  'VBC125': { website: 'https://emberandoak.online' },   // Ember and Oak
+  'VBC126': { website: 'https://chocoandcoo.myshopify.com', instagram: 'https://www.instagram.com/chocoandcoo?stkn=NDN3djQwMmZkY2k=' },   // Choco and co
+  'VBC128': { website: 'theusualcoffee.in', instagram: 'https://www.instagram.com/theusualindia/' },   // The Usual
+  'VBC130': { website: 'sidequestco.in' },   // Side Quest
+  'VBC131': { website: 'https://nottycrunch.in/products/peri-peri-veggie-chips', instagram: 'https://www.instagram.com/nottycrunch?stkn=MW04bHAyZXFzZDdodQ%3D%3D&utm_source=qr' },   // Notty Crunch
+  'VBC132': { website: 'www.mugshot.in', instagram: 'https://www.instagram.com/mugshott.co?stkn=MzRvMTRxM2YzYmhw' },   // Mugshot
+  'VBC133': { website: 'https://crunchdco.myshopify.com/' },   // Crunchd
+  'VBC135': { website: 'https://krackleco.myshopify.com/' },   // Krackle Co
+  'VBC136': { website: 'https://thekuki.in/', instagram: 'https://www.instagram.com/getkuki?stkn=a3o1OHN6d2pzZzlm&utm_source=qr' },   // KUKI
+  'VBC137': { instagram: 'https://www.instagram.com/zaaree.co?stkn=cXJvYXZrbHYyY3J1&utm_source=qr' },   // ZAAREE
+  'VBC138': { website: 'saajshop.online', instagram: 'https://www.instagram.com/saaj_shop?stkn=cGJua212am1uZHFh&utm_source=qr' },   // SAAJ
+  'VBC139': { website: 'www.atmiva.in', instagram: 'https://www.instagram.com/atmiva.in' },   // Atmiva
+}
+
 export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC101/nirmalya-sah',
   'VBC101/sachidananda-dehury',
