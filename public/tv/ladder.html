@@ -241,7 +241,7 @@ const paint = (teams) => {
   // Outside every row, so the slab's own clip cannot slice the crown's top off.
   document.getElementById('ladder').insertAdjacentHTML('afterbegin', `<span class="crown">${CROWN}</span>`)
 
-  writeScan(ranked)
+  writeScan()
   warmPhotos()
   fitScan()
 }
@@ -287,14 +287,19 @@ Promise.all([loadTeams(), loadPhotos()]).then(([teams]) => { paint(teams); onFre
  * category as "earned, not raised" — but a defensible one: 32 of the 39 have
  * taken real money off real customers, which is not a student project.
  *
- * Rotates per mount, so the wall runs a campaign rather than one advert. The
- * counter is stored, not derived from the clock, so a line can never change
- * while somebody is halfway through reading it.
+ * Three a day from 19 September 2026, on the clock. The order is not
+ * arbitrary: each line is pointed at what the building is doing when it shows.
  */
 const SCAN_COPY = [
-  // Day one needs no punchline: "is a founder" runs straight into the ask.
+  // 08:00–13:00 · the day has not happened yet, so this one only introduces.
+  // No punchline: "is a founder" runs straight into the ask.
   ['Behind every number',  'is a founder.',      ''],
+  // 13:00–18:00 · trading hours. The one line that is about BUYING belongs in
+  // the window where the reader could actually act on it.
   ['A leaderboard can\u2019t', 'sell you anything.', 'The founders can.'],
+  // 18:00–08:00 · the day is done and the figures are settled, so this is the
+  // one that argues about what the numbers MEAN. It also holds the building
+  // overnight and through the early morning, which is the longest shift.
   ['None of this',         'is a case study.',   'They built it. They sold it.'],
   // ── Held until `product`, `instagram` and `website` publish in TV_Feed ──
   // ['You can\u2019t buy', 'from a wall.', 'Every one of them will sell to you.'],
@@ -304,29 +309,70 @@ const SCAN_ASK = 'Scan to meet them all.'
 
 
 /**
- * ── One line a day, not one a minute ──
+ * ── Three lines a day, on the clock ──
  *
- * Rotating per slide meant a full cycle every four minutes, and that is the
- * wrong cadence for this audience. The wall is not read by a stream of
- * strangers; it is the same hundred-odd people walking past the same board
- * several times a day for weeks. For them FREQUENCY beats variety — a student
- * who passes three times sees one line three times and knows it by tomorrow,
- * where three different lines leave nothing behind. It is why a billboard runs
- * for a fortnight rather than swapping hourly.
+ * This reverses the rule it replaces, and the rule it replaces was good, so
+ * the cost is stated rather than argued away. **One line a day** was chosen
+ * because this wall is not read by a stream of strangers — it is the same
+ * hundred-odd people walking past the same board several times a day for
+ * weeks, and for them FREQUENCY beats variety: a student who passes three
+ * times sees one line three times and knows it by tomorrow, where three
+ * different lines leave nothing behind. That argument is still true, and
+ * **a line is now seen about a third as often by the same person.**
  *
- * Keyed to the IST day, so the line turns over at midnight with the building
- * empty — and derived from the clock rather than a stored counter, so every
- * screen showing this wall is showing the same line on the same day.
+ * What is bought with it, asked for directly: each line lands in the window it
+ * is actually about. "A leaderboard can't sell you anything" is the only line
+ * that asks the reader to BUY, and it now runs 13:00–18:00, when the ventures
+ * are trading and a passer-by could act on it — rather than on whichever day
+ * the modulo happened to give it. That is a better argument than variety, and
+ * it is the one that carries this.
+ *
+ * ── Derived from the clock, never from a counter ──
+ *
+ * Unchanged and load-bearing. Every screen showing this wall shows the same
+ * line at the same moment, and a slide arriving cannot advance anything. A
+ * stored counter would drift per screen and per remount — the rotation mounts
+ * this page twice a minute.
+ *
+ * ── The band is checked on the clock, and the DOM is not touched otherwise ──
+ *
+ * `paint` only runs when the FIGURES change, so a quiet evening would hold
+ * 13:00's line well past 18:00. The band is re-read every thirty seconds
+ * instead, and `writeScan` returns without touching anything unless the band
+ * actually turned — so the copy is never rewritten under somebody mid-read,
+ * and the block still obeys the motion rule at rest.
  */
-function writeScan(ranked) {
-  const istDay = Math.floor((Date.now() + 5.5 * 3600e3) / 864e5)
-  const [setup, punch, sub] = SCAN_COPY[istDay % SCAN_COPY.length]
+const SCAN_BANDS = [8, 13, 18]     // IST hours each line takes over at
+
+/** 0, 1 or 2. Before 08:00 belongs to the evening line, which runs overnight. */
+function scanBandAt(hourIST) {
+  if (hourIST < SCAN_BANDS[0]) return SCAN_BANDS.length - 1
+  let band = 0
+  for (let i = 0; i < SCAN_BANDS.length; i += 1) if (hourIST >= SCAN_BANDS[i]) band = i
+  return band
+}
+
+let scanBand = null
+
+function writeScan() {
+  const hourIST = new Date(Date.now() + 5.5 * 3600e3).getUTCHours()
+  const band = scanBandAt(hourIST)
+  if (band === scanBand) return          // nothing moves unless the band turns
+  scanBand = band
+
+  const [setup, punch, sub] = SCAN_COPY[band]
   document.getElementById('scan-head').innerHTML = `${setup}<br><em>${punch}</em>`
   const subEl = document.getElementById('scan-sub')
   subEl.textContent = sub
   subEl.hidden = sub === ''          // no empty line, no gap where one was
   document.getElementById('scan-ask').textContent = SCAN_ASK
+
+  // The sub line is absent on one of the three, so the block changes height
+  // when a band turns — and whether it clears the bars is a measurement.
+  if (typeof fitScan === 'function') fitScan()
 }
+
+setInterval(writeScan, 30_000)
 
 /**
  * ── The board wins, always ──
