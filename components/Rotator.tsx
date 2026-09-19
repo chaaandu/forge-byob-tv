@@ -4,7 +4,15 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 
 /**
- * The wall's own slideshow: `/daily` and `/podium`, thirty seconds each.
+ * The old wall's slideshow: `/old/daily` and `/old/podium`, thirty seconds each.
+ *
+ * ── These two are the previous design, kept at `/old/*` ──
+ *
+ * `/daily` and `/podium` now serve the static slides in `public/tv/`, which do
+ * their own rotation in `wall.html` by swapping prefetched iframes. This
+ * component rotates the React pages it always rotated; it simply follows them
+ * to their new addresses. Pointing it at the bare paths would send the old
+ * wall into the new slides and strand it there.
  *
  * This is the one piece of rotation logic in the project, and it exists because
  * the rotation moved in-house — see the note in AGENTS.md. If the campus
@@ -64,7 +72,7 @@ export function Rotator() {
     // wraps the 404 — there is no `app/page.tsx`, so `/` is one — and a rotator
     // running there would navigate away from the error an operator has to see to
     // know the wall is pointed at the wrong URL.
-    const next = pathname === '/daily' ? '/podium' : pathname === '/podium' ? '/daily' : null
+    const next = pathname === '/old/daily' ? '/old/podium' : pathname === '/old/podium' ? '/old/daily' : null
     if (next === null) return
 
     router.prefetch(next)

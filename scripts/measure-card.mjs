@@ -67,7 +67,7 @@ page.on('pageerror', (e) => errors.push(String(e)))
 // `today_revenue` on the way through. The column is index 4; the mock's own
 // header order is asserted rather than assumed, so a reordered fixture fails
 // loudly instead of silently writing a day figure into `total_units`.
-await page.route('**/mock/feed.csv', async (route) => {
+await page.route('**/tv/feed.csv', async (route) => {
   const response = await route.fetch()
   const lines = (await response.text()).split('\n')
   const header = lines[0].split(',')

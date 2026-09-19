@@ -25,7 +25,7 @@ import type { TeamId } from '@/lib/types'
  *
  * What it did not survive is **local development**. Pointing the wall at
  * `scripts/dev-feed.mjs`'s fixtures used to mean editing the two literals below,
- * which puts a `/mock/…` path into a *tracked* file — one `git commit -a` away
+ * which puts a `/tv/…` path into a *tracked* file — one `git commit -a` away
  * from deploying a wall that fetches a URL that does not exist in production.
  * That edit was made and discarded once already (`b5af89b`, "Restore the
  * published CSV URLs"); a rule that has to be remembered every time is not a
@@ -36,8 +36,8 @@ import type { TeamId } from '@/lib/types'
  *
  * ```bash
  * # .env.local — gitignored by the `.env*` rule, and cannot be committed
- * NEXT_PUBLIC_FEED_CSV_URL=/mock/feed.csv
- * NEXT_PUBLIC_COHORT_CSV_URL=/mock/cohort.csv
+ * NEXT_PUBLIC_FEED_CSV_URL=/tv/feed.csv
+ * NEXT_PUBLIC_COHORT_CSV_URL=/tv/cohort.csv
  * ```
  *
  * `NEXT_PUBLIC_`, necessarily: both fetches happen in the browser, so the value

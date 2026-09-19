@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><title>BYOB Leaderboard</title>
+<link rel="stylesheet" href="/tv/tv.css">
+<script>
+  /* Inside the rotator this slide is built before it is shown, so it holds its
+     entrance until told. Opened directly it never holds. The timeout is the
+     safety: a rotator that fails to post must not freeze the board forever. */
+  if (window.top !== window) {
+    document.documentElement.classList.add('holding')
+    const show = () => document.documentElement.classList.remove('holding')
+    addEventListener('message', (e) => { if (e.data === 'byob:show') show() })
+    setTimeout(show, 8000)
+  }
+</script>
+<style>
+/* ============================================================
+   SLIDE 1 — "THE LADDER"  ·  BYOB Leaderboard, all-time, top 10.
+
+   ── The bar is the chart, and NOTHING ELSE MAY LIVE IN IT ──
+
+   Three revisions put the rank numeral, the venture name and the figure
+   inside the coloured bar, which meant every bar needed a minimum width big
+   enough to hold them: 640px of an 1872px maximum. 34% of every bar was
+   constant, so a 14.1% revenue gap between rank 8 and rank 10 rendered as a
+   3.1% length gap — 25px, on rows ~800px long. The chart was telling the
+   truth and showing almost none of it.
+
+   Worse, the money band was a FIXED 230px block in near-white. At the short
+   end of the board the eye stopped comparing bars and started comparing those
+   blocks, and the blocks are identical by construction. That is why ranks 8,
+   9 and 10 read as the same length through three attempts to fix the colour.
+
+   So the labels moved out. Numeral and venture name sit in fixed columns on
+   the page; the bar starts at ONE baseline for every row and is pure livery
+   colour, proportional with no floor at all; the figure sits just past its
+   end. Rank 8 against rank 10 is now 14.1% of the bar — the true number.
+
+   What it costs: the bar no longer bleeds off the left edge, because a bar
+   chart needs a common baseline and that baseline is x=498. The livery
+   survives at both ends of the row — the numeral is drawn in it, and the bar
+   is it.
+   ============================================================ */
+.ladder { position: absolute; left: 0; top: 194px; right: 0; display: flex; flex-direction: column; gap: 7px; z-index: 2; }
+
+/* ── The staircase ──
+ *
+ * Ten livery bars running off the left edge. Rank is vertical position;
+ * revenue is the bar's width. At six metres nobody reads ₹1,00,596 — they
+ * read a staircase, and the staircase is correct.
+ *
+ * Width = 700px floor + proportional remainder. Pure proportion puts rank 10
+ * at 231px, which cannot hold a venture name; the floor is what guarantees
+ * the name always fits and the bar still visibly ranks.
+ *
+ * ── What the floor costs, stated rather than discovered ──
+ *
+ * It halves the tail. Ranks 1 to 7 step by 56-239px, which is the shape of
+ * the race and reads across a corridor. Ranks 8, 9 and 10 step by 7px and
+ * 17px — because those three teams are within 14% of each other, and after
+ * the floor that is 2.6% of the bar. THE STAIRCASE IS NOT WHAT TELLS THEM
+ * APART; the numeral and the figure are. A bar chart that made a 4% gap look
+ * like a 40% gap would be the more serious fault.
+ *
+ * The money band rides the end of every bar, in the team's own colours, so
+ * the figures form their own diagonal down the screen. That diagonal is the
+ * composition — nothing else on the slide is a straight vertical. */
+.bar-row {
+  position: relative; display: flex; align-items: center; overflow: hidden;
+  color: var(--cdk);
+  background: linear-gradient(97deg, var(--a), var(--b));   /* the same perceptual step the cards use */
+  box-shadow: inset 0 2px 0 var(--sheen), 0 12px 26px rgba(0,0,0,0.34);
+  clip-path: polygon(0 0, 100% 0, calc(100% - var(--rake)) 100%, 0 100%);
+  border-radius: 0 8px 8px 0;
+  animation: row-in 640ms cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes row-in { from { opacity: 0; transform: translateX(-90px); } to { opacity: 1; transform: none; } }
+.bar-row.big { height: 122px; }
+.bar-row.sml { height: 60px; }
+
+/* Knocked into the bar's own colour. The 60px inset is not decoration: a
+   `skewX(-11deg)` glyph sits ~12px left of its box at the bottom, and 48px is
+   where a television starts cropping. */
+.bar-num {
+  flex: none; color: transparent; font-weight: 900; line-height: 1;
+  /* Ranged right: "10" is twice the width of "9", so left-aligned in a fixed
+     box a two-digit rank grows toward the venture name. Measured before this:
+     rank 10's glyph ended at x=128 and the name began at x=128. */
+  text-align: right;
+  transform: skewX(-11deg); -webkit-text-stroke-color: var(--cdk);
+}
+.big .bar-num { width: 168px; padding-right: 34px; font-size: 90px; -webkit-text-stroke-width: 3px; }
+.sml .bar-num { width: 168px; padding-right: 34px; font-size: 50px; -webkit-text-stroke-width: 2.4px; }
+
+.bar-name {
+  min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  font-weight: 800; letter-spacing: -0.01em;
+}
+.big .bar-name { font-size: 42px; }
+.sml .bar-name { font-size: 30px; }
+
+
+.squad { display: flex; align-items: flex-end; flex: none; margin-left: 26px; align-self: flex-end; }
+/* ── No fade on the wall ──
+   `/live` fades the last fifth of each crop because a cutout there stands on
+   the dark PAGE, and a photograph ending mid-chest on open background is a
+   straight cut across somebody. Here the crop's bottom edge is the bar's own
+   bottom edge and the bar clips, so there is nothing to soften — the fade was
+   only dissolving the bodies into their own card. */
+.person { position: relative; display: block; }
+.person img { width: 100%; height: 100%; object-fit: contain; object-position: bottom center; }
+
+
+.bar-fig {
+  flex: none; display: grid; place-items: center; height: 100%; margin-left: auto;
+  background: var(--bd); color: var(--bdk);
+  padding: 0 24px 0 calc(var(--rake) + 16px);
+  clip-path: polygon(var(--rake) 0, 100% 0, 100% 100%, 0 100%);
+  box-shadow: inset 0 2px 0 var(--sheen);
+  filter: drop-shadow(-5px 0 0 var(--rule-seam));
+  font-weight: 900; letter-spacing: -0.015em; white-space: nowrap;
+}
+.big .bar-fig { min-width: 300px; font-size: 46px; }
+.sml .bar-fig { min-width: 250px; font-size: 34px; }
+
+.crown { position: absolute; left: 45px; top: -52px; width: 101px; z-index: 6; line-height: 0;
+  filter: drop-shadow(0 7px 13px rgba(0,0,0,0.5)) drop-shadow(0 0 3px rgba(0,0,0,0.4));
+  animation: crown-drop 900ms cubic-bezier(0.34,1.4,0.5,1) 460ms both; }
+.crown svg { width: 100%; height: auto; display: block; }
+@keyframes crown-drop { from { opacity:0; transform: translateY(-120px) rotate(-28deg); } to { opacity:1; transform: rotate(-12deg); } }
+
+/* ── The scan block ─────────────────────────────────────────
+   The chart gives up its bottom-right corner by construction — that is the
+   shape of a top-heavy board, and it is the only real estate nothing else
+   wants. It gets the one thing this slide cannot say: the other twenty-nine.
+   It hides itself when the board grows into it; see `fitScan()`. */
+.scan {
+  position: absolute; right: var(--safe-x); bottom: var(--safe-y); z-index: 4;
+  width: 430px; text-align: right; animation: fade-in 700ms 760ms both;
+}
+.scan[hidden] { display: none; }
+.scan-code {
+  display: block; width: 216px; margin-left: auto; border-radius: 14px;
+  background: #fff; padding: 8px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.12);
+}
+.scan-code img { display: block; width: 100%; height: auto; }
+.scan-head {
+  display: block; margin-top: 18px; font-size: 32px; font-weight: 900; font-stretch: 70%;
+  line-height: 0.98; letter-spacing: 0.005em; text-transform: uppercase;
+  transform: skewX(-11deg); transform-origin: 100% 100%;
+  padding-right: 15px;
+  /* Splits a wrapping line evenly instead of orphaning its last word. */
+  text-wrap: balance;
+}
+.scan-head em { font-style: normal; color: var(--accent); }
+.scan-sub {
+  display: block; margin-top: 9px; max-width: 400px; margin-left: auto;
+  font-size: 19px; font-weight: 700; line-height: 1.35; color: var(--ink);
+  text-wrap: balance;
+}
+/* The ask, one step quieter than the punchline above it: the argument should
+   be read first and the instruction second. */
+.scan-sub[hidden] { display: none; }
+.scan-ask {
+  display: block; margin-top: 7px;
+  font-size: 15px; font-weight: 700; font-stretch: 96%;
+  letter-spacing: 0.08em; color: var(--ink-faint);
+}
+</style></head>
+<body><div class="tv">
+  <div class="stripes"></div>
+  <header class="wall-head">
+    <div class="mast">
+      <span><span class="mast-kicker">Forge C1</span>
+      <span class="mast-word"><em>BYOB</em> Leaderboard</span></span>
+    </div>
+    <div class="meta">
+      <div><span class="meta-label">All-time sales</span><span class="meta-value" id="m-total">&nbsp;</span></div>
+    </div>
+  </header>
+  <div class="ladder" id="ladder"></div>
+  <aside class="scan" id="scan">
+    <span class="scan-code"><img src="/tv/qr.svg" alt="" width="216" height="216"></span>
+    <span class="scan-head" id="scan-head">&nbsp;</span>
+    <span class="scan-sub" id="scan-sub">&nbsp;</span>
+    <span class="scan-ask" id="scan-ask">&nbsp;</span>
+  </aside>
+</div>
+<script src="/tv/tv.js"></script>
+<script>
+const Q = new URLSearchParams(location.search)
+const PROGRAMME_START = '2026-08-31T00:00:00+05:30'
+const DEMO = Q.get('demo'), PHOTOS_ON = Q.get('photos')
+const photos = (rank) => PHOTOS_ON === 'none' ? false : PHOTOS_ON === 'all' ? true : rank <= 3
+
+/* One baseline for every bar, and a maximum that leaves the leader's figure
+   room. No floor: the bar is the number and nothing else is inside it. */
+const BAR_X = 498
+const BAR_MAX = 1920 - 48 - 404 - BAR_X
+
+/* Named so a fresh poll can repaint it; see `onFreshData` in tv.js. */
+const paint = (teams) => {
+  if (DEMO === 'flat') teams.forEach((t) => { t.total = 195000 + Math.random() * 12000 })
+  if (DEMO === 'hook') {
+    const low = rankBy(teams, 'total')[24]   // rank 25 all-time
+    if (low) low.today = 36110
+  }
+  if (DEMO === 'hook2') {
+    const mid = rankBy(teams, 'total')[3]    // rank 4 all-time
+    if (mid) mid.today = 22500
+  }
+  // Day one: the sheet is published, nobody has sold anything.
+  if (DEMO === 'cold') teams.forEach((t) => { t.total = 0; t.today = 0; t.units = 0 })
+  // A venture with no photographs reaching the podium. ZAAREE has none today.
+  if (DEMO === 'nophoto') PHOTOS.length = 0
+  if (DEMO === 'hook3') {
+    const top1 = rankBy(teams, 'total')[0]   // the leader also has the best day
+    if (top1) top1.today = 36110
+  }
+  const ranked = rankBy(teams, 'total')
+  const top = ranked.slice(0, 10)
+  const lead = top[0].total || 1
+
+  document.getElementById('m-total').textContent = rupees(ranked.reduce((s, t) => s + t.total, 0))
+
+  const FLOOR = 700, MAX = 1920 - 48
+  document.getElementById('ladder').innerHTML = top.map((t, i) => {
+    const rank = i + 1, big = rank <= 3
+    const w = Math.round(FLOOR + (t.total / lead) * (MAX - FLOOR))
+    return `<div class="bar-row ${big ? 'big' : 'sml'} liv-${liveryFor(t.id)}"
+                 style="width:${w}px;animation-delay:${60 + i * 52}ms">
+      <span class="bar-num">${rank}</span>
+      <span class="bar-name">${t.name}</span>
+      ${photos(rank) ? (squadHtml(t.id, big ? 114 : 52, 5)
+        || `<span class="mono" style="width:84px;height:84px;font-size:34px;margin-left:26px">${monogram(t.name, t.id)}</span>`) : ''}
+      <span class="bar-fig">${rupees(t.total)}</span>
+    </div>`
+  }).join('')
+
+  // Outside every row, so the slab's own clip cannot slice the crown's top off.
+  document.getElementById('ladder').insertAdjacentHTML('afterbegin', `<span class="crown">${CROWN}</span>`)
+
+  writeScan(ranked)
+  warmPhotos()
+  fitScan()
+}
+Promise.all([loadTeams(), loadPhotos()]).then(([teams]) => { paint(teams); onFreshData(paint) })
+
+/**
+ * ── The copy is a fact, not an instruction ──
+ *
+ * "Scan to see the full leaderboard" is a caption: it tells you what to do and
+ * gives you no reason to. Zomato, Blinkit and Netflix all do the same thing on
+ * a billboard — state one specific, true, surprising number and stop talking.
+ * The gap does the work.
+ *
+ * So the headline is the biggest single day's takings on the board and it
+ * refuses to say whose. That figure is live, so the line is different most
+ * mornings and the wall does not go stale — and the venture it is about is
+ * very often NOT one of the ten on screen, which is the whole point.
+ *
+ * When nobody has traded yet (every morning before the first sale, and after
+ * the midnight roll) there is no number to be curious about, so it falls back
+ * to the plain promise rather than printing a hook about zero.
+ */
+/**
+ * ── The scan block's copy, and why it rotates ──
+ *
+ * It used to say "someone sold X today, scan to see who" — and thirty seconds
+ * later the Daily board listed all thirty-nine with today's figures. The wall
+ * answered its own question, so the gap was never a gap, and anyone who
+ * scanned and then watched the answer appear had been mildly conned.
+ *
+ * The rule that replaces it: a call to action may only promise what the
+ * DESTINATION has and the SOURCE does not. Every line below passes — the
+ * people, the businesses, the keeping. None can be closed by the next slide.
+ *
+ * They all share one shape too: a limit, then a reversal. Say what the board
+ * ISN'T and let the reader supply what it is.
+ *
+ * ── "Founders", and "all" rather than 39 ──
+ *
+ * 39 is the number of VENTURES. The people behind them are about 118, so a
+ * line that counts founders says "all" and never a figure it would get wrong.
+ * "Founder" is an editorial claim rather than a column in the sheet — the same
+ * category as "earned, not raised" — but a defensible one: 32 of the 39 have
+ * taken real money off real customers, which is not a student project.
+ *
+ * Rotates per mount, so the wall runs a campaign rather than one advert. The
+ * counter is stored, not derived from the clock, so a line can never change
+ * while somebody is halfway through reading it.
+ */
+const SCAN_COPY = [
+  // Day one needs no punchline: "is a founder" runs straight into the ask.
+  ['Behind every number',  'is a founder.',      ''],
+  ['A leaderboard can\u2019t', 'sell you anything.', 'The founders can.'],
+  ['None of this',         'is a case study.',   'They built it. They sold it.'],
+  // ── Held until `product`, `instagram` and `website` publish in TV_Feed ──
+  // ['You can\u2019t buy', 'from a wall.', 'Every one of them will sell to you.'],
+]
+const SCAN_ASK = 'Scan to meet them all.'
+
+
+
+/**
+ * ── One line a day, not one a minute ──
+ *
+ * Rotating per slide meant a full cycle every four minutes, and that is the
+ * wrong cadence for this audience. The wall is not read by a stream of
+ * strangers; it is the same hundred-odd people walking past the same board
+ * several times a day for weeks. For them FREQUENCY beats variety — a student
+ * who passes three times sees one line three times and knows it by tomorrow,
+ * where three different lines leave nothing behind. It is why a billboard runs
+ * for a fortnight rather than swapping hourly.
+ *
+ * Keyed to the IST day, so the line turns over at midnight with the building
+ * empty — and derived from the clock rather than a stored counter, so every
+ * screen showing this wall is showing the same line on the same day.
+ */
+function writeScan(ranked) {
+  const istDay = Math.floor((Date.now() + 5.5 * 3600e3) / 864e5)
+  const [setup, punch, sub] = SCAN_COPY[istDay % SCAN_COPY.length]
+  document.getElementById('scan-head').innerHTML = `${setup}<br><em>${punch}</em>`
+  const subEl = document.getElementById('scan-sub')
+  subEl.textContent = sub
+  subEl.hidden = sub === ''          // no empty line, no gap where one was
+  document.getElementById('scan-ask').textContent = SCAN_ASK
+}
+
+/**
+ * ── The board wins, always ──
+ *
+ * The corner is only free because the standings are top-heavy. The day the
+ * bottom catches the top — which is what this programme is trying to cause —
+ * the bars grow into this space, and a QR under a figure is worse than no QR.
+ *
+ * Measured after the entrance, not during it: `row-in` translates each row
+ * -56px and getBoundingClientRect includes transforms, so a check on the same
+ * tick measures ten rows short of where they will be and decides there is room.
+ */
+const GAP = 120
+
+function fitScan() {
+  const scan = document.getElementById('scan')
+  const run = () => {
+    scan.hidden = false
+    const box = scan.getBoundingClientRect()
+    scan.hidden = [...document.querySelectorAll('.bar-row')].some((row) => {
+      const fig = row.querySelector('.bar-fig').getBoundingClientRect()
+      return fig.bottom > box.top && fig.top < box.bottom && fig.right + GAP > box.left
+    })
+  }
+  setTimeout(run, 1250)
+  run()
+}
+
+addEventListener('resize', fitScan)
+</script></body></html>

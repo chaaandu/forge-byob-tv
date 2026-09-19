@@ -1851,9 +1851,37 @@
      of the size the paragraph above argued for. `--y-crown` moves with it: a
      taller crown in a square box has its base band further from the box's
      top, so the box hangs higher to keep the band on the same rim. */
-  --d-crown: 42%;
-  --x-crown: 4%;
-  --y-crown: -25%;
+  /* ── And then the box grew by 20.3% and the crown did not ──
+
+     `Crown.tsx`'s viewBox went from `0 0 128 128` to `-13 -13 154 154` — 13
+     units of safe area on every side, because a glint on the left terminal
+     ball reached x = -2 and was being clipped flat by the svg's own viewport.
+     The argument is there; what lives here is the price.
+
+     **None of the four numbers below is a design decision any more.** The
+     artwork is the same size in a box 154/128 as wide, so every one of them is
+     its old value put through that ratio, and the crown renders where it
+     always did:
+
+       --d-crown   42%  x 154/128            = 50.531%   (81px at 1920, as before)
+       --x-crown    4%  - 13/154 of the box  = -0.266%
+       --y-crown  -25%  - 13/154 of the box  = -29.266%
+
+     The padding offset is the same on both axes because the padding is
+     symmetric: 13/154 of a box that is itself 50.531% of the disc is 4.266% of
+     the disc, subtracted from each.
+
+     **They move as a set or they are wrong as a set.** Scale the crown and all
+     three change; change the viewBox again and all three change, along with
+     the two `transform-origin`s on `.tv-crown` / `.tv-crown-glyph` and the
+     translate percentages in `tv-crown-drop` / `tv-crown-lift`, which are
+     percentages of an element that just got taller. Every one of those carries
+     the same ratio and says so. `scripts/measure-crown.mjs` is what catches a
+     half-done pass: it should still report `crown 81x81`, 14px of left
+     overhang and 49.8px of top overhang at 1920. */
+  --d-crown: 50.531%;
+  --x-crown: -0.266%;
+  --y-crown: -29.266%;
   --r-crown: -20deg;
 
 
@@ -2196,10 +2224,18 @@
    Two bounces, the second an eighth of the first, then still. It runs **once**
    — `both`, no `infinite`. A crown that bobbed forever would be a fourth moving
    thing at rest, and this wall allows three. */
+/* **Every percentage below is a share of the crown's own box, and that box is
+   20.3% taller than the artwork in it.** `Crown.tsx`'s viewBox carries 13 units
+   of safe area on each side so a glint on the left terminal ball stops being
+   clipped, which made the element 154/128 of its old size for the same drawn
+   crown. So -180% would now be a *longer* fall than the one argued for two
+   paragraphs down — the crown would start higher and land harder for no reason
+   anybody chose. These are the old distances in the new box: -149.6% is -180%
+   x 128/154, and the two rebounds follow. The travel in pixels is unchanged. */
 @keyframes tv-crown-drop {
   0% {
     opacity: 0;
-    transform: translate3d(0, -180%, 0) rotate(16deg);
+    transform: translate3d(0, -149.6%, 0) rotate(16deg);
     animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
   26% {
@@ -2213,7 +2249,7 @@
     animation-timing-function: cubic-bezier(0.16, 0.84, 0.44, 1);
   }
   60% {
-    transform: translate3d(0, -26%, 0) rotate(3deg);
+    transform: translate3d(0, -21.6%, 0) rotate(3deg);
     animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
   74% {
@@ -2221,7 +2257,7 @@
     animation-timing-function: cubic-bezier(0.16, 0.84, 0.44, 1);
   }
   85% {
-    transform: translate3d(0, -7%, 0) rotate(0.5deg);
+    transform: translate3d(0, -5.8%, 0) rotate(0.5deg);
     animation-timing-function: cubic-bezier(0.55, 0.06, 0.68, 0.19);
   }
   100% {
@@ -2257,7 +2293,10 @@
   }
   to {
     opacity: 0;
-    transform: translate3d(0, -180%, 0) rotate(16deg);
+    /* The drop's distance, in the padded box — see `tv-crown-drop`. The two
+       have to agree to the decimal or the crown leaves on a different arc from
+       the one it arrived on, which is the whole point of reusing it. */
+    transform: translate3d(0, -149.6%, 0) rotate(16deg);
   }
 }
 
@@ -3901,8 +3940,16 @@
     transform: rotate(var(--r-crown));
     /* The lower-right of the crown — the corner resting on the disc. Tilting
        about the box centre lifts that corner off the rim as the angle changes,
-       so a later tweak to `--r-crown` would silently detach it. */
-    transform-origin: 78% 92%;
+       so a later tweak to `--r-crown` would silently detach it.
+
+       **73.27% 84.91% is 78% 92% of the old box.** The viewBox gained 13 units
+       of safe area on every side, so the same point on the metal is now a
+       smaller fraction of a larger box: (0.78 x 128 + 13) / 154 and
+       (0.92 x 128 + 13) / 154. Left at 78/92 the pivot would sit out in the
+       new padding, below and right of the corner it is named for, and the
+       crown would lift off the rim as `--r-crown` changed — the exact failure
+       the paragraph above exists to prevent. */
+    transform-origin: 73.27% 84.91%;
     pointer-events: none;
   }
 
@@ -3913,8 +3960,11 @@
        dimensions is a crown one viewport away from being squashed. */
     height: auto;
     /* The band, so the crown pivots on the rim it lands on rather than about
-       its own middle. */
-    transform-origin: 50% 92%;
+       its own middle. 84.91% rather than 92% for the reason the seat's origin
+       carries: the viewBox's 13 units of padding moved every feature's share
+       of the box. The horizontal half stays at 50% only because that padding
+       is symmetric. */
+    transform-origin: 50% 84.91%;
     /* **`both`, and no iteration count.** It runs once per mount — which on
        this wall is once per rotation, every thirty seconds, because `/podium`
        remounts on each soft navigation. `forwards` alone would leave the crown

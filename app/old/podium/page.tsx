@@ -144,7 +144,7 @@ export default function PodiumPage() {
           The stamp's removal is the part worth recording: this wall shows no
           error state, so a failed fetch renders perfectly healthy stale numbers
           for days and that was the only tell. See the same note in
-          app/daily/page.tsx. */}
+          app/old/daily/page.tsx. */}
 
       <DevPodiumTrigger
         teams={teams}

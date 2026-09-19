@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
-import { BOARD } from '@/app/daily/page'
+import { BOARD } from '@/app/old/daily/page'
 import { boardHeading, boardMode, rankForMode } from '@/lib/board'
 import type { DailyWindow } from '@/lib/daily'
 import { currentChallenge, openWeek } from '@/lib/feed'
@@ -237,7 +237,7 @@ describe('/daily board spec', () => {
    */
   it('matches the route it is served at', () => {
     expect(BOARD.name).toBe('daily')
-    expect(existsSync('app/daily/page.tsx')).toBe(true)
+    expect(existsSync('app/old/daily/page.tsx')).toBe(true)
     expect(existsSync('app/weekly/page.tsx')).toBe(false)
   })
 

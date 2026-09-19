@@ -148,7 +148,7 @@ const browser = await launch()
 let failed = false
 
 for (const [width, height] of SIZES) {
-  for (const path of ['/daily', '/podium']) {
+  for (const path of ['/old/daily', '/old/podium']) {
     const { page, errors } = await open(browser, `${url}${path}`, { width, height })
     const rows = await measure(page)
     for (const r of rows) {

@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>BYOB — the wall</title>
+<style>
+  html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#0a0512}
+  /* The stage stays 1920x1080 and scales as one; see .tv in tv.css. */
+  #stage{position:absolute;top:50%;left:50%;width:1920px;height:1080px;
+         transform:translate(-50%,-50%) scale(var(--fit,1))}
+  iframe{position:absolute;inset:0;width:1920px;height:1080px;border:0;opacity:0;transition:opacity 340ms}
+  iframe.on{opacity:1}
+</style></head><body>
+<!-- Thirty seconds a slide, the way Rotator does it.
+
+     ── The next slide is built six seconds early ──
+
+     A cold browser needs about a second to fetch the sheet, and even warm the
+     swap costs 15-40ms. Neither is much, but neither has to be paid at all:
+     the incoming slide is given its src at T+24s, renders while hidden, and at
+     T+30s the only work left is a cross-fade.
+
+     The catch, and the reason this is not just `src` set earlier: a page that
+     renders while invisible plays its ENTRANCE while invisible. So each slide
+     holds its animations at frame 0 (see the `holding` class in tv.css) and
+     this posts `byob:show` at the moment of the swap. The board is already
+     painted; the arrival still happens in front of somebody. -->
+<div id="stage"><iframe id="a"></iframe><iframe id="b"></iframe></div>
+<script>
+  /* Three slides, thirty seconds each. The 10-Day Challenge REPLACES the daily
+   board when it is running — `AGENTS.md` is explicit that it is the day's
+   contest, not a fourth slide — so the suffix belongs to `/daily` and the
+   weekly board is untouched by it. */
+  const SLIDES = ['/podium',
+                  '/daily' + (location.search.includes('challenge') ? '?mode=challenge' : ''),
+                  '/weekly']
+  const PERIOD = 30000, LEAD = 6000
+  const f = [document.getElementById('a'), document.getElementById('b')]
+  let i = 0, front = 0
+
+  const show = (frame) => {
+    frame.classList.add('on')
+    try { frame.contentWindow.postMessage('byob:show', '*') } catch { /* not ready */ }
+  }
+
+  f[0].src = SLIDES[0]
+  f[0].addEventListener('load', () => show(f[0]), { once: true })
+
+  /* Prefetch at PERIOD-LEAD, swap at PERIOD. A plain `setInterval` firing at
+     PERIOD and swapping LEAD later would have made every slide 36 seconds
+     long and moved the prefetch to the moment of the swap, which is the thing
+     this exists to avoid. Measured before it was noticed. */
+  function cycle() {
+    const back = 1 - front
+    f[back].src = SLIDES[(i + 1) % SLIDES.length]
+    setTimeout(() => {
+      i = (i + 1) % SLIDES.length
+      show(f[back])
+      f[front].classList.remove('on')
+      front = back
+      setTimeout(cycle, PERIOD - LEAD)
+    }, LEAD)
+  }
+  setTimeout(cycle, PERIOD - LEAD)
+</script><script>
+  const fit=()=>document.documentElement.style.setProperty('--fit',
+    String(Math.min(innerWidth/1920, innerHeight/1080)))
+  fit(); addEventListener('resize', fit)
+</script></body></html>

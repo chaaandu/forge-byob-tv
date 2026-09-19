@@ -1,0 +1,363 @@
+/* ============================================================
+   TV mock — a shared design system for two 1920x1080 slides.
+
+   Throwaway. Lives in /public/mock, which .gitignore excludes, and is
+   reachable only at http://localhost:3000/mock/*.html. Touches nothing in
+   app/, components/ or lib/.
+
+   Two rules carried over from the real wall because they are correctness
+   rather than taste:
+     · COLOUR MAY BLEED TO THE EDGE, TYPE MAY NOT. A television's overscan
+       crops ~2% off every side. A colour bar losing 20px is invisible; a
+       figure losing 20px is a wrong number. --safe-x / --safe-y.
+     · NOTHING MOVES AT REST. Everything below is still. The only motion is
+       an arrival on mount, once, `both`, no iteration count.
+   ============================================================ */
+
+@font-face {
+  font-family: 'ArchivoMock';
+  src: url('/tv/Archivo-Variable.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: block;
+}
+
+:root {
+  /* ── The page ── */
+  --page: #120a1e;
+  --page-deep: #0a0512;
+  --glow: #2e1550;
+  --ink: #ffffff;
+  --ink-muted: #b9a6d4;
+  --ink-faint: #9481b4;
+  --accent: #c99bff;
+  --hairline: rgba(255, 255, 255, 0.09);
+  --sheen: rgba(255, 255, 255, 0.22);
+  --shade: rgba(0, 0, 0, 0.55);
+
+  /* Television overscan. Colour crosses these; type never does. */
+  /* The wall's own numbers: 48 / 40 at 1080, which is 3.7% vertical — inside
+     the 2.5-5% a consumer panel typically crops. Nothing structural above it. */
+  --safe-x: 48px;
+  --safe-y: 40px;
+
+  /* The Ladder's money band: ONE fill for all ten rows, because a bar chart
+     whose end-blocks vary in brightness is not comparable. See ladder.html. */
+  --rule-fill: #f7f2fd;
+  --rule-ink: #140a1f;
+  --rule-seam: rgba(8, 3, 16, 0.55);
+
+  /* One rake, so every diagonal on the wall is parallel. */
+  --rake: 16px;
+
+  /* ── Thirty-nine liveries: one per team, and never shared ──
+
+     Hashing into a short palette always collides, and with 39 teams over 16
+     colours two of the visible top ten will share one most days. So the
+     palette is the size of the cohort and the assignment is a BIJECTION —
+     every venture owns a colour outright, for the whole programme, on both
+     slides and at every rank.
+
+     13 hues x 3 value families (vivid / deep / pale), because 39 hues alone
+     would sit 7 degrees apart and be indistinguishable; a hue plus a value
+     family is not. Slots are strided so that id-adjacent teams are never
+     hue-adjacent.
+
+     Generated with measured contrast: worst slab 4.55:1, worst band 12.80:1.
+     Each carries its own INK, which is the whole trick and the thing the real
+     wall's six purple tints could not do: a fill that ships with the colour of
+     the type that sits on it can be any lightness at all. The band is the
+     OPPOSITE VALUE to its slab, never a darker version — a dark livery given a
+     darker band puts a hole at the end of the row.
+
+     Hues 100-165 are absent on purpose: Mesa's parent brand is green and Forge
+     is its purple re-skin, so an emerald slab reads as a regression. */
+  --l1-a:#ffd9aa; --l1-b:#de9e43; --l1-ink:#140a1f; --l1-band:#f2d2ac; --l1-band-ink:#140a1f; --l1-card:#feb857; --l1-card-ink:#140a1f; --l1-edge:#af761f; --l1-disc-ink:#140a1f; --l1-shade:#fff7ed; /*  72deg */
+  --l2-a:#60fedb; --l2-b:#2cc6a8; --l2-ink:#140a1f; --l2-band:#aae3d3; --l2-band-ink:#140a1f; --l2-card:#44e4c3; --l2-card-ink:#140a1f; --l2-edge:#14917a; --l2-disc-ink:#140a1f; --l2-shade:#e4fff7; /* 176deg */
+  --l3-a:#8ff2ff; --l3-b:#62bcc8; --l3-ink:#140a1f; --l3-band:#a5e1e9; --l3-band-ink:#140a1f; --l3-card:#78d9e5; --l3-card-ink:#140a1f; --l3-edge:#158d99; --l3-disc-ink:#140a1f; --l3-shade:#e9fdff; /* 206deg */
+  --l4-a:#bee6ff; --l4-b:#85b3d1; --l4-ink:#140a1f; --l4-band:#b0ddfa; --l4-band-ink:#140a1f; --l4-card:#9ccfef; --l4-card-ink:#140a1f; --l4-edge:#1c87bb; --l4-disc-ink:#140a1f; --l4-shade:#f1faff; /* 236deg */
+  --l5-a:#ffedbe; --l5-b:#e0b436; --l5-ink:#140a1f; --l5-band:#ead6a3; --l5-band-ink:#140a1f; --l5-card:#ffcf4a; --l5-card-ink:#140a1f; --l5-edge:#6d4600; --l5-disc-ink:#ffffff; --l5-shade:#fffaec; /*  88deg /live material */
+  --l6-a:#d2e0ff; --l6-b:#96acde; --l6-ink:#140a1f; --l6-band:#c6d7ff; --l6-band-ink:#140a1f; --l6-card:#afc7fe; --l6-card-ink:#140a1f; --l6-edge:#5d7ac5; --l6-disc-ink:#140a1f; --l6-shade:#f6f9ff; /* 267deg */
+  --l7-a:#e3d9ff; --l7-b:#b2a1dd; --l7-ink:#140a1f; --l7-band:#ddd1fe; --l7-band-ink:#140a1f; --l7-card:#cdbbfd; --l7-card-ink:#140a1f; --l7-edge:#7f66b5; --l7-disc-ink:#ffffff; --l7-shade:#f9f7ff; /* 297deg */
+  --l8-a:#fccefb; --l8-b:#c59dc4; --l8-ink:#140a1f; --l8-band:#f1ccef; --l8-band-ink:#140a1f; --l8-card:#e3b6e1; --l8-card-ink:#140a1f; --l8-edge:#9c5c9b; --l8-disc-ink:#ffffff; --l8-shade:#fff4ff; /* 327deg */
+  --l9-a:#ffd1df; --l9-b:#d598ac; --l9-ink:#140a1f; --l9-band:#fdcada; --l9-band-ink:#140a1f; --l9-card:#f4b1c7; --l9-card-ink:#140a1f; --l9-edge:#ae5677; --l9-disc-ink:#ffffff; --l9-shade:#fff5f8; /* 358deg */
+  --l10-a:#ffd5c5; --l10-b:#df997d; --l10-ink:#140a1f; --l10-band:#feccba; --l10-band-ink:#140a1f; --l10-card:#ffb294; --l10-card-ink:#140a1f; --l10-edge:#b15c3a; --l10-disc-ink:#ffffff; --l10-shade:#fff6f3; /*  42deg */
+  --l11-a:#4ee7b7; --l11-b:#0eb187; --l11-ink:#140a1f; --l11-band:#aee2cd; --l11-band-ink:#140a1f; --l11-card:#2fcea0; --l11-card-ink:#140a1f; --l11-edge:#047558; --l11-disc-ink:#ffffff; --l11-shade:#81fdd1; /* 168deg */
+  --l12-a:#4de1e6; --l12-b:#0eacb0; --l12-ink:#140a1f; --l12-band:#a5e2e4; --l12-band-ink:#140a1f; --l12-card:#2fc8cd; --l12-card-ink:#140a1f; --l12-edge:#087175; --l12-disc-ink:#ffffff; --l12-shade:#80f8fc; /* 198deg */
+  --l13-a:#7cd6ff; --l13-b:#16a5d6; --l13-ink:#140a1f; --l13-band:#acdff7; --l13-band-ink:#140a1f; --l13-card:#33c1f6; --l13-card-ink:#140a1f; --l13-edge:#0a6d8f; --l13-disc-ink:#ffffff; --l13-shade:#bceaff; /* 229deg */
+  --l14-a:#a9cbff; --l14-b:#6d98da; --l14-ink:#140a1f; --l14-band:#c1d9fe; --l14-band-ink:#140a1f; --l14-card:#84b2fb; --l14-card-ink:#140a1f; --l14-edge:#3662a7; --l14-disc-ink:#ffffff; --l14-shade:#d0e3ff; /* 259deg */
+  --l15-a:#c7c0ff; --l15-b:#958ad8; --l15-ink:#140a1f; --l15-band:#d7d3fe; --l15-band-ink:#140a1f; --l15-card:#afa4f9; --l15-card-ink:#140a1f; --l15-edge:#6355a3; --l15-disc-ink:#ffffff; --l15-shade:#e0ddff; /* 289deg */
+  --l16-a:#d8b8ff; --l16-b:#ab7ede; --l16-ink:#140a1f; --l16-band:#e2cffb; --l16-band-ink:#140a1f; --l16-card:#c796ff; --l16-card-ink:#140a1f; --l16-edge:#764aa3; --l16-disc-ink:#ffffff; --l16-shade:#e9d9ff; /* 305deg */
+  --l17-a:#ffa7ec; --l17-b:#d26cbe; --l17-ink:#140a1f; --l17-band:#f5cbea; --l17-band-ink:#140a1f; --l17-card:#f283dc; --l17-card-ink:#140a1f; --l17-edge:#973786; --l17-disc-ink:#ffffff; --l17-shade:#ffd1f4; /* 335deg */
+  --l18-a:#ffafc0; --l18-b:#d7738b; --l18-ink:#140a1f; --l18-band:#ffc9d4; --l18-band-ink:#140a1f; --l18-card:#f88aa5; --l18-card-ink:#140a1f; --l18-edge:#9b3f59; --l18-disc-ink:#ffffff; --l18-shade:#ffd4dc; /*   5deg */
+  --l19-a:#ffb68e; --l19-b:#d77c45; --l19-ink:#140a1f; --l19-band:#fcceb5; --l19-band-ink:#140a1f; --l19-card:#f89459; --l19-card-ink:#140a1f; --l19-edge:#9c4805; --l19-disc-ink:#ffffff; --l19-shade:#ffd8c4; /*  50deg */
+  --l20-a:#fdbd3f; --l20-b:#c28c10; --l20-ink:#140a1f; --l20-band:#edd4aa; --l20-band-ink:#140a1f; --l20-card:#e2a521; --l20-card-ink:#140a1f; --l20-edge:#815c06; --l20-disc-ink:#ffffff; --l20-shade:#ffdca0; /*  80deg */
+  --l21-a:#e0974a; --l21-b:#a7681e; --l21-ink:#140a1f; --l21-band:#f6d1ae; --l21-band-ink:#140a1f; --l21-card:#c68034; --l21-card-ink:#140a1f; --l21-edge:#673c02; --l21-disc-ink:#ffffff; --l21-shade:#f3b171; /*  65deg */
+  --l22-a:#fcf8ff; --l22-b:#c9c4d0; --l22-ink:#140a1f; --l22-band:#dcd4e4; --l22-band-ink:#140a1f; --l22-card:#e5dfec; --l22-card-ink:#140a1f; --l22-edge:#514a66; --l22-disc-ink:#ffffff; --l22-shade:#fcf9ff; /* 307deg /live material */
+  --l23-a:#37bfba; --l23-b:#038b86; --l23-ink:#140a1f; --l23-band:#a6e2de; --l23-band-ink:#140a1f; --l23-card:#10a7a2; --l23-card-ink:#140a1f; --l23-edge:#045350; --l23-disc-ink:#ffffff; --l23-shade:#69d5d0; /* 191deg */
+  --l24-a:#fd4234; --l24-b:#ba0605; --l24-ink:#ffffff; --l24-band:#fecbc3; --l24-band-ink:#140a1f; --l24-card:#e0241b; --l24-card-ink:#ffffff; --l24-edge:#ff9b93; --l24-disc-ink:#140a1f; --l24-shade:#9a0303; /*  29deg /live material */
+  --l25-a:#36badf; --l25-b:#0286a4; --l25-ink:#140a1f; --l25-band:#a9e0f3; --l25-band-ink:#140a1f; --l25-card:#0ea2c5; --l25-card-ink:#140a1f; --l25-edge:#055063; --l25-disc-ink:#ffffff; --l25-shade:#68d1f1; /* 221deg */
+  --l26-a:#60adff; --l26-b:#067ad7; --l26-ink:#140a1f; --l26-band:#badaff; --l26-band-ink:#140a1f; --l26-card:#1f94fd; --l26-card-ink:#140a1f; --l26-edge:#014884; --l26-disc-ink:#ffffff; --l26-shade:#91c5ff; /* 251deg */
+  --l27-a:#9c9dff; --l27-b:#6c66d9; --l27-ink:#140a1f; --l27-band:#d1d4ff; --l27-band-ink:#140a1f; --l27-card:#837ffd; --l27-card-ink:#140a1f; --l27-edge:#3f319d; --l27-disc-ink:#ffffff; --l27-shade:#b6baff; /* 282deg */
+  --l28-a:#e372fd; --l28-b:#aa44c1; --l28-ink:#140a1f; --l28-band:#eccdf4; --l28-band-ink:#140a1f; --l28-card:#c95be2; --l28-card-ink:#140a1f; --l28-edge:#710185; --l28-disc-ink:#ffffff; --l28-shade:#ed9eff; /* 320deg */
+  --l29-a:#fa72b9; --l29-b:#bd4686; --l29-ink:#140a1f; --l29-band:#fbcadf; --l29-band-ink:#140a1f; --l29-card:#de5ca1; --l29-card-ink:#140a1f; --l29-edge:#810453; --l29-disc-ink:#ffffff; --l29-shade:#ff9dcc; /* 350deg */
+  --l30-a:#f18586; --l30-b:#b6585a; --l30-ink:#140a1f; --l30-band:#ffcbc9; --l30-band-ink:#140a1f; --l30-card:#d66f70; --l30-card-ink:#140a1f; --l30-edge:#7c252b; --l30-disc-ink:#ffffff; --l30-shade:#ffa5a4; /*  20deg */
+  --l31-a:#2482c1; --l31-b:#055281; --l31-ink:#ffffff; --l31-band:#b4dcfd; --l31-band-ink:#140a1f; --l31-card:#016ba8; --l31-card-ink:#ffffff; --l31-edge:#a0d4ff; --l31-disc-ink:#140a1f; --l31-shade:#004068; /* 183deg */
+  --l32-a:#787385; --l32-b:#4a4756; --l32-ink:#ffffff; --l32-band:#d8d6e1; --l32-band-ink:#140a1f; --l32-card:#625e6f; --l32-card-ink:#ffffff; --l32-edge:#d3cfdd; --l32-disc-ink:#140a1f; --l32-shade:#393644; /* 296deg /live material */
+  --l33-a:#2c8a9c; --l33-b:#065967; --l33-ink:#ffffff; --l33-band:#a6e1ee; --l33-band-ink:#140a1f; --l33-card:#097384; --l33-card-ink:#ffffff; --l33-edge:#5ee2fd; --l33-disc-ink:#140a1f; --l33-shade:#034651; /* 214deg */
+  --l34-a:#c7379c; --l34-b:#890668; --l34-ink:#ffffff; --l34-band:#f8cae5; --l34-band-ink:#140a1f; --l34-card:#ac1b84; --l34-card-ink:#ffffff; --l34-edge:#ffb2e1; --l34-disc-ink:#140a1f; --l34-shade:#6d0352; /* 244deg */
+  --l35-a:#5a64fd; --l35-b:#3616d5; --l35-ink:#ffffff; --l35-band:#ccd6ff; --l35-band-ink:#140a1f; --l35-card:#4738fc; --l35-card-ink:#ffffff; --l35-edge:#bfcbff; --l35-disc-ink:#140a1f; --l35-shade:#2a07ae; /* 274deg */
+  --l36-a:#2c8d81; --l36-b:#065b52; --l36-ink:#ffffff; --l36-band:#a7e3d9; --l36-band-ink:#140a1f; --l36-card:#0a766b; --l36-card-ink:#ffffff; --l36-edge:#61e7d5; --l36-disc-ink:#140a1f; --l36-shade:#044740; /* 312deg */
+  --l37-a:#a93ddd; --l37-b:#74019e; --l37-ink:#ffffff; --l37-band:#e7cef8; --l37-band-ink:#140a1f; --l37-card:#9120c2; --l37-card-ink:#ffffff; --l37-edge:#e4bafe; --l37-disc-ink:#140a1f; --l37-shade:#5b007e; /* 343deg */
+  --l38-a:#d5375b; --l38-b:#940434; --l38-ink:#ffffff; --l38-band:#ffcace; --l38-band-ink:#140a1f; --l38-card:#b91a46; --l38-card-ink:#ffffff; --l38-edge:#feb8bf; --l38-disc-ink:#140a1f; --l38-shade:#760227; /*  13deg */
+  --l39-a:#b26622; --l39-b:#773d00; --l39-ink:#ffffff; --l39-band:#f9cfb1; --l39-band-ink:#140a1f; --l39-card:#995001; --l39-card-ink:#ffffff; --l39-edge:#ffbe8f; --l39-disc-ink:#140a1f; --l39-shade:#5e2f00; /*  57deg */
+}
+
+.liv-1{--a:var(--l1-a);--b:var(--l1-b);--lk:var(--l1-ink);--bd:var(--l1-band);--bdk:var(--l1-band-ink);--cd:var(--l1-card);--cdk:var(--l1-card-ink);--ce:var(--l1-edge);--cdi:var(--l1-disc-ink);--sh:var(--l1-shade)}
+.liv-2{--a:var(--l2-a);--b:var(--l2-b);--lk:var(--l2-ink);--bd:var(--l2-band);--bdk:var(--l2-band-ink);--cd:var(--l2-card);--cdk:var(--l2-card-ink);--ce:var(--l2-edge);--cdi:var(--l2-disc-ink);--sh:var(--l2-shade)}
+.liv-3{--a:var(--l3-a);--b:var(--l3-b);--lk:var(--l3-ink);--bd:var(--l3-band);--bdk:var(--l3-band-ink);--cd:var(--l3-card);--cdk:var(--l3-card-ink);--ce:var(--l3-edge);--cdi:var(--l3-disc-ink);--sh:var(--l3-shade)}
+.liv-4{--a:var(--l4-a);--b:var(--l4-b);--lk:var(--l4-ink);--bd:var(--l4-band);--bdk:var(--l4-band-ink);--cd:var(--l4-card);--cdk:var(--l4-card-ink);--ce:var(--l4-edge);--cdi:var(--l4-disc-ink);--sh:var(--l4-shade)}
+.liv-5{--a:var(--l5-a);--b:var(--l5-b);--lk:var(--l5-ink);--bd:var(--l5-band);--bdk:var(--l5-band-ink);--cd:var(--l5-card);--cdk:var(--l5-card-ink);--ce:var(--l5-edge);--cdi:var(--l5-disc-ink);--sh:var(--l5-shade)}
+.liv-6{--a:var(--l6-a);--b:var(--l6-b);--lk:var(--l6-ink);--bd:var(--l6-band);--bdk:var(--l6-band-ink);--cd:var(--l6-card);--cdk:var(--l6-card-ink);--ce:var(--l6-edge);--cdi:var(--l6-disc-ink);--sh:var(--l6-shade)}
+.liv-7{--a:var(--l7-a);--b:var(--l7-b);--lk:var(--l7-ink);--bd:var(--l7-band);--bdk:var(--l7-band-ink);--cd:var(--l7-card);--cdk:var(--l7-card-ink);--ce:var(--l7-edge);--cdi:var(--l7-disc-ink);--sh:var(--l7-shade)}
+.liv-8{--a:var(--l8-a);--b:var(--l8-b);--lk:var(--l8-ink);--bd:var(--l8-band);--bdk:var(--l8-band-ink);--cd:var(--l8-card);--cdk:var(--l8-card-ink);--ce:var(--l8-edge);--cdi:var(--l8-disc-ink);--sh:var(--l8-shade)}
+.liv-9{--a:var(--l9-a);--b:var(--l9-b);--lk:var(--l9-ink);--bd:var(--l9-band);--bdk:var(--l9-band-ink);--cd:var(--l9-card);--cdk:var(--l9-card-ink);--ce:var(--l9-edge);--cdi:var(--l9-disc-ink);--sh:var(--l9-shade)}
+.liv-10{--a:var(--l10-a);--b:var(--l10-b);--lk:var(--l10-ink);--bd:var(--l10-band);--bdk:var(--l10-band-ink);--cd:var(--l10-card);--cdk:var(--l10-card-ink);--ce:var(--l10-edge);--cdi:var(--l10-disc-ink);--sh:var(--l10-shade)}
+.liv-11{--a:var(--l11-a);--b:var(--l11-b);--lk:var(--l11-ink);--bd:var(--l11-band);--bdk:var(--l11-band-ink);--cd:var(--l11-card);--cdk:var(--l11-card-ink);--ce:var(--l11-edge);--cdi:var(--l11-disc-ink);--sh:var(--l11-shade)}
+.liv-12{--a:var(--l12-a);--b:var(--l12-b);--lk:var(--l12-ink);--bd:var(--l12-band);--bdk:var(--l12-band-ink);--cd:var(--l12-card);--cdk:var(--l12-card-ink);--ce:var(--l12-edge);--cdi:var(--l12-disc-ink);--sh:var(--l12-shade)}
+.liv-13{--a:var(--l13-a);--b:var(--l13-b);--lk:var(--l13-ink);--bd:var(--l13-band);--bdk:var(--l13-band-ink);--cd:var(--l13-card);--cdk:var(--l13-card-ink);--ce:var(--l13-edge);--cdi:var(--l13-disc-ink);--sh:var(--l13-shade)}
+.liv-14{--a:var(--l14-a);--b:var(--l14-b);--lk:var(--l14-ink);--bd:var(--l14-band);--bdk:var(--l14-band-ink);--cd:var(--l14-card);--cdk:var(--l14-card-ink);--ce:var(--l14-edge);--cdi:var(--l14-disc-ink);--sh:var(--l14-shade)}
+.liv-15{--a:var(--l15-a);--b:var(--l15-b);--lk:var(--l15-ink);--bd:var(--l15-band);--bdk:var(--l15-band-ink);--cd:var(--l15-card);--cdk:var(--l15-card-ink);--ce:var(--l15-edge);--cdi:var(--l15-disc-ink);--sh:var(--l15-shade)}
+.liv-16{--a:var(--l16-a);--b:var(--l16-b);--lk:var(--l16-ink);--bd:var(--l16-band);--bdk:var(--l16-band-ink);--cd:var(--l16-card);--cdk:var(--l16-card-ink);--ce:var(--l16-edge);--cdi:var(--l16-disc-ink);--sh:var(--l16-shade)}
+.liv-17{--a:var(--l17-a);--b:var(--l17-b);--lk:var(--l17-ink);--bd:var(--l17-band);--bdk:var(--l17-band-ink);--cd:var(--l17-card);--cdk:var(--l17-card-ink);--ce:var(--l17-edge);--cdi:var(--l17-disc-ink);--sh:var(--l17-shade)}
+.liv-18{--a:var(--l18-a);--b:var(--l18-b);--lk:var(--l18-ink);--bd:var(--l18-band);--bdk:var(--l18-band-ink);--cd:var(--l18-card);--cdk:var(--l18-card-ink);--ce:var(--l18-edge);--cdi:var(--l18-disc-ink);--sh:var(--l18-shade)}
+.liv-19{--a:var(--l19-a);--b:var(--l19-b);--lk:var(--l19-ink);--bd:var(--l19-band);--bdk:var(--l19-band-ink);--cd:var(--l19-card);--cdk:var(--l19-card-ink);--ce:var(--l19-edge);--cdi:var(--l19-disc-ink);--sh:var(--l19-shade)}
+.liv-20{--a:var(--l20-a);--b:var(--l20-b);--lk:var(--l20-ink);--bd:var(--l20-band);--bdk:var(--l20-band-ink);--cd:var(--l20-card);--cdk:var(--l20-card-ink);--ce:var(--l20-edge);--cdi:var(--l20-disc-ink);--sh:var(--l20-shade)}
+.liv-21{--a:var(--l21-a);--b:var(--l21-b);--lk:var(--l21-ink);--bd:var(--l21-band);--bdk:var(--l21-band-ink);--cd:var(--l21-card);--cdk:var(--l21-card-ink);--ce:var(--l21-edge);--cdi:var(--l21-disc-ink);--sh:var(--l21-shade)}
+.liv-22{--a:var(--l22-a);--b:var(--l22-b);--lk:var(--l22-ink);--bd:var(--l22-band);--bdk:var(--l22-band-ink);--cd:var(--l22-card);--cdk:var(--l22-card-ink);--ce:var(--l22-edge);--cdi:var(--l22-disc-ink);--sh:var(--l22-shade)}
+.liv-23{--a:var(--l23-a);--b:var(--l23-b);--lk:var(--l23-ink);--bd:var(--l23-band);--bdk:var(--l23-band-ink);--cd:var(--l23-card);--cdk:var(--l23-card-ink);--ce:var(--l23-edge);--cdi:var(--l23-disc-ink);--sh:var(--l23-shade)}
+.liv-24{--a:var(--l24-a);--b:var(--l24-b);--lk:var(--l24-ink);--bd:var(--l24-band);--bdk:var(--l24-band-ink);--cd:var(--l24-card);--cdk:var(--l24-card-ink);--ce:var(--l24-edge);--cdi:var(--l24-disc-ink);--sh:var(--l24-shade)}
+.liv-25{--a:var(--l25-a);--b:var(--l25-b);--lk:var(--l25-ink);--bd:var(--l25-band);--bdk:var(--l25-band-ink);--cd:var(--l25-card);--cdk:var(--l25-card-ink);--ce:var(--l25-edge);--cdi:var(--l25-disc-ink);--sh:var(--l25-shade)}
+.liv-26{--a:var(--l26-a);--b:var(--l26-b);--lk:var(--l26-ink);--bd:var(--l26-band);--bdk:var(--l26-band-ink);--cd:var(--l26-card);--cdk:var(--l26-card-ink);--ce:var(--l26-edge);--cdi:var(--l26-disc-ink);--sh:var(--l26-shade)}
+.liv-27{--a:var(--l27-a);--b:var(--l27-b);--lk:var(--l27-ink);--bd:var(--l27-band);--bdk:var(--l27-band-ink);--cd:var(--l27-card);--cdk:var(--l27-card-ink);--ce:var(--l27-edge);--cdi:var(--l27-disc-ink);--sh:var(--l27-shade)}
+.liv-28{--a:var(--l28-a);--b:var(--l28-b);--lk:var(--l28-ink);--bd:var(--l28-band);--bdk:var(--l28-band-ink);--cd:var(--l28-card);--cdk:var(--l28-card-ink);--ce:var(--l28-edge);--cdi:var(--l28-disc-ink);--sh:var(--l28-shade)}
+.liv-29{--a:var(--l29-a);--b:var(--l29-b);--lk:var(--l29-ink);--bd:var(--l29-band);--bdk:var(--l29-band-ink);--cd:var(--l29-card);--cdk:var(--l29-card-ink);--ce:var(--l29-edge);--cdi:var(--l29-disc-ink);--sh:var(--l29-shade)}
+.liv-30{--a:var(--l30-a);--b:var(--l30-b);--lk:var(--l30-ink);--bd:var(--l30-band);--bdk:var(--l30-band-ink);--cd:var(--l30-card);--cdk:var(--l30-card-ink);--ce:var(--l30-edge);--cdi:var(--l30-disc-ink);--sh:var(--l30-shade)}
+.liv-31{--a:var(--l31-a);--b:var(--l31-b);--lk:var(--l31-ink);--bd:var(--l31-band);--bdk:var(--l31-band-ink);--cd:var(--l31-card);--cdk:var(--l31-card-ink);--ce:var(--l31-edge);--cdi:var(--l31-disc-ink);--sh:var(--l31-shade)}
+.liv-32{--a:var(--l32-a);--b:var(--l32-b);--lk:var(--l32-ink);--bd:var(--l32-band);--bdk:var(--l32-band-ink);--cd:var(--l32-card);--cdk:var(--l32-card-ink);--ce:var(--l32-edge);--cdi:var(--l32-disc-ink);--sh:var(--l32-shade)}
+.liv-33{--a:var(--l33-a);--b:var(--l33-b);--lk:var(--l33-ink);--bd:var(--l33-band);--bdk:var(--l33-band-ink);--cd:var(--l33-card);--cdk:var(--l33-card-ink);--ce:var(--l33-edge);--cdi:var(--l33-disc-ink);--sh:var(--l33-shade)}
+.liv-34{--a:var(--l34-a);--b:var(--l34-b);--lk:var(--l34-ink);--bd:var(--l34-band);--bdk:var(--l34-band-ink);--cd:var(--l34-card);--cdk:var(--l34-card-ink);--ce:var(--l34-edge);--cdi:var(--l34-disc-ink);--sh:var(--l34-shade)}
+.liv-35{--a:var(--l35-a);--b:var(--l35-b);--lk:var(--l35-ink);--bd:var(--l35-band);--bdk:var(--l35-band-ink);--cd:var(--l35-card);--cdk:var(--l35-card-ink);--ce:var(--l35-edge);--cdi:var(--l35-disc-ink);--sh:var(--l35-shade)}
+.liv-36{--a:var(--l36-a);--b:var(--l36-b);--lk:var(--l36-ink);--bd:var(--l36-band);--bdk:var(--l36-band-ink);--cd:var(--l36-card);--cdk:var(--l36-card-ink);--ce:var(--l36-edge);--cdi:var(--l36-disc-ink);--sh:var(--l36-shade)}
+.liv-37{--a:var(--l37-a);--b:var(--l37-b);--lk:var(--l37-ink);--bd:var(--l37-band);--bdk:var(--l37-band-ink);--cd:var(--l37-card);--cdk:var(--l37-card-ink);--ce:var(--l37-edge);--cdi:var(--l37-disc-ink);--sh:var(--l37-shade)}
+.liv-38{--a:var(--l38-a);--b:var(--l38-b);--lk:var(--l38-ink);--bd:var(--l38-band);--bdk:var(--l38-band-ink);--cd:var(--l38-card);--cdk:var(--l38-card-ink);--ce:var(--l38-edge);--cdi:var(--l38-disc-ink);--sh:var(--l38-shade)}
+.liv-39{--a:var(--l39-a);--b:var(--l39-b);--lk:var(--l39-ink);--bd:var(--l39-band);--bdk:var(--l39-band-ink);--cd:var(--l39-card);--cdk:var(--l39-card-ink);--ce:var(--l39-edge);--cdi:var(--l39-disc-ink);--sh:var(--l39-shade)}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--page-deep);
+}
+
+body {
+  font-family: 'ArchivoMock', system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.tv {
+  /* ── The board is drawn at 1920x1080 and SCALED, never reflowed ──
+   *
+   * Every size on this wall is an absolute pixel, tuned at 1920x1080. Left to
+   * reflow, a narrower screen keeps 1920-scale type inside a smaller grid:
+   * measured at 1366x768, venture names truncated to "The Drunk..." and both
+   * hero figures printed straight across the squad's faces. It rendered
+   * convincingly and was wrong, which is this wall's stated failure mode.
+   *
+   * So the geometry is frozen and the whole board is scaled by
+   * min(vw/1920, vh/1080) — `fitToScreen` in tv.js sets `--fit`, because CSS
+   * cannot divide a length by a length to get a bare number for scale().
+   * At exactly 1920x1080 the factor is 1 and nothing moves. Anywhere else the
+   * board is letterboxed, identical, just smaller. */
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1920px;
+  height: 1080px;
+  transform: translate(-50%, -50%) scale(var(--fit, 1));
+  overflow: hidden;
+  background:
+    radial-gradient(120% 70% at 88% -10%, var(--glow) 0%, transparent 62%),
+    radial-gradient(90% 60% at 4% 104%, #1d0d33 0%, transparent 60%),
+    var(--page);
+}
+
+/* ── The masthead ──
+   Not a band. The wordmark bleeds off the top-left and the board overlaps it,
+   which is what stops the frame reading as stacked rows. */
+.wall-head {
+  position: absolute;
+  top: var(--safe-y);
+  left: var(--safe-x);
+  right: var(--safe-x);
+  z-index: 3;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 40px;
+}
+
+.mast {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+}
+
+.mast-kicker {
+  display: block;
+  font-size: 22px;
+  font-weight: 700;
+  font-stretch: 100%;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 6px;
+}
+
+.mast-word {
+  display: block;
+  font-size: 90px;
+  font-weight: 900;
+  font-stretch: 68%;
+  line-height: 0.8;
+  letter-spacing: 0.004em;
+  text-transform: uppercase;
+  transform: skewX(-11deg);
+  transform-origin: 0 100%;
+  text-shadow: 0 10px 40px var(--shade);
+}
+
+.mast-word em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+/* Diagonal stripes off the top-right, the one piece of decoration. */
+.stripes {
+  position: absolute;
+  top: -40px;
+  right: -60px;
+  width: 720px;
+  height: 340px;
+  background: repeating-linear-gradient(108deg,
+    rgba(255,255,255,0.085) 0 14px, transparent 14px 34px);
+  mask-image: linear-gradient(255deg, black 30%, transparent 78%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* The three rules at the top-right: what the board totals. */
+.meta {
+  display: flex;
+  align-items: flex-end;
+  gap: 52px;
+  text-align: right;
+}
+
+.meta-label {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  font-stretch: 100%;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 6px;
+}
+
+.meta-value {
+  display: block;
+  font-size: 82px;
+  font-weight: 900;
+  font-stretch: 74%;
+  line-height: 0.9;
+  letter-spacing: -0.01em;
+}
+
+.meta-note {
+  display: block; margin-top: 5px;
+  font-size: 13px; font-weight: 700; font-stretch: 100%;
+  letter-spacing: 0.14em; text-transform: uppercase; color: var(--ink-faint);
+}
+
+.meta-value small {
+  font-size: 0.44em;
+  font-weight: 700;
+  color: var(--ink-faint);
+}
+
+.meta-scope {
+  font-size: 24px;
+  font-weight: 800;
+  font-stretch: 84%;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+}
+
+/* ── The monogram ──
+   No borrowed artwork: two letters on the livery's own ground. The emblem is
+   the ghost watermark behind, never the identity. */
+.mono {
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--lk) 14%, transparent);
+  box-shadow: inset 0 0 0 2.5px color-mix(in srgb, var(--lk) 62%, transparent);
+  font-weight: 900;
+  font-stretch: 78%;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.ghost {
+  position: absolute;
+  opacity: 0.17;
+  pointer-events: none;
+  color: var(--lk);
+}
+
+/* ── Held until the slide is actually on screen ────────────────────────────
+ *
+ * The rotator builds the next slide six seconds early so the swap costs
+ * nothing. That creates a problem worth naming: a page that renders while
+ * invisible plays its ENTRANCE while invisible, and by the time anybody sees
+ * it the arrival is over. The wall would cut between two static boards.
+ *
+ * `animation-play-state: paused` applied before the elements exist holds every
+ * animation at frame 0; lifting it starts them from the beginning. So the
+ * slide is fully painted and waiting, and the arrival happens on the swap. */
+html.holding *,
+html.holding *::before,
+html.holding *::after { animation-play-state: paused !important; }
+
+/* ── Arrival ──
+   Once, on mount, `both`, no iteration count. Over before anybody who is
+   walking past has stopped walking. */
+@keyframes wipe-in {
+  from { opacity: 0; transform: translateX(-46px) skewX(-11deg); }
+  to   { opacity: 1; transform: translateX(0) skewX(-11deg); }
+}
+@keyframes rise-in {
+  from { opacity: 0; transform: translateY(26px) scale(0.965); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}

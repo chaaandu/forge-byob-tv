@@ -72,7 +72,7 @@ beforeEach(async () => {
   // **Matched against `FEED_CSV_URL` itself, not against a substring of it.**
   //
   // This used to read `String(url).includes('feed')`, which is true of a
-  // fixture path like `/mock/feed.csv` and false of every published Google URL
+  // fixture path like `/tv/feed.csv` and false of every published Google URL
   // — those carry an opaque `2PACX-…` id and a numeric `gid`. So on any machine
   // without a `.env.local` pointing at fixtures, *both* fetches were served the
   // cohort CSV, `parseTeams` threw `TvSchemaError` on every tick, and five of
