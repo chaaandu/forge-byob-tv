@@ -375,6 +375,8 @@ function onFreshData(render) {
     const next = sign(teams)
     if (next === lastSignature) return
     lastSignature = next
+    // The board has already arrived once; see `html.settled` in tv.css.
+    document.documentElement.classList.add('settled')
     render(teams)
   }
   lastSignature = sign(readCache() || [])

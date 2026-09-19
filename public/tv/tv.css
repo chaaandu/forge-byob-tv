@@ -346,6 +346,26 @@ html.holding *,
 html.holding *::before,
 html.holding *::after { animation-play-state: paused !important; }
 
+/* ── A repaint is not an arrival ──
+ *
+ * `onFreshData` rebuilds the board's innerHTML when a poll brings different
+ * figures, and every new element re-runs its entrance — so a live `/daily`
+ * replayed its whole arrival mid-slide, thirty seconds after arriving, and it
+ * read as the page reloading itself. Reported as exactly that.
+ *
+ * `tv.js` already said why the original code did NOT re-render on a fetch:
+ * repainting mid-slide moves figures and reorders the board while somebody is
+ * reading it. Auto-update was asked for after that was written, so the board
+ * does repaint — but it may not announce itself twice. `settled` goes on after
+ * the first paint and never comes off; the rotation remounts the document
+ * every cycle, which is what gives the next arrival a clean slate.
+ *
+ * The figures still change. What is gone is the 640ms of choreography around
+ * them, which had nothing to report the second time. */
+html.settled *,
+html.settled *::before,
+html.settled *::after { animation: none !important; }
+
 /* ── Arrival ──
    Once, on mount, `both`, no iteration count. Over before anybody who is
    walking past has stopped walking. */

@@ -48,7 +48,8 @@
 }
 
 .hero {
-  position: relative; overflow: hidden; border-radius: 14px;
+  position: relative; overflow: hidden;
+  border-radius: 26px; corner-shape: squircle;   /* see .card */
   /* ── The gradient is a fixed step in LIGHTNESS, not a fixed mix ──
      `color-mix(in srgb, var(--cd) 74%, white)` is a fixed mix, and a fixed mix
      toward white barely moves a card that is already pale. So only the dark
@@ -116,7 +117,17 @@
 
 .card {
   position: relative; display: flex; align-items: center; gap: 10px;
-  min-width: 0; overflow: hidden; padding: 0 12px 0 18px; border-radius: 8px;
+  min-width: 0; overflow: hidden; padding: 0 12px 0 18px;
+  /* ── Continuous corners, and the radius has to grow with them ──
+   * A superellipse stands 0.159·√2·r off the box corner where a circular arc
+   * stands 0.293·√2·r — 0.54 as deep at the same number — so `corner-shape`
+   * at an unchanged radius makes a corner SQUARER, not smoother. Apple's
+   * continuous corner needs the radius multiplied by ~1.85 to land where the
+   * old one was: 8px → 15px here, 14px → 26px on the heroes. **Move one
+   * without the other and the shape changes rather than the smoothing.**
+   * Chrome has had the property since 139; the fallback is a genuinely
+   * rounder corner, not a missing one. */
+  border-radius: 15px; corner-shape: squircle;
   background: linear-gradient(104deg, var(--a), var(--b));   /* see .hero */
   color: var(--cdk);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 6px 16px rgba(0,0,0,0.3);
