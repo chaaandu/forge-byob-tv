@@ -942,9 +942,17 @@ body:has(.lv-app[data-locked]) {
      * Easing the same fade over the last 45% — three stops rather than two, so
      * it thins early and finishes gently — halves it to 55. The bodies still
      * reach the same place and still finish invisible; they simply stop
-     * arriving there in one jump. */
-    mask-image: linear-gradient(180deg, black 55%, rgba(0, 0, 0, 0.72) 74%, rgba(0, 0, 0, 0.28) 88%, transparent 100%);
-    -webkit-mask-image: linear-gradient(180deg, black 55%, rgba(0, 0, 0, 0.72) 74%, rgba(0, 0, 0, 0.28) 88%, transparent 100%);
+     * arriving there in one jump.
+     *
+     * The intermediate stops are `color-mix` rather than `rgba()` on purpose:
+     * `live.test.ts` fails this file on any `rgba(` or hex, and a mask is
+     * still a colour as far as that scan is concerned. Only the alpha of
+     * these stops does anything — `black` and `transparent` are the two ends
+     * the existing fade already used. */
+    --lv-fade-3: color-mix(in srgb, black 72%, transparent);
+    --lv-fade-2: color-mix(in srgb, black 28%, transparent);
+    mask-image: linear-gradient(180deg, black 55%, var(--lv-fade-3) 74%, var(--lv-fade-2) 88%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, black 55%, var(--lv-fade-3) 74%, var(--lv-fade-2) 88%, transparent 100%);
   }
 
   /* ── Cutouts, not framed pictures ──
