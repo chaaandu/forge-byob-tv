@@ -58,35 +58,11 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: '/', destination: '/live', permanent: false },
-      /**
-       * `/weekly` → `/daily`, and this one *is* permanent.
-       *
-       * The slide was at `/weekly` until 18 September 2026, when it stopped
-       * being a weekly board — it ranks a finished day now, 10:00 to 10:00 —
-       * and a route whose name contradicts what it shows is the kind of drift
-       * that misleads whoever reads this next.
-       *
-       * **The redirect exists so nobody has to walk to the TV.** The wall is
-       * pointed at a URL once, by hand, and then runs fullscreen and unattended
-       * for weeks; `components/Rotator.tsx` is explicit that it must never
-       * reload, because a reload drops out of fullscreen for good. A laptop
-       * already bookmarked on `/weekly` keeps working, lands on `/daily`, and
-       * the rotation carries on from there.
-       *
-       * `permanent: true` — a 308, where the root's redirect above is a 307,
-       * and the difference is deliberate. That one is a routing *decision* that
-       * could reasonably change the day this grows a landing page, so it must
-       * stay takeable-back from a browser that has cached it for weeks. This
-       * one is a rename, and a rename does not get un-made: `/weekly` is not
-       * coming back to mean something else, so there is nothing a hard cache
-       * could trap us into.
-       */
-      { source: '/weekly', destination: '/daily', permanent: true },
     ]
   },
 
   /**
-   * ── The two slides are static files, and these are their real addresses ──
+   * ── The three slides are static files, and these are their real addresses ──
    *
    * The wall is drawn in `public/tv/` as plain HTML, CSS and JS rather than as
    * React routes, so the board paints from cached CSV before Next has booted
@@ -107,6 +83,31 @@ const nextConfig: NextConfig = {
     return [
       { source: '/podium', destination: '/tv/ladder.html' },
       { source: '/daily', destination: '/tv/floor.html' },
+      /**
+       * ── `/weekly` is a board again, and it used to be a 308 ──
+       *
+       * It redirected permanently to `/daily` from 18 September 2026, on the
+       * argument that the slide had stopped being a weekly board and a route
+       * whose name contradicts what it shows is drift. It is a weekly board
+       * again — `week_revenue`, Monday 00:00 IST to Sunday midnight, anchored
+       * at `TV_Feed!D2` — so the redirect is gone.
+       *
+       * **A 308 is cached by the browser, not just by us.** Any machine that
+       * loaded `/weekly` while the redirect was live may hold it indefinitely
+       * and never ask the server again — including, most importantly, the
+       * laptop driving the wall. It will land on `/daily` and look completely
+       * healthy. Clearing site data fixes it; `/weekly?x=1` is the one-off
+       * that proves it is what is happening. This is the cost of the
+       * `permanent: true` chosen then, and it is the reason the root's
+       * redirect above is deliberately a 307.
+       *
+       * **Both destinations are the bare file.** A `?board=` here would be
+       * invisible to the page: a rewrite does not change the client URL, so
+       * `location.search` in the browser is empty and the slide would fall
+       * back to the day board — `/weekly` served a flawless DAILY leaderboard
+       * that way. The slide reads `location.pathname` instead.
+       */
+      { source: '/weekly', destination: '/tv/floor.html' },
       { source: '/wall', destination: '/tv/wall.html' },
     ]
   },

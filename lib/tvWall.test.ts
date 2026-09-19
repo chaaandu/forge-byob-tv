@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
-import { SPARE_TEAM_IDS } from '@/config'
-import { compareChallenge, compareDaily, compareTeams } from '@/lib/ranking'
+import { PROGRAMME_START_ISO, SPARE_TEAM_IDS } from '@/config'
+import { compareChallenge, compareDaily, compareTeams, compareWeek } from '@/lib/ranking'
 import type { Team, TeamId } from '@/lib/types'
 
 /**
@@ -26,6 +26,7 @@ import type { Team, TeamId } from '@/lib/types'
  * for the same reason.
  */
 const WALL = readFileSync('public/tv/tv.js', 'utf8')
+const SLIDE = readFileSync('public/tv/floor.html', 'utf8')
 
 const team = (id: string, total: number, units: number, today: number, challenge = 0): Team =>
   ({
@@ -92,6 +93,47 @@ describe('the static wall ranks exactly as lib/ranking does', () => {
     expect(rankPeriod(withChallenge.map(wallTeam), 'challenge').map((t) => t.id)).toEqual(
       [...withChallenge].sort(compareChallenge).map((t) => t.teamId),
     )
+  })
+
+  it('ranks the weekly board the same', () => {
+    const { rankPeriod } = wallComparators()
+    const withWeek = fixture.map((t) =>
+      team(t.teamId, t.totalRevenue, t.totalUnits, 0),
+    ).map((t, i) => ({ ...t, weekRevenue: fixture[i].todayRevenue }) as Team)
+    const wall = withWeek.map((t) => ({ ...wallTeam(t), week: t.weekRevenue }))
+    expect(rankPeriod(wall, 'week').map((t) => t.id)).toEqual(
+      [...withWeek].sort(compareWeek).map((t) => t.teamId),
+    )
+  })
+
+  /**
+   * ── The week must start on a Monday, and a wrong anchor reports nothing ──
+   *
+   * `week_revenue` is the sheet's column, zeroed against `TV_Feed!D2`, and
+   * `PROGRAMME_START_ISO` is the copy of that date this repo reasons from.
+   * `AGENTS.md` records the failure: set to the 1st of September once, which
+   * is a Tuesday, and nothing broke — the formula still returned a plausible
+   * small integer, it just rolled the week on the wrong day, and the two
+   * anchors happened to agree that week. The wall would print a confident
+   * board covering Tuesday to Monday and say so nowhere.
+   */
+  it('anchors the programme week to a Monday', () => {
+    const ist = new Date(Date.parse(PROGRAMME_START_ISO) + 5.5 * 3600_000)
+    expect(ist.getUTCDay()).toBe(1)
+  })
+
+  /**
+   * `/daily`, `/weekly` and the challenge are one file and a `?board=`. Three
+   * copies would drift; one file with a missing entry falls back to the day
+   * board, which would silently serve the daily figures under a weekly name.
+   */
+  it('serves all three boards from the one slide', () => {
+    const map = SLIDE.match(/const BOARDS = \{([\s\S]*?)\n\}/)
+    expect(map).not.toBeNull()
+    for (const [name, key] of [['day', 'today'], ['week', 'week'], ['challenge', 'challenge']]) {
+      expect(map![1]).toMatch(new RegExp(`${name}:\\s*\\{\\s*key: '${key}'`))
+    }
+    expect(map![1]).toContain('Weekly</em> Leaderboard')
   })
 
   /**

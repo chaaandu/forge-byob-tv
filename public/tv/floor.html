@@ -257,9 +257,50 @@
 </div>
 <script src="/tv/tv.js"></script>
 <script>
+/* ── One layout, three boards ──────────────────────────────────────────────
+ *
+ * `/daily`, `/weekly` and the 10-Day Challenge are the same slide reading a
+ * different column, so they are one file and a `?board=` rather than three
+ * copies that drift. The rewrite in `next.config.ts` is what gives each of
+ * them a real URL.
+ *
+ * All three rank with `rankPeriod`, which falls back to ALL-TIME revenue and
+ * never to units — `compareDaily`, `compareWeek` and `compareChallenge` in
+ * `lib/ranking.ts` are the same rule, and `lib/tvWall.test.ts` holds this file
+ * to all three.
+ *
+ * **The week is the sheet's week, not one computed here.** `week_revenue` is
+ * `TV_Feed`'s own column, anchored at `TV_Feed!D2` — 31 August 2026, which is
+ * a Monday — so it zeroes at Monday 00:00 IST and runs Monday to Sunday. A
+ * second opinion about where a week starts is how a board comes to disagree
+ * with the sheet it is printing, so nothing here asks the clock. */
+const BOARDS = {
+  day:       { key: 'today',     word: '<em>Daily</em> Leaderboard',  label: 'Today’s sales',     title: 'BYOB — Daily Leaderboard' },
+  week:      { key: 'week',      word: '<em>Weekly</em> Leaderboard', label: 'This week’s sales', title: 'BYOB — Weekly Leaderboard' },
+  challenge: { key: 'challenge', word: '<em>10-Day</em> Challenge',   label: 'Challenge sales',   title: 'BYOB — 10-Day Challenge' },
+}
 const Q = new URLSearchParams(location.search)
-const challenge = Q.get('mode') === 'challenge', DEMO = Q.get('demo')
-const KEY = challenge ? 'challenge' : 'today'
+const DEMO = Q.get('demo')
+/* ── The PATH decides which board, not a query ──
+ *
+ * `/weekly` is a rewrite onto this file, and a rewrite does not change the
+ * client URL: the destination's `?board=week` exists only on the server, so
+ * `location.search` here is empty and a query-driven switch silently falls
+ * back to the day board. `/weekly` served a flawless DAILY leaderboard —
+ * right figures, right ranking, wrong week, nothing to report it. Measured,
+ * not reasoned about.
+ *
+ * `?board=` survives for opening the file directly at `/tv/floor.html`, and
+ * `?mode=challenge` for the rotator, which sets it on the iframe's own URL
+ * where the browser can see it. */
+const PATH_BOARD = { '/weekly': 'week', '/daily': 'day' }
+const WHICH = Q.get('mode') === 'challenge'
+  ? 'challenge'
+  : (PATH_BOARD[location.pathname] ?? Q.get('board') ?? 'day')
+const BOARD = BOARDS[WHICH] ?? BOARDS.day
+const challenge = WHICH === 'challenge'
+const KEY = BOARD.key
+document.title = BOARD.title
 
 /* Named so a fresh poll can repaint it; see `onFreshData` in tv.js. */
 const paint = (teams) => {
@@ -273,14 +314,13 @@ const paint = (teams) => {
   const ranked = rankBy(teams, KEY)
   const total = ranked.reduce((s, t) => s + t[KEY], 0)
 
-  document.getElementById('mast-word').innerHTML =
-    challenge ? '<em>10-Day</em> Challenge' : '<em>Daily</em> Leaderboard'
+  document.getElementById('mast-word').innerHTML = BOARD.word
   if (challenge) document.getElementById('chip-slot').innerHTML = '<span class="day-chip">Day 7 of 10</span>'
 
   // One figure, named in the language the rest of the wall uses. "Taken" was
   // warehouse English; "Sales today" says what it is, and quietly carries the
   // timeframe the window line used to.
-  document.getElementById('m-label').textContent = challenge ? 'Challenge sales' : 'Today’s sales'
+  document.getElementById('m-label').textContent = BOARD.label
   document.getElementById('m-total').textContent = rupees(total)
 
   // A podium needs three ventures that have actually sold something.
