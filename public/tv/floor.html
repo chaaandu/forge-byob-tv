@@ -120,9 +120,16 @@
   background: linear-gradient(104deg, var(--a), var(--b));   /* see .hero */
   color: var(--cdk);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 6px 16px rgba(0,0,0,0.3);
-  animation: card-in 500ms cubic-bezier(0.16,1,0.3,1) both;
+  animation: card-in 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
-@keyframes card-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+/* 12px and a fade was too small to register at six metres — the board looked
+   like it simply appeared. 20px and a hair of scale reads as the card landing
+   without becoming a bounce. The distance is the part to keep modest: this is
+   a board of thirty-nine, and anything with travel in it becomes a swarm. */
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(20px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
 .card::before {
   content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 10px;
   background: var(--ce);
@@ -357,11 +364,28 @@ const paint = (teams) => {
     </div>`
   }).join('')
 
+  /* ── The stagger is a diagonal, not a reading order ──
+   *
+   * `i * 12ms` walks the grid left-to-right and top-to-bottom, which on a 6x6
+   * is a typewriter: 36 cards arriving in sequence looks like a list being
+   * printed, and the last one is 420ms behind the first for no reason the eye
+   * can see.
+   *
+   * By `row + column` instead, every card on the same diagonal arrives
+   * together — a single wave crossing the board from the top-left corner. Ten
+   * steps rather than thirty-six, so it is over sooner AND more legible, which
+   * is the rare case where both improve at once. */
+  const cardDelay = (i) => {
+    const COLS = 6
+    const diagonal = Math.floor(i / COLS) + (i % COLS)
+    return (podium ? 240 : 40) + diagonal * 46
+  }
+
   // The field: 36, six by six, reading left to right.
   document.getElementById('grid').innerHTML = ranked.slice(podium ? 3 : 0).map((t, i) => {
     const rank = i + (podium ? 4 : 1), quiet = t[KEY] <= 0
     return `<div class="card liv-${liveryFor(t.id)}${quiet ? ' quiet' : ''}"
-                 style="animation-delay:${(podium ? 260 : 40) + i * 12}ms">
+                 style="animation-delay:${cardDelay(i)}ms">
       <span class="card-pos">${rank}</span>
       <span class="card-text">
         <span class="card-name">${t.name}</span>
