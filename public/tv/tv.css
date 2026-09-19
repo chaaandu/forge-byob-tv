@@ -16,7 +16,7 @@
 
 @font-face {
   font-family: 'ArchivoMock';
-  src: url('./Archivo-Variable.woff2') format('woff2-variations');
+  src: url('/tv/Archivo-Variable.woff2') format('woff2-variations');
   font-weight: 100 900;
   font-stretch: 62% 125%;
   font-display: block;

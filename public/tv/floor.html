@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><title>BYOB — Daily Leaderboard</title>
-<link rel="stylesheet" href="./tv.css">
+<link rel="stylesheet" href="/tv/tv.css">
 <script>
   /* Inside the rotator this slide is built before it is shown, so it holds its
      entrance until told. Opened directly it never holds. The timeout is the
@@ -255,13 +255,14 @@
   <div class="heroes" id="heroes"></div>
   <div class="grid" id="grid"></div>
 </div>
-<script src="./tv.js"></script>
+<script src="/tv/tv.js"></script>
 <script>
 const Q = new URLSearchParams(location.search)
 const challenge = Q.get('mode') === 'challenge', DEMO = Q.get('demo')
 const KEY = challenge ? 'challenge' : 'today'
 
-Promise.all([loadTeams(), loadPhotos()]).then(([teams]) => {
+/* Named so a fresh poll can repaint it; see `onFreshData` in tv.js. */
+const paint = (teams) => {
   
   
   
@@ -328,5 +329,6 @@ Promise.all([loadTeams(), loadPhotos()]).then(([teams]) => {
       </span>
     </div>`
   }).join('')
-})
+}
+Promise.all([loadTeams(), loadPhotos()]).then(([teams]) => { paint(teams); onFreshData(paint) })
 </script></body></html>

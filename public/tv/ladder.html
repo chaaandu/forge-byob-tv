@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><title>BYOB Leaderboard</title>
-<link rel="stylesheet" href="./tv.css">
+<link rel="stylesheet" href="/tv/tv.css">
 <script>
   /* Inside the rotator this slide is built before it is shown, so it holds its
      entrance until told. Opened directly it never holds. The timeout is the
@@ -181,13 +181,13 @@
   </header>
   <div class="ladder" id="ladder"></div>
   <aside class="scan" id="scan">
-    <span class="scan-code"><img src="./qr.svg" alt="" width="216" height="216"></span>
+    <span class="scan-code"><img src="/tv/qr.svg" alt="" width="216" height="216"></span>
     <span class="scan-head" id="scan-head">&nbsp;</span>
     <span class="scan-sub" id="scan-sub">&nbsp;</span>
     <span class="scan-ask" id="scan-ask">&nbsp;</span>
   </aside>
 </div>
-<script src="./tv.js"></script>
+<script src="/tv/tv.js"></script>
 <script>
 const Q = new URLSearchParams(location.search)
 const PROGRAMME_START = '2026-08-31T00:00:00+05:30'
@@ -199,7 +199,8 @@ const photos = (rank) => PHOTOS_ON === 'none' ? false : PHOTOS_ON === 'all' ? tr
 const BAR_X = 498
 const BAR_MAX = 1920 - 48 - 404 - BAR_X
 
-Promise.all([loadTeams(), loadPhotos()]).then(([teams]) => {
+/* Named so a fresh poll can repaint it; see `onFreshData` in tv.js. */
+const paint = (teams) => {
   if (DEMO === 'flat') teams.forEach((t) => { t.total = 195000 + Math.random() * 12000 })
   if (DEMO === 'hook') {
     const low = rankBy(teams, 'total')[24]   // rank 25 all-time
@@ -243,7 +244,8 @@ Promise.all([loadTeams(), loadPhotos()]).then(([teams]) => {
   writeScan(ranked)
   warmPhotos()
   fitScan()
-})
+}
+Promise.all([loadTeams(), loadPhotos()]).then(([teams]) => { paint(teams); onFreshData(paint) })
 
 /**
  * ── The copy is a fact, not an instruction ──

@@ -6,7 +6,7 @@
 
 const FEED_LIVE =
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIPEG2OyaUG4epSSXmvtiHClz9jUwDKuHIUy1de4gw6AevZMBM2oODC5W8DwqbRDQspTqqM34DalBd/pub?gid=1357679077&single=true&output=csv'
-const FEED_LOCAL = './real-feed.csv'
+const FEED_LOCAL = '/tv/real-feed.csv'
 
 /** 39, not 41. Two spares in the sheet are not in the cohort. */
 const SPARES = ['VBC140', 'VBC141']
@@ -236,8 +236,33 @@ async function loadTeams() {
 }
 
 /** logged revenue desc -> units desc -> team id asc, exactly as the wall sorts. */
-const rankBy = (teams, key) =>
-  [...teams].sort((a, b) => b[key] - a[key] || b.units - a.units || a.id.localeCompare(b.id))
+/* ── The comparators, and why the second key is not the same on both boards ──
+ *
+ * These mirror `compareTeams`, `compareDaily` and `compareChallenge` in
+ * `lib/ranking.ts` to the line, and `lib/tvWall.test.ts` fails if they drift.
+ * That is not tidiness: this file and the React app rank the same CSV, and a
+ * wall that disagreed with the phone about who is fourth is worse than no wall.
+ *
+ * They used to share ONE rule — revenue, then units, then id — and that was
+ * wrong on every board but the Ladder. Measured against the app on a real
+ * feed: the all-time board agreed on 41 of 41, the daily board disagreed on
+ * SIX, because 19 of 41 ventures sit on ₹0 and the tie-break is what orders
+ * them.
+ *
+ * All-time falls back to **units**, because two ventures on the same revenue
+ * have genuinely done different amounts of trade. A period board falls back to
+ * **all-time revenue** instead, and the reason is written in `ranking.ts`: on a
+ * morning when nobody has sold yet, the standing the wall showed all week is
+ * the order a passer-by already has in their head. Ordering thirty zeroes by
+ * units looks arbitrary and makes the day board fight the Ladder for no reason
+ * anyone can see. */
+const rankAllTime = (teams) =>
+  [...teams].sort((a, b) => b.total - a.total || b.units - a.units || a.id.localeCompare(b.id))
+
+const rankPeriod = (teams, key) =>
+  [...teams].sort((a, b) => b[key] - a[key] || b.total - a.total || a.id.localeCompare(b.id))
+
+const rankBy = (teams, key) => (key === 'total' ? rankAllTime(teams) : rankPeriod(teams, key))
 
 
 /* ── The squad ──────────────────────────────────────────────────────────────
@@ -253,7 +278,7 @@ const rankBy = (teams, key) =>
    Nobody's face is ever borrowed. No photograph, no person. */
 let PHOTOS = []
 async function loadPhotos() {
-  try { PHOTOS = await (await fetch('./people.json', { cache: 'no-store' })).json() } catch { PHOTOS = [] }
+  try { PHOTOS = await (await fetch('/tv/people.json', { cache: 'no-store' })).json() } catch { PHOTOS = [] }
 }
 
 /**
@@ -327,6 +352,34 @@ function squadHtml(teamId, h, max) {
  * on today's board. Late logging under-reports today rather than inflating it.
  */
 
+
+/* ── Auto-update: repaint when a poll actually brings something new ──
+ *
+ * `loadTeams` returns the cache synchronously and refreshes in the background,
+ * which is what makes first paint instant. That alone is enough inside the
+ * rotation, where every slide is remounted every thirty seconds — but a board
+ * opened on its own would then never change, and the Daily board is LIVE now:
+ * it reads `today_revenue`, so a sale should appear on it within about ten
+ * minutes without anybody touching the laptop.
+ *
+ * Only on a real change. Repainting on every poll would reorder the board
+ * under somebody mid-read for no reason, and this wall does not move unless
+ * something happened. The signature is the figures, not the fetch. */
+let lastSignature = null
+function onFreshData(render) {
+  const sign = (teams) =>
+    teams.map((t) => `${t.id}:${t.total}:${t.today}:${t.challenge}`).join('|')
+  const tick = async () => {
+    const teams = await fetchTeams()
+    if (!teams) return                       // a failed fetch keeps the last good board
+    const next = sign(teams)
+    if (next === lastSignature) return
+    lastSignature = next
+    render(teams)
+  }
+  lastSignature = sign(readCache() || [])
+  setInterval(tick, 60_000)
+}
 
 /* ── Fit the 1920x1080 board to whatever screen it lands on ──
  * A laptop driving a TV over HDMI does not always hand the browser exactly

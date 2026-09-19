@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { BOARD } from '@/app/daily/page'
+import { BOARD } from '@/app/old/daily/page'
 import { KEYS } from '@/lib/storage'
 
 /**

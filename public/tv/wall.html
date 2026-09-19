@@ -24,7 +24,7 @@
      painted; the arrival still happens in front of somebody. -->
 <div id="stage"><iframe id="a"></iframe><iframe id="b"></iframe></div>
 <script>
-  const SLIDES = ['./ladder.html', './floor.html' + (location.search.includes('challenge') ? '?mode=challenge' : '')]
+  const SLIDES = ['/podium', '/daily' + (location.search.includes('challenge') ? '?mode=challenge' : '')]
   const PERIOD = 30000, LEAD = 6000
   const f = [document.getElementById('a'), document.getElementById('b')]
   let i = 0, front = 0

@@ -84,6 +84,32 @@ const nextConfig: NextConfig = {
       { source: '/weekly', destination: '/daily', permanent: true },
     ]
   },
+
+  /**
+   * ── The two slides are static files, and these are their real addresses ──
+   *
+   * The wall is drawn in `public/tv/` as plain HTML, CSS and JS rather than as
+   * React routes, so the board paints from cached CSV before Next has booted
+   * anything — no spinner, no empty frame on a slide change. A rewrite is what
+   * lets it keep a URL somebody can type: `/podium`, not `/tv/ladder.html`.
+   *
+   * A rewrite and not a redirect, deliberately. A redirect would change the
+   * address bar, and the TV is set up once by a person typing a URL into a
+   * fullscreen browser — a URL that rewrites itself to something longer is a
+   * URL that gets written down wrong next time.
+   *
+   * The previous React design still exists, at `/old/podium` and `/old/daily`.
+   * It is not dead code: `render.test.tsx` and `board.test.ts` still hold it to
+   * every rule this project has, and it is where the overtake choreography and
+   * the daily-window machinery live until the static wall is ported onto them.
+   */
+  async rewrites() {
+    return [
+      { source: '/podium', destination: '/tv/ladder.html' },
+      { source: '/daily', destination: '/tv/floor.html' },
+      { source: '/wall', destination: '/tv/wall.html' },
+    ]
+  },
 }
 
 export default nextConfig
