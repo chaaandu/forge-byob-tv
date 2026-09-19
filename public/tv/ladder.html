@@ -168,8 +168,32 @@
   width: 430px; text-align: right; animation: fade-in 700ms 760ms both;
 }
 .scan[hidden] { display: none; }
+/* ── 194px, and the 22 it gives up are the whole point ──
+ *
+ * The block is pinned to the bottom safe line and grows UPWARD, so its height
+ * decides which row it ends up beside. The row map at 1920x1080 is fixed by
+ * the layout — three big rows then seven small — and rank 5 occupies y 648-708
+ * with the longest bar of the lower half: its figure ends 19px from this
+ * block's left edge.
+ *
+ * `block top = 1040 - height`, so the block has to be 332px or shorter to
+ * start below 708 and stop being compared against rank 5 at all. The
+ * three-line copy was 354. Taking the code from 216 to 188 is that 28px,
+ * and the nearest bar becomes rank 6 at 309px.
+ *
+ * **194 was tried first and still hid.** It lands the top on 708 exactly, and
+ * the comparison is `fig.bottom > box.top` on subpixel values — the figure's
+ * real bottom is 708.x against a block top of 708.0, so it clashed by a
+ * fraction of a pixel. 188 puts the top at 714 and leaves the margin that
+ * arithmetic on whole numbers quietly assumed.
+ *
+ * **This is stable where the guard was not.** Those row positions do not move
+ * with the data — only the bar LENGTHS do — so once the block clears 708 it
+ * clears it every day whatever the standings say. `box-sizing` is border-box
+ * here, so 194 includes the 8px of white padding: the code itself is 178px,
+ * about 13cm on a 65" panel. */
 .scan-code {
-  display: block; width: 216px; margin-left: auto; border-radius: 14px;
+  display: block; width: 188px; margin-left: auto; border-radius: 14px;
   background: #fff; padding: 8px;
   box-shadow: 0 16px 40px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.12);
 }
