@@ -772,26 +772,29 @@ body:has(.lv-app[data-locked]) {
    * a `border-radius` on top — but a radius belongs to the border box, which
    * that clip makes invisible, so the painted bar came out a sharp-cornered
    * rectangle. Same size, wrong shape: stretched rather than rounded. */
+  /* ── The bar is gone; the gesture is not ──
+   *
+   * Removing the pill outright would have taken drag-to-close with it, and
+   * that is the only way to dismiss this sheet other than the close button.
+   * So the element stays and is lifted OUT OF FLOW instead: it draws nothing,
+   * occupies no height, and is still a 28px target with `touch-action: none`
+   * at the very top of the header, which is the only place a downward drag is
+   * unambiguous anyway (below it, a drag is a scroll).
+   *
+   * What it costs is the affordance rather than the gesture. Nothing now says
+   * the sheet can be dragged down; the × is the visible way out, and a
+   * passer-by who tries the drag still finds it there. The 22px it used to
+   * occupy went to the photographs. */
   .lv-grabber {
-    position: relative;
-    display: block;
-    width: 84px;
-    height: 22px;
-    margin: 0 auto;
-    touch-action: none;
-  }
-
-  .lv-grabber::before {
-    content: '';
     position: absolute;
+    z-index: 3;
+    top: 0;
     left: 50%;
-    top: 50%;
-    width: 42px;
-    height: 5px;
-    margin: -2.5px 0 0 -21px;
-    border-radius: 99px;
-    background: currentColor;
-    opacity: 0.45;
+    display: block;
+    width: 140px;
+    height: 28px;
+    margin-left: -70px;
+    touch-action: none;
   }
 
   .lv-sheet-actions {
@@ -905,7 +908,10 @@ body:has(.lv-app[data-locked]) {
        each crop is over the content below, which is what makes the group sit
        *between* the two rather than inside the colour. `.lv-sheet-body` pads
        its top by the same amount so nothing is ever underneath a face. */
-    margin-bottom: -46px;
+    /* A third of the crop, as before: 46/132 was 35%, and 58/165 is the same
+       share of a taller photograph. `.lv-sheet-body`'s top padding carries the
+       same 12px so nothing ends up under a face. */
+    margin-bottom: -58px;
     pointer-events: none;
   }
 
@@ -920,12 +926,18 @@ body:has(.lv-app[data-locked]) {
     display: grid;
     place-items: end center;
     flex: none;
-    /* Four of these plus their overlaps is 294px inside a 350px header. Three
-       or two centre themselves in the same space. */
-    width: 96px;
-    height: 132px;
+    /* ── 1.25x, and the overlap had to grow with it ──
+       Four of these is `4w - 3·lap` and it has to clear the narrowest header
+       this page has: a 360px phone, which leaves 320px inside. At 96px and a
+       -30px lap that was 294px. At 120px the same lap would be 366px and
+       overflow, so the lap goes to 56: 480 - 168 = 312px, still inside 320.
+       The visible strip of a covered photograph is 64px against 66px before —
+       but the crop is scaled too, so the FACE inside that strip went from
+       about 28px to 35px. Bigger faces in a slightly narrower gap. */
+    width: 120px;
+    height: 165px;
     /* Shoulders overlap; heads do not. */
-    margin-left: -30px;
+    margin-left: -56px;
     /* The bodies end where the crop ends, which on a dark page is a straight
        cut across somebody's chest. Fading the last fifth turns that into the
        group standing in the dark. */
@@ -1014,7 +1026,7 @@ body:has(.lv-app[data-locked]) {
     gap: 12px;
     /* Top: clear of the heads hanging down from the header. Bottom: clear of
        the chevrons, which float over this rather than scrolling with it. */
-    padding: 62px 16px calc(80px + env(safe-area-inset-bottom));
+    padding: 74px 16px calc(80px + env(safe-area-inset-bottom));
   }
 
   .lv-placements {
@@ -1418,13 +1430,13 @@ body:has(.lv-app[data-locked]) {
     }
 
     .lv-person {
-      width: 78px;
-      height: 104px;
-      margin-left: -24px;
+      width: 98px;
+      height: 130px;
+      margin-left: -44px;    /* 4 x 98 - 3 x 44 = 260px */
     }
 
     .lv-squad {
-      margin-bottom: -34px;
+      margin-bottom: -43px;
     }
 
     .lv-sheet-name {
@@ -1907,11 +1919,13 @@ body:has(.lv-app[data-locked]) {
       font-size: 188px;
     }
 
-    /* There is room for the faces to be faces. */
+    /* There is room for the faces to be faces. The panel is
+       `min(40vw, 560px)`, so the width that has to hold four is a 1024px
+       viewport's 410px — 358px inside. 4 x 148 - 3 x 80 = 352px. */
     .lv-person {
-      width: 118px;
-      height: 162px;
-      margin-left: -36px;
+      width: 148px;
+      height: 203px;
+      margin-left: -80px;
     }
 
     /* **The same straddle as the phone, scaled up.** This was -16px, which
@@ -1920,13 +1934,13 @@ body:has(.lv-app[data-locked]) {
        people. The hang is what makes them stand *between* the header and the
        content, so it grows with the photographs rather than shrinking. */
     .lv-squad {
-      margin-bottom: -54px;
+      margin-bottom: -68px;
     }
 
     .lv-sheet-body {
       gap: 14px;
       /* Clear of the heads hanging down, as on the phone. */
-      padding: 78px 26px 96px;
+      padding: 92px 26px 96px;
     }
 
     .lv-figure-value {
