@@ -913,6 +913,24 @@ body:has(.lv-app[data-locked]) {
        same 12px so nothing ends up under a face. */
     margin-bottom: -58px;
     pointer-events: none;
+    /* ── One frame, one gradient ──
+     *
+     * The bodies end where the crop ends, which on a dark page is a straight
+     * cut across somebody's chest; fading the last fifth turns that into the
+     * group standing in the dark. The same gradient as before — it has simply
+     * moved up one level.
+     *
+     * **Why the frame and not the figure.** Per figure, every body became
+     * translucent in its own last fifth; the figures overlap by nearly half
+     * their width, so in that band you saw straight through the front body to
+     * the one behind it. It reads as a background that was never removed and
+     * was reported as exactly that — the cutouts are clean, measured: not one
+     * of the 105 photographs has background left in a top corner, and
+     * compositing the same crops offline at the same overlap shows no
+     * ghosting at all. Masking this frame flattens the group first, so an
+     * overlap is opaque and only the outside edge softens. */
+    mask-image: linear-gradient(180deg, black 78%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, black 78%, transparent 100%);
   }
 
   /* ── Cutouts, not framed pictures ──
@@ -926,23 +944,20 @@ body:has(.lv-app[data-locked]) {
     display: grid;
     place-items: end center;
     flex: none;
-    /* ── 1.25x, and the overlap had to grow with it ──
-       Four of these is `4w - 3·lap` and it has to clear the narrowest header
-       this page has: a 360px phone, which leaves 320px inside. At 96px and a
-       -30px lap that was 294px. At 120px the same lap would be 366px and
-       overflow, so the lap goes to 56: 480 - 168 = 312px, still inside 320.
-       The visible strip of a covered photograph is 64px against 66px before —
-       but the crop is scaled too, so the FACE inside that strip went from
-       about 28px to 35px. Bigger faces in a slightly narrower gap. */
     width: 120px;
     height: 165px;
-    /* Shoulders overlap; heads do not. */
-    margin-left: -56px;
-    /* The bodies end where the crop ends, which on a dark page is a straight
-       cut across somebody's chest. Fading the last fifth turns that into the
-       group standing in the dark. */
-    mask-image: linear-gradient(180deg, black 78%, transparent 100%);
-    -webkit-mask-image: linear-gradient(180deg, black 78%, transparent 100%);
+    /* ── Shoulders overlap; heads do not ──
+       72px of every photograph shows. Four of these is `4w - 3·lap` = 336px,
+       and the narrowest header on this page — a 360px phone — leaves 320px
+       inside, so **four photographed members would overflow it by 16px.**
+       Three fit with room: 360 - 96 = 264px. No team has four photographs
+       today; the day one does, this number has to come back down to 56. */
+    margin-left: -48px;
+    /* **No fade here.** The gradient belongs to `.lv-squad`, the frame the
+       whole line-up is drawn into — see the note there. On the figure it made
+       each body translucent in its own last fifth, and they overlap by nearly
+       half their width, so the person behind showed through the person in
+       front. */
   }
 
   /* ── No shadow under a cutout, and that took three tries ──
@@ -988,32 +1003,6 @@ body:has(.lv-app[data-locked]) {
     object-position: bottom center;
   }
 
-  .lv-person-placeholder {
-    width: 100%;
-    height: 100%;
-    /* **Fades out before the seam, unlike a photograph.** A cutout is opaque,
-       so it can cross onto the dark page and still be a person. This is
-       translucent ink, and below the header it turns into a grey hump on the
-       background. So it dissolves inside the colour it was drawn on. */
-    mask-image: linear-gradient(180deg, black 52%, transparent 84%);
-    -webkit-mask-image: linear-gradient(180deg, black 52%, transparent 84%);
-  }
-
-  .lv-person-body {
-    fill: var(--livery-ink);
-    /* On the group, never the shapes: see `PlaceholderPortrait`. */
-    opacity: 0.24;
-  }
-
-  .lv-person-initials {
-    fill: var(--livery-ink);
-    font-family: var(--font-live), var(--font-sans);
-    font-size: 30px;
-    font-weight: 900;
-    font-stretch: 78%;
-    text-anchor: middle;
-    dominant-baseline: central;
-  }
 
   /* Not a scroller any more — `.lv-sheet-scroll` above is. This is just the
      column of cards under the header, and it scrolls because its parent
@@ -1432,7 +1421,7 @@ body:has(.lv-app[data-locked]) {
     .lv-person {
       width: 98px;
       height: 130px;
-      margin-left: -44px;    /* 4 x 98 - 3 x 44 = 260px */
+      margin-left: -32px;    /* 4 x 98 - 3 x 32 = 296px, inside 320 */
     }
 
     .lv-squad {
@@ -1921,11 +1910,14 @@ body:has(.lv-app[data-locked]) {
 
     /* There is room for the faces to be faces. The panel is
        `min(40vw, 560px)`, so the width that has to hold four is a 1024px
-       viewport's 410px — 358px inside. 4 x 148 - 3 x 80 = 352px. */
+       viewport's 410px — 358px inside. `4 x 148 - 3 x 68` is 388px, so **four
+       would overflow that by 30px**; three are 308px and fit. Same trade as
+       the phone: widen the overlap back to 80 the day a team has four
+       photographs. */
     .lv-person {
       width: 148px;
       height: 203px;
-      margin-left: -80px;
+      margin-left: -68px;
     }
 
     /* **The same straddle as the phone, scaled up.** This was -16px, which

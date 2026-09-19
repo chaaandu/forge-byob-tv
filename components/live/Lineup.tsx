@@ -1,7 +1,7 @@
 import Image from 'next/image'
 
 import { PEOPLE_PHOTOS } from '@/config'
-import { initialsOf, membersOf, photoSlug } from '@/lib/live'
+import { membersOf, photoSlug } from '@/lib/live'
 import type { Team } from '@/lib/types'
 
 /**
@@ -23,48 +23,60 @@ import type { Team } from '@/lib/types'
  * its manifest entry arrive in one commit, written together by
  * `scripts/prepare-people.py`.
  *
- * ── Until then, everyone gets a drawn portrait ──
+ * ── No photograph, no figure ──
  *
- * Not a grey box and not a stock face: a silhouette in the team's own livery
- * with the person's initials. **A photograph of somebody who is not that
- * student would be the `LOGOS` mistake with a person's face in it** — the rule
- * there is that borrowed artwork says something false about who a team is, and
- * a borrowed face says it about who a person is. So the placeholder is
- * obviously a placeholder, and it is the same shape and size as the real
- * thing, so the layout is already the finished one.
+ * A student without one used to get a drawn silhouette carrying their
+ * initials. Removed on request: the line-up is a photograph of a team, and a
+ * drawn stand-in beside real cutouts reads as a gap rather than as a person.
+ *
+ * **Nothing is invented in its place.** No stock face, no borrowed one — that
+ * would be the `LOGOS` mistake with a person's face in it, and this file's
+ * whole reason for reading `PEOPLE_PHOTOS` rather than the filesystem is that
+ * it will only ever show a photograph that exists.
+ *
+ * What it costs: a student who missed the shoot is now absent from their
+ * team's line-up rather than present as a silhouette, and a team where nobody
+ * has a photograph renders no squad at all. In production today that changes
+ * nothing — `TV_Feed` publishes no `members` column, so `membersOf` falls back
+ * to the photographs themselves and everyone listed has one by construction.
+ * It starts to matter the day that column is published.
  */
 export function Squad({ team }: { team: Team }) {
   const members = membersOf(team)
   if (members.length === 0) return null
 
   /**
-   * ── Faces first, silhouettes at the right-hand end ──
+   * Only the people there is a photograph of, in the roster's own order.
    *
-   * The roster's own order put a placeholder wherever the sheet happened to
-   * list that student, so a team with one missing photograph got a gap in the
-   * middle of its line-up. Grouping them moves the gap to the edge, where it
-   * reads as the end of the row rather than as somebody missing from it —
-   * and on nine of the twelve affected teams that is a single silhouette
-   * standing at the side of three faces.
-   *
-   * Stable within each group, so the roster's order still decides who stands
-   * where among the people who have a photograph.
+   * This used to sort faces first and stand the silhouettes at the right-hand
+   * end, so a missing photograph read as the end of the row rather than as a
+   * gap in the middle of it. With no silhouettes left there is nothing to
+   * sort: the ones without a photograph simply are not here, and everybody
+   * else keeps the order the sheet listed them in.
    */
-  const ordered = members
-    .map((name) => ({ name, hasPhoto: PEOPLE_PHOTOS.includes(`${team.teamId}/${photoSlug(name)}`) }))
-    .sort((a, b) => Number(b.hasPhoto) - Number(a.hasPhoto))
+  const shown = members.filter((name) =>
+    PEOPLE_PHOTOS.includes(`${team.teamId}/${photoSlug(name)}`),
+  )
+  if (shown.length === 0) return null
 
   return (
-    <div className="lv-squad" aria-label={`Team: ${members.join(', ')}`} role="img">
-      {ordered.map(({ name, hasPhoto }, index) => (
+    /* ── One frame, and the fade belongs to it ──
+     *
+     * `.lv-squad` is the frame the whole line-up is drawn into, and
+     * `live.css` puts the bottom gradient THERE rather than on each figure.
+     * Per figure it made every body translucent in its last fifth, and the
+     * figures overlap by nearly half their width, so the person behind showed
+     * through the person in front. One frame flattens the group first, so an
+     * overlap is opaque and only the outside edge softens. */
+    <div className="lv-squad" aria-label={`Team: ${shown.join(', ')}`} role="img">
+      {shown.map((name, index) => (
         <Person
           key={name}
           teamId={team.teamId}
           name={name}
-          hasPhoto={hasPhoto}
           // The left-most sits on top and each one behind the last, so the
           // stack reads front-to-back rather than as a row of half-faces.
-          style={{ zIndex: ordered.length - index }}
+          style={{ zIndex: shown.length - index }}
         />
       ))}
     </div>
@@ -74,66 +86,21 @@ export function Squad({ team }: { team: Team }) {
 function Person({
   teamId,
   name,
-  hasPhoto,
   style,
 }: {
   teamId: string
   name: string
-  hasPhoto: boolean
   style: React.CSSProperties
 }) {
   return (
     <span className="lv-person" style={style} title={name}>
-      {hasPhoto ? (
-        <Image
-          src={`/people/${teamId}/${photoSlug(name)}.webp`}
-          alt=""
-          width={256}
-          height={256}
-          unoptimized
-        />
-      ) : (
-        <PlaceholderPortrait initials={initialsOf(name)} />
-      )}
+      <Image
+        src={`/people/${teamId}/${photoSlug(name)}.webp`}
+        alt=""
+        width={256}
+        height={256}
+        unoptimized
+      />
     </span>
-  )
-}
-
-/**
- * A student with no photograph: a head-and-shoulders silhouette in the team's
- * livery, with their initials on it.
- *
- * **The silhouette was dropped once and has to come back.** While every
- * portrait sat in its own framed disc the frame was already person-shaped, so
- * the drawing added nothing and muddied the letters. The photographs are
- * cutouts now, standing with no frame at all — so a bare pair of letters
- * floats in the gap where a body should be, which is what it looked like on
- * `LUMI` before this. The silhouette is what keeps two cutouts and one
- * placeholder reading as three people.
- *
- * Seven of the cohort missed the shoot and five more have no frame recorded
- * against them, so this is on the board today rather than hypothetically.
- */
-function PlaceholderPortrait({ initials }: { initials: string }) {
-  return (
-    <svg viewBox="0 0 120 160" className="lv-person-placeholder" aria-hidden="true">
-      {/* **One group, one opacity.** Drawn as two translucent shapes, the
-          head and the shoulders each showed their own edge and the overlap
-          went darker than both — a person assembled from parts. The group
-          carries the transparency so the union is flat, and the shoulders
-          start above the chin so there is no seam to see. */}
-      <g className="lv-person-body">
-        <circle cx="60" cy="56" r="30" />
-        {/* The shoulders start at y=78, eight units above the head's own
-            bottom edge at 86. They started level with it once and the two
-            shapes read as a ball above a hill. */}
-        <path d="M6 160C6 108 30 78 60 78s54 30 54 82z" />
-      </g>
-      {/* Dead centre of the head, which is the circle's own centre — not the
-          centre of the 120x160 box, which sits down on the chest. */}
-      <text x="60" y="56" className="lv-person-initials">
-        {initials}
-      </text>
-    </svg>
   )
 }

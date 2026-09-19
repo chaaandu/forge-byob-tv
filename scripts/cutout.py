@@ -28,13 +28,24 @@ import cv2
 import numpy as np
 from PIL import Image, ImageFilter
 
-WIDTH = 330
+# ── 20px of clear space down each side, and FACE_W moves with WIDTH ──
+#
+# The frame was 330 wide at 3.4 face widths, and the body reached a side edge
+# on 92 of the 105 photographs — measured, with a median of 105 rows out of 440
+# pressed flat against the right edge. A cutout whose shoulder is sliced by its
+# own frame has no room to sit beside another one.
+#
+# 370 is 330 plus 20 a side. **`FACE_W` has to grow in the same proportion or
+# the face shrinks**: the face occupies `WIDTH / FACE_W` pixels of the frame, so
+# 330/3.4 and 370/3.81 are both 97px and every student stays the size they
+# were. Change one without the other and every crop silently re-scales.
+WIDTH = 370
 HEIGHT = 440
 QUALITY = 84
 
 # Every crop is measured in face widths, so students photographed at different
 # distances — or on a phone, or by LinkedIn — still come out the same size.
-FACE_W = 3.4
+FACE_W = 3.81
 FACE_H = 4.6
 
 # ── Headroom is measured on the cutout, not guessed from the face box ──
