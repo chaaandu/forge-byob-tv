@@ -35,9 +35,45 @@ const report = await page.evaluate(() => {
   const slot = crown.closest('.tv-pod-slot')
   const numeral = slot?.querySelector('.tv-pod-numeral')
 
-  const box = crown.getBoundingClientRect()
+  const rawBox = crown.getBoundingClientRect()
   const glyphBox = glyph.getBoundingClientRect()
   const bandBox = band.getBoundingClientRect()
+
+  // ── The element box is not the crown any more ──
+  //
+  // `Crown.tsx`'s viewBox carries 13 units of safe area on every side so a
+  // glint on a terminal ball stops being clipped by the svg's own viewport.
+  // That padding is part of the element and part of `getBoundingClientRect`,
+  // and it is *not* part of anything this file asks about: "is it clipped",
+  // "does it clear the numeral" and "does it still overhang the disc" are all
+  // questions about gold, not about empty space. Measured raw, the crown
+  // reports 8px more overhang on every side than it has and its clearances
+  // read 8px tighter than they are — conservative in one direction and
+  // flattering in the other, which is the worst of both.
+  //
+  // So every number below is taken from the artwork's own square, recovered by
+  // insetting the rect by the padding's share of the box. **Read from the
+  // viewBox attribute rather than written here**, so a later change to the
+  // safe area cannot leave this file quietly measuring the old one.
+  //
+  // The inset is exact rather than approximate even though the crown is
+  // rotated: the padded and unpadded squares are concentric and turn together,
+  // and the axis-aligned box of a square at angle t is side x (|cos t| + |sin
+  // t|) — so both rects scale by the same ratio about the same centre.
+  const cs = getComputedStyle(crown)
+  const layoutW = parseFloat(cs.width)
+  const layoutH = parseFloat(cs.height)
+  const vb = glyph.getAttribute('viewBox').trim().split(/[\s,]+/).map(Number)
+  const padShare = -vb[0] / vb[2]
+  const inset = padShare * rawBox.width
+  const box = {
+    left: rawBox.left + inset,
+    top: rawBox.top + inset,
+    right: rawBox.right - inset,
+    bottom: rawBox.bottom - inset,
+    width: rawBox.width - inset * 2,
+    height: rawBox.height - inset * 2,
+  }
 
   // Every ancestor that could be clipping, intersected into one visible rect.
   let clip = { top: 0, left: 0, right: innerWidth, bottom: innerHeight }
@@ -65,11 +101,22 @@ const report = await page.evaluate(() => {
     // reports 117x106 — and reading that as the width makes the crown look 23%
     // bigger than it is and its clearances tighter than they are. `offsetWidth`
     // is the unrotated layout box; the rect is what actually has to fit.
-    crown: { w: crown.offsetWidth, h: crown.offsetHeight },
+    // `getComputedStyle`, not `offsetWidth`: the used width here is 97.373px
+    // and `offsetWidth` rounds it to 97, which is a tenth of a per cent of the
+    // disc once the padding is taken back off — small, and the sort of small
+    // that makes a token look like it drifted when it did not.
+    crown: {
+      w: +(layoutW * (1 - padShare * 2)).toFixed(1),
+      h: +(layoutH * (1 - padShare * 2)).toFixed(1),
+    },
+    // The element as laid out, padding and all — the number `--d-crown`
+    // actually produces, and the one to check that token against.
+    withSafeArea: { w: +layoutW.toFixed(1), h: +layoutH.toFixed(1) },
+    safeArea: `${(padShare * 100).toFixed(2)}% a side (${(padShare * layoutW).toFixed(1)}px)`,
     painted: { w: +box.width.toFixed(1), h: +box.height.toFixed(1) },
     glyph: { w: +glyphBox.width.toFixed(1), h: +glyphBox.height.toFixed(1) },
     disc: { w: +bandBox.width.toFixed(1), h: +bandBox.height.toFixed(1) },
-    shareOfDisc: `${((crown.offsetWidth / bandBox.width) * 100).toFixed(1)}%`,
+    shareOfDisc: `${(((layoutW * (1 - padShare * 2)) / bandBox.width) * 100).toFixed(1)}%`,
     fill: getComputedStyle(path).fill,
     crownInk: getComputedStyle(document.querySelector('main')).getPropertyValue('--crown-ink').trim(),
     surface: getComputedStyle(document.querySelector('main')).backgroundColor,

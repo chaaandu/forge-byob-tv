@@ -138,7 +138,46 @@ export function Crown({
   return (
     <svg
       className={className}
-      viewBox="0 0 128 128"
+      // ── 13 units of safe area, and one of them was being sliced ──
+      //
+      // Noto's own viewBox is `0 0 128 128` and the artwork fills nearly all of
+      // it: measured with `getBBox`, the paths run x 3.10 → 124.31 and y 7.97 →
+      // 122.04, so the metal has between 3.1 and 8 units of air on a side. The
+      // six glints then overhang that — a spark is placed on a *tip*, which is
+      // the point of them, so its outer half is past the form it sits on. The
+      // left terminal ball's spark (`cx: 9, r: 11`) reaches **x = -2**, outside
+      // the box entirely.
+      //
+      // An outermost `<svg>` with a viewBox clips to that viewBox by default,
+      // so that spark was being cut off flat on its left tip — a four-point
+      // star with three points and a straight edge, fired every eighteen
+      // seconds, on a wall nobody is watching closely enough to catch it. The
+      // rest of the crown was not clipped, but it had nothing to spare either:
+      // at `/podium`'s rendered 81px the right-hand spark cleared the edge by
+      // **0.6px** and the base band by 3.8px, which is why the object reads as
+      // cropped even where it technically is not.
+      //
+      // So the box is padded 13 units on every side. Symmetric rather than
+      // per-edge for two reasons: it keeps the box **square**, which is what
+      // `.tv-crown-glyph`'s `height: auto` depends on and what the CSS's "the
+      // crown is 95x95, not 95x74" note is about; and it keeps a 50%
+      // transform-origin at 50%. Every drawn edge now clears by 5.8px to 10px
+      // at 81px, inside the 4-8px asked for at the narrow end.
+      //
+      // **The box grew and the artwork did not, so CSS compensates.** 154/128
+      // is a 20.3% larger box for the same crown, and `--d-crown`,
+      // `--x-crown`, `--y-crown`, both `transform-origin`s and the drop's and
+      // lift's translate percentages are all scaled by it in `mesa-tv.css` —
+      // so the rendered crown is pixel-identical to the one measured above.
+      // The whole set moves together or the crown shrinks and slides
+      // down-right; `scripts/measure-crown.mjs` is the check, and the numbers
+      // it should still report are 81px wide, 14px of left overhang and 49.8px
+      // of top overhang at 1920.
+      //
+      // `--tv-crown-metal` is `userSpaceOnUse` across the *old* 128 square and
+      // stays there: the gradient line is meant to run off the artwork at both
+      // ends, and padding is not artwork.
+      viewBox="-13 -13 154 154"
       // **Presentational, not an image.** The crown restates a rank the numeral
       // above the mark already announces to a screen reader, and `/podium` is a
       // display page — a second "first place" in the accessibility tree is
