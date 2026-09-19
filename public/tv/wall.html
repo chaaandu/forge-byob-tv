@@ -24,13 +24,22 @@
      painted; the arrival still happens in front of somebody. -->
 <div id="stage"><iframe id="a"></iframe><iframe id="b"></iframe></div>
 <script>
-  /* Three slides, thirty seconds each. The 10-Day Challenge REPLACES the daily
-   board when it is running — `AGENTS.md` is explicit that it is the day's
-   contest, not a fourth slide — so the suffix belongs to `/daily` and the
-   weekly board is untouched by it. */
+  /* ── Two slides, thirty seconds each ──
+   *
+   * `/weekly` exists and is a real board — it is simply not in the rotation
+   * yet, by decision rather than by omission. Put it back by adding `'/weekly'`
+   * to this array and nothing else changes; the slide, its route and its tests
+   * are already here.
+   *
+   * What it costs while it is out: a minute round trip instead of ninety
+   * seconds, so each board is on screen twice as often.
+   *
+   * The 10-Day Challenge REPLACES the daily board when it is running —
+   * `AGENTS.md` is explicit that it is the day's contest, not another slide —
+   * so the suffix belongs to `/daily`, and would still belong there if the
+   * weekly board rejoined. */
   const SLIDES = ['/podium',
-                  '/daily' + (location.search.includes('challenge') ? '?mode=challenge' : ''),
-                  '/weekly']
+                  '/daily' + (location.search.includes('challenge') ? '?mode=challenge' : '')]
   const PERIOD = 30000, LEAD = 6000
   const f = [document.getElementById('a'), document.getElementById('b')]
   let i = 0, front = 0
