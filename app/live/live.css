@@ -913,46 +913,6 @@ body:has(.lv-app[data-locked]) {
        same 12px so nothing ends up under a face. */
     margin-bottom: -58px;
     pointer-events: none;
-    /* ── One fade, over the whole line-up ──
-     *
-     * The bodies end where the crop ends, which on a dark page is a straight
-     * cut across somebody's chest; fading the last fifth turns that into the
-     * group standing in the dark.
-     *
-     * It has to happen HERE rather than on each `.lv-person`, and that is the
-     * whole point. Per figure, every body became translucent in its own last
-     * fifth — and the figures overlap by nearly half, so in that band you saw
-     * the person behind THROUGH the person in front. It looks exactly like a
-     * background that was never removed, and it was reported as that.
-     *
-     * Masking the container flattens the group first and fades the result, so
-     * an overlap is opaque and only the bottom edge softens.
-     *
-     * ── And the ramp is eased, because every crop cuts a torso ──
-     *
-     * Measured across all 105 photographs: not one has background left in a
-     * top corner, so the removal is clean — but **all 105 are opaque along
-     * their bottom edge** and 68 are more than 90% opaque there. The crop ends
-     * mid-chest, so each cutout finishes as a straight horizontal cut the full
-     * width of its box, and where one cut torso meets the next the join is a
-     * vertical line rather than a shoulder.
-     *
-     * A short linear ramp over the last 22% left that line plainly visible: a
-     * 108/255 luminance step across the seam, measured on the rendered page.
-     * Easing the same fade over the last 45% — three stops rather than two, so
-     * it thins early and finishes gently — halves it to 55. The bodies still
-     * reach the same place and still finish invisible; they simply stop
-     * arriving there in one jump.
-     *
-     * The intermediate stops are `color-mix` rather than `rgba()` on purpose:
-     * `live.test.ts` fails this file on any `rgba(` or hex, and a mask is
-     * still a colour as far as that scan is concerned. Only the alpha of
-     * these stops does anything — `black` and `transparent` are the two ends
-     * the existing fade already used. */
-    --lv-fade-3: color-mix(in srgb, black 72%, transparent);
-    --lv-fade-2: color-mix(in srgb, black 28%, transparent);
-    mask-image: linear-gradient(180deg, black 55%, var(--lv-fade-3) 74%, var(--lv-fade-2) 88%, transparent 100%);
-    -webkit-mask-image: linear-gradient(180deg, black 55%, var(--lv-fade-3) 74%, var(--lv-fade-2) 88%, transparent 100%);
   }
 
   /* ── Cutouts, not framed pictures ──
@@ -978,12 +938,11 @@ body:has(.lv-app[data-locked]) {
     height: 165px;
     /* Shoulders overlap; heads do not. */
     margin-left: -56px;
-    /* **The fade is on the GROUP, not here.** Per figure it made each body
-       translucent in its last fifth, and translucent bodies OVERLAP: you could
-       see the person behind straight through the person in front, which reads
-       as a botched background removal and was reported as exactly that. The
-       cutouts themselves are clean — compositing the same crops offline at the
-       same overlap shows no such thing. See `.lv-squad`. */
+    /* The bodies end where the crop ends, which on a dark page is a straight
+       cut across somebody's chest. Fading the last fifth turns that into the
+       group standing in the dark. */
+    mask-image: linear-gradient(180deg, black 78%, transparent 100%);
+    -webkit-mask-image: linear-gradient(180deg, black 78%, transparent 100%);
   }
 
   /* ── No shadow under a cutout, and that took three tries ──
