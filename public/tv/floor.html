@@ -1,0 +1,332 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><title>BYOB — Daily Leaderboard</title>
+<link rel="stylesheet" href="./tv.css">
+<script>
+  /* Inside the rotator this slide is built before it is shown, so it holds its
+     entrance until told. Opened directly it never holds. The timeout is the
+     safety: a rotator that fails to post must not freeze the board forever. */
+  if (window.top !== window) {
+    document.documentElement.classList.add('holding')
+    const show = () => document.documentElement.classList.remove('holding')
+    addEventListener('message', (e) => { if (e.data === 'byob:show') show() })
+    setTimeout(show, 8000)
+  }
+</script>
+<style>
+/* ============================================================
+   SLIDE 2 — the Daily Leaderboard / 10-Day Challenge.
+
+   ── Two card types, because the reference is two card types ──
+   A grand-prix standings page does not draw thirty-nine identical rows. It
+   draws a big landscape CONSTRUCTOR card — faces, huge name, a swoosh of the
+   team's colour, the maker's mark in the corner — and then a run of compact
+   DRIVER cards underneath. Different objects for different jobs.
+
+   39 is 3 + 36, and 36 is 6 x 6 exactly. So the day's top three get hero
+   cards at 592x232 (2.55:1, the constructor card's proportion) and the other
+   thirty-six get compact cards at 292x93. No ragged column, no filler tile,
+   every venture on one screen.
+
+   ── Why the top three get the faces ──
+   The Ladder already earns its squad photographs on an ALL-TIME board, where
+   the same three teams sit for weeks. Here they change every morning, so a
+   venture that has never been near the top of the programme can be on this
+   wall at 150px tall for a day because of one good Tuesday. That is a
+   different promise from the Ladder's, and it is the one this slide can make.
+
+   ── Colour is still only where the money is ──
+   A venture that has not sold in the window keeps its card, its rank and its
+   name, and loses its colour.
+   ============================================================ */
+
+/* ── The hero cards ─────────────────────────────────────── */
+.heroes[hidden] { display: none; }
+.heroes {
+  position: absolute; left: var(--safe-x); right: var(--safe-x); top: 168px; height: 232px;
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; z-index: 2;
+}
+
+.hero {
+  position: relative; overflow: hidden; border-radius: 14px;
+  /* ── The gradient is a fixed step in LIGHTNESS, not a fixed mix ──
+     `color-mix(in srgb, var(--cd) 74%, white)` is a fixed mix, and a fixed mix
+     toward white barely moves a card that is already pale. So only the dark
+     cards — Atmiva, Mugshot — looked like they had a gradient at all, and the
+     pale half of the board read as flat. `--a` and `--b` are the venture's own
+     colour at +0.075 and -0.085 of OKLCh lightness, which is the same visible
+     step on every card at either end of the range. */
+  background: linear-gradient(112deg, var(--a), var(--b));
+  color: var(--cdk);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.5), 0 16px 34px rgba(0,0,0,0.42);
+  animation: hero-in 640ms cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes hero-in { from { opacity: 0; transform: translateY(22px) scale(0.975); } to { opacity: 1; transform: none; } }
+
+/* The venture's own edge, down the left, as on the compact cards. */
+.hero-edge {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 14px; z-index: 3;
+  background: var(--ce);
+}
+
+.hero-num {
+  position: absolute; left: 30px; top: 2px; z-index: 2;
+  font-size: 78px; font-weight: 900; font-stretch: 64%; line-height: 1;
+  color: transparent; -webkit-text-stroke: 3px var(--cdk); opacity: 0.85;
+  transform: skewX(-11deg);
+}
+.hero-squad { position: absolute; left: 20px; bottom: 0; z-index: 2; }
+.squad { display: flex; align-items: flex-end; }
+/* ── No fade on the wall ──
+   `/live` fades the last fifth of each crop because a cutout there stands on
+   the dark PAGE, and a photograph ending mid-chest on open background is a
+   straight cut across somebody. Here the crop's bottom edge is the bar's own
+   bottom edge and the bar clips, so there is nothing to soften — the fade was
+   only dissolving the bodies into their own card. */
+.person { position: relative; display: block; }
+.person img { width: 100%; height: 100%; object-fit: contain; object-position: bottom center; }
+.hero-mono {
+  position: absolute; left: 34px; bottom: 26px; z-index: 2;
+  width: 92px; height: 92px; font-size: 38px;
+  color: var(--cdk); background: rgba(0,0,0,0.09); box-shadow: inset 0 0 0 2px rgba(0,0,0,0.2);
+}
+.hero-text {
+  position: absolute; right: 24px; bottom: 20px; z-index: 3; max-width: 62%; text-align: right;
+}
+.hero-name {
+  display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  font-size: 32px; font-weight: 800; letter-spacing: -0.01em; line-height: 1.05;
+}
+.hero-fig {
+  display: block; margin-top: 2px;
+  font-size: 46px; font-weight: 900; font-stretch: 78%; letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── The compact cards ──────────────────────────────────── */
+.grid {
+  position: absolute; left: var(--safe-x); right: var(--safe-x); top: 424px; bottom: var(--safe-y);
+  display: grid; grid-template-columns: repeat(6, 1fr); grid-template-rows: repeat(6, 1fr);
+  column-gap: 14px; row-gap: 11px; z-index: 2;
+}
+/* No podium yet: the grid takes the whole board and everyone is equal. */
+.grid[data-flat] {
+  top: 168px; grid-template-rows: repeat(7, 1fr);
+}
+
+.card {
+  position: relative; display: flex; align-items: center; gap: 10px;
+  min-width: 0; overflow: hidden; padding: 0 12px 0 18px; border-radius: 8px;
+  background: linear-gradient(104deg, var(--a), var(--b));   /* see .hero */
+  color: var(--cdk);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 6px 16px rgba(0,0,0,0.3);
+  animation: card-in 500ms cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes card-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+.card::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 10px;
+  background: var(--ce);
+  z-index: 3;
+}
+/* ── Eight shapes, not one swoosh thirty-nine times ──
+ *
+ * The same ellipse on every card made the board look printed from one
+ * template. `shapeFor` hashes different bits of the team id from the colour
+ * so two ventures that land on similar tints are still told
+ * apart by the shape their card is cut with.
+ *
+ * All eight enter from the RIGHT: the left of a card belongs to the rank
+ * disc and the venture's name, and nothing decorative may cross it. */
+.shape {
+  position: absolute; inset: 0; z-index: 0; overflow: hidden;
+  pointer-events: none;
+}
+.shape i {
+  position: absolute; display: block;
+  /* ── A shape may never cost a figure its contrast ──
+     This was painted in `--ce`, and on a dark card the edge is BRIGHT by
+     design — so the shape lightened the card under white ink and dropped the
+     worst hero figure to 4.39:1, under the 4.5 bar, before the chevrons
+     existed. `--sh` is the card moved AWAY from its own ink, so blending it in
+     can only raise contrast. */
+  background: linear-gradient(140deg, var(--sh), var(--cd));
+}
+/* 1 · sweeping ellipse from the top right */
+.hero.sh-1 i { right: -16%; top: -74%; width: 66%; height: 246%; border-radius: 50%; transform: rotate(-14deg); }
+/* 2 · full circle rising from the bottom right */
+.hero.sh-2 i { right: -12%; bottom: -120%; width: 74%; height: 300%; border-radius: 50%; }
+/* 3 · a raked band straight across */
+.hero.sh-3 i { right: -10%; top: -30%; width: 46%; height: 160%; transform: skewX(-22deg); }
+/* 4 · quarter round tucked into the top right corner */
+.hero.sh-4 i { right: 0; top: 0; width: 58%; height: 100%; border-radius: 0 0 0 100%; }
+/* 5 · wide arc along the bottom */
+.hero.sh-5 i { right: -8%; bottom: -170%; width: 80%; height: 240%; border-radius: 50%; }
+/* 6 · wedge off the right edge */
+.hero.sh-6 i { right: 0; top: 0; width: 62%; height: 100%; clip-path: polygon(100% 0, 100% 100%, 0 100%); }
+/* 7 · disc centred on the right edge */
+.hero.sh-7 i { right: -22%; top: 50%; width: 62%; height: 210%; border-radius: 50%; transform: translateY(-50%); }
+/* 8 · two raked stripes */
+.hero.sh-8 i { right: -14%; top: -30%; width: 74%; height: 160%; transform: skewX(-22deg);
+  background: repeating-linear-gradient(90deg, var(--sh) 0 22%, transparent 22% 44%); }
+
+/* 9 · two chevrons, and only ever on rank 1 ─────────────
+ *
+ * The other eight are sweeps and arcs — ground for a card to sit on. This one
+ * points, which is why it is not in the hash: a shape that means "leading" has
+ * to be attached to the lead, not to whichever venture's id happens to draw
+ * it. Rank 1 is forced to it in `heroShapes`, so the other two still pick from
+ * the eight and still de-duplicate against each other.
+ *
+ * Drawn as two squares wearing only their top and right borders, turned 45deg.
+ * A chevron has no fill, so unlike the eight it reads at the card's own edge
+ * colour rather than as a gradient body. */
+.hero.sh-9 i { inset: 0; background: none; }
+.hero.sh-9 i::before, .hero.sh-9 i::after {
+  content: ''; position: absolute; top: 50%;
+  width: 275px; height: 275px;                 /* 2.5x */
+  border: 80px solid var(--sh); border-left: 0; border-bottom: 0;
+  transform: translateY(-50%) rotate(45deg);
+}
+/* ── Where the bleed is measured ──
+ * Turned 45deg, a 355px box paints 251px of ink to the right of its own
+ * centre and 502px tall — so on a 232px card the arms leave through the top
+ * and bottom by design, and the `right` values below are set from the INK
+ * rather than from the box, which sits 73.5px inside it. The leading chevron
+ * is placed to hang a quarter of its width past the card's right edge; the
+ * card clips it, which is what makes it read as passing through rather than
+ * as a decal sitting on top. */
+.hero.sh-9 i::before { right: 47.4%; }
+.hero.sh-9 i::after  { right: 1.9%; }
+
+/* The heroes wear the same eight, bigger. */
+.hero .shape { opacity: 0.24; }
+.hero.hero.sh-1 i { right: -14%; top: -46%; width: 62%; height: 176%; }
+.hero.hero.sh-3 i { width: 40%; }
+.hero.hero.sh-4 i { width: 50%; }
+.hero.hero.sh-6 i { width: 54%; }
+.hero.hero.sh-8 i { width: 78%; background: repeating-linear-gradient(90deg, var(--sh) 0 26%, transparent 26% 60%); }
+
+.card-pos {
+  position: relative; z-index: 1; flex: none;
+  display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%;
+  background: var(--ce); color: var(--cdi);
+  font-size: 20px; font-weight: 900; font-stretch: 76%; line-height: 1;
+  font-variant-numeric: tabular-nums;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.22);
+}
+.card-text { position: relative; z-index: 1; min-width: 0; flex: 1; }
+.card-name {
+  min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;
+  display: block; font-size: 19px; font-weight: 800; letter-spacing: -0.005em;
+}
+.card-fig {
+  display: block; margin-top: 1px;
+  font-size: 23px; font-weight: 900; font-stretch: 78%; letter-spacing: -0.015em;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Nothing sold in the window ─────────────────────────
+ *
+ * The card keeps its livery; only the figure changes. A dash reads as "no
+ * number yet" without making a venture look switched off, and the count in
+ * the masthead says how many are in that state. */
+.quiet .card-fig, .quiet .hero-fig {
+  opacity: 0.52; font-weight: 800;
+}
+
+.day-chip {
+  display: inline-block; margin-bottom: 12px; padding: 8px 18px; border-radius: 6px;
+  background: var(--accent); color: #200d38;
+  font-size: 22px; font-weight: 900; font-stretch: 84%; letter-spacing: 0.1em; text-transform: uppercase;
+}
+</style></head>
+<body><div class="tv">
+  <div class="stripes"></div>
+  <header class="wall-head">
+    <div class="mast">
+      <span><span class="mast-kicker">Forge C1</span>
+      <span class="mast-word" id="mast-word"></span></span>
+      <span id="chip-slot"></span>
+    </div>
+    <div class="meta">
+      <div><span class="meta-label" id="m-label">Sales today</span><span class="meta-value" id="m-total">&nbsp;</span></div>
+    </div>
+  </header>
+  <div class="heroes" id="heroes"></div>
+  <div class="grid" id="grid"></div>
+</div>
+<script src="./tv.js"></script>
+<script>
+const Q = new URLSearchParams(location.search)
+const challenge = Q.get('mode') === 'challenge', DEMO = Q.get('demo')
+const KEY = challenge ? 'challenge' : 'today'
+
+Promise.all([loadTeams(), loadPhotos()]).then(([teams]) => {
+  
+  
+  
+
+  if (DEMO === 'quiet') teams.forEach((t, i) => { if (i > 2) t[KEY] = 0 })
+  if (DEMO === 'empty') teams.forEach((t) => { t[KEY] = 0 })
+  if (DEMO === 'busy') teams.forEach((t) => { t[KEY] = Math.round(400 + Math.random() * 30000) })
+  const ranked = rankBy(teams, KEY)
+  const total = ranked.reduce((s, t) => s + t[KEY], 0)
+
+  document.getElementById('mast-word').innerHTML =
+    challenge ? '<em>10-Day</em> Challenge' : '<em>Daily</em> Leaderboard'
+  if (challenge) document.getElementById('chip-slot').innerHTML = '<span class="day-chip">Day 7 of 10</span>'
+
+  // One figure, named in the language the rest of the wall uses. "Taken" was
+  // warehouse English; "Sales today" says what it is, and quietly carries the
+  // timeframe the window line used to.
+  document.getElementById('m-label').textContent = challenge ? 'Challenge sales' : 'Today’s sales'
+  document.getElementById('m-total').textContent = rupees(total)
+
+  // A podium needs three ventures that have actually sold something.
+  const sellers = ranked.filter((t) => t[KEY] > 0).length
+  const podium = sellers >= 3
+  document.getElementById('heroes').hidden = !podium
+  document.getElementById('grid').toggleAttribute('data-flat', !podium)
+
+  // The three the day belongs to.
+  const heroShapes = []
+  ;(podium ? ranked.slice(0, 3) : []).forEach((t, i) => {
+    if (i === 0) { heroShapes.push(8); return }   // rank 1 always wears the chevrons
+    let sh = shapeFor(t.id)
+    while (heroShapes.includes(sh)) sh = (sh + 1) % 8
+    heroShapes.push(sh)
+  })
+  document.getElementById('heroes').innerHTML = (podium ? ranked.slice(0, 3) : []).map((t, i) => {
+    const quiet = t[KEY] <= 0
+    // Faces when the manifest has them, the monogram when it does not — the
+    // same fallback the Ladder and /live use, so ZAAREE topping the day is a
+    // card rather than a hole.
+    const squad = squadHtml(t.id, 150, 4)
+    return `<div class="hero sh-${heroShapes[i] + 1} liv-${liveryFor(t.id)}${quiet ? ' quiet' : ''}"
+                 style="animation-delay:${60 + i * 90}ms">
+      <span class="shape"><i></i></span>
+      <span class="hero-edge"></span>
+      <span class="hero-num">${i + 1}</span>
+      ${squad ? `<span class="hero-squad">${squad}</span>`
+              : `<span class="mono hero-mono">${monogram(t.name, t.id)}</span>`}
+      <span class="hero-text">
+        <span class="hero-name">${t.name}</span>
+        <span class="hero-fig">${rupees(t[KEY])}</span>
+      </span>
+    </div>`
+  }).join('')
+
+  // The field: 36, six by six, reading left to right.
+  document.getElementById('grid').innerHTML = ranked.slice(podium ? 3 : 0).map((t, i) => {
+    const rank = i + (podium ? 4 : 1), quiet = t[KEY] <= 0
+    return `<div class="card liv-${liveryFor(t.id)}${quiet ? ' quiet' : ''}"
+                 style="animation-delay:${(podium ? 260 : 40) + i * 12}ms">
+      <span class="card-pos">${rank}</span>
+      <span class="card-text">
+        <span class="card-name">${t.name}</span>
+        <span class="card-fig">${rupees(t[KEY])}</span>
+      </span>
+    </div>`
+  }).join('')
+})
+</script></body></html>
