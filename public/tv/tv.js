@@ -378,7 +378,13 @@ function onFreshData(render) {
     render(teams)
   }
   lastSignature = sign(readCache() || [])
-  setInterval(tick, 60_000)
+  /* Thirty seconds, the same beat the rotation runs on. Every timer on this
+     wall is 30s: a slide is up for 30s and the feed is asked for 30s, so a
+     board never sits on figures older than one slide. The published CSV is
+     cached by Google for about five minutes and the consolidator writes every
+     ten, so most of these return the same bytes and cost nothing — `tick`
+     compares the figures and only repaints when something actually moved. */
+  setInterval(tick, 30_000)
 }
 
 /* ── Fit the 1920x1080 board to whatever screen it lands on ──

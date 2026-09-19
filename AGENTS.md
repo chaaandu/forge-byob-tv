@@ -10,9 +10,44 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 # BYOB Campus TV Wall
 
-Two pages displayed on TVs across Mesa campus during BYOB Cohort 2026, driven from a
-laptop over HDMI. The wall rotates between its own two slides every thirty seconds; if it
+Pages displayed on TVs across Mesa campus during BYOB Cohort 2026, driven from a
+laptop over HDMI. The wall rotates between its own slides every thirty seconds; if it
 also sits inside a wider campus slideshow, that outer rotation is someone else's.
+
+## The wall was rebuilt on 19 September 2026, and most of this file predates it
+
+**Read this section before trusting anything below it.** The rules that follow were
+written for the React wall, and that wall is still here — it is at `/old/podium` and
+`/old/daily`, it still passes every test in this repo, and it is where the overtake
+choreography and the daily-window machinery live. It is no longer what is on the TV.
+
+What is on the TV is `public/tv/` — three static slides served straight out of
+`public/`, so the board paints from cached CSV before Next has booted anything.
+
+| URL | What it is |
+| --- | --- |
+| `/wall` | **the rotator — point the TV here.** `/podium` and `/daily`, thirty seconds each |
+| `/podium` | the BYOB Ladder, all-time |
+| `/daily` | the Daily Leaderboard, **live from midnight IST** |
+| `/weekly` | the Weekly Leaderboard, Monday 00:00 IST to Sunday midnight. Built, routed, tested, and **deliberately out of the rotation** until asked for |
+| `/live` | the phone page, untouched by any of this |
+| `/old/podium`, `/old/daily` | the previous React design |
+
+Four rules below are now historical rather than binding, and each is marked where it
+sits: the daily board is **not** a locked 10:00-to-10:00 day any more; `/daily` does
+**not** fetch once a day; `components/Rotator.tsx` rotates the `/old/*` pages rather
+than the wall; and `/weekly` is **not** a redirect.
+
+**The cost of the split is stated once, here.** `public/tv/` carries its own copy of
+everything that decides a number, so the wall and the phone are two implementations of
+one ranking. That is paid deliberately — it is what makes first paint instant — and
+`lib/tvWall.test.ts` is what stops it drifting: it holds the wall's comparators to
+`lib/ranking.ts`, its spare-team list to `config.ts`, and the programme anchor to a
+Monday. It has already earned its place. The wall ranked every board on
+`revenue → units → id`, which is right for all-time and wrong for a period board;
+measured on a real feed, the all-time board agreed with the app on 41 of 41 and the
+daily board disagreed on **six**, because 19 of 41 ventures sit on ₹0 and the tie-break
+is what orders them. Porting the static wall onto `lib/` is the open piece of work.
 
 **This is a display system, not a dashboard.** Nobody interacts with it. It runs
 unattended for weeks. The bar: on a wall nobody is actively watching, a bug that renders
@@ -36,7 +71,12 @@ npm run build        # next build
 - **This project never writes to `BYOB_MASTER`.** It reads two published CSVs over plain
   HTTP with no credentials. There is no token, no service account, no Apps Script here.
 - **Never hardcode a hex.** `app/forge-tokens.css` is the only file that may contain
-  one. It is imported **last and unlayered** from `globals.css`, and both halves of that
+  one — **and since 19 September 2026 the static wall has its own**, `public/tv/tv.css`,
+  which is the same discipline applied to a tree that cannot import from `app/`. One file
+  owns colour on each surface and everything else reads a token: `.liv-1`…`.liv-39` expose
+  `--cd`, `--cdk`, `--ce`, `--cdi`, `--bd`, `--sh`, and nothing in `floor.html`,
+  `ladder.html` or `wall.html` names a colour. **Two files, not two habits.** A third is a
+  new argument. It is imported **last and unlayered** from `globals.css`, and both halves of that
   matter — move it above `mesa-tv.css` and the wall silently reverts to a white page with
   purple parts on it.
 
@@ -506,9 +546,26 @@ npm run build        # next build
   not `/daily`. `next.config.ts` carries the reasoning: the wall is set up
   once, by one person, who can type one more word, and the other hundred and
   eighteen people are opening a link on a phone. **The TV is pointed at
-  `/daily` explicitly** and rotates itself from there; nothing else changes.
-- **The rotation between the two slides is ours, and it is the only rotation logic
-  here.** `components/Rotator.tsx`, thirty seconds a slide, by soft navigation. That
+  `/wall`** — from 19 September 2026; it was `/daily` while the wall rotated
+  itself from inside a slide. `/wall` is a frame that owns the rotation, so no
+  slide has to know it is in one. Nothing else changes.
+- **The rotation between the slides is ours, and it is the only rotation logic
+  here.** Since 19 September 2026 there are two of them, for two different
+  walls, and they solve the same problem the same way.
+
+  `public/tv/wall.html` is the one on the TV: `/podium` and `/daily`, thirty
+  seconds each, swapped by **exchanging two prefetched iframes** — the back one
+  is loaded at T+24s and revealed at T+30s, so a slide never opens on an empty
+  frame. `/weekly` is built and routed and deliberately left out of `SLIDES`;
+  putting it back is that one word and nothing else.
+
+  `components/Rotator.tsx` rotates `/old/daily` and `/old/podium`, which is
+  what it always did — it simply followed those pages to their new addresses.
+  **Pointing it at the bare paths would send the old wall into the new slides
+  and strand it there**, because the new slides do not carry it.
+
+  Both obey the same rule, which is the part that matters: thirty seconds a
+  slide, by soft navigation. That
   reverses the original "external system" rule, which assumed the campus slideshow drove
   both URLs. It must never become a page reload: the TV runs fullscreen with nobody at
   the laptop, and a reload drops out of fullscreen for good. Nothing else about the
@@ -844,6 +901,26 @@ is the one page here that a person holds. Added 17 September 2026.
   folding the mode into the reset period so flipping the cell does not read as
   39 overtakes.
 
+  **And `/weekly` is a board again from 19 September 2026.** It went to a 308
+  redirect on the 18th when the slide stopped being a weekly board; it is now
+  its own route, reading `week_revenue` — the sheet's column, anchored at
+  `TV_Feed!D2`, 31 August 2026, a Monday — so it zeroes at Monday 00:00 IST and
+  runs Monday to Sunday. `/daily`, `/weekly` and the challenge are **one file
+  and one layout reading a different column**, chosen by `location.pathname`.
+
+  **That last part is load-bearing and was got wrong first.** The board was
+  selected by `?board=` in the rewrite's destination — and a rewrite does not
+  change the client URL, so `location.search` in the browser is empty and the
+  page fell back to the day board. `/weekly` served a flawless *daily*
+  leaderboard: right figures, right ranking, right colours, wrong week, nothing
+  to report it.
+
+  **The 308 it un-makes is still out there.** Browsers cache a permanent
+  redirect indefinitely, so any machine that loaded `/weekly` while it was live
+  may still jump to `/daily` on its own and look perfectly healthy — including
+  the laptop driving the wall. Clearing site data fixes it; `/weekly?x=1` is
+  what proves that is the cause.
+
   **The non-challenge half was `week_revenue` until 18 September 2026** and the
   daily board replaced it, asked for directly. The fallback asymmetry survives
   the swap with a new argument: guessing wrong towards daily puts a true,
@@ -852,7 +929,28 @@ is the one page here that a person holds. Added 17 September 2026.
   puts ₹0 on 39 cards under the name of a contest that is not running, and
   nothing recovers it.
 
-- **The daily board is a *finished* day, it is computed on the laptop, and it
+- **HISTORICAL from 19 September 2026 — the wall's `/daily` is live from
+  midnight.** Everything in this bullet describes `/old/daily`, where it is
+  still true and still tested. The static wall reads `today_revenue` straight
+  from `TV_Feed` — the sheet's own `SUMIFS(… 'Daily Dump'!B:B, TODAY())`, so
+  midnight IST to now — and repaints on a 30-second poll when the figures
+  actually change.
+
+  Asked for directly, against the case below. What it buys: a sale appears on
+  the wall within about ten minutes instead of the next morning; no
+  `localStorage`, no 10:00 alarm, nothing to lose when a browser's data is
+  cleared; and because the figure is a published column rather than two
+  photographs held on one laptop, **a phone can show the same board the TV
+  does**, which the locked version could never do. What it costs is exactly
+  what this bullet's four costs were protecting against, inverted: before
+  lunch most of the board is on ₹0, and the window rolls at midnight when the
+  building is empty rather than at an hour anyone chose.
+
+  `lib/daily.ts`, `istWindowKey` and the two-photograph machinery are all
+  still here and still under test, because `/old/daily` uses them. If the
+  locked board is ever wanted back, none of it has to be rebuilt.
+
+- **`/old/daily` is a *finished* day, it is computed on the laptop, and it
   does not move.** 10:00 IST yesterday to 10:00 IST today. `lib/daily.ts`
   photographs every team's `total_revenue` at the first poll at or after ten and
   keeps the newest two marks in `localStorage`; the figure is the difference.
@@ -897,8 +995,16 @@ is the one page here that a person holds. Added 17 September 2026.
     keeps `week_revenue` under its own honest label. `lib/live.test.ts` states
     the divergence as a fact rather than asserting a parity that is gone.
 
-- **`/daily` goes to the network once a day, and `/podium` still polls every
-  sixty seconds.** Asked for directly. The daily board's figures change only at
+- **HISTORICAL from 19 September 2026.** This describes `/old/daily`. Every
+  timer on the static wall is **thirty seconds**: a slide is up for 30s and the
+  feed is asked for 30s, so no board sits on figures older than one slide. A
+  live board has nothing to gate on — the once-a-day rule existed because a
+  locked board's figures could not move between 10:00s, and this one's move all
+  day. `onFreshData` compares the figures and repaints only when something
+  actually changed, so a quiet poll costs a request and moves nothing.
+
+- **`/old/daily` goes to the network once a day, and `/old/podium` still polls
+  every sixty seconds.** Asked for directly. The daily board's figures change only at
   10:00, so the other 1,439 polls could not move anything on screen; its
   `shouldFetch` returns `true` only when the current window has not been
   photographed yet.
