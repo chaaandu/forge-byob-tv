@@ -320,16 +320,18 @@ Promise.all([loadTeams(), loadPhotos()]).then(([teams]) => { paint(teams); onFre
  * arbitrary: each line is pointed at what the building is doing when it shows.
  */
 const SCAN_COPY = [
-  // 08:00–13:00 · the day has not happened yet, so this one only introduces.
+  // 00:00–13:00 · the day has not happened yet, so this one only introduces.
   // No punchline: "is a founder" runs straight into the ask.
   ['Behind every number',  'is a founder.',      ''],
-  // 13:00–18:00 · trading hours. The one line that is about BUYING belongs in
-  // the window where the reader could actually act on it.
+  // 13:00–00:00 · the line that is about BUYING, in the half of the day where
+  // the reader could act on it — trading hours and the evening after them.
   ['A leaderboard can\u2019t', 'sell you anything.', 'The founders can.'],
-  // 18:00–08:00 · the day is done and the figures are settled, so this is the
-  // one that argues about what the numbers MEAN. It also holds the building
-  // overnight and through the early morning, which is the longest shift.
-  ['None of this',         'is a case study.',   'They built it. They sold it.'],
+  // ── Two, not three ──
+  // `None of this / is a case study. / They built it. They sold it.` ran
+  // 18:00–08:00 and was dropped on request. It was the one that argued about
+  // what the numbers MEAN rather than pointing at the people, and it is the
+  // weakest of the three at the hour it held — the building is empty overnight.
+  // Its removal is what lets each of the surviving two hold half a day.
   // ── Held until `product`, `instagram` and `website` publish in TV_Feed ──
   // ['You can\u2019t buy', 'from a wall.', 'Every one of them will sell to you.'],
 ]
@@ -371,9 +373,20 @@ const SCAN_ASK = 'Scan to meet them all.'
  * actually turned — so the copy is never rewritten under somebody mid-read,
  * and the block still obeys the motion rule at rest.
  */
-const SCAN_BANDS = [8, 13, 18]     // IST hours each line takes over at
+/* IST hours each line takes over at. Half a day each: midnight to 1pm, then
+   1pm to midnight. It was three bands starting at 08:00 while there were three
+   lines; with two, splitting the clock evenly is what keeps either of them
+   from owning only the hours nobody is in the building. */
+const SCAN_BANDS = [0, 13]
 
-/** 0, 1 or 2. Before 08:00 belongs to the evening line, which runs overnight. */
+/**
+ * Which line the hour belongs to.
+ *
+ * The wrap branch is what covers a first band that does not start at midnight
+ * — with `[8, 13, 18]` the hours before eight belonged to the last line, which
+ * ran overnight. `SCAN_BANDS[0]` is 0 now so nothing wraps, and the branch is
+ * kept because it is what makes the array the only thing to edit.
+ */
 function scanBandAt(hourIST) {
   if (hourIST < SCAN_BANDS[0]) return SCAN_BANDS.length - 1
   let band = 0
