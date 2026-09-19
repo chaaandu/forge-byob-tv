@@ -427,7 +427,18 @@ setInterval(writeScan, 30_000)
  * -56px and getBoundingClientRect includes transforms, so a check on the same
  * tick measures ten rows short of where they will be and decides there is room.
  */
-const GAP = 120
+/* ── The clearance the board demands of the QR block ──
+ *
+ * 120px was the original, and it is what hid the block for the whole
+ * 13:00-24:00 band once the second line took three rows: measured, rank 5's
+ * money band ends 19px from the block's left edge, so 120 was never close.
+ *
+ * 40 is a deliberate loosening, asked for directly. **It is not enough to make
+ * today's board fit** — 19 is still under 40 — but it stops a bar that clears
+ * the block by half its own width from hiding it, which is what 120 was doing
+ * on every wide-spread day. Below about 20 the guard stops meaning anything:
+ * the figure and the QR headline would touch. */
+const GAP = 40
 
 function fitScan() {
   const scan = document.getElementById('scan')
