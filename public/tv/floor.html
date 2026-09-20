@@ -205,13 +205,15 @@
 .hero.sh-8 i { right: -14%; top: -30%; width: 74%; height: 160%; transform: skewX(-22deg);
   background: repeating-linear-gradient(90deg, var(--sh) 0 22%, transparent 22% 44%); }
 
-/* 9 · two chevrons, and only ever on rank 1 ─────────────
+/* 9 · two chevrons, and only ever on rank 2 ─────────────
  *
  * The other eight are sweeps and arcs — ground for a card to sit on. This one
- * points, which is why it is not in the hash: a shape that means "leading" has
- * to be attached to the lead, not to whichever venture's id happens to draw
- * it. Rank 1 is forced to it in `heroShapes`, so the other two still pick from
- * the eight and still de-duplicate against each other.
+ * points, which is why it is not in the hash: a shape with a direction in it
+ * has to belong to a POSITION rather than to whichever venture's id happens
+ * to draw it. It sat on rank 1 when it was built and moved to rank 2 on 20
+ * September 2026, asked for directly — the board reads 1-2-3 left to right,
+ * so an arrow in the middle points along the podium rather than off the end
+ * of it.
  *
  * Drawn as two squares wearing only their top and right borders, turned 45deg.
  * A chevron has no fill, so unlike the eight it reads at the card's own edge
@@ -231,8 +233,13 @@
  * is placed to hang a quarter of its width past the card's right edge; the
  * card clips it, which is what makes it read as passing through rather than
  * as a decal sitting on top. */
-.hero.sh-9 i::before { right: 47.4%; }
-.hero.sh-9 i::after  { right: 1.9%; }
+/* 20% of the card further right than they were — 47.4/1.9 became 27.4/-18.1.
+   The trailing chevron now sits where the leading one did and the leading one
+   runs well off the edge, so the pair reads as passing through the card
+   rather than sitting inside it. Fixed here; rank 2 is the only card that
+   ever draws them. */
+.hero.sh-9 i::before { right: 27.4%; }
+.hero.sh-9 i::after  { right: -18.1%; }
 
 /* The heroes wear the same eight, bigger. */
 .hero .shape { opacity: 0.24; }
@@ -366,13 +373,23 @@ const paint = (teams) => {
   document.getElementById('grid').toggleAttribute('data-flat', !podium)
 
   // The three the day belongs to.
-  const heroShapes = []
-  ;(podium ? ranked.slice(0, 3) : []).forEach((t, i) => {
-    if (i === 0) { heroShapes.push(8); return }   // rank 1 always wears the chevrons
-    let sh = shapeFor(t.id)
-    while (heroShapes.includes(sh)) sh = (sh + 1) % 8
-    heroShapes.push(sh)
-  })
+  /* ── Two of the three places own their shape; only third place varies ──
+   *
+   * Rank 1 is the raked stripes and rank 2 is the chevrons, whoever is
+   * standing there — a shape that belongs to a POSITION rather than to a
+   * team, the way the numeral does.
+   *
+   * Rank 3 still belongs to its venture: `shapeFor` hashes the team id, and
+   * the answer is folded into the round forms only — the ellipse, the circle,
+   * the quarter round, the arc and the disc. So the last card is always a
+   * curve after a striped one and a pointed one, and it still changes when
+   * the team does.
+   *
+   * No de-duplication needed: a circle cannot collide with 8 or 9. */
+  const ROUND = [1, 2, 4, 5, 7]
+  const heroShape = (t, i) =>
+    i === 0 ? 8 : i === 1 ? 9 : ROUND[shapeFor(t.id) % ROUND.length]
+  const heroShapes = (podium ? ranked.slice(0, 3) : []).map(heroShape)
   document.getElementById('heroes').innerHTML = (podium ? ranked.slice(0, 3) : []).map((t, i) => {
     const quiet = t[KEY] <= 0
     // Faces when the manifest has them, the monogram when it does not — the
@@ -401,7 +418,7 @@ const paint = (teams) => {
      * long name running into the third person, and it survives every count. */
     const faces = Math.min(squadOf(t.id).length, 4)
     const textMax = faces ? 486 - 95 * faces : 422
-    return `<div class="hero sh-${heroShapes[i] + 1} liv-${liveryFor(t.id)}${quiet ? ' quiet' : ''}"
+    return `<div class="hero sh-${heroShapes[i]} liv-${liveryFor(t.id)}${quiet ? ' quiet' : ''}"
                  style="animation-delay:${60 + i * 90}ms">
       <span class="shape"><i></i></span>
       <span class="hero-edge"></span>
