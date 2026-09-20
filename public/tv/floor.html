@@ -96,15 +96,16 @@
  * Bottom-anchored, so the figure holds its position and a name that needs two
  * lines grows UPWARD into the empty colour rather than pushing the money down.
  *
- * 34% rather than 62%, and the number is the squad's. At 188px tall a
- * photograph is 137px wide and three of them with the 31% overlap reach x=347
- * inside a 592px card; 592 - 24 of right padding - 347 - 16 of air is 205px,
- * which is 34.6%. At 62% a long name started at x=341 and **ran into the
- * third person** — measured at 6px of overlap on `AKS Perfumes`, while short
- * names like `Linore` cleared by 65. The old width was set when the
- * photographs were 150px and the squad ended 70px earlier. */
+ * **`max-width` is set inline, per card, because it depends on how many
+ * photographs that team has** — see `textMax` where the hero is rendered. It
+ * was a flat 34% here, which is right for three faces and leaves a team of two
+ * with 95px of wasted colour and a name broken over two lines for nothing.
+ *
+ * The 360px below is only what a card falls back to if that inline value ever
+ * goes missing: wide enough not to crop a name, narrow enough not to reach the
+ * three-photograph case at x=347. It is a backstop, not the number. */
 .hero-text {
-  position: absolute; right: 24px; bottom: 20px; z-index: 3; max-width: 34%; text-align: right;
+  position: absolute; right: 24px; bottom: 20px; z-index: 3; max-width: 360px; text-align: right;
 }
 /* Two lines, and no more. `AKS Perfumes` becomes `AKS / Perfumes`; a single
    word too long for one line — `WeKravehealthy` is the longest in the feed —
@@ -377,7 +378,29 @@ const paint = (teams) => {
     // Faces when the manifest has them, the monogram when it does not — the
     // same fallback the Ladder and /live use, so ZAAREE topping the day is a
     // card rather than a hole.
-    const squad = squadHtml(t.id, 188, 4)   /* 1.25x of 150 */
+    const squad = squadHtml(t.id, 188, 4)
+    /* ── The text takes whatever the line-up leaves ──
+     *
+     * This was a flat `max-width: 34%`, which is the right number for THREE
+     * photographs and wrong for every other count: a team of two left 95px of
+     * empty colour beside its name and broke `Notty Crunch` over two lines for
+     * no reason. Reported as exactly that.
+     *
+     * The squad's width is arithmetic rather than a measurement — a crop is
+     * `188 x 96/132` = 137px wide and they overlap by 31%, so `n` of them are
+     * `95n + 42` — and the card is 592 with the squad starting at 20, 24px of
+     * right padding and 20px of air between the two:
+     *
+     *     592 - 24 - (20 + 95n + 42) - 20  =  486 - 95n
+     *
+     *     1 photo  391px     3 photos  201px
+     *     2 photos 296px     4 photos  106px
+     *
+     * No photographs at all is the monogram, which ends at x=126, so the text
+     * gets 422. **The 20px of air is the part to keep**: it is what stopped a
+     * long name running into the third person, and it survives every count. */
+    const faces = Math.min(squadOf(t.id).length, 4)
+    const textMax = faces ? 486 - 95 * faces : 422
     return `<div class="hero sh-${heroShapes[i] + 1} liv-${liveryFor(t.id)}${quiet ? ' quiet' : ''}"
                  style="animation-delay:${60 + i * 90}ms">
       <span class="shape"><i></i></span>
@@ -385,7 +408,7 @@ const paint = (teams) => {
       <span class="hero-num">${i + 1}</span>
       ${squad ? `<span class="hero-squad">${squad}</span>`
               : `<span class="mono hero-mono">${monogram(t.name, t.id)}</span>`}
-      <span class="hero-text">
+      <span class="hero-text" style="max-width:${textMax}px">
         <span class="hero-name">${t.name}</span>
         <span class="hero-fig">${rupees(t[KEY])}</span>
       </span>
