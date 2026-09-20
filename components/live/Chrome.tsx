@@ -124,7 +124,23 @@ export function SearchSheet({
     }
   }, [open, onClose])
 
-  const results = standings.filter((s) => matchesQuery(s.team, query))
+  /* ── By team id, not by rank ──
+   *
+   * `standings` arrives ranked, and this list draws the team ID as its first
+   * column — so taking that order straight put VBC118 above VBC104 above
+   * VBC131, a column of numbers in no order at all. A list is scanned by the
+   * thing it shows, and what it shows is the id.
+   *
+   * It is also the one order that does not move: a rank-ordered list of
+   * forty ids reshuffles every time somebody sells, so the place a team sat
+   * in the list a minute ago is not where it is now. `VBC101`-`VBC139` is
+   * fixed for the whole programme.
+   *
+   * `localeCompare` rather than a numeric sort: every id is `VBC1` plus two
+   * digits, so they are the same length and sort lexicographically. */
+  const results = standings
+    .filter((s) => matchesQuery(s.team, query))
+    .sort((a, b) => a.team.teamId.localeCompare(b.team.teamId))
 
   return (
     <AnimatePresence onExitComplete={() => setQuery('')}>
