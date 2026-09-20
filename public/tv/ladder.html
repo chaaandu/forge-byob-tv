@@ -74,7 +74,10 @@
    * its length instead of one flat sweep. Two radials rather than the card's
    * one: a bar is up to 1872px long against a card's 292, so a single light
    * leaves most of it unlit — the second sits late and low and keeps the far
-   * end of the leader's bar from going flat before the money band.
+   * end of the leader's bar from going flat before the money band. It is the
+   * STRONGER of the two at 32% against 26%: the first sits where a bar is
+   * already busy with a numeral, a name and often three photographs, and the
+   * second sits in the empty run where there is nothing else to look at.
    *
    * `--sh` is the card's own colour moved AWAY from its ink, so this can only
    * lift the type off the bar, never wash it out — the same guard the shapes
@@ -82,8 +85,8 @@
   background:
     radial-gradient(52% 170% at 18% 58%,
       color-mix(in srgb, var(--sh) 26%, transparent) 0%, transparent 64%),
-    radial-gradient(44% 150% at 72% 46%,
-      color-mix(in srgb, var(--sh) 18%, transparent) 0%, transparent 60%),
+    radial-gradient(50% 160% at 72% 46%,
+      color-mix(in srgb, var(--sh) 32%, transparent) 0%, transparent 64%),
     linear-gradient(97deg, var(--a), var(--b));   /* the same perceptual step the cards use */
   box-shadow: inset 0 2px 0 var(--sheen), 0 12px 26px rgba(0,0,0,0.34);
   /* The rake. A rounded top-right was tried on 19 September 2026 and removed
