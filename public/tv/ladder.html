@@ -104,8 +104,22 @@
 @keyframes row-in {
   from { opacity: 0; width: 0; }
 }
-.bar-row.big { height: 122px; }
-.bar-row.sml { height: 60px; }
+/* ── The three that carry photographs are taller; the seven give it up ──
+ *
+ * The ladder has a fixed 849px between the crown's headroom and the bottom
+ * safe line — measured, and there is no slack above: the 52px between the
+ * masthead and the first bar is exactly where the crown hangs.
+ *
+ * So a bigger photograph has to be paid for. At 1.15x a crop is 131px tall and
+ * it sits bottom-aligned inside a row that CLIPS, so the big row has to be 133
+ * to leave the 2px the old 114-in-122 had. Three rows taking 11px each is 33,
+ * and the seven small rows give up 5 apiece: 3x133 + 7x55 + 9x7 of gap = 847,
+ * inside 849.
+ *
+ * **Only the top three show photographs** — `photos(rank)` is `rank <= 3` —
+ * so the seven that shrink are the seven that have nothing to show. */
+.bar-row.big { height: 133px; }
+.bar-row.sml { height: 55px; }
 
 /* Knocked into the bar's own colour. The 60px inset is not decoration: a
    `skewX(-11deg)` glyph sits ~12px left of its box at the bottom, and 48px is
@@ -165,7 +179,19 @@
    It hides itself when the board grows into it; see `fitScan()`. */
 .scan {
   position: absolute; right: var(--safe-x); bottom: var(--safe-y); z-index: 4;
-  width: 430px; text-align: right; animation: fade-in 700ms 760ms both;
+  /* ── 360px, and the width is clearance rather than taste ──
+   *
+   * The block is right-anchored, so its WIDTH decides how far left it reaches
+   * and therefore which bar it has to clear. At 430 its left edge sat at
+   * x=1442 and rank 5's money band ended 27px away — under the 40px guard, so
+   * the whole block hid for the afternoon band. At 360 the edge is at 1512 and
+   * the nearest bar is **97px** away.
+   *
+   * This is the lever to reach for before shrinking the code again. The
+   * headline wraps to the same two lines at 430, 390, 360 and 340 — measured —
+   * so the block's HEIGHT does not change and nothing else has to move. The
+   * code stays 188px. */
+  width: 360px; text-align: right; animation: fade-in 700ms 760ms both;
 }
 .scan[hidden] { display: none; }
 /* ── 194px, and the 22 it gives up are the whole point ──
@@ -285,7 +311,7 @@ const paint = (teams) => {
                  style="width:${w}px;animation-delay:${60 + i * 52}ms">
       <span class="bar-num">${rank}</span>
       <span class="bar-name">${t.name}</span>
-      ${photos(rank) ? (squadHtml(t.id, big ? 114 : 52, 5)
+      ${photos(rank) ? (squadHtml(t.id, big ? 131 : 50, 5)
         || `<span class="mono" style="width:84px;height:84px;font-size:34px;margin-left:26px">${monogram(t.name, t.id)}</span>`) : ''}
       <span class="bar-fig">${rupees(t.total)}</span>
     </div>`
