@@ -40,7 +40,15 @@
    * weekly board rejoined. */
   const SLIDES = ['/podium',
                   '/daily' + (location.search.includes('challenge') ? '?mode=challenge' : '')]
-  const PERIOD = 30000, LEAD = 6000
+  /* LEAD is how early the next slide is built. 6s was enough on a fast
+     network — measured on the deployed wall, a prefetched slide rendered in
+     62-95ms and was revealed already full — but it is the whole margin the
+     wall has against a slow CSV fetch at the venue, so it is 15s now.
+     **The slides' own safety timeout has to stay longer than this.** They hold
+     their entrance until `byob:show` arrives and release themselves if it
+     never does; a safety shorter than LEAD fires while the frame is still
+     invisible and the slide appears with its arrival already over. */
+  const PERIOD = 30000, LEAD = 15000
   const f = [document.getElementById('a'), document.getElementById('b')]
   let i = 0, front = 0
 

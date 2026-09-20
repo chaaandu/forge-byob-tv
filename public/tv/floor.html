@@ -5,12 +5,17 @@
 <script>
   /* Inside the rotator this slide is built before it is shown, so it holds its
      entrance until told. Opened directly it never holds. The timeout is the
-     safety: a rotator that fails to post must not freeze the board forever. */
+     safety: a rotator that fails to post must not freeze the board forever.
+
+     **25s, and it must stay above `LEAD` in wall.html, which is 15s.** This
+     fires while the frame is still hidden if it is shorter, and the slide is
+     then revealed with its entrance already finished — it renders perfectly
+     and simply never arrives, which is this wall's stated failure mode. */
   if (window.top !== window) {
     document.documentElement.classList.add('holding')
     const show = () => document.documentElement.classList.remove('holding')
     addEventListener('message', (e) => { if (e.data === 'byob:show') show() })
-    setTimeout(show, 8000)
+    setTimeout(show, 25000)
   }
 </script>
 <style>
