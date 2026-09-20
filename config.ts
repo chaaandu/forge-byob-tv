@@ -530,7 +530,6 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC109/ajitwsh-s',
   'VBC109/ridhima-gupta',
   'VBC109/shweta-singh',
-  'VBC110/diya-harish',
   'VBC110/happy-panjwani',
   'VBC110/rishika-choudhary',
   'VBC111/jenessa-bhathena',
