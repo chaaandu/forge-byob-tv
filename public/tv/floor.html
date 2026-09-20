@@ -146,7 +146,20 @@
    * Chrome has had the property since 139; the fallback is a genuinely
    * rounder corner, not a missing one. */
   border-radius: 15px; corner-shape: squircle;
-  background: linear-gradient(104deg, var(--a), var(--b));   /* see .hero */
+  /* ── One soft light, on all thirty-six ──
+   *
+   * Layered over the card's own gradient rather than drawn as an element:
+   * thirty-six extra nodes for a glow is thirty-six nodes the board does not
+   * need, and this costs none. It paints in `--sh` — the card's colour moved
+   * AWAY from its ink — so it can only ever help the type, never wash it out.
+   *
+   * Faint on purpose. The heroes carry their shape at 0.24 and have room for
+   * it; a card is 292x41 with a disc, a name and a figure already in it, so
+   * this is a lift in the colour rather than anything you would call a shape. */
+  background:
+    radial-gradient(78% 150% at 26% 62%,
+      color-mix(in srgb, var(--sh) 26%, transparent) 0%, transparent 62%),
+    linear-gradient(104deg, var(--a), var(--b));   /* see .hero */
   color: var(--cdk);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 6px 16px rgba(0,0,0,0.3);
   animation: card-in 560ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -172,7 +185,12 @@
  * apart by the shape their card is cut with.
  *
  * All eight enter from the RIGHT: the left of a card belongs to the rank
- * disc and the venture's name, and nothing decorative may cross it. */
+ * disc and the venture's name, and nothing decorative may cross it.
+ *
+ * **`sh-9` is the exception and it is the only one.** The eight are ground for
+ * a card to sit on; the chevrons are a statement, and a statement about
+ * climbing has to start behind the team and travel forward. Entering from the
+ * left is the whole point of it — see the note at `sh-9`. */
 .shape {
   position: absolute; inset: 0; z-index: 0; overflow: hidden;
   pointer-events: none;
@@ -205,15 +223,24 @@
 .hero.sh-8 i { right: -14%; top: -30%; width: 74%; height: 160%; transform: skewX(-22deg);
   background: repeating-linear-gradient(90deg, var(--sh) 0 22%, transparent 22% 44%); }
 
-/* 9 · two chevrons, and only ever on rank 2 ─────────────
+/* 9 · two chevrons, and only ever on rank 1 ─────────────
  *
  * The other eight are sweeps and arcs — ground for a card to sit on. This one
  * points, which is why it is not in the hash: a shape with a direction in it
  * has to belong to a POSITION rather than to whichever venture's id happens
- * to draw it. It sat on rank 1 when it was built and moved to rank 2 on 20
- * September 2026, asked for directly — the board reads 1-2-3 left to right,
- * so an arrow in the middle points along the podium rather than off the end
- * of it.
+ * to draw it.
+ *
+ * ── Which direction, and it took being wrong once to see it ──
+ *
+ * It spent a few hours on rank 2 pointing right, on the reasoning that an
+ * arrow in the middle points along the podium. It does — **toward rank 3.**
+ * The board reads 1-2-3 left to right, so a right-pointing arrow on any card
+ * points down the ranking, and on the middle one it aims at the losing end.
+ *
+ * On rank 1, entering from the LEFT, the same arrow says the opposite: it
+ * starts behind the line-up and travels forward past them, which is a leader
+ * still climbing. That is the sentence this shape is for, and it is why this
+ * one shape breaks the enter-from-the-right rule above.
  *
  * Drawn as two squares wearing only their top and right borders, turned 45deg.
  * A chevron has no fill, so unlike the eight it reads at the card's own edge
@@ -221,8 +248,13 @@
 .hero.sh-9 i { inset: 0; background: none; }
 .hero.sh-9 i::before, .hero.sh-9 i::after {
   content: ''; position: absolute; top: 50%;
-  width: 275px; height: 275px;                 /* 2.5x */
-  border: 80px solid var(--sh); border-left: 0; border-bottom: 0;
+  width: 344px; height: 344px;                 /* 1.25x of 275 */
+  border: 100px solid var(--sh); border-left: 0; border-bottom: 0;
+  /* Borders top-and-right turned 45deg point the corner RIGHT. It wore a
+     `scaleX(-1)` to point left for a while; the mirror is worth remembering
+     rather than just deleting, because it moves the INK as well as the
+     direction — the 314px that reach right of the element's centre swing to
+     the left of it — so `right` below has to be re-derived on every flip. */
   transform: translateY(-50%) rotate(45deg);
 }
 /* ── Where the bleed is measured ──
@@ -233,13 +265,106 @@
  * is placed to hang a quarter of its width past the card's right edge; the
  * card clips it, which is what makes it read as passing through rather than
  * as a decal sitting on top. */
-/* 20% of the card further right than they were — 47.4/1.9 became 27.4/-18.1.
-   The trailing chevron now sits where the leading one did and the leading one
-   runs well off the edge, so the pair reads as passing through the card
-   rather than sitting inside it. Fixed here; rank 2 is the only card that
-   ever draws them. */
-.hero.sh-9 i::before { right: 27.4%; }
-.hero.sh-9 i::after  { right: -18.1%; }
+/* ── One chevron, not two ─────────────────────────────
+ *
+ * It was a pair from the day it was built. A single `<` says the same thing
+ * with less: two of them read as a motif, one reads as a mark. `::after` is
+ * hidden rather than deleted so the pair is one line away if it is ever
+ * wanted back.
+ *
+ * ── Where it sits, and why the number looks arbitrary ──
+ *
+ * A 444px box turned 45deg paints `(444/2) x sqrt2` = 314px of ink, and
+ * `centre = 592 - right - 222`. Pointing right, that ink spans `centre` to
+ * `centre + 314`, so 7.4% puts it at x=326..640: the tip clear of the
+ * photographs, which end at 347, and the open end 48px past the card's right
+ * edge so it is cut by the card rather than floating inside it.
+ *
+ * Re-derive this if the direction changes again — pointing left, the same
+ * centre would put the ink at 12..326 instead. Fixed here; rank 1 is the only
+ * card that draws it. */
+.hero.sh-9 i::before { right: 7.4%; }
+.hero.sh-9 i::after  { display: none; }
+
+/* ── 10-13 · the quiet set ─────────────────────────────
+ *
+ * Four alternatives to the sweeps, added 20 September 2026 while choosing
+ * what the podium wears. They share a property the eight do not: none of them
+ * is a SHAPE so much as a treatment, so none can fight a cutout or a figure
+ * for attention. All four paint in `--sh`, the card's own colour moved away
+ * from its ink, so none can cost the type its contrast.
+ *
+ * Preview any of them across all three cards with `?shape=N`. */
+
+/* 10 · concentric rings, radiating from off the right edge */
+.hero.sh-10 i {
+  inset: 0; border: 0; border-radius: 0; transform: none; clip-path: none;
+  background: repeating-radial-gradient(circle at 108% 50%,
+    transparent 0 74px, var(--sh) 74px 84px);
+}
+
+/* 11 · a halftone field, fading in from the right */
+.hero.sh-11 i {
+  inset: 0; border: 0; border-radius: 0; transform: none; clip-path: none;
+  background: radial-gradient(var(--sh) 3px, transparent 3.5px);
+  background-size: 26px 26px;
+  mask-image: linear-gradient(100deg, transparent 18%, black 78%);
+  -webkit-mask-image: linear-gradient(100deg, transparent 18%, black 78%);
+}
+
+/* 12 · hairline diagonals, on the wall's own -11deg rake */
+.hero.sh-12 i {
+  inset: 0; border: 0; border-radius: 0; transform: none; clip-path: none;
+  background: repeating-linear-gradient(104deg, var(--sh) 0 4px, transparent 4px 34px);
+  mask-image: linear-gradient(100deg, transparent 12%, black 70%);
+  -webkit-mask-image: linear-gradient(100deg, transparent 12%, black 70%);
+}
+
+/* 13 · one diagonal, the card in two tones and nothing else */
+.hero.sh-13 i {
+  inset: 0; border: 0; border-radius: 0; transform: none; background: var(--sh);
+  clip-path: polygon(42% 0, 100% 0, 100% 100%, 12% 100%);
+}
+.hero.sh-10 i::before, .hero.sh-10 i::after,
+.hero.sh-11 i::before, .hero.sh-11 i::after,
+.hero.sh-12 i::before, .hero.sh-12 i::after,
+.hero.sh-13 i::before, .hero.sh-13 i::after { display: none; }
+
+/* ── 14-17 · the second set, when none of the first was right ─────────
+ *
+ * The quiet set was still geometry. These are not: two are light rather than
+ * shape, one is the card's own edge, and one is the venture's own initials.
+ * Preview with `?shape=N` as before. */
+
+/* 14 · nothing at all. The card is its gradient and its colour. */
+.hero.sh-14 i { display: none; }
+
+/* 15 · one soft light, thrown from behind the line-up */
+.hero.sh-15 i {
+  inset: 0; border: 0; border-radius: 0; transform: none; clip-path: none;
+  background: radial-gradient(60% 120% at 34% 58%, var(--sh) 0%, transparent 62%);
+}
+
+/* 16 · a hairline inset from the card's own edge */
+.hero.sh-16 i {
+  inset: 14px; border: 2px solid var(--sh); border-radius: 12px;
+  background: none; transform: none; clip-path: none;
+}
+
+/* 17 · the venture's initials, oversized and set behind everything */
+.hero.sh-17 i {
+  inset: 0; border: 0; background: none; transform: none; clip-path: none;
+  display: grid; place-items: center end; padding-right: 38px;
+}
+.hero.sh-17 i::before {
+  content: attr(data-mono);
+  font-size: 190px; font-weight: 900; font-stretch: 70%; line-height: 0.8;
+  color: var(--sh); letter-spacing: -0.04em;
+}
+.hero.sh-14 i::before, .hero.sh-14 i::after,
+.hero.sh-15 i::before, .hero.sh-15 i::after,
+.hero.sh-16 i::before, .hero.sh-16 i::after,
+.hero.sh-17 i::after { display: none; }
 
 /* The heroes wear the same eight, bigger. */
 .hero .shape { opacity: 0.24; }
@@ -375,7 +500,7 @@ const paint = (teams) => {
   // The three the day belongs to.
   /* ── Two of the three places own their shape; only third place varies ──
    *
-   * Rank 1 is the raked stripes and rank 2 is the chevrons, whoever is
+   * Rank 1 is the chevrons and rank 2 is the raked stripes, whoever is
    * standing there — a shape that belongs to a POSITION rather than to a
    * team, the way the numeral does.
    *
@@ -387,8 +512,12 @@ const paint = (teams) => {
    *
    * No de-duplication needed: a circle cannot collide with 8 or 9. */
   const ROUND = [1, 2, 4, 5, 7]
+  /* `?shape=N` puts one shape on all three cards, for choosing between them
+     side by side. No param is the real board. */
+  const FORCED = Number(Q.get('shape')) || 0
   const heroShape = (t, i) =>
-    i === 0 ? 8 : i === 1 ? 9 : ROUND[shapeFor(t.id) % ROUND.length]
+    FORCED ? FORCED
+    : i === 0 ? 9 : i === 1 ? 8 : ROUND[shapeFor(t.id) % ROUND.length]
   const heroShapes = (podium ? ranked.slice(0, 3) : []).map(heroShape)
   document.getElementById('heroes').innerHTML = (podium ? ranked.slice(0, 3) : []).map((t, i) => {
     const quiet = t[KEY] <= 0
@@ -420,7 +549,7 @@ const paint = (teams) => {
     const textMax = faces ? 486 - 95 * faces : 422
     return `<div class="hero sh-${heroShapes[i]} liv-${liveryFor(t.id)}${quiet ? ' quiet' : ''}"
                  style="animation-delay:${60 + i * 90}ms">
-      <span class="shape"><i></i></span>
+      <span class="shape"><i data-mono="${monogram(t.name, t.id)}"></i></span>
       <span class="hero-edge"></span>
       <span class="hero-num">${i + 1}</span>
       ${squad ? `<span class="hero-squad">${squad}</span>`
