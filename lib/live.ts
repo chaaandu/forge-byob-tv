@@ -102,10 +102,18 @@ export function boardLabel(key: BoardKey, mode: BoardMode): string {
   return mode === 'challenge' ? '10-Day' : 'Last 7 days'
 }
 
-/** What the figure on this board is, in words, for the team sheet. */
+/**
+ * What the figure on this board is, in words, for the team sheet.
+ *
+ * **All four read `<window> revenue`, in that order.** `.lv-label` is uppercase
+ * at 0.2em, and at that tracking the eye lands on the first word; leading with
+ * the window is what lets someone flicking between tabs see which board they
+ * are on without reading the whole label. `Revenue today` led with the word
+ * every tab shares, which made the three captions look identical at a glance.
+ */
 export function figureLabel(key: BoardKey, mode: BoardMode): string {
   if (key === 'all') return 'All-time revenue'
-  if (key === 'today') return 'Revenue today'
+  if (key === 'today') return 'Today revenue'
   return mode === 'challenge' ? '10-Day Challenge revenue' : 'Last 7 days revenue'
 }
 
