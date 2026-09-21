@@ -35,9 +35,18 @@ import type { BoardMode, Team, TeamId } from '@/lib/types'
  * own honest label, and it is the more useful of the two on a phone: somebody
  * holding this wants *live*, and the tab beside it — `Today`, `today_revenue`,
  * current to the last poll — is the live daily board the wall's locked one
- * cannot be. What is genuinely lost is that between challenges the two surfaces
- * now measure different windows, and `lib/live.test.ts` states that as a fact
- * rather than asserting a parity that is no longer true.
+ * cannot be.
+ *
+ * **And that tab agrees with `/weekly` again from 21 September 2026.** The
+ * divergence this comment used to end by conceding was real and was worse than
+ * it sounds: the wall's weekly board moved to a rolling seven days and the phone
+ * stayed on the programme week, so the same label sat over ₹6,94,123 and ₹5,274
+ * on the same afternoon. Both surfaces now take the figure from
+ * `periodRevenueOf` in `lib/feed.ts`, which prefers `last7_revenue`, so the
+ * agreement is structural rather than remembered. The divergence that remains is
+ * the intended one above: the phone's period tab is a week and the wall's
+ * `/daily` is a locked day, and those are different boards rather than two
+ * spellings of one.
  *
  * Today's comparator (`compareToday`) lives in `lib/ranking.ts` beside the
  * others for the same reason they all do.

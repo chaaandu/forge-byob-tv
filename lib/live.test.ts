@@ -46,11 +46,16 @@ describe('standingsFor', () => {
    *
    * So the phone's period tab keeps the week, under its own honest label, and
    * the live daily board is the tab beside it. This pins that the middle tab is
-   * `week_revenue` — because the direction this could fail in is the phone
+   * the weekly figure — because the direction this could fail in is the phone
    * quietly falling through to `rankForMode('daily', …, null)`, which ranks
    * every team at ₹0 and makes the tab an unlabelled duplicate of `All-time`.
+   *
+   * **The window itself is no longer a divergence.** From 21 September 2026 both
+   * surfaces take `weekRevenue` from `periodRevenueOf`, which prefers
+   * `last7_revenue`, so the phone's week and `/weekly` on the wall are the same
+   * seven days. What this test still pins is the *tab*, not the window.
    */
-  it('ranks its period tab on the week, which is no longer what the wall shows', () => {
+  it('ranks its period tab on the week, which the wall now shows too', () => {
     expect(standingsFor('period', 'daily', cohort).map((s) => s.team.teamId)).toEqual(
       rankByWeek(competingTeams(cohort)).map((t) => t.teamId),
     )

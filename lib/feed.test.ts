@@ -159,6 +159,56 @@ describe('venture names', () => {
   })
 })
 
+describe('the rolling week', () => {
+  const HEAD = 'team_id,venture_name,total_revenue,week_revenue,today_revenue,total_units'
+
+  it('prefers last7_revenue over week_revenue when the sheet publishes it', () => {
+    const csv = [`${HEAD},last7_revenue`, 'VBC101,Aurora,90000,1000,0,12,8000'].join('\n')
+    expect(parseTeams(csv)[0]!.weekRevenue).toBe(8_000)
+  })
+
+  /**
+   * The column is optional exactly as `challenge_revenue` is: a sheet that has
+   * not grown it must keep working on the programme week rather than losing the
+   * fetch. This is the state production ran in until 21 September 2026.
+   */
+  it('falls back to week_revenue when the column is absent', () => {
+    const csv = [HEAD, 'VBC101,Aurora,90000,1000,0,12'].join('\n')
+    expect(parseTeams(csv)[0]!.weekRevenue).toBe(1_000)
+  })
+
+  /** Per row, not per fetch — a half-populated column still yields 39 true figures. */
+  it('falls back per row, so a half-filled column is still all true figures', () => {
+    const csv = [
+      `${HEAD},last7_revenue`,
+      'VBC101,Aurora,90000,1000,0,12,8000',
+      'VBC102,Borealis,50000,2000,0,9,',
+    ].join('\n')
+    const [a, b] = parseTeams(csv)
+    expect(a!.weekRevenue).toBe(8_000)
+    expect(b!.weekRevenue).toBe(2_000)
+  })
+
+  /**
+   * `week_revenue` stays in `FEED_HEADERS` and stays required. The new column
+   * must not become a way for a revoked sheet — which returns an HTML login page
+   * with HTTP 200 — to satisfy the gate.
+   */
+  it('does not let last7_revenue stand in for a missing week_revenue column', () => {
+    const csv = [
+      'team_id,venture_name,total_revenue,today_revenue,total_units,last7_revenue',
+      'VBC101,Aurora,90000,0,12,8000',
+    ].join('\n')
+    expect(() => parseTeams(csv)).toThrow()
+  })
+
+  /** A zero is a figure, not a blank: a team that sold nothing in seven days is ₹0. */
+  it('reads an explicit zero rather than falling through to the week', () => {
+    const csv = [`${HEAD},last7_revenue`, 'VBC101,Aurora,90000,1000,0,12,0'].join('\n')
+    expect(parseTeams(csv)[0]!.weekRevenue).toBe(0)
+  })
+})
+
 describe('the product column', () => {
   const head = 'team_id,venture_name,total_revenue,week_revenue,today_revenue,total_units'
 

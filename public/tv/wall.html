@@ -24,22 +24,23 @@
      painted; the arrival still happens in front of somebody. -->
 <div id="stage"><iframe id="a"></iframe><iframe id="b"></iframe></div>
 <script>
-  /* ── Two slides, thirty seconds each ──
+  /* ── Two slides, thirty seconds each: the ladder and the weekly board ──
    *
-   * `/weekly` exists and is a real board — it is simply not in the rotation
-   * yet, by decision rather than by omission. Put it back by adding `'/weekly'`
-   * to this array and nothing else changes; the slide, its route and its tests
-   * are already here.
+   * `/daily` came out of the rotation on 21 September 2026, asked for
+   * directly. The route is untouched and still works — it is out of the loop,
+   * not gone — so putting it back is adding it to this array and nothing else.
    *
-   * What it costs while it is out: a minute round trip instead of ninety
-   * seconds, so each board is on screen twice as often.
+   * **What leaves with it is the 10-Day Challenge.** `AGENTS.md` is explicit
+   * that the challenge REPLACES the daily board rather than being a slide of
+   * its own, so with `/daily` out there is nowhere for it to appear: flipping
+   * `challenge_mode` to `Yes` in `TV_Cohort` will now change nothing on the
+   * wall. That is a real consequence of a one-line edit and it is written
+   * here because nothing else would report it — the cell would be set, the
+   * contest would be running, and the board would carry on showing the week.
    *
-   * The 10-Day Challenge REPLACES the daily board when it is running —
-   * `AGENTS.md` is explicit that it is the day's contest, not another slide —
-   * so the suffix belongs to `/daily`, and would still belong there if the
-   * weekly board rejoined. */
-  const SLIDES = ['/podium',
-                  '/daily' + (location.search.includes('challenge') ? '?mode=challenge' : '')]
+   * When a challenge is next run, `/daily` has to come back into this array
+   * for the duration, carrying `?mode=challenge` as it did before. */
+  const SLIDES = ['/podium', '/weekly']
   /* LEAD is how early the next slide is built. 6s was enough on a fast
      network — measured on the deployed wall, a prefetched slide rendered in
      62-95ms and was revealed already full — but it is the whole margin the

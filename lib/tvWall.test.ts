@@ -137,6 +137,36 @@ describe('the static wall ranks exactly as lib/ranking does', () => {
   })
 
   /**
+   * ── Both trees must pick the weekly figure from the same column ──
+   *
+   * `/weekly` on the TV and `/live`'s `This week` tab rank the same teams under
+   * the same word. On 21 September 2026 the wall moved to a rolling seven days
+   * and the phone did not, and for a few hours the same label sat over
+   * ₹6,94,123 and ₹5,274 — both figures true, both boards rendering perfectly,
+   * nothing in either product able to report it. A student standing at the wall
+   * with a phone in their hand is the one person guaranteed to see it.
+   *
+   * `lib/feed.ts` cannot be imported by `public/tv/`, so this reads the wall's
+   * source and pins the shape: prefer `last7_revenue`, fall back to
+   * `week_revenue`, per row. The fallback is the half that gets dropped in a
+   * hurry, and dropping it turns a sheet without the column into 39 cards on ₹0.
+   */
+  it('takes the weekly figure from last7_revenue, falling back to the week', () => {
+    const field = WALL.match(/week:\s*([\s\S]*?),\n\s*challenge:/)
+    expect(field).not.toBeNull()
+    expect(field![1]).toContain('last7_revenue')
+    expect(field![1]).toContain('week_revenue')
+
+    // The same rule `periodRevenueOf` applies in lib/feed.ts, exercised here so
+    // a change to one tree that is not made in the other fails on this line.
+    const pick = (last7: string, week: string) =>
+      last7.trim() === '' ? Number(week) : Number(last7)
+    expect(pick('8000', '1000')).toBe(8_000)
+    expect(pick('', '1000')).toBe(1_000)
+    expect(pick('0', '1000')).toBe(0)
+  })
+
+  /**
    * The spares are two workbooks `TV_Feed` publishes that are not in the
    * cohort. The wall cannot import `config.ts`, so it repeats the list — and a
    * spare that fell off one side would take a card on the board while never

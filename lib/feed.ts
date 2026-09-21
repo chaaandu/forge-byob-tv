@@ -76,12 +76,47 @@ function ventureNameOf(raw: string): string {
  * bad cell discard a fetch that is 41 rows good — the gate's whole job is to
  * judge that, and it cannot judge what never reaches it.
  */
+/**
+ * The figure the weekly board ranks on: `last7_revenue` when the sheet has it,
+ * `week_revenue` when it does not.
+ *
+ * **A rolling seven days — today and the six before it, inclusive.** Added 21
+ * September 2026, and the reason is a Monday: `week_revenue` is anchored to the
+ * programme week, so at nine on a Monday morning the whole cohort sits on ₹0 and
+ * the board reads as broken rather than as new. Measured that morning — the
+ * Monday week totalled ₹5,274 across 39 teams while the rolling window totalled
+ * ₹6,94,123. Both true; only one is worth putting on a wall.
+ *
+ * **Optional, exactly as `challenge_revenue` is**, and for the same reason: a
+ * missing column may never throw away a fetch. `week_revenue` stays in
+ * `FEED_HEADERS` and stays required, so the gate that catches a revoked sheet is
+ * untouched, and a sheet that has not grown the new column keeps working on the
+ * programme week. The surface upgrades itself the moment the column appears —
+ * no second deploy, no version check.
+ *
+ * **The fallback is per row rather than per fetch**, so a sheet publishing the
+ * column for some teams and not others still shows a true figure for every one
+ * of them.
+ *
+ * **This is what keeps the phone and the wall telling the same story.**
+ * `public/tv/tv.js` picks its `week` field the identical way; the two trees
+ * cannot import from one another, so this is two implementations of one rule and
+ * `lib/tvWall.test.ts` is what stops them drifting. Before this, `/weekly` on the
+ * TV showed the rolling window and `/live`'s `This week` tab showed the
+ * programme week — same label, figures an order of magnitude apart, and nothing
+ * in either product that could report it.
+ */
+function periodRevenueOf(row: Record<string, string>): number | null {
+  const rolling = (row.last7_revenue ?? '').trim()
+  return rolling === '' ? toNumber(row.week_revenue ?? '') : toNumber(rolling)
+}
+
 function toTeam(row: Record<string, string>): Team | null {
   const teamId = (row.team_id ?? '').trim()
   if (teamId === '') return null
 
   const totalRevenue = toNumber(row.total_revenue ?? '')
-  const weekRevenue = toNumber(row.week_revenue ?? '')
+  const weekRevenue = periodRevenueOf(row)
   const todayRevenue = toNumber(row.today_revenue ?? '')
   const totalUnits = toNumber(row.total_units ?? '')
   if (

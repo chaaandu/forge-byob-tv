@@ -23,10 +23,18 @@ export type Team = {
   /** All-time. Ranks `/podium`, and breaks ties everywhere else. */
   totalRevenue: number
   /**
-   * Since Monday 00:00 IST. **Ranks no slide.** It ranked `/daily` until the
-   * challenge took that board, and again between challenges until the daily
-   * window replaced it; `/live`'s week tab is its only reader now. Still
-   * required, still correct, and the fallback nothing falls back to.
+   * The weekly figure — **a rolling seven days from 21 September 2026**, today
+   * and the six before it, read from `last7_revenue`. Falls back to
+   * `week_revenue` (Monday 00:00 IST) when the sheet has not grown the column;
+   * `periodRevenueOf` in `lib/feed.ts` owns the choice and states why.
+   *
+   * **The name is now wider than the field.** It is kept because every reader
+   * and comparator is spelled this way and renaming it buys nothing the comment
+   * does not — but do not read `weekRevenue` as "since Monday" without checking
+   * which column fed it.
+   *
+   * Ranks `/weekly` on the wall and `/live`'s week tab, which is the point: the
+   * two used to measure different windows under one label.
    */
   weekRevenue: number
   /**

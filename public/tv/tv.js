@@ -214,7 +214,27 @@ async function fetchTeams() {
       name: r.venture_name ? titleCase(r.venture_name) : r.team_id,
       total: num(r.total_revenue),
       today: num(r.today_revenue),
-      week: num(r.week_revenue),
+      /* ── The weekly board is a ROLLING seven days when the sheet has it ──
+       *
+       * `last7_revenue` is today and the six days before it, inclusive — on a
+       * Friday, last Saturday through today, with today's sales counting as
+       * they land. It is one `SUMIFS` over `Daily Dump` cols B, D and N, the
+       * same proof-gated column every other figure here comes from.
+       *
+       * **Optional, exactly as `product` and `instagram` are**: absent is a
+       * valid state and a missing column may never throw away a fetch. Until
+       * `TV_Feed` publishes it the board falls back to `week_revenue`, which
+       * is the Monday-anchored week — correct, just resetting to ₹0 every
+       * Monday morning, which is the thing the rolling window exists to
+       * avoid. The slide upgrades itself the moment the column appears; no
+       * deploy, no change here.
+       *
+       * The fallback is per FIELD rather than per fetch, so a sheet that
+       * publishes the column for some teams and not others still shows a true
+       * figure for every one of them. */
+      week: r.last7_revenue !== undefined && String(r.last7_revenue).trim() !== ''
+        ? num(r.last7_revenue)
+        : num(r.week_revenue),
       challenge: num(r.challenge_revenue),
       units: num(r.total_units),
     }))
