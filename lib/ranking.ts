@@ -32,7 +32,10 @@ export function compareTeams(a: Team, b: Team): number {
 }
 
 /**
- * This week's standing: week revenue desc → **all-time** revenue desc → team ID asc.
+ * The weekly board's standing: weekly revenue desc → **all-time** revenue desc →
+ * team ID asc. The first key is a rolling seven days from 21 September 2026 —
+ * see `periodRevenueOf` in `lib/feed.ts`; this comparator does not care which
+ * window fed it, only that both surfaces were fed the same one.
  *
  * All-time revenue rather than units is the second key on purpose. Monday
  * morning has every team on ₹0 for the week, and falling back to the standing

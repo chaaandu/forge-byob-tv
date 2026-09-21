@@ -30,7 +30,7 @@ import type { BoardMode, Team, TeamId } from '@/lib/types'
  * and cannot be handed them without this project growing the backend it does not
  * have.
  *
- * So the phone's period tab keeps the **week**, and says `This week`. That is
+ * So the phone's period tab keeps the **week**, and says `Last 7 days`. That is
  * not a fudge of the wall's board, it is a different published figure under its
  * own honest label, and it is the more useful of the two on a phone: somebody
  * holding this wants *live*, and the tab beside it — `Today`, `today_revenue`,
@@ -86,18 +86,27 @@ export function standingsFor(key: BoardKey, mode: BoardMode, teams: readonly Tea
   return ranked.map((team, index) => ({ team, rank: index + 1, figure: figureOf(key, mode, team) }))
 }
 
-/** The tab's label. Short, because three of them share a phone's width. */
+/**
+ * The tab's label. Short, because three of them share a phone's width.
+ *
+ * `Last 7 days` rather than `This week` from 21 September 2026, because the
+ * figure behind it is a rolling window and `This week` said otherwise. Measured
+ * before it went in: 78.6px in a 94px chip at 320px, the narrowest phone this
+ * page is built for, so it fits everywhere the old label did. It is the longest
+ * of the three and the grid is `repeat(3, 1fr)`, so a longer one still needs
+ * measuring rather than eyeballing.
+ */
 export function boardLabel(key: BoardKey, mode: BoardMode): string {
   if (key === 'all') return 'All-time'
   if (key === 'today') return 'Today'
-  return mode === 'challenge' ? '10-Day' : 'This week'
+  return mode === 'challenge' ? '10-Day' : 'Last 7 days'
 }
 
 /** What the figure on this board is, in words, for the team sheet. */
 export function figureLabel(key: BoardKey, mode: BoardMode): string {
   if (key === 'all') return 'All-time revenue'
   if (key === 'today') return 'Revenue today'
-  return mode === 'challenge' ? '10-Day Challenge revenue' : 'Revenue this week'
+  return mode === 'challenge' ? '10-Day Challenge revenue' : 'Revenue, last 7 days'
 }
 
 /**
