@@ -106,7 +106,7 @@ export function boardLabel(key: BoardKey, mode: BoardMode): string {
 export function figureLabel(key: BoardKey, mode: BoardMode): string {
   if (key === 'all') return 'All-time revenue'
   if (key === 'today') return 'Revenue today'
-  return mode === 'challenge' ? '10-Day Challenge revenue' : 'Revenue, last 7 days'
+  return mode === 'challenge' ? '10-Day Challenge revenue' : 'Last 7 days revenue'
 }
 
 /**

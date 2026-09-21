@@ -447,26 +447,29 @@
  * a Monday — so it zeroes at Monday 00:00 IST and runs Monday to Sunday. A
  * second opinion about where a week starts is how a board comes to disagree
  * with the sheet it is printing, so nothing here asks the clock. */
-/* ── The captions avoid a possessive at a word end, and the reason is tracking ──
+/* ── The captions carry no punctuation at a word end, and tracking is why ──
  *
  * `Last 7 days’ sales` is correct English — a plural possessive, the same
- * construction as "two weeks’ notice". It is still wrong here. `.meta-label`
- * is uppercase at 0.26em, which is 4.16px of air between every pair of letters,
- * and at that tracking an apostrophe sitting at the END of a word floats in a
- * gap as wide as a letter: `LAST 7 DAYS’ SALES` reads as a stray mark between
- * two words at six metres, which is where this board is read from.
+ * construction as "two weeks’ notice". It is still wrong here, and so was the
+ * comma that briefly replaced it. `.meta-label` is uppercase at 0.26em, which
+ * is 4.16px of air between every pair of letters, and at that tracking any mark
+ * sitting at the END of a word floats in a gap as wide as a letter:
+ * `LAST 7 DAYS’ SALES` reads as a stray speck between two words at six metres,
+ * which is where this board is read from.
  *
  * `TODAY’S SALES` has the same apostrophe and is fine, because it falls INSIDE
  * a word with a letter either side to bracket it. So the rule is not "no
- * apostrophes" — it is that a possessive at a word end does not survive this
- * tracking, and the plural possessive is always at a word end.
+ * apostrophes" — it is that a mark at a word end does not survive this tracking,
+ * and a plural possessive is always at a word end.
  *
- * Both spellings measure the same, 237.3px against 237.8px, so nothing was
- * bought or lost in the layout; `Sales, last 7 days` also matches the phone’s
- * `Revenue, last 7 days` in `lib/live.ts`. */
+ * `Last 7 days sales` drops the possessive rather than spelling it, which is
+ * mildly non-standard as prose and entirely ordinary as a label. That is the
+ * trade taken deliberately: this is signage read at a distance, not a sentence.
+ * All three spellings measure within half a pixel of each other, so the layout
+ * was never the argument. */
 const BOARDS = {
   day:       { key: 'today',     word: '<em>Daily</em> Leaderboard',  label: 'Today’s sales',     title: 'BYOB — Daily Leaderboard' },
-  week:      { key: 'week',      word: '<em>Weekly</em> Leaderboard', label: 'Sales, last 7 days', title: 'BYOB — Weekly Leaderboard' },
+  week:      { key: 'week',      word: '<em>Weekly</em> Leaderboard', label: 'Last 7 days sales', title: 'BYOB — Weekly Leaderboard' },
   challenge: { key: 'challenge', word: '<em>10-Day</em> Challenge',   label: 'Challenge sales',   title: 'BYOB — 10-Day Challenge' },
 }
 const Q = new URLSearchParams(location.search)
