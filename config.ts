@@ -606,6 +606,7 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC136/aadishwar-r',
   'VBC136/pratiksha-bihani',
   'VBC136/shivansh-sarraf',
+  'VBC137/abhishek-gaur',
   'VBC138/radha-hutkey',
   'VBC138/sahil-agrawal',
   'VBC139/aditya-singhal',
