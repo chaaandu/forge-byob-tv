@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
-import { PROGRAMME_START_ISO, SPARE_TEAM_IDS } from '@/config'
+import { PEOPLE_PHOTOS, PROGRAMME_START_ISO, SPARE_TEAM_IDS } from '@/config'
 import { compareChallenge, compareDaily, compareTeams, compareWeek } from '@/lib/ranking'
 import type { Team, TeamId } from '@/lib/types'
 
@@ -164,6 +164,28 @@ describe('the static wall ranks exactly as lib/ranking does', () => {
     expect(pick('8000', '1000')).toBe(8_000)
     expect(pick('', '1000')).toBe(1_000)
     expect(pick('0', '1000')).toBe(0)
+  })
+
+  /**
+   * ── The wall's copy of the people manifest, which had already drifted ──
+   *
+   * `public/tv/` cannot import `config.ts`, so it reads `people.json` — a
+   * second copy of `PEOPLE_PHOTOS`, hand-maintained until 22 September 2026
+   * and wrong by then in both directions at once. It listed
+   * `VBC110/diya-harish`, a photograph **deleted** for being another student's
+   * face, and `VBC107/aditi` after that file moved teams: two 404s and two
+   * broken images on the TV. It was also missing four real photographs,
+   * including ZAAREE's only one, so a whole team's line-up was empty on the
+   * wall while full on the phone.
+   *
+   * Neither direction reports anything. A wall shows a torn-page icon to a
+   * corridor nobody is auditing, and a missing face just looks like a team
+   * that sent fewer photographs. `scripts/export-people-json.mjs` generates
+   * the file now; this is what makes regenerating it non-optional.
+   */
+  it('gives the wall the same people manifest the app has', () => {
+    const wall = JSON.parse(readFileSync('public/tv/people.json', 'utf8'))
+    expect(wall).toEqual([...PEOPLE_PHOTOS])
   })
 
   /**
