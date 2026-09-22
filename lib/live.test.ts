@@ -448,3 +448,72 @@ describe('TEAM_LINKS', () => {
     expect(linksOf(linkTeam('VBC199'))).toEqual({ website: undefined, instagram: undefined })
   })
 })
+
+/**
+ * ── The manifest and the filesystem must agree, in both directions ──
+ *
+ * `PEOPLE_PHOTOS` is the list the page reads; it never looks at the directory.
+ * That is deliberate — it works exactly as `LOGOS` does — but it means the two
+ * can drift silently, and both directions of drift are a real bug that has
+ * already shipped:
+ *
+ * - **Listed with no file** is a broken image on a named student's card. It
+ *   happened when re-running the fetch meant emptying `public/people/` first,
+ *   and every card spent an hour asking for 105 files that were not there.
+ * - **On disk but unlisted** is a photograph a student sent that nobody can
+ *   see, which reports nothing at all — the card just shows one fewer face.
+ *
+ * The mitigation until now was remembering to run `scripts/register-people.py`.
+ * This is that habit written down where it fails the build instead, because a
+ * missing face is precisely the kind of thing nobody notices on a card they
+ * have already seen.
+ */
+describe('the people manifest', () => {
+  const ROOT = 'public/people'
+
+  const onDisk = () =>
+    readdirSync(ROOT, { withFileTypes: true })
+      .filter((d) => d.isDirectory())
+      .flatMap((d) =>
+        readdirSync(`${ROOT}/${d.name}`)
+          .filter((f) => f.endsWith('.webp'))
+          .map((f) => `${d.name}/${f.replace(/\.webp$/, '')}`),
+      )
+
+  it('has a file behind every entry it lists', () => {
+    const missing = PEOPLE_PHOTOS.filter((e) => !existsSync(`${ROOT}/${e}.webp`))
+    expect(missing).toEqual([])
+  })
+
+  it('lists every file that is on disk', () => {
+    const unlisted = onDisk().filter((e) => !PEOPLE_PHOTOS.includes(e))
+    expect(unlisted).toEqual([])
+  })
+
+  /** A zero-byte or truncated write is a broken image the existence check passes. */
+  it('carries a real image behind every entry', () => {
+    const empty = PEOPLE_PHOTOS.filter((e) => readFileSync(`${ROOT}/${e}.webp`).length < 1_500)
+    expect(empty).toEqual([])
+  })
+
+  /**
+   * A photograph filed under a team that does not exist is invisible rather
+   * than wrong, which is why it needs a test: nothing renders it and nothing
+   * complains. `VBC1007` for `VBC107` is one keystroke.
+   */
+  it('files every photograph under a real team id', () => {
+    const strange = PEOPLE_PHOTOS.filter((e) => !/^VBC1[0-3]\d\//.test(e))
+    expect(strange).toEqual([])
+  })
+
+  /** Two teams cannot both hold the same person's photograph. */
+  it('does not list one person on two teams', () => {
+    const seen = new Map<string, string[]>()
+    for (const entry of PEOPLE_PHOTOS) {
+      const [team, slug] = entry.split('/')
+      seen.set(slug!, [...(seen.get(slug!) ?? []), team!])
+    }
+    const doubled = [...seen].filter(([, teams]) => teams.length > 1)
+    expect(doubled).toEqual([])
+  })
+})
