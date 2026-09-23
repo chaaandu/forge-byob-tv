@@ -26,10 +26,10 @@ What is on the TV is `public/tv/` — three static slides served straight out of
 
 | URL | What it is |
 | --- | --- |
-| `/wall` | **the rotator — point the TV here.** `/podium` and `/daily`, thirty seconds each |
+| `/wall` | **the rotator — point the TV here.** `/podium` and `/weekly`, thirty seconds each (since 21 September 2026; `SLIDES` in `wall.html`) |
 | `/podium` | the BYOB Ladder, all-time |
-| `/daily` | the Daily Leaderboard, **live from midnight IST** |
-| `/weekly` | the Weekly Leaderboard, Monday 00:00 IST to Sunday midnight. Built, routed, tested, and **deliberately out of the rotation** until asked for |
+| `/daily` | the Daily Leaderboard, **live from midnight IST**. Built, routed, tested, and **out of the rotation** since 21 September 2026 — which takes the 10-Day Challenge (`?mode=challenge`) off the wall with it |
+| `/weekly` | the Weekly Leaderboard, a **rolling last seven days** (`last7_revenue`, falling back per row to the Monday-anchored `week_revenue`). **In the rotation** |
 | `/live` | the phone page, untouched by any of this |
 | `/old/podium`, `/old/daily` | the previous React design |
 
@@ -861,7 +861,9 @@ is the one page here that a person holds. Added 17 September 2026.
 
 ## Domain
 
-- 42 workbooks, `SLE-C401`–`SLE-C442`. Team IDs come from `Team Links` col A, rows 6–47.
+- 41 workbooks in `TV_Feed`, `VBC101`–`VBC141`; 37 compete. `VBC140`/`VBC141` are test
+  workbooks and `VBC104`/`VBC138` left — all four are `SPARE_TEAM_IDS`. Team IDs come
+  from `Team Links` col A.
 - **Logged (proof-backed) revenue is the only figure used.** `Daily Team Summary` col B,
   which is `SUMIFS('Daily Dump'!$N:$N, 'Daily Dump'!$D:$D, "Sale")`. Column N is already
   proof-gated upstream (proof = `Yes` AND units ≥ 1). Summing `Amount` (col I) instead
