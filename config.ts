@@ -528,6 +528,7 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC102/arpita-mahata',
   'VBC102/diya-agarwal',
   'VBC102/simran-kalra',
+  'VBC103/annashri-mahato',
   'VBC103/kavya-zala',
   'VBC103/pragati-singh',
   'VBC104/preethi-s',
@@ -546,6 +547,7 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC109/ajitwsh-s',
   'VBC109/ridhima-gupta',
   'VBC109/shweta-singh',
+  'VBC110/diya-harish',
   'VBC110/happy-panjwani',
   'VBC110/rishika-choudhary',
   'VBC111/jenessa-bhathena',
@@ -555,6 +557,7 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC112/parin-kumat',
   'VBC112/praval-goud-madduri',
   'VBC113/archit-pathak',
+  'VBC113/diya-ispahani',
   'VBC113/riya-kothavade',
   'VBC114/abhishek-kamblath',
   'VBC114/aditi-roy',
@@ -606,6 +609,7 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC130/anshul-dhapte',
   'VBC130/devansh-mehta',
   'VBC130/nikhil-kanjolia',
+  'VBC131/abhishek-hosmani',
   'VBC131/brijesh-attal',
   'VBC131/rushabh-shah',
   'VBC132/aditi',
@@ -625,6 +629,8 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC136/pratiksha-bihani',
   'VBC136/shivansh-sarraf',
   'VBC137/abhishek-gaur',
+  'VBC137/kaavya-goenka',
+  'VBC137/riya-khurana',
   'VBC138/sahil-agrawal',
   'VBC139/aditya-singhal',
   'VBC139/bhavit-gupta',
@@ -694,7 +700,7 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
     { name: 'Arpita Mahata', linkedin: 'https://www.linkedin.com/in/arpita-mahata', photo: 'arpita-mahata' },
   ],
   VBC103: [
-    { name: 'Annashri Mahato', linkedin: 'https://www.linkedin.com/in/annashrimahato' },
+    { name: 'Annashri Mahato', linkedin: 'https://www.linkedin.com/in/annashrimahato', photo: 'annashri-mahato' },
     { name: 'Pragati Singh', linkedin: 'https://www.linkedin.com/in/pragatisingh99', photo: 'pragati-singh' },
     { name: 'Kavya Zala', linkedin: 'https://www.linkedin.com/in/kavya-zala-a451292b2', photo: 'kavya-zala' },
   ],
@@ -725,7 +731,7 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
   ],
   VBC110: [
     { name: 'Happy Panjwani', linkedin: 'https://www.linkedin.com/in/happy-panjwani-652909241/', photo: 'happy-panjwani' },
-    { name: 'Diya Harish', linkedin: 'https://www.linkedin.com/in/diya-h-bb7694255' },
+    { name: 'Diya Harish', linkedin: 'https://www.linkedin.com/in/diya-h-bb7694255', photo: 'diya-harish' },
     { name: 'Rishika Choudhary', linkedin: 'https://www.linkedin.com/in/rishikachoudhary?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'rishika-choudhary' },
     { name: 'Zuha Fathima', linkedin: 'https://www.linkedin.com/in/zuha-fathima-gs-bb8572290?trk=contact-info' },
   ],
@@ -742,7 +748,7 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
   VBC113: [
     { name: 'Archit Pathak', linkedin: 'https://www.linkedin.com/in/archit-pathak-1b4859211/', photo: 'archit-pathak' },
     { name: 'Riya Kothavade', linkedin: 'https://www.linkedin.com/in/riya-kothavade-a3a549236?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'riya-kothavade' },
-    { name: 'Diya Ispahani', linkedin: 'https://www.linkedin.com/in/diya-ispahani?utm_source=share_via&utm_content=profile&utm_medium=member_ios' },
+    { name: 'Diya Ispahani', linkedin: 'https://www.linkedin.com/in/diya-ispahani?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'diya-ispahani' },
   ],
   VBC114: [
     { name: 'Abhishek Kambalath', linkedin: 'https://www.linkedin.com/in/abhishek-kambalath-20337a25a', photo: 'abhishek-kamblath' },
@@ -830,7 +836,7 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
     { name: 'Nikhil Kanjolia', linkedin: 'https://www.linkedin.com/in/nikhil-kanjolia-45a452326/', photo: 'nikhil-kanjolia' },
   ],
   VBC131: [
-    { name: 'Abhishek Hosmani', linkedin: 'https://www.linkedin.com/in/abhishek-hosmani-b3a9b135b?utm_source=share_via&utm_content=profile&utm_medium=member_ios' },
+    { name: 'Abhishek Hosmani', linkedin: 'https://www.linkedin.com/in/abhishek-hosmani-b3a9b135b?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'abhishek-hosmani' },
     { name: 'Rushabh Shah', linkedin: 'https://www.linkedin.com/in/rushabh-shah-34438923b/', photo: 'rushabh-shah' },
     { name: 'Brijesh Attal', linkedin: 'https://www.linkedin.com/in/brijesh-attal-37b38940b', photo: 'brijesh-attal' },
   ],
@@ -862,9 +868,9 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
   ],
   VBC137: [
     { name: 'Abhishek Gaur', linkedin: 'https://www.linkedin.com/in/abhishek-gaur-b64225282?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'abhishek-gaur' },
-    { name: 'Kaavya Goenka', linkedin: 'https://www.linkedin.com/in/kaavya-goenka-a91059288' },
+    { name: 'Kaavya Goenka', linkedin: 'https://www.linkedin.com/in/kaavya-goenka-a91059288', photo: 'kaavya-goenka' },
     { name: 'Atharva Agrawal', linkedin: 'https://www.linkedin.com/in/atharva-agrawal-835193202?utm_source=share_via&utm_content=profile&utm_medium=member_ios' },
-    { name: 'Riya Khurana', linkedin: 'https://www.linkedin.com/in/riya-khurana-048626271/' },
+    { name: 'Riya Khurana', linkedin: 'https://www.linkedin.com/in/riya-khurana-048626271/', photo: 'riya-khurana' },
   ],
   VBC139: [
     { name: 'Aditya Singhal', linkedin: 'https://www.linkedin.com/in/adityasinghal15703/', photo: 'aditya-singhal' },
