@@ -1059,8 +1059,7 @@ body:has(.lv-app[data-locked]) {
 
   .lv-figure,
   .lv-stat,
-  .lv-interval,
-  .lv-sells {
+  .lv-interval {
     border: 1px solid var(--lv-hairline);
     border-radius: 16px;
     background: var(--lv-panel);
@@ -1209,17 +1208,66 @@ body:has(.lv-app[data-locked]) {
     font-size: 13px;
   }
 
-  /* ── What they sell ─────────────────────────────────────── */
+  /* ── Venture and Team: two cards, one anatomy ──
+   *
+   * The foot of the sheet answers two questions — what is this venture and
+   * where do I find it, and who is behind it — so it is two cards built the
+   * same way: a label, then rows. A row is a 44px mark, the text, and what
+   * pressing it does. Only the mark changes: a livery tile for the venture's
+   * rows, the person's own face for the team's. */
 
-  .lv-sells {
-    display: grid;
-    grid-template-columns: 44px minmax(0, 1fr);
-    align-items: center;
-    gap: 12px;
-    padding: 12px 14px;
+  .lv-group {
+    padding: 12px 6px 6px;
+    border: 1px solid var(--lv-hairline);
+    border-radius: 16px;
+    background: var(--lv-panel);
   }
 
-  .lv-sells-icon {
+  .lv-group-head {
+    padding: 0 8px 4px;
+  }
+
+  .lv-group-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Hairlines between rows, inset past the mark so the card reads as one
+     list rather than a stack of boxes. */
+  .lv-group-list li + li .lv-group-row::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 64px;
+    right: 8px;
+    border-top: 1px solid var(--lv-hairline);
+  }
+
+  .lv-group-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 60px;
+    padding: 8px;
+    border-radius: 12px;
+    color: var(--lv-ink);
+    text-decoration: none;
+  }
+
+  a.lv-group-row:active {
+    background: var(--lv-panel-strong);
+  }
+
+  @media (hover: hover) {
+    a.lv-group-row:hover {
+      background: var(--lv-panel-strong);
+    }
+  }
+
+  .lv-group-mark {
     display: grid;
     place-items: center;
     width: 44px;
@@ -1229,121 +1277,73 @@ body:has(.lv-app[data-locked]) {
     color: var(--livery-ink);
   }
 
-  .lv-sells-text {
+  .lv-group-text {
     display: flex;
     flex-direction: column;
     gap: 3px;
     min-width: 0;
   }
 
-  .lv-sells-line {
-    display: -webkit-box;
+  .lv-group-value {
     overflow: hidden;
     font-size: 14.5px;
     font-weight: 700;
     line-height: 1.25;
-    /* Two lines, then an ellipsis: the sheet is the place to shorten it. */
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  /* What the venture sells is a sentence: two lines, then an ellipsis. */
+  .lv-group-value-wrap {
+    display: -webkit-box;
+    white-space: normal;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
   }
 
-  /* ── The team, by name ──────────────────────────────────── */
-
-  .lv-roster {
-    padding: 12px 6px 6px;
-    border: 1px solid var(--lv-hairline);
-    border-radius: 16px;
-    background: var(--lv-panel);
+  .lv-group-go {
+    padding-right: 6px;
+    font-size: 17px;
+    font-weight: 900;
+    color: var(--lv-accent);
   }
 
-  .lv-roster-head {
-    padding: 0 8px 4px;
-  }
-
-  .lv-roster-list {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  /* Hairlines between people, inset past the face so they read as one list
-     rather than a stack of boxes. */
-  .lv-roster-list li + li .lv-roster-row::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 60px;
-    right: 8px;
-    border-top: 1px solid var(--lv-hairline);
-  }
-
-  .lv-roster-row {
-    position: relative;
-    display: grid;
-    grid-template-columns: 40px minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 12px;
-    min-height: 56px;
-    padding: 0 8px;
-    border-radius: 12px;
-    color: var(--lv-ink);
-    text-decoration: none;
-  }
-
-  a.lv-roster-row:active {
-    background: var(--lv-panel-strong);
-  }
-
-  @media (hover: hover) {
-    a.lv-roster-row:hover {
-      background: var(--lv-panel-strong);
-    }
-  }
-
-  /* ── Head and shoulders, from the header's cutout ──
+  /* ── A face, not a tile ──
    *
-   * The photographs are 370×440 with the crown at y≈27 and the face about
-   * 110px wide, centred. At 205% of the disc the face spans ~60% of it, and
-   * lifting the image a tenth puts the eyes just above the middle — the
-   * framing every avatar uses. `max-width: none` because the design system's
-   * reset caps images at their container. */
+   * The header's cutout, framed as a portrait. Every photograph is 370×440
+   * with the crown of the head at y≈27 and a face about 110px wide, centred —
+   * `fetch-headshots.py` scales everyone off their own face, so one framing
+   * fits all of them. At 140% of the disc the face is about 40% of its width,
+   * the hair clears the rim by about 6px and the shoulders fill the bottom —
+   * head-and-shoulders, the framing a portrait avatar uses. The first version
+   * ran at 205%, which put the face at 60% and cut the top of every head off,
+   * and was reported as exactly that; 165% still grazed the rim on curly
+   * hair. `max-width: none` because the design system's
+   * reset caps an image at its container. */
   .lv-roster-face {
     position: relative;
-    display: grid;
-    place-items: center;
-    width: 40px;
-    height: 40px;
     overflow: hidden;
     border-radius: 50%;
-    background: linear-gradient(140deg, var(--livery-a), var(--livery-b));
-    color: var(--livery-ink);
   }
 
   .lv-roster-face img {
     position: absolute;
-    top: -8%;
+    top: 4%;
     left: 50%;
-    width: 205%;
+    width: 140%;
     max-width: none;
     height: auto;
     transform: translateX(-50%);
   }
 
   .lv-roster-initials {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 800;
     letter-spacing: 0.02em;
   }
 
-  .lv-roster-name {
-    overflow: hidden;
-    font-size: 14.5px;
-    font-weight: 700;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-
-  /* The key a row presses, in the livery like every other key on the sheet. */
+  /* The key a person's row presses — their face is on the left, so the
+     platform goes on the right. */
   .lv-roster-in {
     display: grid;
     place-items: center;
@@ -1352,60 +1352,6 @@ body:has(.lv-app[data-locked]) {
     border-radius: 9px;
     background: linear-gradient(140deg, var(--livery-a), var(--livery-b));
     color: var(--livery-ink);
-  }
-
-  /* ── Links ──────────────────────────────────────────────── */
-
-  .lv-links {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .lv-link {
-    display: grid;
-    grid-template-columns: 44px minmax(0, 1fr) auto;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    border: 1px solid var(--lv-hairline);
-    border-radius: 16px;
-    background: var(--lv-panel);
-    color: var(--lv-ink);
-    text-decoration: none;
-  }
-
-  .lv-link-icon {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    /* The rake the rows use, on the one element small enough to carry it
-       without bending the type inside. */
-    border-radius: 13px;
-    background: linear-gradient(140deg, var(--livery-a), var(--livery-b));
-    color: var(--livery-ink);
-  }
-
-  .lv-link-text {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-  }
-
-  .lv-link-handle {
-    overflow: hidden;
-    font-size: 14.5px;
-    font-weight: 700;
-    white-space: nowrap;
-    text-overflow: ellipsis;
-  }
-
-  .lv-link-go {
-    font-size: 17px;
-    font-weight: 900;
-    color: var(--lv-accent);
   }
 
   /* ── What the keys float on ──
@@ -2044,25 +1990,6 @@ body:has(.lv-app[data-locked]) {
 
     .lv-figure-value {
       font-size: 50px;
-    }
-
-    /* **The two links go side by side.** At 560px a full-width row carrying
-       an icon and a domain is mostly empty; the phone stacks them because it
-       has no choice.
-       `.lv-sells` is deliberately left alone — it is a card with its own
-       icon-and-text grid inside, and overriding the container's columns here
-       broke that grid and stood the icon on its own line. */
-    .lv-links {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      border: 0;
-      padding: 0;
-      background: none;
-    }
-
-    .lv-link {
-      padding: 12px 14px;
     }
 
     /* ── The keys float at the foot of the panel ──

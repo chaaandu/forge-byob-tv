@@ -304,11 +304,9 @@ export function TeamSheet({
                 />
               </div>
 
-              <Sells product={race.self.team.product} />
+              <Venture team={race.self.team} />
 
               <Roster team={race.self.team} />
-
-              <Links team={race.self.team} />
             </div>
             </div>
 
@@ -438,46 +436,35 @@ function Intervals({
 }
 
 /**
- * What the venture sells, in its own words.
+ * The venture in one card: what it sells, then where to find it.
+ *
+ * ── Two cards at the foot of the sheet, one per question ──
+ *
+ * These were three kinds of card in a row — `Sells`, then the students, then
+ * a card per venture link — so the venture's Instagram sat *under* its
+ * founders' LinkedIns and read as one more person's link. Asked about
+ * directly. The foot of the sheet is now two cards with one anatomy between
+ * them: **Venture** (what it sells, and its own links) and **Team** (who is
+ * behind it, and theirs). What you are reaching tells you which card to look
+ * in; nothing about a venture sits in the list of people.
  *
  * **Real or absent — there is no sample.** A strip of invented products with
  * invented unit counts stood here for a day; it rendered beautifully and said
  * false things about a team, which is the one failure this project is built
- * around. `TV_Feed` has no product column yet, so this shows nothing at all
- * until the sheet grows one, and then shows exactly what the team typed.
+ * around. No product and no links, and there is no card at all.
  *
- * Two lines, clamped, because a team writes a sentence and the sheet is the
- * place to shorten it. The icon is read off the same words by
- * `sellsCategory`, so nothing here has to be maintained per team.
+ * The product line is two lines, clamped, because a team writes a sentence
+ * and the sheet is the place to shorten it. Its icon is read off the same
+ * words by `sellsCategory`, so nothing here has to be maintained per team.
+ *
+ * **The links are untrusted input.** `instagram` and `website` are optional
+ * `TV_Feed` columns with `TEAM_LINKS` as a floor, typed by forty teams into a
+ * workbook, and anything that is not plainly `https` is refused by
+ * `instagramUrl` / `websiteUrl` / `facebookUrl`. `rel="noreferrer"` with
+ * `target="_blank"`: without `noopener` (which `noreferrer` implies) the
+ * opened page gets a handle on this one.
  */
-function Sells({ product }: { product?: string }) {
-  if (!product) return null
-  return (
-    <section className="lv-sells">
-      <span className="lv-sells-icon">
-        <SellsIcon product={product} size={24} />
-      </span>
-      <span className="lv-sells-text">
-        <span className="lv-label">Sells</span>
-        <span className="lv-sells-line">{product}</span>
-      </span>
-    </section>
-  )
-}
-
-/**
- * The venture's own links, at the foot of the sheet.
- *
- * **Absent until the sheet publishes them.** `instagram` and `website` are
- * optional `TV_Feed` columns, like `product`; a team with neither gets no
- * block at all rather than a dead button. Anything that is not plainly
- * `https` is refused by `instagramUrl` / `websiteUrl` — these cells are typed
- * by forty teams into a workbook, which makes them untrusted input.
- *
- * `rel="noreferrer"` with `target="_blank"`: without `noopener` (which
- * `noreferrer` implies) the opened page gets a handle on this one.
- */
-function Links({ team }: { team: Team }) {
+function Venture({ team }: { team: Team }) {
   // The sheet when it speaks, `TEAM_LINKS` when it does not; see `linksOf`.
   const own = linksOf(team)
   const links = [
@@ -486,28 +473,40 @@ function Links({ team }: { team: Team }) {
     { kind: 'facebook' as const, href: facebookUrl(own.facebook) },
   ].filter((link): link is { kind: 'instagram' | 'website' | 'facebook'; href: string } => link.href !== null)
 
-  if (links.length === 0) return null
+  if (!team.product && links.length === 0) return null
 
   return (
-    <section className="lv-links">
-      {links.map(({ kind, href }) => (
-        <a
-          key={kind}
-          className="lv-link"
-          href={href}
-          target="_blank"
-          rel="noreferrer"
-        >
-          <span className="lv-link-icon">{LINK_KINDS[kind].icon}</span>
-          <span className="lv-link-text">
-            <span className="lv-label">{LINK_KINDS[kind].label}</span>
-            <span className="lv-link-handle">{linkLabel(href)}</span>
-          </span>
-          <span className="lv-link-go" aria-hidden="true">
-            ↗
-          </span>
-        </a>
-      ))}
+    <section className="lv-group" aria-label="Venture">
+      <span className="lv-label lv-group-head">Venture</span>
+      <ul className="lv-group-list">
+        {team.product ? (
+          <li>
+            <div className="lv-group-row">
+              <span className="lv-group-mark">
+                <SellsIcon product={team.product} size={22} />
+              </span>
+              <span className="lv-group-text">
+                <span className="lv-label">Sells</span>
+                <span className="lv-group-value lv-group-value-wrap">{team.product}</span>
+              </span>
+            </div>
+          </li>
+        ) : null}
+        {links.map(({ kind, href }) => (
+          <li key={kind}>
+            <a className="lv-group-row" href={href} target="_blank" rel="noreferrer">
+              <span className="lv-group-mark">{LINK_KINDS[kind].icon}</span>
+              <span className="lv-group-text">
+                <span className="lv-label">{LINK_KINDS[kind].label}</span>
+                <span className="lv-group-value">{linkLabel(href)}</span>
+              </span>
+              <span className="lv-group-go" aria-hidden="true">
+                ↗
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }

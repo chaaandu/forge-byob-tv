@@ -113,9 +113,9 @@ function Person({
  * person reads when they want to know *who*, and it sits beside the venture's
  * own links because both answer the same question — how do I get in touch.
  *
- * **One card, a row per person**, rather than a card each the way the links
- * are: three or four cards stacked read as three or four more things to
- * scroll past, and a team is one thing. A row with a profile is a link, whole
+ * **One card, a row per person**, in the same anatomy as the Venture card
+ * above it — see `Venture` in `TeamSheet.tsx` for why the foot of the sheet
+ * is those two cards and nothing else. A row with a profile is a link, whole
  * row, 52px tall so a thumb finds it; a row without one is a name and nothing
  * to press, rather than a button that goes nowhere.
  *
@@ -130,30 +130,30 @@ export function Roster({ team }: { team: Team }) {
   if (people.length === 0) return null
 
   return (
-    <section className="lv-roster" aria-label="Team">
-      <span className="lv-label lv-roster-head">Team</span>
-      <ul className="lv-roster-list">
+    <section className="lv-group" aria-label="Team">
+      <span className="lv-label lv-group-head">Team</span>
+      <ul className="lv-group-list">
         {people.map((person) => {
           const body = (
             <>
-              <span className="lv-roster-face" aria-hidden="true">
+              <span className="lv-group-mark lv-roster-face" aria-hidden="true">
                 {person.photo === null ? (
                   <span className="lv-roster-initials">{initialsOf(person.name)}</span>
                 ) : (
                   <Image src={person.photo} alt="" width={370} height={440} unoptimized />
                 )}
               </span>
-              <span className="lv-roster-name">{person.name}</span>
+              <span className="lv-group-value">{person.name}</span>
               {person.linkedin === null ? null : <LinkedInMark />}
             </>
           )
           return (
             <li key={person.name}>
               {person.linkedin === null ? (
-                <div className="lv-roster-row">{body}</div>
+                <div className="lv-group-row">{body}</div>
               ) : (
                 <a
-                  className="lv-roster-row"
+                  className="lv-group-row"
                   href={person.linkedin}
                   target="_blank"
                   rel="noreferrer"
