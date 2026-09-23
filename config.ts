@@ -652,8 +652,8 @@ export const PEOPLE_PHOTOS: readonly string[] = [
  * (`1fe854b`), both confirmed directly. Trigo and SAAJ have left, so Rohit
  * Singh, Preethi S, Udhav Kothari and Sahil Agrawal are unplaced and not
  * here. Riya Khurana is on ZAAREE, confirmed directly on 23 September 2026
- * after `Groups List` and `Team Links` disagreed about her; she has no LinkedIn
- * here because no tracker row was matched to her.
+ * after `Groups List` and `Team Links` disagreed about her. Her link is the
+ * tracker's, matched on her Forge email like everyone else's.
  *
  * **Names are written by hand**, as first and last name in the case a person
  * would write them — the sources carry `AADISHWAR R`, `Sai Santosh Praval Goud
@@ -663,9 +663,9 @@ export const PEOPLE_PHOTOS: readonly string[] = [
  * **`linkedin` is stored verbatim**, tracking query and all, for the reason
  * `TEAM_LINKS` gives: deciding what is safe to put in an `href` is
  * `linkedinUrl`'s job in `lib/live.ts`, and doing it twice is how two answers
- * drift. Divy Hardenia's cell is a `share.google` short link rather than a
- * profile, so he is listed without one rather than linked somewhere that is
- * not LinkedIn.
+ * drift. Divy Hardenia's tracker cell is a `share.google` short link rather
+ * than a profile; his link here was given directly on 23 September 2026
+ * instead, and the tracker still carries the short link.
  *
  * **`photo` is the slug in `PEOPLE_PHOTOS`**, stated rather than derived,
  * because a third of those slugs are first names only (`VBC106/aarav`) and
@@ -705,7 +705,7 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
   ],
   VBC106: [
     { name: 'Aarav Shrivastava', linkedin: 'https://www.linkedin.com/in/aarav-shrivastava-b63779218?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'aarav' },
-    { name: 'Divy Hardenia' },
+    { name: 'Divy Hardenia', linkedin: 'https://www.linkedin.com/in/divy-hardenia-b08666377' },
     { name: 'Tushar Ram Reddy', linkedin: 'https://www.linkedin.com/in/tushar-ram-759706399', photo: 'tushar' },
   ],
   VBC107: [
@@ -864,7 +864,7 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
     { name: 'Abhishek Gaur', linkedin: 'https://www.linkedin.com/in/abhishek-gaur-b64225282?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'abhishek-gaur' },
     { name: 'Kaavya Goenka', linkedin: 'https://www.linkedin.com/in/kaavya-goenka-a91059288' },
     { name: 'Atharva Agrawal', linkedin: 'https://www.linkedin.com/in/atharva-agrawal-835193202?utm_source=share_via&utm_content=profile&utm_medium=member_ios' },
-    { name: 'Riya Khurana' },
+    { name: 'Riya Khurana', linkedin: 'https://www.linkedin.com/in/riya-khurana-048626271/' },
   ],
   VBC139: [
     { name: 'Aditya Singhal', linkedin: 'https://www.linkedin.com/in/adityasinghal15703/', photo: 'aditya-singhal' },
