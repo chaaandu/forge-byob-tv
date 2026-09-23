@@ -8,8 +8,8 @@ const FEED_LIVE =
   'https://docs.google.com/spreadsheets/d/e/2PACX-1vQIPEG2OyaUG4epSSXmvtiHClz9jUwDKuHIUy1de4gw6AevZMBM2oODC5W8DwqbRDQspTqqM34DalBd/pub?gid=1357679077&single=true&output=csv'
 const FEED_LOCAL = '/tv/real-feed.csv'
 
-/** 39, not 41. Two spares in the sheet are not in the cohort. */
-const SPARES = ['VBC140', 'VBC141']
+/** 38, not 41. Two spares in the sheet are not in the cohort, and VBC138 (SAAJ) left it. */
+const SPARES = ['VBC140', 'VBC141', 'VBC138']
 
 const LIVERY_COUNT = 39
 

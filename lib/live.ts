@@ -379,7 +379,7 @@ const HANDLE = /^[A-Za-z0-9._]{1,30}$/
  * places is how two answers drift apart. `lib/live.test.ts` pins that nothing
  * in the manifest is refused by them.
  */
-export function linksOf(team: Team): { website?: string; instagram?: string } {
+export function linksOf(team: Team): { website?: string; instagram?: string; facebook?: string } {
   const fallback = TEAM_LINKS[team.teamId] ?? {}
   const pick = (cell: string | undefined, spare: string | undefined) => {
     const value = (cell ?? '').trim()
@@ -388,6 +388,8 @@ export function linksOf(team: Team): { website?: string; instagram?: string } {
   return {
     website: pick(team.website, fallback.website),
     instagram: pick(team.instagram, fallback.instagram),
+    // No `TV_Feed` column carries Facebook, so the manifest is the only source.
+    facebook: fallback.facebook,
   }
 }
 
@@ -423,11 +425,26 @@ export function websiteUrl(raw: string | undefined): string | null {
   return url.toString()
 }
 
+/**
+ * A Facebook page, and only a Facebook page. The cell goes through
+ * `websiteUrl` for the scheme and hostname checks, and is then refused unless
+ * the host is Facebook's own — a cell under a "Facebook" label that opens
+ * somewhere else is the same lie as a wrong logo.
+ */
+export function facebookUrl(raw: string | undefined): string | null {
+  const href = websiteUrl(raw)
+  if (href === null) return null
+  const host = new URL(href).hostname.toLowerCase()
+  return /^(?:(?:www|m|web)\.)?(?:facebook\.com|fb\.com)$/.test(host) ? href : null
+}
+
 /** What a link is called on screen. `instagram.com/aks.perfumes` reads as a lockup; a full URL does not. */
 export function linkLabel(url: string): string {
   const { hostname, pathname } = new URL(url)
   const host = hostname.replace(/^www\./, '')
   const path = pathname.replace(/\/$/, '')
+  // `facebook.com/profile.php` and `facebook.com/share/1JxswCt3Wo` name no one.
+  if (/^(?:m\.)?facebook\.com$/.test(host) && /^\/(?:profile\.php|share)(?:\/|$)/.test(path)) return 'facebook.com'
   return `${host}${path}`
 }
 

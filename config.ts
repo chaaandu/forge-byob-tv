@@ -74,11 +74,12 @@ export const COHORT_CSV_URL: string = feedUrl(
 /**
  * The fewest usable rows a fetch may carry and still be trusted.
  *
- * **39 — the competing cohort, `VBC101`–`VBC139`.** `TV_Feed` publishes more
- * than that today, because `VBC140` and `VBC141` are test workbooks still
- * sitting in `Team Links`; the gate checks *short*, never exact, so it passes
- * either way and keeps passing the day those two are deleted. See
- * `passesRowGate` in lib/feed.ts.
+ * **38 — the competing cohort, `VBC101`–`VBC139` less `VBC138`.** It was 39
+ * until SAAJ left on 23 September 2026. `TV_Feed` publishes more than that
+ * today, because `VBC140` and `VBC141` are test workbooks still sitting in
+ * `Team Links` and SAAJ's workbook still publishes a row; the gate checks
+ * *short*, never exact, so it passes either way and keeps passing the day
+ * those three are deleted. See `passesRowGate` in lib/feed.ts.
  *
  * **This number is the single most dangerous constant in the project.** Set it
  * one above the real cohort and every poll is rejected, forever, silently: no
@@ -86,7 +87,7 @@ export const COHORT_CSV_URL: string = feedUrl(
  * line in a console nobody is reading. Whenever the cohort size changes, this
  * changes with it.
  */
-export const MIN_TEAM_ROWS = 39
+export const MIN_TEAM_ROWS = 38
 
 /** The consolidator writes every 10 minutes and Google caches the CSV ~5 min; polling faster only burns cycles. */
 export const POLL_INTERVAL_MS = 60_000
@@ -102,8 +103,14 @@ export const POLL_INTERVAL_MS = 60_000
  * arrived rather than who is racing. Listing them here is also what makes the
  * wall correct *before* they are deleted from the sheet and *after*: a spare
  * that no longer exists simply never matches.
+ *
+ * **`VBC138` (SAAJ) left the cohort on 23 September 2026** and is filtered the
+ * same way: its workbook still publishes a row, and it takes no card, no rank
+ * and no line on `/live`. Its two students' photographs stay in
+ * `PEOPLE_PHOTOS` and on disk, unread, until they are placed on another team —
+ * moving them is renaming the folder and editing two entries.
  */
-export const SPARE_TEAM_IDS: readonly TeamId[] = ['VBC140', 'VBC141']
+export const SPARE_TEAM_IDS: readonly TeamId[] = ['VBC140', 'VBC141', 'VBC138']
 
 // ── Daily board ─────────────────────────────────────────────────────────────
 
@@ -459,19 +466,23 @@ export const LOGOS: readonly TeamId[] = []
  * wall the next poll. Until then it goes stale silently, and the only fix for
  * that is publishing the columns.
  *
- * Transcribed from `Team Links` cols G and I on 19 September 2026: 41 teams,
- * 29 websites, 24 Instagram handles, 31 teams with at least one. Every value
- * was put through `websiteUrl` / `instagramUrl` before being written here and
- * all 53 produce a link; none is refused. **Cells are stored verbatim**, in
+ * Transcribed from `Team Links` cols G and I on 19 September 2026, and
+ * re-checked against an updated export on 23 September 2026, which added
+ * Savore, Pehchaan and Bean & Beyond: 33 teams with at least one link, 31
+ * websites, 26 Instagram handles. `VBC138` is gone with its team. Every value
+ * is put through `websiteUrl` / `instagramUrl` / `facebookUrl` by
+ * `lib/live.test.ts` and none is refused. **Cells are stored verbatim**, in
  * whatever shape the team typed — bare domain, full URL, with or without
  * `www.` — because deciding what is a safe URL is `lib/live.ts`'s job and
  * doing it twice is how the two answers drift apart.
  *
- * Facebook is deliberately absent. Three of the 41 have one and `/live` has no
- * Facebook affordance; adding a third link type for three teams is a design
- * decision, not a transcription.
+ * **Facebook is here from 23 September 2026**, asked for directly, from col H.
+ * Three teams have one. It lives only in this list — `TV_Feed` has no
+ * `facebook` column and the parser reads none — so unlike the other two it
+ * is not a floor under the sheet; it is the only source. Madhosh's cell reads
+ * "To be updated" and is left out rather than linked.
  */
-export const TEAM_LINKS: Readonly<Record<string, { website?: string; instagram?: string }>> = {
+export const TEAM_LINKS: Readonly<Record<string, { website?: string; instagram?: string; facebook?: string }>> = {
   'VBC101': { website: 'https://aksperfumes.in/', instagram: 'https://www.instagram.com/aks.perfumes_' },   // AKS Perfumes
   'VBC102': { website: 'https://getlumi.in/', instagram: 'https://www.instagram.com/shop_lumii?stkn=c3BtY2pubGVremU3' },   // LUMI
   'VBC103': { website: 'houseofpravaah.com', instagram: 'https://www.instagram.com/houseofpravaah?stkn=a280dDNucDlyY2V6' },   // House of Pravaah
@@ -480,17 +491,20 @@ export const TEAM_LINKS: Readonly<Record<string, { website?: string; instagram?:
   'VBC106': { website: 'https://dadofbags.in/', instagram: 'https://www.instagram.com/dadofbags1947/' },   // Dad Of Bags.
   'VBC107': { website: 'https://madhosh.co.in/', instagram: 'https://www.instagram.com/madhosh.co.in/' },   // Madhosh
   'VBC109': { website: 'https://www.wekrave.in/', instagram: 'https://www.instagram.com/wekravehealthy?stkn=bWFmZTVkeDI0ZGZh' },   // WeKravehealthy
+  'VBC110': { website: 'https://savore.online/', instagram: 'https://www.instagram.com/savore_gifting/' },   // Savore
+  'VBC111': { website: 'https://www.pehchaann.in/', instagram: 'https://www.instagram.com/pehchaann.in/', facebook: 'https://www.facebook.com/profile.php?id=61594343353780' },   // Pehchaan
   'VBC112': { website: 'fakesocietystudio.com', instagram: 'https://www.instagram.com/fakesocietystudio?stkn=cjRjZ283cWM2dHk5' },   // Fake society studio
   'VBC113': { website: 'munchco.in', instagram: 'https://www.instagram.com/shopmunchandco?stkn=MWkzd3lzNGh1aWRrOQ%3D%3D&utm_source=qr' },   // Munch&co
   'VBC114': { website: 'https://tea-riffic.in/', instagram: 'https://www.instagram.com/tea.riffic__?stkn=MXQxa3M0enh0amc4eA%3D%3D&utm_source=qr' },   // Tea-riffic
   'VBC115': { website: 'https://chipmonk.co.in/', instagram: 'https://www.instagram.com/chip.monk.snacks?stkn=ZjRzM3JoZjhlNTYw&utm_source=qr' },   // ChipMonk
   'VBC116': { website: 'https://caughtinnasha.store', instagram: 'https://www.instagram.com/caughtinnasha?stkn=MWk3M2x5ZTl5YWw5Nw%3D%3D&utm_source=qr' },   // Nasha
-  'VBC117': { website: 'https://juzzle-store.myshopify.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAcGRvZgJleHRuA2FlbQIxMQBzcnRjBmFwcF9pZA85MzY2MTk3NDMzOTI0NTkAAadkSeDj0_1sTkLwmLs-pYSbp-ttUGNxZzMoBBv8IAdIjRXS89g0ci9l9mw84A_aem_uS6MOQTIglIwVhIZptHq0Q', instagram: 'https://www.instagram.com/just.juzzle/' },   // Juzzle
+  'VBC117': { website: 'https://juzzle-store.myshopify.com/?utm_source=ig&utm_medium=social&utm_content=link_in_bio&fbclid=PAcGRvZgJleHRuA2FlbQIxMQBzcnRjBmFwcF9pZA85MzY2MTk3NDMzOTI0NTkAAadkSeDj0_1sTkLwmLs-pYSbp-ttUGNxZzMoBBv8IAdIjRXS89g0ci9l9mw84A_aem_uS6MOQTIglIwVhIZptHq0Q', instagram: 'https://www.instagram.com/just.juzzle/', facebook: 'https://www.facebook.com/share/1JxswCt3Wo/' },   // Juzzle
   'VBC119': { website: 'https://getnekt.in', instagram: 'https://www.instagram.com/getnekt.in?stkn=cGhvbWNxbDR4NG1z' },   // NEKT
   'VBC120': { website: 'https://nobiggie.shop/', instagram: 'https://www.instagram.com/nobiggie.crumbs?stkn=N2cxdGFnNjVjeDly' },   // No Biggie
   'VBC121': { website: 'https://kirdaaar.com/' },   // Kirdaaar
   'VBC122': { website: 'Meltyk.in', instagram: 'https://www.instagram.com/meltyk.in?stkn=NWhoMnpieHdkbm9z' },   // MELTYK
   'VBC123': { instagram: 'https://www.instagram.com/haulties_s?stkn=dWZrMHp2YTV0cXRm&utm_source=qr' },   // HAULTIES
+  'VBC124': { website: 'bean-beyond-store.myshopify.com', instagram: 'https://www.instagram.com/beanandbeyond26?stkn=a3F3ZDF0OHhwMmF2' },   // Bean & Beyond
   'VBC125': { website: 'https://emberandoak.online' },   // Ember and Oak
   'VBC126': { website: 'https://chocoandcoo.myshopify.com', instagram: 'https://www.instagram.com/chocoandcoo?stkn=NDN3djQwMmZkY2k=' },   // Choco and co
   'VBC128': { website: 'theusualcoffee.in', instagram: 'https://www.instagram.com/theusualindia/' },   // The Usual
@@ -501,8 +515,7 @@ export const TEAM_LINKS: Readonly<Record<string, { website?: string; instagram?:
   'VBC135': { website: 'https://krackleco.myshopify.com/' },   // Krackle Co
   'VBC136': { website: 'https://thekuki.in/', instagram: 'https://www.instagram.com/getkuki?stkn=a3o1OHN6d2pzZzlm&utm_source=qr' },   // KUKI
   'VBC137': { instagram: 'https://www.instagram.com/zaaree.co?stkn=cXJvYXZrbHYyY3J1&utm_source=qr' },   // ZAAREE
-  'VBC138': { website: 'saajshop.online', instagram: 'https://www.instagram.com/saaj_shop?stkn=cGJua212am1uZHFh&utm_source=qr' },   // SAAJ
-  'VBC139': { website: 'www.atmiva.in', instagram: 'https://www.instagram.com/atmiva.in' },   // Atmiva
+  'VBC139': { website: 'www.atmiva.in', instagram: 'https://www.instagram.com/atmiva.in', facebook: 'https://www.facebook.com/atmiva.in/' },   // Atmiva
 }
 
 export const PEOPLE_PHOTOS: readonly string[] = [

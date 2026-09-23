@@ -15,6 +15,7 @@ import {
   boardLabel,
   climbOf,
   figureLabel,
+  facebookUrl,
   instagramUrl,
   linksOf,
   linkLabel,
@@ -480,7 +481,8 @@ function Links({ team }: { team: Team }) {
   const links = [
     { kind: 'instagram' as const, href: instagramUrl(own.instagram) },
     { kind: 'website' as const, href: websiteUrl(own.website) },
-  ].filter((link): link is { kind: 'instagram' | 'website'; href: string } => link.href !== null)
+    { kind: 'facebook' as const, href: facebookUrl(own.facebook) },
+  ].filter((link): link is { kind: 'instagram' | 'website' | 'facebook'; href: string } => link.href !== null)
 
   if (links.length === 0) return null
 
@@ -494,9 +496,9 @@ function Links({ team }: { team: Team }) {
           target="_blank"
           rel="noreferrer"
         >
-          <span className="lv-link-icon">{kind === 'instagram' ? <InstagramIcon /> : <GlobeIcon />}</span>
+          <span className="lv-link-icon">{LINK_KINDS[kind].icon}</span>
           <span className="lv-link-text">
-            <span className="lv-label">{kind === 'instagram' ? 'Instagram' : 'Website'}</span>
+            <span className="lv-label">{LINK_KINDS[kind].label}</span>
             <span className="lv-link-handle">{linkLabel(href)}</span>
           </span>
           <span className="lv-link-go" aria-hidden="true">
@@ -508,12 +510,26 @@ function Links({ team }: { team: Team }) {
   )
 }
 
+const LINK_KINDS = {
+  instagram: { label: 'Instagram', icon: <InstagramIcon /> },
+  website: { label: 'Website', icon: <GlobeIcon /> },
+  facebook: { label: 'Facebook', icon: <FacebookIcon /> },
+}
+
 function InstagramIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden="true">
       <rect x="3" y="3" width="18" height="18" rx="5.4" />
       <circle cx="12" cy="12" r="4.2" />
       <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+function FacebookIcon() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M14.5 21v-7.5h2.8l.5-3.2h-3.3V8.4c0-.9.4-1.7 1.8-1.7h1.6V3.9a18 18 0 0 0-2.5-.2c-2.6 0-4.2 1.6-4.2 4.4v2.2H8.4v3.2h2.8V21" />
     </svg>
   )
 }

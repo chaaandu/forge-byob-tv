@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { PEOPLE_PHOTOS, SPARE_TEAM_IDS, TEAM_LINKS } from '@/config'
 import type { Team, TeamId } from '@/lib/types'
 import { rankForMode } from '@/lib/board'
-import { EMBLEM_COUNT, LIVERY_COUNT, MAX_MEMBERS, avgTicket, climbOf, emblemFor, initialsOf, instagramUrl, linkLabel, linksOf, liveryFor, matchesQuery, membersOf, photoSlug, raceFor, shareOf, standingsFor, websiteUrl } from '@/lib/live'
+import { EMBLEM_COUNT, LIVERY_COUNT, MAX_MEMBERS, avgTicket, climbOf, emblemFor, facebookUrl, initialsOf, instagramUrl, linkLabel, linksOf, liveryFor, matchesQuery, membersOf, photoSlug, raceFor, shareOf, standingsFor, websiteUrl } from '@/lib/live'
 import { competingTeams, rankByWeek, rankTeams } from '@/lib/ranking'
 import { COMPETING_SIZE, team, teams } from '@/test/fixtures'
 
@@ -273,7 +273,16 @@ describe('links', () => {
     ]) {
       expect(websiteUrl(hostile), hostile).toBeNull()
       expect(instagramUrl(hostile), hostile).toBeNull()
+      expect(facebookUrl(hostile), hostile).toBeNull()
     }
+  })
+
+  it('opens a Facebook link only on Facebook', () => {
+    expect(facebookUrl('https://www.facebook.com/atmiva.in/')).toBe('https://www.facebook.com/atmiva.in/')
+    expect(facebookUrl('facebook.com/atmiva.in')).toBe('https://facebook.com/atmiva.in')
+    expect(facebookUrl('https://evil.com/facebook.com')).toBeNull()
+    expect(facebookUrl('https://facebook.com.evil.com/x')).toBeNull()
+    expect(facebookUrl('To be updated')).toBeNull()
   })
 
   it('accepts a handle however the sheet writes it', () => {
@@ -309,6 +318,9 @@ describe('links', () => {
   it('labels a link as a lockup rather than a URL', () => {
     expect(linkLabel('https://instagram.com/aks.perfumes')).toBe('instagram.com/aks.perfumes')
     expect(linkLabel('https://www.rooh.in/')).toBe('rooh.in')
+    expect(linkLabel('https://www.facebook.com/atmiva.in/')).toBe('facebook.com/atmiva.in')
+    expect(linkLabel('https://www.facebook.com/profile.php?id=61594343353780')).toBe('facebook.com')
+    expect(linkLabel('https://www.facebook.com/share/1JxswCt3Wo/')).toBe('facebook.com')
   })
 })
 
@@ -419,7 +431,13 @@ describe('TEAM_LINKS', () => {
     for (const [id, link] of Object.entries(TEAM_LINKS)) {
       if (link.website !== undefined) expect(websiteUrl(link.website), `${id} website`).not.toBeNull()
       if (link.instagram !== undefined) expect(instagramUrl(link.instagram), `${id} instagram`).not.toBeNull()
+      if (link.facebook !== undefined) expect(facebookUrl(link.facebook), `${id} facebook`).not.toBeNull()
     }
+  })
+
+  /** Facebook has no `TV_Feed` column, so the manifest is its only source. */
+  it('carries Facebook from the manifest', () => {
+    expect(linksOf(linkTeam('VBC139')).facebook).toBe(TEAM_LINKS.VBC139.facebook)
   })
 
   it('is keyed by real team ids and never by a spare', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { MIN_TEAM_ROWS } from '@/config'
+import { MIN_TEAM_ROWS, SPARE_TEAM_IDS } from '@/config'
 import { COHORT_SIZE, cohort, cohortCsv, feedCsv, teams } from '@/test/fixtures'
 import {
   COHORT_KEYS,
@@ -363,12 +363,14 @@ describe('passesRowGate', () => {
    * `parseTeams` drops an unparseable row instead of throwing on it.
    */
   it('rejects a full-length feed whose rows are too garbled to use', () => {
+    // One more garbled row than the spares can absorb.
+    const garbled = SPARE_TEAM_IDS.length + 1
     const csv = feedCsv(teams())
       .split('\n')
-      .map((line, index) => (index >= 1 && index <= 3 ? line.replace(/,0,0,0,0$/, ',#REF!,0,0,0') : line))
+      .map((line, index) => (index >= 1 && index <= garbled ? line.replace(/,0,0,0,0$/, ',#REF!,0,0,0') : line))
       .join('\n')
     const parsed = parseTeams(csv)
-    expect(parsed).toHaveLength(COHORT_SIZE - 3)
+    expect(parsed).toHaveLength(COHORT_SIZE - garbled)
     expect(passesRowGate(parsed)).toBe(false)
   })
 

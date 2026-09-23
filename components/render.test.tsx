@@ -1132,8 +1132,8 @@ describe('DailyGrid', () => {
    * Reading order: ten per row, left to right then top to bottom. Rank 1 at the
    * top-left of row 1, the last rank at the end of row 4.
    *
-   * **The final row is allowed to be short.** Forge C1 competes 39 teams into
-   * 40 slots, so row 4 holds nine cards and the bottom-right slot is empty.
+   * **The final row is allowed to be short.** Forge C1 competes 38 teams into
+   * 40 slots, so row 4 holds eight cards and the last two slots are empty.
    * `ROW_HEIGHTS` states each row's height rather than using `1fr`, so a short
    * last row keeps its size instead of stretching to swallow the gap — which is
    * what would quietly destroy the rank ramp.
