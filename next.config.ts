@@ -126,7 +126,12 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       { source: '/podium', destination: '/tv/ladder.html' },
-      { source: '/daily', destination: '/tv/floor.html' },
+      /**
+       * `/daily` is its own page from 23 September 2026 — THE DAILY, the day's
+       * top ten as a magazine cover. `/weekly` stays on `floor.html`, and so
+       * does the challenge: `daily.html` forwards `?mode=challenge` there.
+       */
+      { source: '/daily', destination: '/tv/daily.html' },
       /**
        * ── `/weekly` is a board again, and it used to be a 308 ──
        *

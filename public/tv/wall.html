@@ -24,23 +24,17 @@
      painted; the arrival still happens in front of somebody. -->
 <div id="stage"><iframe id="a"></iframe><iframe id="b"></iframe></div>
 <script>
-  /* ── Two slides, thirty seconds each: the ladder and the weekly board ──
+  /* ── Three slides, thirty seconds each: the ladder, the week, the day ──
    *
-   * `/daily` came out of the rotation on 21 September 2026, asked for
-   * directly. The route is untouched and still works — it is out of the loop,
-   * not gone — so putting it back is adding it to this array and nothing else.
+   * `/daily` came out of the rotation on 21 September 2026 and went back in on
+   * 23 September as THE DAILY (`daily.html`) — the day's top ten as a magazine
+   * cover. Asked for directly.
    *
-   * **What leaves with it is the 10-Day Challenge.** `AGENTS.md` is explicit
-   * that the challenge REPLACES the daily board rather than being a slide of
-   * its own, so with `/daily` out there is nowhere for it to appear: flipping
-   * `challenge_mode` to `Yes` in `TV_Cohort` will now change nothing on the
-   * wall. That is a real consequence of a one-line edit and it is written
-   * here because nothing else would report it — the cell would be set, the
-   * contest would be running, and the board would carry on showing the week.
-   *
-   * When a challenge is next run, `/daily` has to come back into this array
-   * for the duration, carrying `?mode=challenge` as it did before. */
-  const SLIDES = ['/podium', '/weekly']
+   * **The 10-Day Challenge is still not on the wall.** It lives on the old
+   * slide, and `daily.html` forwards `/daily?mode=challenge` to it. Flipping
+   * `challenge_mode` in `TV_Cohort` changes nothing here on its own: to run a
+   * challenge, this entry becomes `/daily?mode=challenge` for the duration. */
+  const SLIDES = ['/podium', '/weekly', '/daily']
   /* LEAD is how early the next slide is built. 6s was enough on a fast
      network — measured on the deployed wall, a prefetched slide rendered in
      62-95ms and was revealed already full — but it is the whole margin the
@@ -50,6 +44,44 @@
      never does; a safety shorter than LEAD fires while the frame is still
      invisible and the slide appears with its arrival already over. */
   const PERIOD = 30000, LEAD = 15000
+
+  /* ── The day board sits out until somebody has sold ──
+   *
+   * Before the first sale of the day `/daily` is an open cover and nine open
+   * places, and thirty seconds of that on a TV is thirty seconds of an empty
+   * page. Asked for directly: skip it. The loop is `/podium` and `/weekly`
+   * until the first sale lands, and the day board joins on the next cycle —
+   * nobody has to touch the laptop, in either direction, and after midnight
+   * IST (when `today_revenue` zeroes) it steps out again on its own.
+   *
+   * Decided from the feed the slides already keep in localStorage (`CACHE_KEY`
+   * in tv.js), not from a fetch of its own: every slide refreshes that cache on
+   * mount and every thirty seconds, so it is never more than a slide old.
+   *
+   * **Only a positive "nobody has sold" hides it.** No cache, a cache that will
+   * not parse, or anything else unknown shows the slide — a board that is
+   * wrongly present says "open"; a board that is wrongly absent says nothing,
+   * and nothing on this wall would report it. Only the bare `/daily` is
+   * checked: `/daily?mode=challenge` ranks a different column, and a quiet
+   * morning is not a reason to hide a challenge. */
+  const CACHE_KEY = 'byob-tv.feed'
+  function hasContent(path) {
+    if (path !== '/daily') return true
+    try {
+      const teams = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null')?.teams
+      if (!Array.isArray(teams) || teams.length === 0) return true
+      return teams.some((t) => Number(t.today) > 0)
+    } catch { return true }
+  }
+  /** The next slide after `k` that has something to show. `/podium` always
+      does, so this never runs out; the fallback is only a guard. */
+  function nextAfter(k) {
+    for (let step = 1; step <= SLIDES.length; step += 1) {
+      const j = (k + step) % SLIDES.length
+      if (hasContent(SLIDES[j])) return j
+    }
+    return (k + 1) % SLIDES.length
+  }
   const f = [document.getElementById('a'), document.getElementById('b')]
   let i = 0, front = 0
 
@@ -67,9 +99,10 @@
      this exists to avoid. Measured before it was noticed. */
   function cycle() {
     const back = 1 - front
-    f[back].src = SLIDES[(i + 1) % SLIDES.length]
+    const next = nextAfter(i)
+    f[back].src = SLIDES[next]
     setTimeout(() => {
-      i = (i + 1) % SLIDES.length
+      i = next
       show(f[back])
       f[front].classList.remove('on')
       front = back

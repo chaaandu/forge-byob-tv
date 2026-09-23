@@ -26,9 +26,9 @@ What is on the TV is `public/tv/` — three static slides served straight out of
 
 | URL | What it is |
 | --- | --- |
-| `/wall` | **the rotator — point the TV here.** `/podium` and `/weekly`, thirty seconds each (since 21 September 2026; `SLIDES` in `wall.html`) |
+| `/wall` | **the rotator — point the TV here.** `/podium`, `/weekly` and `/daily`, thirty seconds each (since 23 September 2026; `SLIDES` in `wall.html`). **`/daily` sits out until the first sale of the day** — the loop is 60s of `/podium` and `/weekly` until the cached feed shows any `today_revenue` above zero, and it steps out again at midnight IST (`hasContent` in `wall.html`) |
 | `/podium` | the BYOB Ladder, all-time |
-| `/daily` | the Daily Leaderboard, **live from midnight IST**. Built, routed, tested, and **out of the rotation** since 21 September 2026 — which takes the 10-Day Challenge (`?mode=challenge`) off the wall with it |
+| `/daily` | **THE DAILY** (`daily.html`, since 23 September 2026): today's top ten as a magazine cover, **live from midnight IST** off `today_revenue`. No. 1 is the cover — line-up, name band, crown, and the figure on a gold badge (a third gold object, argued at `.sticker`); Nos. 2–10 count down beside it, and places nobody has taken today are drawn `Open`. **In the rotation.** `?mode=challenge` forwards to `floor.html`, so the 10-Day Challenge is still off the wall unless `SLIDES` carries it |
 | `/weekly` | the Weekly Leaderboard, a **rolling last seven days** (`last7_revenue`, falling back per row to the Monday-anchored `week_revenue`). **In the rotation** |
 | `/live` | the phone page, untouched by any of this |
 | `/old/podium`, `/old/daily` | the previous React design |

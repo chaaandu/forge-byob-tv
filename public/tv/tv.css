@@ -47,6 +47,21 @@
   --rule-ink: #140a1f;
   --rule-seam: rgba(8, 3, 16, 0.55);
 
+  /* THE DAILY's cover (`daily.html`). White paper and the ink printed on it —
+     a surface token and an ink token, never one token doing both jobs. */
+  --paper: #ffffff;
+  --paper-ink: #140a1f;
+
+  /* THE DAILY's gold badge — the day's figure, struck as a medal. The crown's
+     own four stops (tv.js) plus the ink pressed into the metal. Asked for
+     directly on 23 September 2026; see the note at `.sticker` in daily.html. */
+  --gold-hi: #fff1b8;
+  --gold: #f2b93c;
+  --gold-mid: #d99a1e;
+  --gold-deep: #9a6206;
+  --gold-edge: #6a3f02;
+  --gold-ink: #3b2400;
+
   /* One rake, so every diagonal on the wall is parallel. */
   --rake: 16px;
 
