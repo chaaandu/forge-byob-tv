@@ -141,12 +141,15 @@ describe('Podium', () => {
 
   it('ranks 4-10 land in the strip, in order', () => {
     const all = teams().map((row, index) => ({ ...row, totalRevenue: 1_000 * (42 - index) }))
-    const text = render(<Podium ranked={rankTeams(competingTeams(all))} />)
-    expect(text).toContain('Venture 4')
-    expect(text).toContain('Venture 10')
+    const ranked = rankTeams(competingTeams(all))
+    const text = render(<Podium ranked={ranked} />)
+    // Read off the ranking rather than restated, because which fixture venture
+    // is fourth depends on which ids are spares.
+    expect(text).toContain(ranked[3].ventureName)
+    expect(text).toContain(ranked[9].ventureName)
     // Rank 11 is off the board entirely — this is a top ten, not a leaderboard
     // that trails off.
-    expect(text).not.toContain('Venture 11')
+    expect(text).not.toContain(ranked[10].ventureName)
   })
 
   /**
@@ -1132,8 +1135,8 @@ describe('DailyGrid', () => {
    * Reading order: ten per row, left to right then top to bottom. Rank 1 at the
    * top-left of row 1, the last rank at the end of row 4.
    *
-   * **The final row is allowed to be short.** Forge C1 competes 38 teams into
-   * 40 slots, so row 4 holds eight cards and the last two slots are empty.
+   * **The final row is allowed to be short.** Forge C1 competes 37 teams into
+   * 40 slots, so row 4 holds seven cards and the last three slots are empty.
    * `ROW_HEIGHTS` states each row's height rather than using `1fr`, so a short
    * last row keeps its size instead of stretching to swallow the gap — which is
    * what would quietly destroy the rank ramp.
@@ -1143,9 +1146,12 @@ describe('DailyGrid', () => {
     expect(rows).toHaveLength(4)
     for (const row of rows.slice(0, 3)) expect(row).toHaveLength(ROW_LENGTH)
     expect(rows[3]).toHaveLength(COMPETING_SIZE - 3 * ROW_LENGTH)
+    // The fixture's figures fall with the id, so rank order is id order with
+    // the spares taken out — and reading the rows left to right, top to
+    // bottom, has to give exactly that.
+    const competing = board().map((team) => team.teamId)
+    expect(rows.flat().map((team) => team.teamId)).toEqual(competing)
     expect(rows[0][0].teamId).toBe('VBC101')
-    expect(rows[0][9].teamId).toBe('VBC110')
-    expect(rows[1][0].teamId).toBe('VBC111')
     expect(rows[3][rows[3].length - 1].teamId).toBe('VBC139')
   })
 

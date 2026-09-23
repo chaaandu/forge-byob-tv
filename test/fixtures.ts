@@ -26,7 +26,7 @@ export function team(overrides: Partial<Team> = {}): Team {
  *
  * **Derived from config, not restated.** `COHORT_SIZE` is the competing cohort
  * plus the spares, which is exactly what `TV_Feed` publishes — 41 rows,
- * `VBC101`–`VBC141`, of which three are `SPARE_TEAM_IDS`. Every
+ * `VBC101`–`VBC141`, of which four are `SPARE_TEAM_IDS`. Every
  * assertion about "how many teams are on the board" reads these rather than a
  * literal, because the literals are what made six tests fail the day the cohort
  * changed size, each one restating a number it did not own.

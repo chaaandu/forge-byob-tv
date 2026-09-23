@@ -74,12 +74,12 @@ export const COHORT_CSV_URL: string = feedUrl(
 /**
  * The fewest usable rows a fetch may carry and still be trusted.
  *
- * **38 — the competing cohort, `VBC101`–`VBC139` less `VBC138`.** It was 39
- * until SAAJ left on 23 September 2026. `TV_Feed` publishes more than that
- * today, because `VBC140` and `VBC141` are test workbooks still sitting in
- * `Team Links` and SAAJ's workbook still publishes a row; the gate checks
- * *short*, never exact, so it passes either way and keeps passing the day
- * those three are deleted. See `passesRowGate` in lib/feed.ts.
+ * **37 — the competing cohort, `VBC101`–`VBC139` less `VBC104` and
+ * `VBC138`.** It was 39 until Trigo and SAAJ left on 23 September 2026.
+ * `TV_Feed` publishes more than that today, because `VBC140` and `VBC141` are
+ * test workbooks still sitting in `Team Links` and the two departed teams'
+ * workbooks still publish rows; the gate checks *short*, never exact, so it
+ * passes either way and keeps passing the day those four are deleted. See `passesRowGate` in lib/feed.ts.
  *
  * **This number is the single most dangerous constant in the project.** Set it
  * one above the real cohort and every poll is rejected, forever, silently: no
@@ -87,7 +87,7 @@ export const COHORT_CSV_URL: string = feedUrl(
  * line in a console nobody is reading. Whenever the cohort size changes, this
  * changes with it.
  */
-export const MIN_TEAM_ROWS = 38
+export const MIN_TEAM_ROWS = 37
 
 /** The consolidator writes every 10 minutes and Google caches the CSV ~5 min; polling faster only burns cycles. */
 export const POLL_INTERVAL_MS = 60_000
@@ -109,8 +109,11 @@ export const POLL_INTERVAL_MS = 60_000
  * and no line on `/live`. Its two students' photographs stay in
  * `PEOPLE_PHOTOS` and on disk, unread, until they are placed on another team —
  * moving them is renaming the folder and editing two entries.
+ *
+ * **`VBC104` (Trigo) left on 23 September 2026 too**, and is handled exactly
+ * the same way: filtered from every board, photographs kept but unread.
  */
-export const SPARE_TEAM_IDS: readonly TeamId[] = ['VBC140', 'VBC141', 'VBC138']
+export const SPARE_TEAM_IDS: readonly TeamId[] = ['VBC140', 'VBC141', 'VBC138', 'VBC104']
 
 // ── Daily board ─────────────────────────────────────────────────────────────
 
@@ -469,7 +472,8 @@ export const LOGOS: readonly TeamId[] = []
  * Transcribed from `Team Links` cols G and I on 19 September 2026, and
  * re-checked against an updated export on 23 September 2026, which added
  * Savore, Pehchaan and Bean & Beyond: 33 teams with at least one link, 31
- * websites, 26 Instagram handles. `VBC138` is gone with its team. Every value
+ * websites, 26 Instagram handles. `VBC138` and `VBC104` are gone with their
+ * teams, which leaves 32, 30 and 26. Every value
  * is put through `websiteUrl` / `instagramUrl` / `facebookUrl` by
  * `lib/live.test.ts` and none is refused. **Cells are stored verbatim**, in
  * whatever shape the team typed — bare domain, full URL, with or without
@@ -486,7 +490,6 @@ export const TEAM_LINKS: Readonly<Record<string, { website?: string; instagram?:
   'VBC101': { website: 'https://aksperfumes.in/', instagram: 'https://www.instagram.com/aks.perfumes_' },   // AKS Perfumes
   'VBC102': { website: 'https://getlumi.in/', instagram: 'https://www.instagram.com/shop_lumii?stkn=c3BtY2pubGVremU3' },   // LUMI
   'VBC103': { website: 'houseofpravaah.com', instagram: 'https://www.instagram.com/houseofpravaah?stkn=a280dDNucDlyY2V6' },   // House of Pravaah
-  'VBC104': { website: 'thetrigo.in' },   // Trigo
   'VBC105': { website: 'https://chaklebro.myshopify.com' },   // Chakle Bro
   'VBC106': { website: 'https://dadofbags.in/', instagram: 'https://www.instagram.com/dadofbags1947/' },   // Dad Of Bags.
   'VBC107': { website: 'https://madhosh.co.in/', instagram: 'https://www.instagram.com/madhosh.co.in/' },   // Madhosh
