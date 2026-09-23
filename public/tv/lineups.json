@@ -1,0 +1,12 @@
+{
+  "_": "Hand-set line-ups, read by the wall (tv.js) and /live (lib/lineup.ts). `order` is left to right; `front` is who stands in front, front-most first. Anyone not named keeps the automatic rule. Slugs as in public/people/<TEAM>/<slug>.webp. Each entry was asked for directly, looking at the team on screen.",
+  "VBC131": {
+    "note": "Notty Crunch, 23 Sep 2026: Abhishek Hosmani moved from first to third place; then Brijesh Attal, in the middle, moved to the right.",
+    "order": ["rushabh-shah", "abhishek-hosmani", "brijesh-attal"]
+  },
+  "VBC109": {
+    "note": "WeKrave Healthy, 23 Sep 2026: centre in front, the right-hand one next, the left-hand one at the back.",
+    "order": ["shweta-singh", "ajitwsh-s", "ridhima-gupta"],
+    "front": ["ajitwsh-s", "ridhima-gupta", "shweta-singh"]
+  }
+}

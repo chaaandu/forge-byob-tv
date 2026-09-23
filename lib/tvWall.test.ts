@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
 import { PEOPLE_PHOTOS, PROGRAMME_START_ISO, SPARE_TEAM_IDS } from '@/config'
+import { lineup } from '@/lib/lineup'
 import { compareChallenge, compareDaily, compareTeams, compareWeek } from '@/lib/ranking'
 import type { Team, TeamId } from '@/lib/types'
 
@@ -199,6 +200,11 @@ describe('the static wall ranks exactly as lib/ranking does', () => {
     expect(declared).not.toBeNull()
     const ids = [...declared![1].matchAll(/'([^']+)'/g)].map((m) => m[1])
     expect(ids).toEqual([...SPARE_TEAM_IDS])
+    // wall.html counts today's sellers to decide whether /daily is shown, and
+    // a spare counted there would bring the board on a seller early.
+    const rotator = readFileSync('public/tv/wall.html', 'utf8').match(/const SPARES = \[([^\]]*)\]/)
+    expect(rotator).not.toBeNull()
+    expect([...rotator![1].matchAll(/'([^']+)'/g)].map((m) => m[1])).toEqual([...SPARE_TEAM_IDS])
   })
 
   /** 39 ventures, one locked colour each — the map is the authority, not a hash. */
@@ -208,5 +214,55 @@ describe('the static wall ranks exactly as lib/ranking does', () => {
     const entries = [...map![1].matchAll(/"(VBC\d+)":\s*(\d+)/g)]
     expect(entries).toHaveLength(39)
     expect(new Set(entries.map((e) => e[2])).size).toBe(39)
+  })
+
+  /**
+   * ── A team stands the same way on the TV and on a phone ──
+   *
+   * Who stands where, and who is in front, is decided twice: `lineupOf` in
+   * `tv.js` for the wall and `lineup` in `lib/lineup.ts` for `/live`. They
+   * drifted once already — the wall was fixed for bodies cut by their frame
+   * and `/live` kept "leftmost in front" — and a student looked at the phone
+   * and saw the very overlap the TV no longer drew. So both are run over every
+   * team's photographs and must agree on order, layering and the cut fades.
+   */
+  it('lines every team up the same way as /live does', () => {
+    const src = WALL.slice(WALL.indexOf('function photoSrc'), WALL.indexOf('function squadOf'))
+    const photoSrc = src.slice(0, src.indexOf('/**'))
+    const lineupOf = WALL.slice(WALL.indexOf('function orderings'), WALL.indexOf('function squadOf'))
+    const META = JSON.parse(readFileSync('public/tv/people-meta.json', 'utf8'))
+    const LINEUPS = JSON.parse(readFileSync('public/tv/lineups.json', 'utf8'))
+    // eslint-disable-next-line @typescript-eslint/no-implied-eval
+    const wall = new Function('META', 'LINEUPS', `${photoSrc}\n${lineupOf}\nreturn lineupOf`)(META, LINEUPS) as typeof lineup
+
+    const teams = new Map<string, string[]>()
+    for (const entry of PEOPLE_PHOTOS) {
+      const [id, slug] = entry.split('/')
+      teams.set(id, [...(teams.get(id) ?? []), slug])
+    }
+    for (const [id, slugs] of teams) expect(wall(id, slugs), id).toEqual(lineup(id, slugs))
+  })
+
+  /** Every photograph has a version and a measurement; a new one without is a stale URL waiting to happen. */
+  it('has measured every photograph', () => {
+    const META = JSON.parse(readFileSync('public/tv/people-meta.json', 'utf8'))
+    expect(Object.keys(META).sort()).toEqual([...PEOPLE_PHOTOS].sort())
+  })
+
+  /**
+   * ── No passport photographs ──
+   *
+   * A headshot framed at the chest has no body to stand in a line-up with. Two
+   * were used on 23 September 2026 and every way of showing them was worse
+   * than not: enlarged, a giant head; at scale, a body ending in a straight
+   * line; faded, a hole in the group; the whole group faded to match, every
+   * teammate cut at the chest. They were removed, asked for directly, and a
+   * student without a waist-up photograph is absent from the line-up exactly
+   * as one who missed the shoot is. `measure-people.py` flags one as `short`.
+   */
+  it('has no photograph that stops short of the bottom', () => {
+    const META = JSON.parse(readFileSync('public/tv/people-meta.json', 'utf8'))
+    const short = Object.entries(META).filter(([, m]) => (m as { cut: number[] }).cut[2]).map(([k]) => k)
+    expect(short).toEqual([])
   })
 })

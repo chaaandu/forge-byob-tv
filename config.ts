@@ -537,6 +537,7 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC105/meith-jain',
   'VBC105/ritesh-oswal',
   'VBC106/aarav',
+  'VBC106/divy-hardenia',
   'VBC106/tushar',
   'VBC107/anubhav',
   'VBC107/satvik',
@@ -550,6 +551,7 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC110/diya-harish',
   'VBC110/happy-panjwani',
   'VBC110/rishika-choudhary',
+  'VBC110/zuha-fathima',
   'VBC111/jenessa-bhathena',
   'VBC111/tanishq-lomte',
   'VBC111/zalak-gogri',
@@ -596,6 +598,7 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC125/anuj-bajaj',
   'VBC125/darshan-chopda',
   'VBC126/sarth',
+  'VBC126/ujjwal-sitlani',
   'VBC126/vikram',
   'VBC127/akshat',
   'VBC127/lipika',
@@ -629,6 +632,7 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC136/pratiksha-bihani',
   'VBC136/shivansh-sarraf',
   'VBC137/abhishek-gaur',
+  'VBC137/atharva-agrawal',
   'VBC137/kaavya-goenka',
   'VBC137/riya-khurana',
   'VBC138/sahil-agrawal',
@@ -711,7 +715,7 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
   ],
   VBC106: [
     { name: 'Aarav Shrivastava', linkedin: 'https://www.linkedin.com/in/aarav-shrivastava-b63779218?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'aarav' },
-    { name: 'Divy Hardenia', linkedin: 'https://www.linkedin.com/in/divy-hardenia-b08666377' },
+    { name: 'Divy Hardenia', linkedin: 'https://www.linkedin.com/in/divy-hardenia-b08666377', photo: 'divy-hardenia' },
     { name: 'Tushar Ram Reddy', linkedin: 'https://www.linkedin.com/in/tushar-ram-759706399', photo: 'tushar' },
   ],
   VBC107: [
@@ -733,7 +737,7 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
     { name: 'Happy Panjwani', linkedin: 'https://www.linkedin.com/in/happy-panjwani-652909241/', photo: 'happy-panjwani' },
     { name: 'Diya Harish', linkedin: 'https://www.linkedin.com/in/diya-h-bb7694255', photo: 'diya-harish' },
     { name: 'Rishika Choudhary', linkedin: 'https://www.linkedin.com/in/rishikachoudhary?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'rishika-choudhary' },
-    { name: 'Zuha Fathima', linkedin: 'https://www.linkedin.com/in/zuha-fathima-gs-bb8572290?trk=contact-info' },
+    { name: 'Zuha Fathima', linkedin: 'https://www.linkedin.com/in/zuha-fathima-gs-bb8572290?trk=contact-info', photo: 'zuha-fathima' },
   ],
   VBC111: [
     { name: 'Jenessa Bhathena', linkedin: 'https://www.linkedin.com/in/jenessa-bhathena-527079247/', photo: 'jenessa-bhathena' },
@@ -813,7 +817,7 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
   VBC126: [
     { name: 'Vikram Aditya Agarwal', linkedin: 'https://www.linkedin.com/in/vikramadityaagarwal1?utm_source=share_via&utm_content=profile&utm_medium=member_android', photo: 'vikram' },
     { name: 'Sarth Raghuwanshi', linkedin: 'https://www.linkedin.com/in/sarth-raghuwanshi-583bb5240?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'sarth' },
-    { name: 'Ujjwal Sitlani', linkedin: 'https://www.linkedin.com/in/ujjwal-sitlani-6198b5229?utm_source=share_via&utm_content=profile&utm_medium=member_ios' },
+    { name: 'Ujjwal Sitlani', linkedin: 'https://www.linkedin.com/in/ujjwal-sitlani-6198b5229?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'ujjwal-sitlani' },
   ],
   VBC127: [
     { name: 'Akshat Thakur', linkedin: 'https://www.linkedin.com/in/akshat-thakur-0a7bb3262?utm_source=share_via&utm_content=profile&utm_medium=member_android', photo: 'akshat' },
@@ -869,7 +873,7 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
   VBC137: [
     { name: 'Abhishek Gaur', linkedin: 'https://www.linkedin.com/in/abhishek-gaur-b64225282?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'abhishek-gaur' },
     { name: 'Kaavya Goenka', linkedin: 'https://www.linkedin.com/in/kaavya-goenka-a91059288', photo: 'kaavya-goenka' },
-    { name: 'Atharva Agrawal', linkedin: 'https://www.linkedin.com/in/atharva-agrawal-835193202?utm_source=share_via&utm_content=profile&utm_medium=member_ios' },
+    { name: 'Atharva Agrawal', linkedin: 'https://www.linkedin.com/in/atharva-agrawal-835193202?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'atharva-agrawal' },
     { name: 'Riya Khurana', linkedin: 'https://www.linkedin.com/in/riya-khurana-048626271/', photo: 'riya-khurana' },
   ],
   VBC139: [

@@ -297,8 +297,26 @@ const rankBy = (teams, key) => (key === 'total' ? rankAllTime(teams) : rankPerio
 
    Nobody's face is ever borrowed. No photograph, no person. */
 let PHOTOS = []
+/* Per photograph: a version stamp and where its body is cut —
+   `{ "VBC132/rohan-vivek": { v, cut: [left, right, short] } }`, written by
+   `scripts/measure-people.py`. And the hand-set line-ups in `lineups.json`.
+   Both are optional: missing files mean unversioned URLs and the automatic
+   rule, which is the old behaviour. */
+let META = {}
+let LINEUPS = {}
 async function loadPhotos() {
-  try { PHOTOS = await (await fetch('/tv/people.json', { cache: 'no-store' })).json() } catch { PHOTOS = [] }
+  const get = async (url, fallback) => {
+    try { return await (await fetch(url, { cache: 'no-store' })).json() } catch { return fallback }
+  }
+  ;[PHOTOS, META, LINEUPS] = await Promise.all([
+    get('/tv/people.json', []), get('/tv/people-meta.json', {}), get('/tv/lineups.json', {})])
+}
+
+/** `/people/<team>/<slug>.webp?v=<hash>` — a replaced photograph is a new URL,
+    so it is not stuck behind a day of browser cache. */
+function photoSrc(teamId, slug) {
+  const v = META[`${teamId}/${slug}`]?.v
+  return `/people/${teamId}/${slug}.webp${v ? `?v=${v}` : ''}`
 }
 
 /**
@@ -313,27 +331,84 @@ async function loadPhotos() {
  */
 function warmPhotos() {
   requestIdleCallback
-    ? requestIdleCallback(() => PHOTOS.forEach((p) => { new Image().src = `/people/${p}.webp` }))
-    : setTimeout(() => PHOTOS.forEach((p) => { new Image().src = `/people/${p}.webp` }), 1200)
+    ? requestIdleCallback(() => PHOTOS.forEach((p) => { new Image().src = photoSrc(...p.split('/')) }))
+    : setTimeout(() => PHOTOS.forEach((p) => { new Image().src = photoSrc(...p.split('/')) }), 1200)
 }
 
-/** Slugs back to names, for the title attribute and for ordering. */
-function squadOf(teamId) {
-  return PHOTOS.filter((p) => p.startsWith(teamId + '/'))
-    .map((p) => ({ slug: p.slice(teamId.length + 1), src: `/people/${p}.webp` }))
+/**
+ * ── Who stands where, and who stands in front ──
+ *
+ * The wall's copy of `lineup` in `lib/lineup.ts`, which carries the full
+ * reasoning; `lib/tvWall.test.ts` holds the two to the same answer for every
+ * team. In short: a hand-set line-up (`lineups.json`) wins; otherwise nobody's
+ * cut side is on the outside of the group if it can be helped; a body cut by
+ * its frame stands behind the neighbour on the cut side; among equals the
+ * middle is in front.
+ *
+ * Returns people left to right, each with `z` (n = front) and its cut sides.
+ * `max` trims the roster BEFORE placing, so the layers are right for the
+ * people actually drawn.
+ */
+function orderings(items) {
+  if (items.length <= 1) return [items]
+  const out = []
+  items.forEach((item, i) => {
+    for (const rest of orderings([...items.slice(0, i), ...items.slice(i + 1)])) out.push([item, ...rest])
+  })
+  return out
 }
+
+function lineupOf(teamId, slugs) {
+  const hand = LINEUPS[teamId] || {}
+  const cutOf = (slug) => META[`${teamId}/${slug}`]?.cut || [null, null, 0]
+
+  let order
+  if (hand.order) {
+    order = [...hand.order.filter((s) => slugs.includes(s)), ...slugs.filter((s) => !hand.order.includes(s))]
+  } else {
+    const exposed = (o) =>
+      o.length === 0 ? 0 : (cutOf(o[0])[0] !== null ? 1 : 0) + (cutOf(o[o.length - 1])[1] !== null ? 1 : 0)
+    order = slugs
+    for (const o of orderings(slugs)) if (exposed(o) < exposed(order)) order = o
+  }
+
+  const n = order.length, centre = (n - 1) / 2
+  const cost = order.map((s, i) => {
+    const [l, r] = cutOf(s)
+    const hand_ = hand.front ? hand.front.indexOf(s) : -1
+    if (hand_ >= 0) return -1000 + hand_
+    return ((i > 0 && l !== null ? 1 : 0) + (i < n - 1 && r !== null ? 1 : 0)) * 10
+      + Math.abs(i - centre) + (i > centre ? 0.01 : 0)
+  })
+  const z = new Array(n)
+  ;[...cost.keys()].sort((a, b) => cost[a] - cost[b]).forEach((i, rank) => { z[i] = n - rank })
+
+  return order.map((slug, i) => {
+    const [l, r] = cutOf(slug)
+    return { slug, src: photoSrc(teamId, slug), z: z[i], cutL: l, cutR: r }
+  })
+}
+
+function squadOf(teamId, max = 99) {
+  const slugs = PHOTOS.filter((p) => p.startsWith(teamId + '/')).map((p) => p.slice(teamId.length + 1))
+  return lineupOf(teamId, slugs.slice(0, max))
+}
+
+/** The class and inline style that fade a cut side from its own cut line (tv.css). */
+const cutClass = (p) => [p.cutL !== null && 'cut-l', p.cutR !== null && 'cut-r'].filter(Boolean).join(' ')
+const cutStyle = (p) => (p.cutL !== null ? `--cl:${p.cutL}%;` : '') + (p.cutR !== null ? `--cr:${p.cutR}%;` : '')
 
 /** Bottom-aligned cutouts, shoulders overlapping and heads not, the last fifth
     faded so a crop ending on somebody's chest is not a straight cut across
     them. Exactly `/live`'s treatment, scaled to the bar. */
 function squadHtml(teamId, h, max) {
-  const people = squadOf(teamId).slice(0, max)
+  const people = squadOf(teamId, max)
   if (people.length === 0) return ''
   const w = Math.round(h * (96 / 132))
   const lap = Math.round(w * 0.31)
   return `<span class="squad" style="height:${h}px">` + people.map((p, i) =>
-    `<span class="person" style="width:${w}px;height:${h}px;z-index:${people.length - i};` +
-    `margin-left:${i === 0 ? 0 : -lap}px"><img src="${p.src}" alt=""></span>`).join('') + '</span>'
+    `<span class="person" style="width:${w}px;height:${h}px;z-index:${p.z};` +
+    `margin-left:${i === 0 ? 0 : -lap}px"><img class="${cutClass(p)}" style="${cutStyle(p)}" src="${p.src}" alt=""></span>`).join('') + '</span>'
 }
 
 

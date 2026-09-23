@@ -38,7 +38,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from PIL import Image, ImageOps
 
-from cutout import HEADROOM, QUALITY, cut_out, detector, face_box, frame, portrait
+from cutout import MIN_TOP as HEADROOM, QUALITY, cut_out, detector, face_box, frame, portrait
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "public" / "people"

@@ -39,13 +39,22 @@ from PIL import Image, ImageFilter
 # the face shrinks**: the face occupies `WIDTH / FACE_W` pixels of the frame, so
 # 330/3.4 and 370/3.81 are both 97px and every student stays the size they
 # were. Change one without the other and every crop silently re-scales.
-WIDTH = 370
+# ── 450, and the extra 80 is real body, not empty space ──
+#
+# 370 was 330 plus 20 a side — but the shoot's crops were never re-cut at 370;
+# they were padded, so 76 of 113 had a body ending in a dead-straight vertical
+# line 20px inside the frame, and every surface had to fade it. On 23
+# September 2026 the frame went to 450 at the SAME face size (97px), and the
+# photographs were re-cut from the shoot's originals, so a shoulder carries on
+# to the edge. Surfaces draw the crop 450/370 = 121.6% of their person box,
+# centred, so spacing and scale are exactly what they were at 370.
+WIDTH = 450
 HEIGHT = 440
 QUALITY = 84
 
 # Every crop is measured in face widths, so students photographed at different
 # distances — or on a phone, or by LinkedIn — still come out the same size.
-FACE_W = 3.81
+FACE_W = 4.64   # 450 / 97
 FACE_H = 4.6
 
 # ── Headroom is measured on the cutout, not guessed from the face box ──
@@ -128,18 +137,47 @@ def portrait(image: Image.Image, box: tuple[int, int, int, int]) -> Image.Image:
     return tall.resize((WIDTH, round(ch * scale)), Image.LANCZOS)
 
 
+# ── Eyes on one line, not hair ──
+#
+# Placing the window by the top of the hair put every student's hair 27px from
+# the top — and their EYES anywhere from y=98 to y=139, because hair is not
+# the same height on everybody. In a line-up that reads as people placed at
+# random. A group photograph lines up eyes. Measured across the cohort, hair
+# to eye line is at most 112px, so eyes at 120 keeps every head 8px clear of
+# the top; anyone taller than that sits lower rather than being cut.
+EYE_Y = 120
+MIN_TOP = 8
+
+
+def eye_line(cut: Image.Image) -> int | None:
+    """The eye line in the cutout's own pixels, from the face detector's landmarks."""
+    ground = Image.new("RGB", cut.size, (200, 200, 200))
+    ground.paste(cut, mask=cut.getchannel("A"))
+    frame_ = cv2.cvtColor(np.array(ground), cv2.COLOR_RGB2BGR)
+    model = detector()
+    model.setInputSize((frame_.shape[1], frame_.shape[0]))
+    _, faces = model.detect(frame_)
+    if faces is None or len(faces) == 0:
+        return None
+    f = max(faces, key=lambda f: f[2] * f[3])
+    return round((f[5] + f[7]) / 2)
+
+
 def frame(cut: Image.Image) -> tuple[Image.Image, int]:
     """
-    The final 330x440 window, placed so the top of the hair sits `HEADROOM`
-    below the top edge.
+    The final 450x440 window, placed so the eyes sit on `EYE_Y` — unless the
+    hair would then come within `MIN_TOP` of the top edge, in which case the
+    head sits lower instead.
 
-    Returns the frame and the gap actually achieved — which is smaller only
+    Returns the frame and the gap above the hair — smaller than `MIN_TOP` only
     when the photograph itself has nothing above the head, and the caller
     reports those.
     """
     bbox = cut.getchannel("A").getbbox()
     hair = bbox[1] if bbox else 0
-    top = max(0, hair - HEADROOM)
+    eye = eye_line(cut)
+    top = hair - HEADROOM if eye is None else min(eye - EYE_Y, hair - MIN_TOP)
+    top = max(0, top)
     gap = hair - top
 
     window = Image.new("RGBA", (WIDTH, HEIGHT), (0, 0, 0, 0))

@@ -1,4 +1,5 @@
 import { PEOPLE_PHOTOS, TEAM_LINKS, TEAM_PEOPLE } from '@/config'
+import { photoSrc } from '@/lib/lineup'
 import { competingTeams, rankByChallenge, rankByToday, rankByWeek, rankTeams } from '@/lib/ranking'
 import { hashTeamId } from '@/lib/seed'
 import { titleCase } from '@/lib/team'
@@ -473,7 +474,7 @@ export function peopleOf(teamId: TeamId): { name: string; linkedin: string | nul
     // Only a photograph that is actually listed — the `PEOPLE_PHOTOS` rule.
     photo:
       person.photo !== undefined && PEOPLE_PHOTOS.includes(`${teamId}/${person.photo}`)
-        ? `/people/${teamId}/${person.photo}.webp`
+        ? photoSrc(teamId, person.photo)
         : null,
   }))
 }

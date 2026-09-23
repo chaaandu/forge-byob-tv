@@ -43,7 +43,7 @@ from pathlib import Path
 from PIL import Image, ImageOps
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from cutout import HEADROOM, QUALITY, cut_out, detector, face_box, frame, portrait, subject_share
+from cutout import MIN_TOP as HEADROOM, QUALITY, cut_out, detector, face_box, frame, portrait, subject_share
 
 try:  # optional, and only needed for iPhone originals
     import pillow_heif  # type: ignore

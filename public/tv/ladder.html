@@ -172,7 +172,8 @@
    bottom edge and the bar clips, so there is nothing to soften — the fade was
    only dissolving the bodies into their own card. */
 .person { position: relative; display: block; }
-.person img { width: 100%; height: 100%; object-fit: contain; object-position: bottom center; }
+/* 450-wide crop in a box sized for the old 370: 450/370 = 121.62%, centred, so the person is exactly the size and in exactly the place they were, and the extra 40px of shoulder each side spills past the box (see WIDTH in scripts/cutout.py). */
+.person img { position: absolute; left: 50%; bottom: 0; width: 121.62%; max-width: none; height: auto; transform: translateX(-50%); }
 
 
 .bar-fig {

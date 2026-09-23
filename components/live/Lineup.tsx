@@ -1,6 +1,7 @@
 import Image from 'next/image'
 
 import { PEOPLE_PHOTOS } from '@/config'
+import { lineup } from '@/lib/lineup'
 import { initialsOf, membersOf, peopleOf, photoSlug } from '@/lib/live'
 import type { Team } from '@/lib/types'
 
@@ -59,6 +60,12 @@ export function Squad({ team }: { team: Team }) {
   )
   if (shown.length === 0) return null
 
+  /* Order and layering come from `lineup` — the same rule the wall uses, so a
+     team stands the same way on the TV and on a phone. It replaced "leftmost
+     in front", which put bodies cut by their photo's frame over clean ones. */
+  const nameOf = new Map(shown.map((name) => [photoSlug(name), name]))
+  const placed = lineup(team.teamId, shown.map(photoSlug))
+
   return (
     /* ── One frame, and the fade belongs to it ──
      *
@@ -69,14 +76,14 @@ export function Squad({ team }: { team: Team }) {
      * through the person in front. One frame flattens the group first, so an
      * overlap is opaque and only the outside edge softens. */
     <div className="lv-squad" aria-label={`Team: ${shown.join(', ')}`} role="img">
-      {shown.map((name, index) => (
+      {placed.map((p) => (
         <Person
-          key={name}
-          teamId={team.teamId}
-          name={name}
-          // The left-most sits on top and each one behind the last, so the
-          // stack reads front-to-back rather than as a row of half-faces.
-          style={{ zIndex: shown.length - index }}
+          key={p.slug}
+          name={nameOf.get(p.slug) ?? p.slug}
+          src={p.src}
+          cut={[p.cutL !== null && 'cut-l', p.cutR !== null && 'cut-r'].filter(Boolean).join(' ')}
+          cutAt={{ ...(p.cutL !== null && { '--cl': `${p.cutL}%` }), ...(p.cutR !== null && { '--cr': `${p.cutR}%` }) } as React.CSSProperties}
+          style={{ zIndex: p.z }}
         />
       ))}
     </div>
@@ -84,18 +91,24 @@ export function Squad({ team }: { team: Team }) {
 }
 
 function Person({
-  teamId,
   name,
+  src,
+  cut,
+  cutAt,
   style,
 }: {
-  teamId: string
   name: string
+  src: string
+  cut: string
+  cutAt: React.CSSProperties
   style: React.CSSProperties
 }) {
   return (
     <span className="lv-person" style={style} title={name}>
       <Image
-        src={`/people/${teamId}/${photoSlug(name)}.webp`}
+        className={cut || undefined}
+        style={cutAt}
+        src={src}
         alt=""
         width={256}
         height={256}

@@ -982,6 +982,14 @@ body:has(.lv-app[data-locked]) {
     margin-left: 0;
   }
 
+  /* ── A body cut by its photo's frame fades from the cut line ──
+     Same rule and numbers as the wall's `img.cut-l` in public/tv/tv.css:
+     `--cl` / `--cr` are where the cut is (% in from that side, set by
+     `Squad` from lib/lineup.ts), and only the 6% inside it fades. */
+  .lv-person img.cut-l { mask-image: linear-gradient(to right, transparent var(--cl), black calc(var(--cl) + 6%)); }
+  .lv-person img.cut-r { mask-image: linear-gradient(to left, transparent var(--cr), black calc(var(--cr) + 6%)); }
+  .lv-person img.cut-l.cut-r { mask-image: linear-gradient(to right, transparent var(--cl), black calc(var(--cl) + 6%), black calc(100% - var(--cr) - 6%), transparent calc(100% - var(--cr))); }
+
   /* **No zigzag any more.** It was what made four framed cards read as a
      group; cutouts standing shoulder to shoulder do that by themselves, and
      raising every second one leaves a body hanging in mid-air where its
@@ -994,13 +1002,18 @@ body:has(.lv-app[data-locked]) {
      letters sit exactly where the head does. */
 
   .lv-person img {
-    width: 100%;
-    height: 100%;
-    /* `contain`, not `cover`: the crop was already composed around the face
-       by the fetch script, and a second crop here would undo the one scale
-       every head shares. */
-    object-fit: contain;
-    object-position: bottom center;
+    /* The crop is 450 wide in a box sized for the old 370: drawn at
+       450/370 = 121.62% of the box, centred, so every head is exactly the
+       size and place it was and the extra shoulder spills past the box
+       (WIDTH in scripts/cutout.py). Never `contain` into the box — that
+       would shrink a wider crop, and with it every face. */
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    width: 121.62%;
+    max-width: none;
+    height: auto;
+    transform: translateX(-50%);
   }
 
 
@@ -1330,7 +1343,7 @@ body:has(.lv-app[data-locked]) {
     position: absolute;
     top: 4%;
     left: 50%;
-    width: 140%;
+    width: 170.3%; /* 140% at the old 370-wide crop, times 450/370 */
     max-width: none;
     height: auto;
     transform: translateX(-50%);

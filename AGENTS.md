@@ -26,9 +26,9 @@ What is on the TV is `public/tv/` — three static slides served straight out of
 
 | URL | What it is |
 | --- | --- |
-| `/wall` | **the rotator — point the TV here.** `/podium`, `/weekly` and `/daily`, thirty seconds each (since 23 September 2026; `SLIDES` in `wall.html`). **`/daily` sits out until the first sale of the day** — the loop is 60s of `/podium` and `/weekly` until the cached feed shows any `today_revenue` above zero, and it steps out again at midnight IST (`hasContent` in `wall.html`) |
+| `/wall` | **the rotator — point the TV here.** `/podium`, `/weekly` and `/daily`, thirty seconds each (since 23 September 2026; `SLIDES` in `wall.html`). **`/daily` sits out until ten teams have sold today** (`MIN_SELLERS` in `wall.html`, since 24 September 2026; it was the first sale before that) — the loop is 60s of `/podium` and `/weekly` until then, and the slide steps out again at midnight IST. The cost: on a quiet day it never appears, and the morning's first sales are never on the TV |
 | `/podium` | the BYOB Ladder, all-time |
-| `/daily` | **THE DAILY** (`daily.html`, since 23 September 2026): today's top ten as a magazine cover, **live from midnight IST** off `today_revenue`. No. 1 is the cover — line-up, name band, crown, and the figure on a gold badge (a third gold object, argued at `.sticker`); Nos. 2–10 count down beside it, and places nobody has taken today are drawn `Open`. **In the rotation.** `?mode=challenge` forwards to `floor.html`, so the 10-Day Challenge is still off the wall unless `SLIDES` carries it |
+| `/daily` | **Today's Top Seller** (`daily.html`; third design, 24 September 2026): today's top ten, **live from midnight IST** off `today_revenue`, on Weekly's own background and nothing else of Weekly's. A raked `TOP ≡ / TODAY'S SELLER` masthead with speed lines; the No. 1 team in a spotlight of its livery, rising from behind a finish line in that colour, name in white and figure in gold type (the third gold object on the wall); Nos. 2–10 streak in as lines, each with a raked slash in its team's colour; The white magazine cover and gold starburst before it were retired for being the one slide that did not look like the wall. **In the rotation once ten teams have sold.** `?mode=challenge` forwards to `floor.html`, so the 10-Day Challenge is still off the wall unless `SLIDES` carries it |
 | `/weekly` | the Weekly Leaderboard, a **rolling last seven days** (`last7_revenue`, falling back per row to the Monday-anchored `week_revenue`). **In the rotation** |
 | `/live` | the phone page, untouched by any of this |
 | `/old/podium`, `/old/daily` | the previous React design |
@@ -782,6 +782,44 @@ is the one page here that a person holds. Added 17 September 2026.
     guessed** — the matcher's first version paired `Diya Agarwal` with
     *Aditya* Agarwal's photograph, which is the one mistake on this page worth
     an apology. 100 of 117 matched; the rest are a list for a human.
+
+  **Who stands where, and who is in front, is one rule on both surfaces**
+  (23 September 2026): `lineup` in `lib/lineup.ts` for `/live`, `lineupOf` in
+  `public/tv/tv.js` for the wall, held equal for every team by
+  `lib/tvWall.test.ts`. **`public/tv/lineups.json` is the hand override** —
+  order and front-to-back for a team someone looked at and decided.
+
+  **Every crop is 450x440 with eyes on y=120** (24 September 2026). The shoot
+  photographs had been cut at 330 and padded to 370 with clear space, so 78
+  of 117 had a body ending in a dead-straight vertical line inside the frame,
+  and every surface had to fade it — reported team after team as shoulders
+  fading. They were re-cut from the shoot's originals at 450 and the same
+  97px face, so a shoulder carries on to the edge: **0 of 117 are cut now.**
+  Placing the window by the top of the hair had also put eyes anywhere from
+  y=98 to 139, which read as people placed at random; they sit on one line
+  now. Surfaces draw a crop at **121.62% (450/370) of the person box,
+  centred**, so size and spacing are exactly what they were. Each re-cut was
+  checked against the photograph it replaced with face recognition (lowest
+  0.87; a different person scores ~0.2), which is what caught the shoot sheet
+  naming Hritik's frame as Diya Harish's a second time. Soumanshu, Anubhav,
+  Shivansh Sarraf and Diya Harish have no original left to re-cut: theirs are
+  the old crops widened and moved onto the eye line.
+
+  `scripts/measure-people.py` writes `public/tv/people-meta.json` — a content
+  hash that goes on every photo URL as `?v=` (photographs are cached for a
+  day, and a replaced face otherwise shows the old one until tomorrow), and
+  any cut at the crop's edge, which a surface fades over 6%. **Run it after
+  any photograph changes**; the test fails if one is unmeasured.
+
+  **No passport photographs.** A headshot framed at the chest has no body to
+  stand in a line-up with, and on 23 September 2026 every way of showing two
+  of them was worse than not: enlarged, a giant head; at scale, a body ending
+  on a straight line; faded, a hole in the group; the group faded to match,
+  every teammate cut at the chest. Both were replaced with full-length
+  versions supplied directly, AI-extended from the students' own photographs
+  (Abhishek Hosmani, Kaavya Goenka), and went through `prepare-people.py` like
+  any other. `measure-people.py` flags a body that stops short of the bottom,
+  and `lib/tvWall.test.ts` fails on one.
 
   **Until a photograph exists, a student is initials in the team's livery, and
   that is not a placeholder to be filled with a stock face.** A borrowed

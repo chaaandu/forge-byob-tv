@@ -612,7 +612,8 @@ describe('TEAM_PEOPLE', () => {
     const served = peopleOf(id as TeamId)[index]!
     expect(served.linkedin).not.toContain('?')
     expect(served.linkedin).toMatch(/^https:\/\/www\.linkedin\.com\/in\/[^/]+$/)
-    if (people[index]!.photo) expect(served.photo).toBe(`/people/${id}/${people[index]!.photo}.webp`)
+    // The path, plus a content version so a replaced photograph is a new URL (lib/lineup.ts).
+    if (people[index]!.photo) expect(served.photo).toMatch(new RegExp(`^/people/${id}/${people[index]!.photo}\\.webp\\?v=[0-9a-f]{10}$`))
   })
 
   it('has nothing to say about a team it does not know', () => {

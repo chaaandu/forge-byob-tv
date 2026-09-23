@@ -65,12 +65,26 @@
    * checked: `/daily?mode=challenge` ranks a different column, and a quiet
    * morning is not a reason to hide a challenge. */
   const CACHE_KEY = 'byob-tv.feed'
+  /* ── …and until the top ten is full ──
+   *
+   * Asked for directly on 24 September 2026: the day board joins the loop
+   * only once MIN_SELLERS teams have sold today, so the TV only ever shows a
+   * complete top ten. The cost, stated when it was chosen: on the data this
+   * wall has seen, ten sellers in a day arrives mid-afternoon at the
+   * earliest (a working Friday had 6 of 41 at 2pm), so on a quiet day the
+   * slide does not appear at all, and the first sale of the day — the cover
+   * changing hands at 11am — is never on the TV. Lower this number and the
+   * slide comes back earlier, with `daily.html`'s open panel standing in for
+   * the places not yet taken. Opening `/daily` directly always shows it. */
+  const MIN_SELLERS = 10
   function hasContent(path) {
     if (path !== '/daily') return true
     try {
       const teams = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null')?.teams
       if (!Array.isArray(teams) || teams.length === 0) return true
-      return teams.some((t) => Number(t.today) > 0)
+      // The spares never trade and are never on the board, so they never count.
+      const SPARES = ['VBC140', 'VBC141', 'VBC138', 'VBC104']
+      return teams.filter((t) => !SPARES.includes(t.id) && Number(t.today) > 0).length >= MIN_SELLERS
     } catch { return true }
   }
   /** The next slide after `k` that has something to show. `/podium` always
