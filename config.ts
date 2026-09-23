@@ -630,3 +630,245 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC139/bhavit-gupta',
   'VBC139/harsh-nain',
 ]
+
+/**
+ * ── Who is on each team, and where to find them on LinkedIn ──
+ *
+ * `/live`'s team sheet lists the students behind a venture, by name, each one
+ * linking to their LinkedIn — so somebody reading a team's numbers can reach
+ * the people who made them. Added 23 September 2026, asked for directly.
+ *
+ * **Three sources, joined on the one key they share, which is the Forge
+ * email.** The `Groups List` tab of `Forge C1 Team Details` gives student →
+ * team; the `Daily LinkedIn Post Tracker` gives student → profile; both carry
+ * `<name>@forge27.mesaschool.co`. Joining on the name instead is how
+ * `fetch-headshots.py` once paired Diya Agarwal with Aditya Agarwal's face,
+ * so names were not used as the key. Two tracker rows needed the name after
+ * all — Aditya Peter's email reads `aditya_peyet@forge28`, Madhuresh
+ * Binzani's is a Gmail — and each is the only possible match on its team.
+ *
+ * **The roster is the programme's, corrected where this repo already knows
+ * better**: Aditi Bhateja is on Mugshot (`30662d9`) and Radha Hutkey on Mello
+ * (`1fe854b`), both confirmed directly. Trigo and SAAJ have left, so Rohit
+ * Singh, Preethi S, Udhav Kothari and Sahil Agrawal are unplaced and not
+ * here. **Riya Khurana is left out on purpose**: `Groups List` puts her on
+ * ZAAREE and `Team Links` does not, and a named student on the wrong team is
+ * the one mistake on this page worth an apology — so she is absent until
+ * someone confirms which is right.
+ *
+ * **Names are written by hand**, as first and last name in the case a person
+ * would write them — the sources carry `AADISHWAR R`, `Sai Santosh Praval Goud
+ * . M` and `Anuj sunil Bajaj`. Order is `Team Links`' order, which is the
+ * order a team listed itself in.
+ *
+ * **`linkedin` is stored verbatim**, tracking query and all, for the reason
+ * `TEAM_LINKS` gives: deciding what is safe to put in an `href` is
+ * `linkedinUrl`'s job in `lib/live.ts`, and doing it twice is how two answers
+ * drift. Divy Hardenia's cell is a `share.google` short link rather than a
+ * profile, so he is listed without one rather than linked somewhere that is
+ * not LinkedIn.
+ *
+ * **`photo` is the slug in `PEOPLE_PHOTOS`**, stated rather than derived,
+ * because a third of those slugs are first names only (`VBC106/aarav`) and
+ * deriving it would mean guessing whose face is whose. `lib/live.test.ts`
+ * holds this list and `PEOPLE_PHOTOS` to each other in both directions.
+ *
+ * **Consent is the same question it is for the photographs.** Each student
+ * put this URL into a cohort tracker; a public page is a wider audience than
+ * that. Removing one person's link is deleting one field.
+ */
+export type Person = {
+  name: string
+  linkedin?: string
+  photo?: string
+}
+
+export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
+  VBC101: [
+    { name: 'Tanishque Jain', linkedin: 'https://www.linkedin.com/in/tanishquejain9/', photo: 'tanishque-jain' },
+    { name: 'Nirmalya Sah', linkedin: 'https://www.linkedin.com/in/nirmalyasah', photo: 'nirmalya-sah' },
+    { name: 'Sachidananda Dehury', linkedin: 'https://www.linkedin.com/in/sachidananda-dehury-1ba51229a', photo: 'sachidananda-dehury' },
+  ],
+  VBC102: [
+    { name: 'Simran Kalra', linkedin: 'https://www.linkedin.com/in/simran-kalra-20088a347?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'simran-kalra' },
+    { name: 'Diya Agrawal', linkedin: 'https://www.linkedin.com/in/diyagrawall', photo: 'diya-agarwal' },
+    { name: 'Arpita Mahata', linkedin: 'https://www.linkedin.com/in/arpita-mahata', photo: 'arpita-mahata' },
+  ],
+  VBC103: [
+    { name: 'Annashri Mahato', linkedin: 'https://www.linkedin.com/in/annashrimahato' },
+    { name: 'Pragati Singh', linkedin: 'https://www.linkedin.com/in/pragatisingh99', photo: 'pragati-singh' },
+    { name: 'Kavya Zala', linkedin: 'https://www.linkedin.com/in/kavya-zala-a451292b2', photo: 'kavya-zala' },
+  ],
+  VBC105: [
+    { name: 'Harsh Malani', linkedin: 'https://www.linkedin.com/in/harsh-malani-a656992b1?utm_source=share_via&utm_content=profile&utm_medium=member_android', photo: 'harsh-malani' },
+    { name: 'Meith Jain', linkedin: 'https://www.linkedin.com/in/meith-jain-89b056291/', photo: 'meith-jain' },
+    { name: 'Ritesh Oswal', linkedin: 'https://www.linkedin.com/in/ritesh-oswal-738682394', photo: 'ritesh-oswal' },
+  ],
+  VBC106: [
+    { name: 'Aarav Shrivastava', linkedin: 'https://www.linkedin.com/in/aarav-shrivastava-b63779218?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'aarav' },
+    { name: 'Divy Hardenia' },
+    { name: 'Tushar Ram Reddy', linkedin: 'https://www.linkedin.com/in/tushar-ram-759706399', photo: 'tushar' },
+  ],
+  VBC107: [
+    { name: 'Satvik Bansal', linkedin: 'https://www.linkedin.com/in/satvik-bansal-b26542286?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'satvik' },
+    { name: 'Somanshu Singhal', linkedin: 'https://www.linkedin.com/in/somanshu-singhal-b42055216/', photo: 'soumanshu' },
+    { name: 'Anubhav Rastogi', linkedin: 'https://www.linkedin.com/in/anubhav-rastogi-91aa95249', photo: 'anubhav' },
+  ],
+  VBC108: [
+    { name: 'Vatsal Shah', linkedin: 'https://www.linkedin.com/in/vatsalshah-/', photo: 'vatsal' },
+    { name: 'Akassh Puranik', linkedin: 'https://www.linkedin.com/in/akassh-puranik-581755224', photo: 'akassh' },
+    { name: 'Divyam Arora', linkedin: 'https://www.linkedin.com/in/divyam-arora-78207b250', photo: 'divyam' },
+  ],
+  VBC109: [
+    { name: 'Shweta Singh', linkedin: 'https://www.linkedin.com/in/shweta-singh', photo: 'shweta-singh' },
+    { name: 'Ajitesh Senthilkumar', linkedin: 'https://www.linkedin.com/in/ajitesh-senthilkumar-0b8a85216?utm_source=share_via&utm_content=profile&utm_medium=member_android', photo: 'ajitwsh-s' },
+    { name: 'Ridhima Gupta', linkedin: 'https://www.linkedin.com/in/ridhima-gupta-a2b3a026a/', photo: 'ridhima-gupta' },
+  ],
+  VBC110: [
+    { name: 'Happy Panjwani', linkedin: 'https://www.linkedin.com/in/happy-panjwani-652909241/', photo: 'happy-panjwani' },
+    { name: 'Diya Harish', linkedin: 'https://www.linkedin.com/in/diya-h-bb7694255' },
+    { name: 'Rishika Choudhary', linkedin: 'https://www.linkedin.com/in/rishikachoudhary?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'rishika-choudhary' },
+    { name: 'Zuha Fathima', linkedin: 'https://www.linkedin.com/in/zuha-fathima-gs-bb8572290?trk=contact-info' },
+  ],
+  VBC111: [
+    { name: 'Jenessa Bhathena', linkedin: 'https://www.linkedin.com/in/jenessa-bhathena-527079247/', photo: 'jenessa-bhathena' },
+    { name: 'Tanishq Lomte', linkedin: 'http://linkedin.com/in/lomtetanishq26', photo: 'tanishq-lomte' },
+    { name: 'Zalak Gogri', linkedin: 'https://www.linkedin.com/in/zalak-gogri-3837342b2?trk=contact-info', photo: 'zalak-gogri' },
+  ],
+  VBC112: [
+    { name: 'Praval Goud Madduri', linkedin: 'https://www.linkedin.com/in/praval-goud-47a795273?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'praval-goud-madduri' },
+    { name: 'Parin Kumat', linkedin: 'https://www.linkedin.com/in/parin-kumat-a58911278?trk=contact-info', photo: 'parin-kumat' },
+    { name: 'Naveen Kumar', linkedin: 'https://in.linkedin.com/in/naveen-kumar-p-6b03522a5', photo: 'naveen-kumar' },
+  ],
+  VBC113: [
+    { name: 'Archit Pathak', linkedin: 'https://www.linkedin.com/in/archit-pathak-1b4859211/', photo: 'archit-pathak' },
+    { name: 'Riya Kothavade', linkedin: 'https://www.linkedin.com/in/riya-kothavade-a3a549236?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'riya-kothavade' },
+    { name: 'Diya Ispahani', linkedin: 'https://www.linkedin.com/in/diya-ispahani?utm_source=share_via&utm_content=profile&utm_medium=member_ios' },
+  ],
+  VBC114: [
+    { name: 'Abhishek Kambalath', linkedin: 'https://www.linkedin.com/in/abhishek-kambalath-20337a25a', photo: 'abhishek-kamblath' },
+    { name: 'Kalika Srivastava', linkedin: 'https://www.linkedin.com/in/kalika-srivastava-73aa20267', photo: 'kalika-srivastava' },
+    { name: 'Aditi Roy', linkedin: 'https://www.linkedin.com/in/aditi-roy-a9ab212bb/', photo: 'aditi-roy' },
+  ],
+  VBC115: [
+    { name: 'Risheet Gangar', linkedin: 'https://www.linkedin.com/in/risheet-gangar?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'risheet-gangar' },
+    { name: 'Dev Mehra', linkedin: 'https://www.linkedin.com/in/dev-mehra-2596bb135?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'dev-mehra' },
+    { name: 'Maitree Shah', linkedin: 'https://www.linkedin.com/in/maitree-shah-9352331b1?utm_source=share_via&utm_content=profile&utm_medium=member_android', photo: 'maitree-shah' },
+  ],
+  VBC116: [
+    { name: 'Ananta Tantia', linkedin: 'https://www.linkedin.com/in/tantiaananta', photo: 'ananta-tantia' },
+    { name: 'Rydham Jain', linkedin: 'https://www.linkedin.com/in/rydham-jain-8281ab28a/', photo: 'rydham-jain' },
+    { name: 'Vidhi Agarwal', linkedin: 'https://www.linkedin.com/in/vidhi-agarwal-38b467203?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'vidhi-agarwal' },
+  ],
+  VBC117: [
+    { name: 'Pratiksha Bengani', linkedin: 'https://www.linkedin.com/in/pratiksha-bengani-5413a8215', photo: 'pratiksha-bengani' },
+    { name: 'Rishika Uppalapati', linkedin: 'https://www.linkedin.com/in/rishika-uppalapati-940545333/', photo: 'rishika-uppalapati' },
+    { name: 'Harsh Dubey', linkedin: 'https://www.linkedin.com/in/harshdubey5?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'harsh-dubey' },
+  ],
+  VBC118: [
+    { name: 'Rahul M', linkedin: 'https://www.linkedin.com/in/rahulm1228/', photo: 'rahul-m' },
+    { name: 'Adithya Rajagopalan', linkedin: 'https://www.linkedin.com/in/adithya-rajagopalan-593014256?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app', photo: 'adithya-rajagopalan' },
+    { name: 'Sairaj G', linkedin: 'https://www.linkedin.com/in/sai-raj-g-63b848373', photo: 'sairaj-g' },
+    { name: 'Radha Hutkey', linkedin: 'https://www.linkedin.com/in/radha-hutkey-a0pr', photo: 'radha-hutkey' },
+  ],
+  VBC119: [
+    { name: 'Abeer Bhati', linkedin: 'https://www.linkedin.com/in/abeer-bhati-493341285?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'abeer-bhati' },
+    { name: 'Utkarsh Kapoor', linkedin: 'https://www.linkedin.com/in/utkarsh-kapoor-b20998262', photo: 'utkarsh-kapoor' },
+    { name: 'Bhadar Singh', linkedin: 'https://www.linkedin.com/in/bhadar-singh-2898161b8?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'bhadar-singh' },
+  ],
+  VBC120: [
+    { name: 'Dhruvi Lohiya', linkedin: 'https://www.linkedin.com/in/dhruvi-lohiya-747087216?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'dhruvi-lohiya' },
+    { name: 'Mayank Agrawal', linkedin: 'https://www.linkedin.com/in/mayank-agrawal-b520513b1?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'mayank-agrawal' },
+    { name: 'Anushka Ghogre', linkedin: 'https://www.linkedin.com/in/anushka-ghogre-48a968268?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'anushka-ghogre' },
+  ],
+  VBC121: [
+    { name: 'Ashutosh Saxena', linkedin: 'https://www.linkedin.com/in/ashutoshsaxena2003', photo: 'ashutosh-saxena' },
+    { name: 'Tejas Joshi', linkedin: 'https://www.linkedin.com/in/tejas-joshi-b1296a31b/', photo: 'tejas-joshi' },
+    { name: 'Sohum Shikhare', linkedin: 'https://www.linkedin.com/in/sohum-shikhare-772a36257?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'sohum-shikhare' },
+  ],
+  VBC122: [
+    { name: 'Shashank Pandey', linkedin: 'https://www.linkedin.com/in/shashank-pandey-95857a17b', photo: 'shashank-pandey' },
+    { name: 'Akristi Mohta', linkedin: 'https://www.linkedin.com/in/akristimohta/', photo: 'akristi-mohta' },
+    { name: 'Itish Pande', linkedin: 'https://www.linkedin.com/in/itishpande/', photo: 'itish-pande' },
+  ],
+  VBC123: [
+    { name: 'Yashwi Agrawal', linkedin: 'https://www.linkedin.com/in/yashwi-agrawal-565627293', photo: 'yashwi' },
+    { name: 'Hritik Gani', linkedin: 'https://www.linkedin.com/in/hritik-gani-78b1673ba?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'hritik' },
+    { name: 'Akhilesh Bijjargi', linkedin: 'https://www.linkedin.com/in/akhilesh-bijjargi-8596383b7', photo: 'akhilesh' },
+  ],
+  VBC124: [
+    { name: 'Naveen Kolla', linkedin: 'http://www.linkedin.com/in/kollanaveen', photo: 'naveen-kolla' },
+    { name: 'Tanishka Desai', linkedin: 'https://www.linkedin.com/in/tanishka-desai-tnd2005', photo: 'tanishkha' },
+    { name: 'Aditya Peter', linkedin: 'https://www.linkedin.com/in/aditya-peter-822876426?utm_source=share_via&utm_content=profile&utm_medium=member_android', photo: 'aditya-peter' },
+  ],
+  VBC125: [
+    { name: 'Darshan Chopda', linkedin: 'https://in.linkedin.com/in/darshan-chopda-8b11231b9', photo: 'darshan-chopda' },
+    { name: 'Anuj Bajaj', linkedin: 'https://www.linkedin.com/in/anujbajaj17', photo: 'anuj-bajaj' },
+  ],
+  VBC126: [
+    { name: 'Vikram Aditya Agarwal', linkedin: 'https://www.linkedin.com/in/vikramadityaagarwal1?utm_source=share_via&utm_content=profile&utm_medium=member_android', photo: 'vikram' },
+    { name: 'Sarth Raghuwanshi', linkedin: 'https://www.linkedin.com/in/sarth-raghuwanshi-583bb5240?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'sarth' },
+    { name: 'Ujjwal Sitlani', linkedin: 'https://www.linkedin.com/in/ujjwal-sitlani-6198b5229?utm_source=share_via&utm_content=profile&utm_medium=member_ios' },
+  ],
+  VBC127: [
+    { name: 'Akshat Thakur', linkedin: 'https://www.linkedin.com/in/akshat-thakur-0a7bb3262?utm_source=share_via&utm_content=profile&utm_medium=member_android', photo: 'akshat' },
+    { name: 'Lipika Arya', linkedin: 'https://www.linkedin.com/in/lipika-arya-14398b21b?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app', photo: 'lipika' },
+    { name: 'Param Deora', linkedin: 'https://www.linkedin.com/in/paramdeora?utm_source=share_via&utm_content=profile&utm_medium=member_android', photo: 'param' },
+  ],
+  VBC128: [
+    { name: "Vion D'Souza", linkedin: 'https://www.linkedin.com/in/vion-george-dsouza-91a25132a?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'vion-d-souza' },
+    { name: 'Adnaan R', linkedin: 'https://www.linkedin.com/in/adnaan-r-0a94352b3?utm_source=share_via&utm_content=profile&utm_medium=member_android', photo: 'adnaan-r' },
+    { name: 'Akash Ghorpade', linkedin: 'https://www.linkedin.com/in/akash-ghorpade-051291271/', photo: 'akash-ghorpade' },
+  ],
+  VBC129: [
+    { name: 'Yogita Bhuwania', linkedin: 'https://www.linkedin.com/in/yogita-bhuwania-02087324a?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=ios_app', photo: 'yogita' },
+    { name: 'Haider Millwala', linkedin: 'https://www.linkedin.com/in/haidermillwala/', photo: 'haider' },
+    { name: 'Bhavya Tandon', linkedin: 'linkedin.com/in/bhavya-tandon-175027223', photo: 'bhavya' },
+  ],
+  VBC130: [
+    { name: 'Anshul Dhapte', linkedin: 'https://www.linkedin.com/in/anshul-dhapte-383498370', photo: 'anshul-dhapte' },
+    { name: 'Devansh Mehta', linkedin: 'https://www.linkedin.com/in/devansh-mehta-06a251259/', photo: 'devansh-mehta' },
+    { name: 'Nikhil Kanjolia', linkedin: 'https://www.linkedin.com/in/nikhil-kanjolia-45a452326/', photo: 'nikhil-kanjolia' },
+  ],
+  VBC131: [
+    { name: 'Abhishek Hosmani', linkedin: 'https://www.linkedin.com/in/abhishek-hosmani-b3a9b135b?utm_source=share_via&utm_content=profile&utm_medium=member_ios' },
+    { name: 'Rushabh Shah', linkedin: 'https://www.linkedin.com/in/rushabh-shah-34438923b/', photo: 'rushabh-shah' },
+    { name: 'Brijesh Attal', linkedin: 'https://www.linkedin.com/in/brijesh-attal-37b38940b', photo: 'brijesh-attal' },
+  ],
+  VBC132: [
+    { name: 'Rohan Vivek', linkedin: 'https://www.linkedin.com/in/rohan-vivek-', photo: 'rohan-vivek' },
+    { name: 'Darsh Shah', linkedin: 'https://www.linkedin.com/in/darshshah19', photo: 'darsh-shah' },
+    { name: 'Sinchan Rai', linkedin: 'https://www.linkedin.com/in/sinchan-rai', photo: 'sinchan-rai' },
+    { name: 'Aditi Bhateja', linkedin: 'https://www.linkedin.com/in/aditi-bhateja-a36134375?utm_source=share_via&utm_content=profile&utm_medium=member_android', photo: 'aditi' },
+  ],
+  VBC133: [
+    { name: 'Ansh Loya', linkedin: 'https://www.linkedin.com/in/anshloya/', photo: 'ansh-loya' },
+    { name: 'Aditya Agarwal', linkedin: 'https://www.linkedin.com/in/aditya-agarwal-5a7317373', photo: 'aditya-agarwal' },
+    { name: 'Yaswanth Krishna', linkedin: 'https://www.linkedin.com/in/yashfiner', photo: 'yaswanth-krishna' },
+  ],
+  VBC134: [
+    { name: 'Yashansh Savla', linkedin: 'https://www.linkedin.com/in/yashanshsavla/', photo: 'yashansh' },
+    { name: 'Preet Jain', linkedin: 'https://www.linkedin.com/in/preet-jain-14b375248/', photo: 'preet' },
+    { name: 'Dhyay Popat', linkedin: 'https://www.linkedin.com/in/dhyay', photo: 'dhyay' },
+  ],
+  VBC135: [
+    { name: 'Sakshi Awasthi', linkedin: 'https://www.linkedin.com/in/sakshi-awasthi-353505211?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'sakshi-awasthi' },
+    { name: 'Devansh Vora', linkedin: 'https://www.linkedin.com/in/devanshvora--/', photo: 'devansh-vora' },
+    { name: 'Madhuresh Binzani', linkedin: 'https://in.linkedin.com/in/madhuresh-binzani-014903242', photo: 'madhuresh-binzani' },
+  ],
+  VBC136: [
+    { name: 'Pratiksha Bihani', linkedin: 'https://www.linkedin.com/in/pratiksha-bihani-4135731b1?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'pratiksha-bihani' },
+    { name: 'Shivansh Sarraf', linkedin: 'linkedin.com/in/shivansh-sarraf-a6b090216', photo: 'shivansh-sarraf' },
+    { name: 'Aadishwar R', linkedin: 'https://www.linkedin.com/in/aadishwar-r-0b843a34a/', photo: 'aadishwar-r' },
+  ],
+  VBC137: [
+    { name: 'Abhishek Gaur', linkedin: 'https://www.linkedin.com/in/abhishek-gaur-b64225282?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'abhishek-gaur' },
+    { name: 'Kaavya Goenka', linkedin: 'https://www.linkedin.com/in/kaavya-goenka-a91059288' },
+    { name: 'Atharva Agrawal', linkedin: 'https://www.linkedin.com/in/atharva-agrawal-835193202?utm_source=share_via&utm_content=profile&utm_medium=member_ios' },
+  ],
+  VBC139: [
+    { name: 'Aditya Singhal', linkedin: 'https://www.linkedin.com/in/adityasinghal15703/', photo: 'aditya-singhal' },
+    { name: 'Bhavit Gupta', linkedin: 'https://www.linkedin.com/in/bhavit-gupta-32b777225', photo: 'bhavit-gupta' },
+    { name: 'Harsh Nain', linkedin: 'https://www.linkedin.com/in/harshnainn/', photo: 'harsh-nain' },
+  ],
+}

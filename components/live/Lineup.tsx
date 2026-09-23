@@ -1,7 +1,7 @@
 import Image from 'next/image'
 
 import { PEOPLE_PHOTOS } from '@/config'
-import { membersOf, photoSlug } from '@/lib/live'
+import { initialsOf, membersOf, peopleOf, photoSlug } from '@/lib/live'
 import type { Team } from '@/lib/types'
 
 /**
@@ -101,6 +101,84 @@ function Person({
         height={256}
         unoptimized
       />
+    </span>
+  )
+}
+
+/**
+ * The students behind a venture, by name, each one a way to reach them.
+ *
+ * **This is where the names are, which is why the squad has none.** The
+ * header's line-up is faces with no captions, on purpose; this is the list a
+ * person reads when they want to know *who*, and it sits beside the venture's
+ * own links because both answer the same question — how do I get in touch.
+ *
+ * **One card, a row per person**, rather than a card each the way the links
+ * are: three or four cards stacked read as three or four more things to
+ * scroll past, and a team is one thing. A row with a profile is a link, whole
+ * row, 52px tall so a thumb finds it; a row without one is a name and nothing
+ * to press, rather than a button that goes nowhere.
+ *
+ * **The face is the same cutout as the header's**, cropped to head and
+ * shoulders on a disc of the team's livery. A student with no photograph gets
+ * initials on the same disc — the thing `Squad` refuses to do, and the
+ * difference is the name beside it: in a line-up of faces a drawn stand-in is
+ * a gap, in a list of names it is an ordinary avatar.
+ */
+export function Roster({ team }: { team: Team }) {
+  const people = peopleOf(team.teamId)
+  if (people.length === 0) return null
+
+  return (
+    <section className="lv-roster" aria-label="Team">
+      <span className="lv-label lv-roster-head">Team</span>
+      <ul className="lv-roster-list">
+        {people.map((person) => {
+          const body = (
+            <>
+              <span className="lv-roster-face" aria-hidden="true">
+                {person.photo === null ? (
+                  <span className="lv-roster-initials">{initialsOf(person.name)}</span>
+                ) : (
+                  <Image src={person.photo} alt="" width={370} height={440} unoptimized />
+                )}
+              </span>
+              <span className="lv-roster-name">{person.name}</span>
+              {person.linkedin === null ? null : <LinkedInMark />}
+            </>
+          )
+          return (
+            <li key={person.name}>
+              {person.linkedin === null ? (
+                <div className="lv-roster-row">{body}</div>
+              ) : (
+                <a
+                  className="lv-roster-row"
+                  href={person.linkedin}
+                  target="_blank"
+                  rel="noreferrer"
+                  aria-label={`${person.name} on LinkedIn`}
+                >
+                  {body}
+                </a>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+    </section>
+  )
+}
+
+/** LinkedIn's `in`, drawn here like the Instagram and Facebook marks beside it. */
+function LinkedInMark() {
+  return (
+    <span className="lv-roster-in" aria-hidden="true">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="5.2" cy="5.3" r="2.3" />
+        <rect x="3.2" y="9" width="4" height="12" rx="0.6" />
+        <path d="M10 9.6c0-.3.3-.6.6-.6h2.9c.3 0 .6.3.6.6v1.1c.8-1.3 2.2-2 3.9-2 2.9 0 4 1.9 4 4.9v6.8c0 .3-.3.6-.6.6h-2.8c-.3 0-.6-.3-.6-.6v-6.1c0-1.4-.5-2.3-1.8-2.3s-2 .9-2 2.4v6c0 .3-.3.6-.6.6h-2.8c-.3 0-.6-.3-.6-.6z" />
+      </svg>
     </span>
   )
 }

@@ -1247,6 +1247,113 @@ body:has(.lv-app[data-locked]) {
     -webkit-box-orient: vertical;
   }
 
+  /* ── The team, by name ──────────────────────────────────── */
+
+  .lv-roster {
+    padding: 12px 6px 6px;
+    border: 1px solid var(--lv-hairline);
+    border-radius: 16px;
+    background: var(--lv-panel);
+  }
+
+  .lv-roster-head {
+    padding: 0 8px 4px;
+  }
+
+  .lv-roster-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Hairlines between people, inset past the face so they read as one list
+     rather than a stack of boxes. */
+  .lv-roster-list li + li .lv-roster-row::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 60px;
+    right: 8px;
+    border-top: 1px solid var(--lv-hairline);
+  }
+
+  .lv-roster-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 56px;
+    padding: 0 8px;
+    border-radius: 12px;
+    color: var(--lv-ink);
+    text-decoration: none;
+  }
+
+  a.lv-roster-row:active {
+    background: var(--lv-panel-strong);
+  }
+
+  @media (hover: hover) {
+    a.lv-roster-row:hover {
+      background: var(--lv-panel-strong);
+    }
+  }
+
+  /* ── Head and shoulders, from the header's cutout ──
+   *
+   * The photographs are 370×440 with the crown at y≈27 and the face about
+   * 110px wide, centred. At 205% of the disc the face spans ~60% of it, and
+   * lifting the image a tenth puts the eyes just above the middle — the
+   * framing every avatar uses. `max-width: none` because the design system's
+   * reset caps images at their container. */
+  .lv-roster-face {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    overflow: hidden;
+    border-radius: 50%;
+    background: linear-gradient(140deg, var(--livery-a), var(--livery-b));
+    color: var(--livery-ink);
+  }
+
+  .lv-roster-face img {
+    position: absolute;
+    top: -8%;
+    left: 50%;
+    width: 205%;
+    max-width: none;
+    height: auto;
+    transform: translateX(-50%);
+  }
+
+  .lv-roster-initials {
+    font-size: 13px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+  }
+
+  .lv-roster-name {
+    overflow: hidden;
+    font-size: 14.5px;
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+
+  /* The key a row presses, in the livery like every other key on the sheet. */
+  .lv-roster-in {
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    background: linear-gradient(140deg, var(--livery-a), var(--livery-b));
+    color: var(--livery-ink);
+  }
+
   /* ── Links ──────────────────────────────────────────────── */
 
   .lv-links {

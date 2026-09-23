@@ -1,10 +1,10 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
 
-import { PEOPLE_PHOTOS, SPARE_TEAM_IDS, TEAM_LINKS } from '@/config'
+import { PEOPLE_PHOTOS, SPARE_TEAM_IDS, TEAM_LINKS, TEAM_PEOPLE } from '@/config'
 import type { Team, TeamId } from '@/lib/types'
 import { rankForMode } from '@/lib/board'
-import { EMBLEM_COUNT, LIVERY_COUNT, MAX_MEMBERS, avgTicket, climbOf, emblemFor, facebookUrl, initialsOf, instagramUrl, linkLabel, linksOf, liveryFor, matchesQuery, membersOf, photoSlug, raceFor, shareOf, standingsFor, websiteUrl } from '@/lib/live'
+import { EMBLEM_COUNT, LIVERY_COUNT, MAX_MEMBERS, avgTicket, climbOf, emblemFor, facebookUrl, initialsOf, instagramUrl, linkLabel, linkedinUrl, linksOf, liveryFor, matchesQuery, membersOf, peopleOf, photoSlug, raceFor, shareOf, standingsFor, websiteUrl } from '@/lib/live'
 import { competingTeams, rankByWeek, rankTeams } from '@/lib/ranking'
 import { COMPETING_SIZE, team, teams } from '@/test/fixtures'
 
@@ -533,5 +533,89 @@ describe('the people manifest', () => {
     }
     const doubled = [...seen].filter(([, teams]) => teams.length > 1)
     expect(doubled).toEqual([])
+  })
+})
+
+/**
+ * ── LinkedIn: one guard, and a roster held to the photographs ──
+ *
+ * `TEAM_PEOPLE` is the only source of who is on a team *by name* and the only
+ * source of a LinkedIn link, so there is no published cell to catch it out.
+ * These are what does instead: every link survives the guard, the guard
+ * refuses what is not a profile, and the roster and `PEOPLE_PHOTOS` cannot
+ * disagree about a face — a photograph with no row is a student the list
+ * forgot, and a row pointing at a photograph that is not listed is a broken
+ * image.
+ */
+describe('linkedinUrl', () => {
+  it('reduces every shape the share sheet produces to one profile URL', () => {
+    const canonical = 'https://www.linkedin.com/in/aarav-shrivastava-b63779218'
+    expect(linkedinUrl('https://www.linkedin.com/in/aarav-shrivastava-b63779218?utm_source=share_via&utm_medium=member_ios')).toBe(canonical)
+    expect(linkedinUrl('linkedin.com/in/aarav-shrivastava-b63779218')).toBe(canonical)
+    expect(linkedinUrl('http://in.linkedin.com/in/aarav-shrivastava-b63779218/')).toBe(canonical)
+    expect(linkedinUrl('  https://www.linkedin.com/in/aarav-shrivastava-b63779218/?trk=contact-info ')).toBe(canonical)
+  })
+
+  it('refuses anything that is not a person on LinkedIn', () => {
+    expect(linkedinUrl(undefined)).toBeNull()
+    expect(linkedinUrl('')).toBeNull()
+    expect(linkedinUrl('https://share.google/GABaxFHoC9T4EfFaI')).toBeNull()
+    expect(linkedinUrl('https://www.linkedin.com/company/mesa-school')).toBeNull()
+    expect(linkedinUrl('https://www.linkedin.com/in/someone/recent-activity')).toBeNull()
+    expect(linkedinUrl('https://linkedin.com.evil.example/in/someone')).toBeNull()
+    expect(linkedinUrl('javascript:alert(1)//linkedin.com/in/x')).toBeNull()
+  })
+})
+
+describe('TEAM_PEOPLE', () => {
+  const entries = Object.entries(TEAM_PEOPLE)
+
+  it('holds only links the guard accepts', () => {
+    for (const [id, people] of entries) {
+      for (const person of people) {
+        if (person.linkedin !== undefined) expect(linkedinUrl(person.linkedin), `${id} ${person.name}`).not.toBeNull()
+      }
+    }
+  })
+
+  it('is keyed by real team ids and never by a spare', () => {
+    for (const [id] of entries) {
+      expect(id).toMatch(/^VBC1\d\d$/)
+      expect(SPARE_TEAM_IDS).not.toContain(id as TeamId)
+    }
+  })
+
+  it('names nobody twice', () => {
+    const names = entries.flatMap(([, people]) => people.map((p) => p.name))
+    expect(names.filter((n, i) => names.indexOf(n) !== i)).toEqual([])
+  })
+
+  it('points only at photographs that are listed', () => {
+    const broken = entries.flatMap(([id, people]) =>
+      people.filter((p) => p.photo !== undefined && !PEOPLE_PHOTOS.includes(`${id}/${p.photo}`)).map((p) => `${id}/${p.photo}`),
+    )
+    expect(broken).toEqual([])
+  })
+
+  /** A competing team's photograph with no row is a student the list left out. */
+  it('has a row for every photographed student on a competing team', () => {
+    const claimed = new Set(entries.flatMap(([id, people]) => people.map((p) => `${id}/${p.photo}`)))
+    const orphaned = PEOPLE_PHOTOS.filter(
+      (e) => !SPARE_TEAM_IDS.includes(e.split('/')[0] as TeamId) && !claimed.has(e),
+    )
+    expect(orphaned).toEqual([])
+  })
+
+  it('serves the guarded URL and the photograph path, never the raw cell', () => {
+    const [id, people] = entries.find(([, ps]) => ps.some((p) => p.linkedin?.includes('?')))!
+    const index = people.findIndex((p) => p.linkedin?.includes('?'))
+    const served = peopleOf(id as TeamId)[index]!
+    expect(served.linkedin).not.toContain('?')
+    expect(served.linkedin).toMatch(/^https:\/\/www\.linkedin\.com\/in\/[^/]+$/)
+    if (people[index]!.photo) expect(served.photo).toBe(`/people/${id}/${people[index]!.photo}.webp`)
+  })
+
+  it('has nothing to say about a team it does not know', () => {
+    expect(peopleOf('VBC199' as TeamId)).toEqual([])
   })
 })

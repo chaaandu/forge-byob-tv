@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Climb } from '@/components/live/Board'
 import { CountUp } from '@/components/live/CountUp'
 import { Emblem } from '@/components/live/Emblem'
-import { Squad } from '@/components/live/Lineup'
+import { Roster, Squad } from '@/components/live/Lineup'
 import { SellsIcon } from '@/components/live/SellsIcon'
 import { formatCount, formatRupees } from '@/lib/format'
 import {
@@ -305,6 +305,8 @@ export function TeamSheet({
               </div>
 
               <Sells product={race.self.team.product} />
+
+              <Roster team={race.self.team} />
 
               <Links team={race.self.team} />
             </div>

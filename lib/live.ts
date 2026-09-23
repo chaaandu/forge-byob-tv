@@ -1,4 +1,4 @@
-import { PEOPLE_PHOTOS, TEAM_LINKS } from '@/config'
+import { PEOPLE_PHOTOS, TEAM_LINKS, TEAM_PEOPLE } from '@/config'
 import { competingTeams, rankByChallenge, rankByToday, rankByWeek, rankTeams } from '@/lib/ranking'
 import { hashTeamId } from '@/lib/seed'
 import { titleCase } from '@/lib/team'
@@ -436,6 +436,46 @@ export function facebookUrl(raw: string | undefined): string | null {
   if (href === null) return null
   const host = new URL(href).hostname.toLowerCase()
   return /^(?:(?:www|m|web)\.)?(?:facebook\.com|fb\.com)$/.test(host) ? href : null
+}
+
+/**
+ * A LinkedIn profile, and only a profile — returned as one canonical URL.
+ *
+ * The tracker's cells come in every shape a phone's share sheet produces:
+ * `in.linkedin.com`, no scheme, `http:`, and a tail of `utm_*` or `trk=`. All
+ * of that is dropped; what is kept is the one path segment after `/in/`, which
+ * is the profile. Anything else — a company page, a post, a `share.google`
+ * short link — is refused, because a row that says LinkedIn and opens
+ * somewhere else is the same lie as a wrong logo.
+ */
+export function linkedinUrl(raw: string | undefined): string | null {
+  const href = websiteUrl(raw)
+  if (href === null) return null
+  const { hostname, pathname } = new URL(href)
+  if (!/^(?:[a-z]{2,3}\.)?linkedin\.com$/i.test(hostname)) return null
+  const slug = pathname.match(/^\/in\/([^/]+)\/?$/)?.[1]
+  if (slug === undefined || !/^[\p{L}\p{N}_-]{2,100}$/u.test(decodeURIComponent(slug))) return null
+  return `https://www.linkedin.com/in/${slug}`
+}
+
+/**
+ * The students behind a venture, from `TEAM_PEOPLE` — or nobody.
+ *
+ * **This is the only source, not a floor.** `TV_Feed` has no LinkedIn column
+ * and the roster in `membersOf` is a string of names with nothing to hang a
+ * link on, so unlike `TEAM_LINKS` there is no published cell to prefer. A
+ * team missing from the manifest gets no section at all.
+ */
+export function peopleOf(teamId: TeamId): { name: string; linkedin: string | null; photo: string | null }[] {
+  return (TEAM_PEOPLE[teamId] ?? []).map((person) => ({
+    name: person.name,
+    linkedin: linkedinUrl(person.linkedin),
+    // Only a photograph that is actually listed — the `PEOPLE_PHOTOS` rule.
+    photo:
+      person.photo !== undefined && PEOPLE_PHOTOS.includes(`${teamId}/${person.photo}`)
+        ? `/people/${teamId}/${person.photo}.webp`
+        : null,
+  }))
 }
 
 /** What a link is called on screen. `instagram.com/aks.perfumes` reads as a lockup; a full URL does not. */
