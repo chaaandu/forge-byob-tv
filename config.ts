@@ -651,10 +651,9 @@ export const PEOPLE_PHOTOS: readonly string[] = [
  * better**: Aditi Bhateja is on Mugshot (`30662d9`) and Radha Hutkey on Mello
  * (`1fe854b`), both confirmed directly. Trigo and SAAJ have left, so Rohit
  * Singh, Preethi S, Udhav Kothari and Sahil Agrawal are unplaced and not
- * here. **Riya Khurana is left out on purpose**: `Groups List` puts her on
- * ZAAREE and `Team Links` does not, and a named student on the wrong team is
- * the one mistake on this page worth an apology — so she is absent until
- * someone confirms which is right.
+ * here. Riya Khurana is on ZAAREE, confirmed directly on 23 September 2026
+ * after `Groups List` and `Team Links` disagreed about her; she has no LinkedIn
+ * here because no tracker row was matched to her.
  *
  * **Names are written by hand**, as first and last name in the case a person
  * would write them — the sources carry `AADISHWAR R`, `Sai Santosh Praval Goud
@@ -865,6 +864,7 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
     { name: 'Abhishek Gaur', linkedin: 'https://www.linkedin.com/in/abhishek-gaur-b64225282?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'abhishek-gaur' },
     { name: 'Kaavya Goenka', linkedin: 'https://www.linkedin.com/in/kaavya-goenka-a91059288' },
     { name: 'Atharva Agrawal', linkedin: 'https://www.linkedin.com/in/atharva-agrawal-835193202?utm_source=share_via&utm_content=profile&utm_medium=member_ios' },
+    { name: 'Riya Khurana' },
   ],
   VBC139: [
     { name: 'Aditya Singhal', linkedin: 'https://www.linkedin.com/in/adityasinghal15703/', photo: 'aditya-singhal' },
