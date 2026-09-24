@@ -96,7 +96,10 @@ def cuts(path: Path) -> tuple[float | None, float | None, bool]:
     # A body that stops short of the bottom edge is a passport-style headshot.
     # Those are not used — see the test that fails on one.
     body = [y for y in range(h) if sum(1 for x in range(w) if px[x, y] > 128) > 40]
-    short = bool(body) and max(body) < h - 15
+    # Any gap at all: a line-up stands on its bottom edge on /podium and
+    # /weekly, so a body ending even 13px short is a hard line across it
+    # (Annashri Mahato's phone photo, 24 September 2026). 15px let it pass.
+    short = bool(body) and max(body) < h - 4
     return left, right, short
 
 
