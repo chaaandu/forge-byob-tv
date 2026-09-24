@@ -531,7 +531,6 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC103/annashri-mahato',
   'VBC103/kavya-zala',
   'VBC103/pragati-singh',
-  'VBC104/preethi-s',
   'VBC104/udhav-kothari',
   'VBC105/harsh-malani',
   'VBC105/meith-jain',
@@ -584,6 +583,7 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC120/dhruvi-lohiya',
   'VBC120/mayank-agrawal',
   'VBC121/ashutosh-saxena',
+  'VBC121/preethi-s',
   'VBC121/sohum-shikhare',
   'VBC121/tejas-joshi',
   'VBC122/akristi-mohta',
@@ -659,9 +659,10 @@ export const PEOPLE_PHOTOS: readonly string[] = [
  *
  * **The roster is the programme's, corrected where this repo already knows
  * better**: Aditi Bhateja is on Mugshot (`30662d9`) and Radha Hutkey on Mello
- * (`1fe854b`), both confirmed directly. Trigo and SAAJ have left, so Rohit
- * Singh, Preethi S, Udhav Kothari and Sahil Agrawal are unplaced and not
- * here. Riya Khurana is on ZAAREE, confirmed directly on 23 September 2026
+ * (`1fe854b`), both confirmed directly. Trigo and SAAJ have left; Preethi S
+ * joined Kirdaaar (VBC121), confirmed directly on 24 September 2026, with the
+ * tracker's link and her photograph from the shoot. Rohit Singh, Udhav
+ * Kothari and Sahil Agrawal are unplaced and not here. Riya Khurana is on ZAAREE, confirmed directly on 23 September 2026
  * after `Groups List` and `Team Links` disagreed about her. Her link is the
  * tracker's, matched on her Forge email like everyone else's.
  *
@@ -794,6 +795,7 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
     { name: 'Ashutosh Saxena', linkedin: 'https://www.linkedin.com/in/ashutoshsaxena2003', photo: 'ashutosh-saxena' },
     { name: 'Tejas Joshi', linkedin: 'https://www.linkedin.com/in/tejas-joshi-b1296a31b/', photo: 'tejas-joshi' },
     { name: 'Sohum Shikhare', linkedin: 'https://www.linkedin.com/in/sohum-shikhare-772a36257?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'sohum-shikhare' },
+    { name: 'Preethi S', linkedin: 'https://www.linkedin.com/in/preethi-s-24a267287?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'preethi-s' },
   ],
   VBC122: [
     { name: 'Shashank Pandey', linkedin: 'https://www.linkedin.com/in/shashank-pandey-95857a17b', photo: 'shashank-pandey' },
