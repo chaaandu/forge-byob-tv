@@ -189,19 +189,25 @@ def cut_out(image: Image.Image) -> Image.Image:
     """
     The background removed, so a line-up is a group rather than framed pictures.
 
-    The alpha is eroded by a pixel and blurred by one more: the raw matte
-    leaves a bright halo of whatever was behind the person, and on a dark
-    header that halo is the first thing the eye finds.
+    ── BiRefNet-portrait, on the CPU (24 September 2026) ──
+    `u2net_human_seg` was coarse around hair: on loose or curly hair it kept
+    whole chunks of the studio backdrop, which showed as grey-green patches
+    around heads on every surface. BiRefNet-portrait is built for hair and
+    cuts between strands. Its matte is already soft, so it is used as-is —
+    the old 1px erosion and blur existed to hide u2net's halo and would only
+    thin real strands here.
+
+    **`providers=['CPUExecutionProvider']` is load-bearing.** onnxruntime
+    offers CoreML first on a Mac, and CoreML stalls indefinitely compiling a
+    model this size — measured: 0% CPU for hours, never returning. On the
+    CPU it loads in ~4s and cuts a photograph in ~50s on an 8GB M-series.
     """
     from rembg import new_session, remove
 
     global _SESSION
     if _SESSION is None:
-        _SESSION = new_session("u2net_human_seg")
-    cut = remove(image, session=_SESSION, post_process_mask=True)
-    alpha = cut.getchannel("A").filter(ImageFilter.MinFilter(3)).filter(ImageFilter.GaussianBlur(0.8))
-    cut.putalpha(alpha)
-    return cut
+        _SESSION = new_session("birefnet-portrait", providers=["CPUExecutionProvider"])
+    return remove(image, session=_SESSION)
 
 
 def subject_share(cut: Image.Image) -> float:

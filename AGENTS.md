@@ -805,6 +805,13 @@ is the one page here that a person holds. Added 17 September 2026.
   Shivansh Sarraf and Diya Harish have no original left to re-cut: theirs are
   the old crops widened and moved onto the eye line.
 
+  **The background is removed with BiRefNet-portrait** (24 September 2026),
+  which cuts between hair strands; `u2net_human_seg` before it left whole
+  patches of the studio backdrop around loose and curly hair. It must run
+  with `providers=['CPUExecutionProvider']` — onnxruntime tries CoreML first
+  on a Mac, and CoreML hangs for hours on a model this size (see `cut_out`
+  in `scripts/cutout.py`). About a minute a photograph on an 8GB laptop.
+
   `scripts/measure-people.py` writes `public/tv/people-meta.json` — a content
   hash that goes on every photo URL as `?v=` (photographs are cached for a
   day, and a replaced face otherwise shows the old one until tomorrow), and
