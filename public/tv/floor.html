@@ -423,13 +423,14 @@
       <span id="chip-slot"></span>
     </div>
     <div class="meta">
-      <div><span class="meta-label" id="m-label">Sales today</span><span class="meta-value" id="m-total">&nbsp;</span></div>
+      <div><span class="meta-label" id="m-label">Sales today</span><span class="nz-row"><span data-nazar="hang"></span><span class="meta-value" id="m-total">&nbsp;</span></span></div>
     </div>
   </header>
   <div class="heroes" id="heroes"></div>
   <div class="grid" id="grid"></div>
 </div>
 <script src="/tv/tv.js"></script>
+<script src="/tv/nazar.js"></script>
 <script>
 /* ── One layout, three boards ──────────────────────────────────────────────
  *
@@ -516,6 +517,8 @@ const paint = (teams) => {
   // timeframe the window line used to.
   document.getElementById('m-label').textContent = BOARD.label
   document.getElementById('m-total').textContent = rupees(total)
+  mountNazar()   // first paint only: the figure has to be there to hang beside
+  nazarWatch(total)
 
   // A podium needs three ventures that have actually sold something.
   const sellers = ranked.filter((t) => t[KEY] > 0).length

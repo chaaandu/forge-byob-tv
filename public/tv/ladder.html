@@ -270,7 +270,7 @@
       <span class="mast-word"><em>BYOB</em> Leaderboard</span></span>
     </div>
     <div class="meta">
-      <div><span class="meta-label">All-time sales</span><span class="meta-value" id="m-total">&nbsp;</span></div>
+      <div><span class="meta-label">All-time sales</span><span class="nz-row"><span data-nazar="hang"></span><span class="meta-value" id="m-total">&nbsp;</span></span></div>
     </div>
   </header>
   <div class="ladder" id="ladder"></div>
@@ -282,6 +282,7 @@
   </aside>
 </div>
 <script src="/tv/tv.js"></script>
+<script src="/tv/nazar.js"></script>
 <script>
 const Q = new URLSearchParams(location.search)
 const PROGRAMME_START = '2026-08-31T00:00:00+05:30'
@@ -316,7 +317,10 @@ const paint = (teams) => {
   const top = ranked.slice(0, 10)
   const lead = top[0].total || 1
 
-  document.getElementById('m-total').textContent = rupees(ranked.reduce((s, t) => s + t.total, 0))
+  const allTime = ranked.reduce((s, t) => s + t.total, 0)
+  document.getElementById('m-total').textContent = rupees(allTime)
+  mountNazar()   // first paint only: the figure has to be there to hang beside
+  nazarWatch(allTime)
 
   const FLOOR = 700, MAX = 1920 - 48
   document.getElementById('ladder').innerHTML = top.map((t, i) => {

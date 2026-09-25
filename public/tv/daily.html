@@ -140,8 +140,12 @@
    Gold was a 3D starburst sticker for a day, the one skeuomorphic object on
    the wall. It is the type now: the figure itself, in the crown's metal. The
    third gold thing on the wall is still this one number, argued in AGENTS.md. */
-.lead-fig {
+/* The figure and the nazar that rolls in to guard it (`nazar.js`). */
+.lead-fig-row {
   position: absolute; left: 58px; bottom: 34px; z-index: 4;
+  display: flex; align-items: center; gap: 24px;
+}
+.lead-fig {
   font-size: 120px; font-weight: 900; font-stretch: 74%; letter-spacing: -0.02em; line-height: 1;
   font-variant-numeric: tabular-nums;
   background: linear-gradient(180deg, var(--gold-hi) 0%, var(--gold) 55%, var(--gold-mid) 100%);
@@ -220,6 +224,7 @@
 </style></head>
 <body><div class="tv" id="tv"></div>
 <script src="/tv/tv.js"></script>
+<script src="/tv/nazar.js"></script>
 <script>
 const Q = new URLSearchParams(location.search)
 const DEMO = Q.get('demo')
@@ -326,7 +331,7 @@ function paint(teams) {
       ${starsHtml(lead.id) || `<div class="mono star-mono ${liv}">${monogram(lead.name, lead.id)}</div>`}
       <div class="finish ${liv}"></div>
       <div class="lead-name"><span class="coverline-name">${lead.name}</span></div>
-      <div class="lead-fig" id="lead-fig"><span></span></div>`
+      <div class="lead-fig-row">${nazarHtml('roll')}<div class="lead-fig" id="lead-fig"><span></span></div></div>`
   } else {
     h += `<div class="open-line"><b>Nobody yet.</b><span>The first sale of the day takes this spot.</span></div>`
   }
@@ -370,6 +375,7 @@ function paint(teams) {
      the order on screen is true throughout the count. */
   document.querySelectorAll('.row-fig').forEach((el) => countUp(el, Number(el.dataset.to), ROWS_T0, ROWS_DUR))
   if (lead) countUp(document.getElementById('lead-fig'), lead[KEY], 2500, 1500)
+  if (lead) nazarWatch(lead[KEY])
   countUp(document.getElementById('all-fig'), all, 150, 2600)
   whenShown(runCounters)
   document.fonts.ready.then(fitName)

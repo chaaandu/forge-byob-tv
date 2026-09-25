@@ -469,6 +469,18 @@ npm run build        # next build
   `loadAnimation` call — and what remains is a figure that arrives once and
   holds, exactly as the crown does. **A second looping ornament is a new
   argument, not an extension of this one.**
+- **That argument was made on 25 September 2026: the nazar.** A glass evil eye
+  sits left of each wall slide's biggest number — hanging on a kalava thread
+  beside the total on `/weekly` and `/podium`, rolling in beside the gold
+  figure on `/daily` — and **it moves at rest**: it blinks, glances and sways,
+  forever. Asked for directly ("go crazy with it"), wall only, never `/live`.
+  It carries no figure and never moves one; when the figure rises on a poll it
+  winks and shows ₹ pupils, which is the only thing it reacts to. It is exempt
+  from `html.settled` in `tv.css`, and a rebuilt one skips its arrival
+  (`.nz.calm`). Two rippling rings were built with it and removed the same day,
+  asked for directly. `public/tv/nazar.js` carries the rest; `?nonazar` shows
+  a slide without it, and `NAZAR` there is the off switch. **A third looping
+  ornament is a new argument again.**
 - **No filler content.** Empty is a valid state. The wall being quiet is what makes it
   loud when something happens. No spinners, ever — first paint reads cached CSV.
 - **There is no footer and there is no `as_of` stamp. This wall now cannot

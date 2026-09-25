@@ -54,6 +54,27 @@
   --gold: #f2b93c;
   --gold-mid: #d99a1e;
 
+  /* The nazar (`nazar.js`): cobalt glass, a white, a sky iris, and the red
+     and yellow of a kalava thread. Blue because the charm is blue — it is
+     the one object on the wall whose colour is not ours to choose. */
+  --nz-glass-hi: #5b95ff;
+  --nz-glass: #1848cc;
+  --nz-glass-deep: #06195a;
+  --nz-white: #f7f9ff;
+  --nz-iris-hi: #a6deff;
+  --nz-iris: #2a8fe6;
+  --nz-iris-ring: #0b4a94;
+  --nz-pupil: #03050c;
+  --nz-catch: #ffffff;
+  --nz-lash: #020b2e;
+  --nz-rim: rgba(196, 220, 255, 0.55);
+  --nz-gloss: rgba(255, 255, 255, 0.72);
+  --nz-kalava: #d61f2b;
+  --nz-kalava-2: #f7c236;
+  --nz-cap-hi: #f4f6fb;
+  --nz-cap: #8b91a6;
+  --nz-charm: #15121e;
+
   /* One rake, so every diagonal on the wall is parallel. */
   --rake: 16px;
 
@@ -380,9 +401,11 @@ html.holding *::after { animation-play-state: paused !important; }
  *
  * The figures still change. What is gone is the 640ms of choreography around
  * them, which had nothing to report the second time. */
-html.settled *,
-html.settled *::before,
-html.settled *::after { animation: none !important; }
+/* The nazar is exempt: it is awake at rest by design, and a rebuilt one
+   skips its own arrival instead (`.nz.calm`, below). */
+html.settled *:not(.nz, .nz *),
+html.settled *:not(.nz *)::before,
+html.settled *:not(.nz *)::after { animation: none !important; }
 
 /* ── Arrival ──
    Once, on mount, `both`, no iteration count. Over before anybody who is
@@ -398,4 +421,230 @@ html.settled *::after { animation: none !important; }
 @keyframes fade-in {
   from { opacity: 0; }
   to   { opacity: 1; }
+}
+
+/* ============================================================
+   THE NAZAR — see `nazar.js` for what it is and why it moves.
+
+   Custom properties drive the eye, animated on `.nz` and inherited by
+   the SVG inside it: where it looks (`--gx`, `--gy`, in the bead's own
+   100-unit space), how shut it is (`--lid`, 0 open → 1 shut) and how wide
+   the pupil is (`--dil`). Arrival and rest both animate them; the rest cycle
+   is later in the list, so it takes over the moment it starts.
+   ============================================================ */
+@property --gx  { syntax: '<length>'; inherits: true; initial-value: 0px; }
+@property --gy  { syntax: '<length>'; inherits: true; initial-value: 0px; }
+@property --lid { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --dil { syntax: '<number>'; inherits: true; initial-value: 1; }
+@property --wink { syntax: '<number>'; inherits: true; initial-value: 0; }
+/* Money eyes: 0 is a pupil, 1 is a ₹ where the pupil was. */
+@property --money { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --cash  { syntax: '<number>'; inherits: true; initial-value: 0; }
+
+/* The figure and its eye, right-aligned together in the masthead. The
+   figure is stacked OVER the eye, so a swing that carries the bead across
+   it passes behind the digits and never hides one. */
+.nz-row { display: flex; justify-content: flex-end; align-items: center; gap: 30px; }
+.nz-row .meta-value { position: relative; z-index: 1; }
+
+/* A zero-height flex item, so a bead taller than the figure beside it never
+   changes the height of the row it sits in — the masthead is bottom-aligned,
+   and a taller meta block would push the whole wordmark down. */
+.nz { --s: 86px; position: relative; flex: none; width: var(--s); height: 0; align-self: center; }
+.nz--roll { --s: 108px; }
+.nz-bead-box { position: absolute; left: 0; top: calc(var(--s) / -2); width: var(--s); height: var(--s);
+  filter: drop-shadow(0 10px 16px var(--shade)); }
+.nz-spin { position: absolute; inset: 0; }
+.nz-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+.nz-white  { fill: var(--nz-white); }
+.nz-iris-ring { fill: none; stroke: var(--nz-iris-ring); stroke-width: 1.6; }
+.nz-pupil  { fill: var(--nz-pupil); transform: scale(calc(var(--dil) * (1 - max(var(--money), var(--cash))))); }
+.nz-rupee  { fill: var(--nz-pupil); font-size: 30px; font-weight: 900; font-stretch: 90%;
+  opacity: max(var(--money), var(--cash));
+  transform: scale(calc(0.4 + 0.6 * max(var(--money), var(--cash)))); transform-origin: 0 0; }
+.nz-catch  { fill: var(--nz-catch); opacity: calc(1 - max(var(--money), var(--cash))); }  /* it would sit on the ₹ */
+.nz-catch-sm { fill-opacity: 0.8; }
+.nz-gaze   { transform: translate(var(--gx), var(--gy)); }
+.nz-lid-up { transform: translateY(calc(max(var(--lid), var(--wink)) * 40px)); }
+.nz-lid-dn { transform: translateY(calc(max(var(--lid), var(--wink)) * -40px)); }
+.nz-lash   { fill: none; stroke: var(--nz-lash); stroke-width: 2.6; stroke-linecap: round;
+  opacity: calc((max(var(--lid), var(--wink)) - 0.8) * 5); }
+.nz-socket { fill: none; stroke: var(--nz-glass-deep); stroke-width: 1.8; }
+.nz-rim    { fill: none; stroke: var(--nz-rim); stroke-width: 1.4; }
+.nz-gloss  { fill: none; stroke: var(--nz-gloss); stroke-width: 5; stroke-linecap: round; }
+.nz-gloss-dot { fill: var(--nz-gloss); }
+.nz-glint  { fill: var(--nz-catch); transform: translate(-31px, -31px) scale(0); }
+
+
+/* ── Hanging: a kalava thread from above the frame ──
+   The pivot is the top of the thread, ~640px up and off screen, so a small
+   angle is a long, slow arc — which is what reads as a thing on a string
+   rather than a thing on a hinge. */
+.nz-swing {
+  --L: 640px;
+  position: absolute; left: 0; bottom: calc(var(--s) / -2);
+  width: var(--s); height: calc(var(--s) + var(--L));
+  transform-origin: 50% 0;
+}
+.nz--hang .nz-bead-box { top: auto; bottom: 0; }
+.nz-thread {
+  position: absolute; left: 50%; top: 0; bottom: calc(var(--s) - 6px); width: 4px; margin-left: -2px;
+  border-radius: 2px;
+  background: repeating-linear-gradient(162deg, var(--nz-kalava) 0 6px, var(--nz-kalava-2) 6px 8px);
+}
+.nz-cap {
+  position: absolute; left: 50%; bottom: calc(var(--s) - 5px); width: 16px; height: 10px; margin-left: -8px;
+  border-radius: 4px 4px 2px 2px;
+  background: linear-gradient(90deg, var(--nz-cap), var(--nz-cap-hi) 45%, var(--nz-cap));
+}
+.nz-charm {
+  position: absolute; left: 50%; border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--nz-gloss) 0 12%, transparent 30%), var(--nz-charm);
+  box-shadow: inset 0 0 0 1px var(--nz-rim);
+}
+.nz-charm-1 { width: 14px; height: 14px; margin-left: -7px; bottom: calc(var(--s) + 34px); }
+.nz-charm-2 { width: 11px; height: 11px; margin-left: -5.5px; bottom: calc(var(--s) + 12px);
+  background: radial-gradient(circle at 35% 30%, var(--nz-gloss) 0 12%, transparent 30%), var(--nz-glass); }
+
+/* ── Motion ── `--d` is when this slide wants the eye to arrive. */
+.nz--hang { --d: 350ms;
+  animation: nz-wake-hang 4600ms var(--d) linear both,
+             nz-look 14s calc(var(--d) + 4600ms) linear infinite; }
+.nz--hang .nz-swing {
+  animation: nz-drop 1100ms var(--d) ease-in-out both,
+             nz-pend 4200ms var(--d) ease-in-out both,
+             nz-sway 9s calc(var(--d) + 4200ms) ease-in-out infinite; }
+
+.nz--roll { --d: 1400ms;
+  animation: nz-wake-roll 5200ms var(--d) linear both,
+             nz-look 14s calc(var(--d) + 5200ms) linear infinite; }
+.nz--roll .nz-bead-box { animation: nz-roll-x 1000ms var(--d) cubic-bezier(0.2, 0.75, 0.3, 1) both; }
+.nz--roll .nz-spin     { animation: nz-roll-r 1000ms var(--d) cubic-bezier(0.2, 0.75, 0.3, 1) both; }
+
+.nz .nz-glint { animation: nz-glint 14s calc(var(--d) + 4600ms) linear infinite; }
+
+/* Rebuilt by a later poll: awake already, no arrival, still watching. */
+.nz.calm { animation: nz-look 14s linear infinite; }
+.nz.calm .nz-swing { animation: nz-sway 9s ease-in-out infinite; }
+.nz.calm .nz-bead-box, .nz.calm .nz-spin { animation: none; }
+.nz.calm .nz-glint { animation-delay: 0s; }
+
+/* A sale: a wink, and it opens on money eyes. `--cash` rather than the
+   arrival's `--money`, so the two can never fight over one property. */
+.nz.sale .nz-eyes { animation: nz-wink 620ms 150ms ease-in-out both; }
+.nz.sale .nz-gaze { animation: nz-cash 2000ms 450ms linear both; }
+
+@keyframes nz-drop {
+  0%   { translate: 0 -420px; opacity: 0; }
+  12%  { opacity: 1; }
+  55%  { translate: 0 12px; }
+  72%  { translate: 0 -5px; }
+  86%  { translate: 0 2px; }
+  100% { translate: 0 0; opacity: 1; }
+}
+/* Released from the left and let go: each segment is extreme to extreme, and
+   ease-in-out is exactly a pendulum's speed — fastest through the bottom. */
+@keyframes nz-pend {
+  0%   { rotate: 14deg; }
+  17%  { rotate: -7deg; }
+  32%  { rotate: 4.4deg; }
+  46%  { rotate: -2.6deg; }
+  59%  { rotate: 1.5deg; }
+  71%  { rotate: -0.8deg; }
+  82%  { rotate: 0.4deg; }
+  92%  { rotate: -0.15deg; }
+  100% { rotate: 0deg; }
+}
+@keyframes nz-sway {
+  0%, 100% { rotate: 0deg; }
+  25% { rotate: 0.6deg; }
+  75% { rotate: -0.6deg; }
+}
+@keyframes nz-roll-x {
+  0%   { translate: -330px 0; opacity: 0; }
+  10%  { opacity: 1; }
+  78%  { translate: 7px 0; }
+  90%  { translate: -2px 0; }
+  100% { translate: 0 0; opacity: 1; }
+}
+/* 330px over a 108px bead is 350° of roll: it turns exactly as far as it
+   travels, so it rolls rather than skids. */
+@keyframes nz-roll-r {
+  0%   { rotate: -350deg; }
+  78%  { rotate: 8deg; }
+  90%  { rotate: -3deg; }
+  100% { rotate: 0deg; }
+}
+
+/* Hanging: asleep through the swing, then it wakes, checks the room left and
+   right, and settles on whoever is in front of it. */
+@keyframes nz-wake-hang {
+  0%, 58%   { --lid: 1; --gx: 0px; --gy: 0px; --dil: 1; }
+  63%       { --lid: 0.55; }
+  66%       { --lid: 0.7; }
+  70%       { --lid: 0; --gx: 0px; }
+  71%, 77%  { --gx: -8px; --gy: 2px; --money: 0; }
+  78%       { --gx: 8px; --gy: 1px; --dil: 1.25; --money: 0; }
+  80%, 90%  { --gx: 8px; --gy: 1px; --money: 1; }
+  92%       { --money: 0; --gx: 8px; }
+  93%, 100% { --gx: 0px; --gy: 0px; --dil: 1; --lid: 0; --money: 0; }
+}
+/* Rolling: eyes open all the way round, so it comes to rest dizzy — the
+   pupil spirals in — blinks twice to shake it off, then turns to watch the
+   figure count up, pupil wide. */
+@keyframes nz-wake-roll {
+  0%, 19%   { --gx: 0px; --gy: 0px; --lid: 0; --dil: 1; }
+  21%       { --gx: 7px; --gy: 0px; }
+  23%       { --gx: 0px; --gy: 7px; }
+  25%       { --gx: -7px; --gy: 0px; }
+  27%       { --gx: 0px; --gy: -6px; }
+  29%       { --gx: 5px; --gy: 0px; }
+  30.5%     { --gx: 0px; --gy: 4px; }
+  32%       { --gx: -2px; --gy: 0px; --lid: 0; }
+  33%       { --gx: 0px; --gy: 0px; --lid: 1; }
+  34.5%     { --lid: 0; }
+  36%       { --lid: 0; }
+  37%       { --lid: 1; }
+  38.5%     { --lid: 0; --gx: 0px; --gy: 0px; --dil: 1; }
+  39.5%     { --gx: 9px; --gy: 2px; --dil: 1.35; --money: 0; }
+  60%       { --money: 0; }
+  62%, 76%  { --money: 1; }
+  78.5%, 80% { --money: 0; --gx: 9px; --gy: 2px; --dil: 1.35; }
+  81.5%, 100% { --gx: 0px; --gy: 0px; --dil: 1; --lid: 0; --money: 0; }
+}
+/* At rest, 14 seconds: the room, the figure, the room, a glance each way.
+   Every move is a saccade — ~80ms and then still — because an eye that
+   drifts reads as a screensaver and one that jumps reads as looking. Blinks
+   land on the moves, as a real eye's do. */
+@keyframes nz-look {
+  0%, 17.4%   { --gx: 0px; --gy: 0px; --dil: 1; --lid: 0; }
+  18%         { --lid: 1; }
+  18.6%       { --lid: 0; --gx: 0px; --gy: 0px; --dil: 1; }
+  19.2%, 37%  { --gx: 9px; --gy: 2px; --dil: 1.3; }
+  37.6%, 54%  { --gx: 0px; --gy: 0px; --dil: 1; --lid: 0; }
+  54.6%       { --lid: 1; }
+  55.2%       { --lid: 0; }
+  55.8%       { --lid: 0; }
+  56.4%       { --lid: 1; }
+  57%, 57.2%  { --lid: 0; --gx: 0px; --gy: 0px; }
+  57.8%, 66%  { --gx: -8px; --gy: 0px; }
+  66.6%, 73%  { --gx: -5px; --gy: -6px; }
+  73.6%, 87%  { --gx: 0px; --gy: 0px; --lid: 0; }
+  87.6%       { --lid: 1; }
+  88.4%, 100% { --lid: 0; --gx: 0px; --gy: 0px; --dil: 1; }
+}
+@keyframes nz-glint {
+  0%, 44%   { transform: translate(-31px, -31px) scale(0) rotate(0deg); }
+  46%       { transform: translate(-31px, -31px) scale(1.15) rotate(45deg); }
+  48.5%, 100% { transform: translate(-31px, -31px) scale(0) rotate(90deg); }
+}
+@keyframes nz-cash {
+  0%        { --cash: 0; }
+  8%, 78%   { --cash: 1; }
+  88%, 100% { --cash: 0; }
+}
+@keyframes nz-wink {
+  0%, 100% { --wink: 0; }
+  30%, 55% { --wink: 1; }
 }
