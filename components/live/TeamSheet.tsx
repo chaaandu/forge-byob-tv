@@ -221,14 +221,21 @@ export function TeamSheet({
                   exit={{ opacity: 0, x: direction * -60 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 36 }}
                 >
+                  {/* **The team id, as an eyebrow over the name.** It went
+                      on 18 September 2026 as "a code for a spreadsheet", and
+                      came back on 25 September, asked for directly: students
+                      and mentors say "VBC114" as often as "Tea-riffic" — it
+                      is the id on every form and in the master — and search
+                      already accepts it. Small, tracked, the livery's ink at
+                      part strength, above the name rather than beside it, so
+                      it labels the venture without competing with it. */}
+                  <span className="lv-sheet-code">{race.self.team.teamId}</span>
                   <h2 className="lv-sheet-name">{nameOf(race.self.team)}</h2>
                   {/* **No caption under the name.** It read "1st of 39 ·
                       All-time", and every part of that is already on screen:
                       the rank is the numeral behind the faces and again on the
                       placements row below, and which board you are looking at
-                      is the tab you pressed to get here. The team id went the
-                      same way and for the same reason — a code for a
-                      spreadsheet, not a fact about a venture. */}
+                      is the tab you pressed to get here. */}
                   {/* ── The stage: the rank behind, the faces in front ──
                    *
                    * The numeral used to be the biggest thing in the header,
