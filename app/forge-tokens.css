@@ -944,4 +944,24 @@
   --lv-10-a: #f7f3fb; --lv-10-b: #c9c0d6; --lv-10-band: #514a66; --lv-10-band-ink: var(--white); --lv-10-ink: var(--lv-ink-dark); /* pearl */
   --lv-11-a: #3a3645; --lv-11-b: #121017; --lv-11-band: #d3cfdd; --lv-11-band-ink: #121017; --lv-11-ink: var(--white);       /* carbon */
   --lv-12-a: #b9592b; --lv-12-b: #6f2f10; --lv-12-band: #f0b48d; --lv-12-band-ink: #3d1806; --lv-12-ink: var(--white);       /* copper */
+
+  /* The nazar beside the board total (`components/live/Nazar.tsx`) — the
+     wall's own glass, from `public/tv/tv.css`. Blue because the charm is
+     blue; it is the one object here whose colour is not ours to choose. */
+  --lv-nz-glass-hi: #5b95ff;
+  --lv-nz-glass: #1848cc;
+  --lv-nz-glass-deep: #06195a;
+  --lv-nz-white: #f7f9ff;
+  --lv-nz-iris-hi: #a6deff;
+  --lv-nz-iris: #2a8fe6;
+  --lv-nz-iris-ring: #0b4a94;
+  --lv-nz-pupil: #03050c;
+  --lv-nz-catch: #ffffff;
+  --lv-nz-lash: #020b2e;
+  --lv-nz-rim: rgba(196, 220, 255, 0.55);
+  --lv-nz-gloss: rgba(255, 255, 255, 0.72);
+  --lv-nz-kalava: #d61f2b;
+  --lv-nz-kalava-2: #f7c236;
+  --lv-nz-cap-hi: #f4f6fb;
+  --lv-nz-cap: #8b91a6;
 }

@@ -2119,3 +2119,246 @@ body:has(.lv-app[data-locked]) {
     }
   }
 }
+
+/* ============================================================
+   THE NAZAR — `components/live/Nazar.tsx`, beside the board total.
+
+   The wall's evil eye (`public/tv/tv.css`, `.nz`), ported rather than shared:
+   `/live` cannot load the wall's stylesheet, and the wall cannot load this
+   one. Same bead, same fourteen-second watch, and it HANGS on a kalava
+   thread as it does on `/weekly` and `/podium` — from the tab bar, not the
+   top of the screen, whose thread would cut the title in half. Still under
+   `prefers-reduced-motion`.
+
+   `--gx` / `--gy` are where it looks, `--lid` how shut, `--dil` the pupil,
+   `--money` / `--cash` the ₹ that replaces the pupil (arrival / a sale).
+   ============================================================ */
+@property --lv-gx    { syntax: '<length>'; inherits: true; initial-value: 0px; }
+@property --lv-gy    { syntax: '<length>'; inherits: true; initial-value: 0px; }
+@property --lv-lid   { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --lv-dil   { syntax: '<number>'; inherits: true; initial-value: 1; }
+@property --lv-wink  { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --lv-money { syntax: '<number>'; inherits: true; initial-value: 0; }
+@property --lv-cash  { syntax: '<number>'; inherits: true; initial-value: 0; }
+
+@layer components {
+  /* The eye sits in the padding, so the label and figure keep their own
+     baseline — on a desktop `.lv-summary` aligns its blocks by it. */
+
+  /* ── The drop is clipped to the summary's own box ──
+     The charm falls from above, and unclipped it fell across the tab bar on
+     the way in. Clipped at the top edge only, so the thread comes out of the
+     hairline under the tabs and the bead is lowered through it; the sides
+     and bottom keep a margin for the swing and the bead's shadow. On a
+     desktop the clip moves up 14px, to the top of the toolbar strip — here
+     rather than on `.lv-toolbar`, because a clip-path there would cut the
+     strip's frosted glass off from the page behind it. */
+  .lv-summary { clip-path: inset(0 -24px -24px -24px); }
+
+  /* ── The figure and its eye, one row ──
+     The eye is a zero-height item centred on the row, so it can never change
+     the row's height; measured on a phone, the digits' ink is centred on the
+     line box to within a pixel, so centred on the row is centred on the
+     number. 34px is twice the digits' 17px — the ₹ pupil stays legible and
+     the bead does not tower over the figure it is guarding. */
+  .lv-summary-amount {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 5px;
+  }
+  .lv-summary-amount .lv-summary-value { position: relative; z-index: 1; margin-top: 0; }
+
+  .lv-nz-slot {
+    --nz-s: 34px;
+    position: relative;
+    flex: none;
+    width: var(--nz-s);
+    height: 0;
+    align-self: center;
+  }
+
+  /* The whole charm on its thread. The thread runs 140px up, well past the
+     clip, so the visible thread always ends exactly at the hairline and the
+     pivot is off in the dark above it, as on the wall. */
+  .lv-nz {
+    --d: 950ms;         /* after the total has counted up, so it hangs where the figure ends */
+    position: absolute;
+    left: 0;
+    width: var(--nz-s);
+    height: calc(var(--nz-s) + 140px);
+    bottom: calc(var(--nz-s) / -2);
+    transform-origin: 50% 0;
+    animation:
+      lv-nz-drop 1000ms var(--d) ease-in-out both,
+      lv-nz-pend 3600ms var(--d) ease-in-out both,
+      lv-nz-sway 7s calc(var(--d) + 3600ms) ease-in-out infinite,
+      lv-nz-wake 4600ms var(--d) linear both,
+      lv-nz-look 14s calc(var(--d) + 4600ms) linear infinite;
+  }
+  .lv-nz-bead {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: var(--nz-s);
+    height: var(--nz-s);
+    filter: drop-shadow(0 5px 8px var(--lv-cast));
+  }
+  .lv-nz-thread {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: calc(var(--nz-s) - 4px);
+    width: 2.5px;
+    margin-left: -1.25px;
+    border-radius: 2px;
+    background: repeating-linear-gradient(162deg, var(--lv-nz-kalava) 0 5px, var(--lv-nz-kalava-2) 5px 7px);
+  }
+  .lv-nz-cap {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--nz-s) - 4px);
+    width: 8px;
+    height: 6px;
+    margin-left: -4px;
+    border-radius: 3px 3px 1px 1px;
+    background: linear-gradient(90deg, var(--lv-nz-cap), var(--lv-nz-cap-hi) 45%, var(--lv-nz-cap));
+  }
+  .lv-nz-charm {
+    position: absolute;
+    left: 50%;
+    bottom: calc(var(--nz-s) + 7px);
+    width: 7px;
+    height: 7px;
+    margin-left: -3.5px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, var(--lv-nz-gloss) 0 12%, transparent 30%), var(--lv-nz-glass);
+  }
+  .lv-nz-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+  .lv-nz-white { fill: var(--lv-nz-white); }
+  .lv-nz-iris-ring { fill: none; stroke: var(--lv-nz-iris-ring); stroke-width: 1.6; }
+  .lv-nz-gaze { transform: translate(var(--lv-gx), var(--lv-gy)); }
+  .lv-nz-pupil {
+    fill: var(--lv-nz-pupil);
+    transform: scale(calc(var(--lv-dil) * (1 - max(var(--lv-money), var(--lv-cash)))));
+  }
+  .lv-nz-rupee {
+    fill: var(--lv-nz-pupil);
+    font-size: 30px;
+    font-weight: 900;
+    font-stretch: 90%;
+    opacity: max(var(--lv-money), var(--lv-cash));
+    transform: scale(calc(0.4 + 0.6 * max(var(--lv-money), var(--lv-cash))));
+    transform-origin: 0 0;
+  }
+  /* The catchlight would sit on the ₹, so it steps aside for it. */
+  .lv-nz-catch { fill: var(--lv-nz-catch); opacity: calc(1 - max(var(--lv-money), var(--lv-cash))); }
+  .lv-nz-lid-up { transform: translateY(calc(max(var(--lv-lid), var(--lv-wink)) * 40px)); }
+  .lv-nz-lid-dn { transform: translateY(calc(max(var(--lv-lid), var(--lv-wink)) * -40px)); }
+  .lv-nz-lash {
+    fill: none;
+    stroke: var(--lv-nz-lash);
+    stroke-width: 2.6;
+    stroke-linecap: round;
+    opacity: calc((max(var(--lv-lid), var(--lv-wink)) - 0.8) * 5);
+  }
+  .lv-nz-socket { fill: none; stroke: var(--lv-nz-glass-deep); stroke-width: 1.8; }
+  .lv-nz-rim { fill: none; stroke: var(--lv-nz-rim); stroke-width: 1.4; }
+  .lv-nz-gloss { fill: none; stroke: var(--lv-nz-gloss); stroke-width: 5; stroke-linecap: round; }
+  .lv-nz-gloss-dot { fill: var(--lv-nz-gloss); }
+  .lv-nz-glint {
+    fill: var(--lv-nz-catch);
+    transform: translate(-31px, -31px) scale(0);
+    animation: lv-nz-glint 14s calc(var(--d) + 4600ms) linear infinite;
+  }
+
+  /* A sale on the same board: a wink, then money eyes. */
+  .lv-nz-eyes.lv-nz-sale { animation: lv-nz-wink 620ms 150ms ease-in-out both; }
+  .lv-nz-gaze.lv-nz-sale { animation: lv-nz-cash 2000ms 450ms linear both; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lv-nz, .lv-nz *, .lv-nz-gaze.lv-nz-sale, .lv-nz-eyes.lv-nz-sale { animation: none; }
+  }
+
+  @media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+    .lv-summary { clip-path: inset(-14px -24px -24px -24px); }
+    /* On a desktop the eye stands LEFT of the total, as on the wall. */
+    .lv-summary-amount { margin-top: 2px; justify-content: flex-end; }
+    .lv-nz-slot { order: -1; --nz-s: 32px; }
+  }
+}
+
+@keyframes lv-nz-drop {
+  0%   { translate: 0 -70px; opacity: 0; }
+  20%  { opacity: 1; }
+  55%  { translate: 0 6px; }
+  72%  { translate: 0 -3px; }
+  86%  { translate: 0 1px; }
+  100% { translate: 0 0; opacity: 1; }
+}
+/* The pivot is ~160px above the bead, so 14° is ~40px of travel: left over
+   the figure (behind its digits), and never far enough right to reach the
+   trading count. */
+@keyframes lv-nz-pend {
+  0%   { rotate: 14deg; }
+  17%  { rotate: -6deg; }
+  32%  { rotate: 4deg; }
+  46%  { rotate: -2.4deg; }
+  59%  { rotate: 1.4deg; }
+  71%  { rotate: -0.7deg; }
+  82%  { rotate: 0.3deg; }
+  92%  { rotate: -0.2deg; }
+  100% { rotate: 0deg; }
+}
+@keyframes lv-nz-sway {
+  0%, 100% { rotate: 0deg; }
+  25% { rotate: 0.8deg; }
+  75% { rotate: -0.8deg; }
+}
+/* Asleep through the swing, then it wakes, checks the room left and right,
+   and turns to the total — and the pupil becomes a ₹. */
+@keyframes lv-nz-wake {
+  0%, 58%    { --lv-lid: 1; --lv-gx: 0px; --lv-gy: 0px; --lv-dil: 1; --lv-money: 0; }
+  63%        { --lv-lid: 0.55; }
+  66%        { --lv-lid: 0.7; }
+  70%        { --lv-lid: 0; --lv-gx: 0px; }
+  71%, 77%   { --lv-gx: -8px; --lv-gy: 2px; --lv-money: 0; }
+  78%        { --lv-gx: 8px; --lv-gy: 1px; --lv-dil: 1.25; --lv-money: 0; }
+  80%, 90%   { --lv-gx: 8px; --lv-gy: 1px; --lv-money: 1; }
+  92%        { --lv-money: 0; --lv-gx: 8px; }
+  93%, 100%  { --lv-gx: 0px; --lv-gy: 0px; --lv-dil: 1; --lv-lid: 0; --lv-money: 0; }
+}
+/* At rest: the room, the figure, the room, a glance each way. Saccades, not
+   drift, and the blinks land on the moves. */
+@keyframes lv-nz-look {
+  0%, 17.4%   { --lv-gx: 0px; --lv-gy: 0px; --lv-dil: 1; --lv-lid: 0; }
+  18%         { --lv-lid: 1; }
+  18.6%       { --lv-lid: 0; --lv-gx: 0px; --lv-gy: 0px; --lv-dil: 1; }
+  19.2%, 37%  { --lv-gx: 9px; --lv-gy: 2px; --lv-dil: 1.3; }
+  37.6%, 54%  { --lv-gx: 0px; --lv-gy: 0px; --lv-dil: 1; --lv-lid: 0; }
+  54.6%       { --lv-lid: 1; }
+  55.2%       { --lv-lid: 0; }
+  55.8%       { --lv-lid: 0; }
+  56.4%       { --lv-lid: 1; }
+  57%, 57.2%  { --lv-lid: 0; --lv-gx: 0px; --lv-gy: 0px; }
+  57.8%, 66%  { --lv-gx: -8px; --lv-gy: 0px; }
+  66.6%, 73%  { --lv-gx: -5px; --lv-gy: -6px; }
+  73.6%, 87%  { --lv-gx: 0px; --lv-gy: 0px; --lv-lid: 0; }
+  87.6%       { --lv-lid: 1; }
+  88.4%, 100% { --lv-lid: 0; --lv-gx: 0px; --lv-gy: 0px; --lv-dil: 1; }
+}
+@keyframes lv-nz-glint {
+  0%, 44%     { transform: translate(-31px, -31px) scale(0) rotate(0deg); }
+  46%         { transform: translate(-31px, -31px) scale(1.15) rotate(45deg); }
+  48.5%, 100% { transform: translate(-31px, -31px) scale(0) rotate(90deg); }
+}
+@keyframes lv-nz-wink {
+  0%, 100% { --lv-wink: 0; }
+  30%, 55% { --lv-wink: 1; }
+}
+@keyframes lv-nz-cash {
+  0%        { --lv-cash: 0; }
+  8%, 78%   { --lv-cash: 1; }
+  88%, 100% { --lv-cash: 0; }
+}

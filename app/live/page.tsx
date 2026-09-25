@@ -6,6 +6,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Podium, Standings, splitBoard } from '@/components/live/Board'
 import { BoardTabs, LiveHeader, SearchKey, SearchSheet } from '@/components/live/Chrome'
 import { CountUp } from '@/components/live/CountUp'
+import { Nazar } from '@/components/live/Nazar'
 import { TeamSheet } from '@/components/live/TeamSheet'
 import { boardMode } from '@/lib/board'
 import { standingsFor, type BoardKey, type Standing } from '@/lib/live'
@@ -176,7 +177,10 @@ export default function LivePage() {
               <div className="lv-summary">
                 <div>
                   <span className="lv-label">Board total</span>
-                  <CountUp className="lv-summary-value" value={boardTotal} from={arriving ? 0 : undefined} />
+                  <span className="lv-summary-amount">
+                    <CountUp className="lv-summary-value" value={boardTotal} from={arriving ? 0 : undefined} />
+                    <Nazar value={boardTotal} board={boardKey} />
+                  </span>
                 </div>
                 <div>
                   <span className="lv-label">Trading</span>

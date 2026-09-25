@@ -473,7 +473,7 @@ npm run build        # next build
   sits left of each wall slide's biggest number — hanging on a kalava thread
   beside the total on `/weekly` and `/podium`, rolling in beside the gold
   figure on `/daily` — and **it moves at rest**: it blinks, glances and sways,
-  forever. Asked for directly ("go crazy with it"), wall only, never `/live`.
+  forever. Asked for directly ("go crazy with it").
   It carries no figure and never moves one; when the figure rises on a poll it
   winks and shows ₹ pupils, which is the only thing it reacts to. It is exempt
   from `html.settled` in `tv.css`, and a rebuilt one skips its arrival
@@ -481,6 +481,17 @@ npm run build        # next build
   asked for directly. `public/tv/nazar.js` carries the rest; `?nonazar` shows
   a slide without it, and `NAZAR` there is the off switch. **A third looping
   ornament is a new argument again.**
+
+  **It is on `/live` too, from the same day**, beside the board total:
+  `components/live/Nazar.tsx`, a port rather than a share, because neither
+  surface can load the other's stylesheet. It hangs as on `/weekly`, on a
+  thread clipped at the hairline under the tab bar — a thread from the top of
+  a phone would cut the title. On a phone it is **right** of the total,
+  centred on the digits (measured within a pixel) at 34px, twice their
+  height; on a desktop it is left of it, as on the wall. Unlike the wall it
+  is still under `prefers-reduced-motion`. It winks only
+  when the total rises on the **same** tab — switching Today to All-time
+  moves the total as well, and that is a tap, not a sale.
 - **No filler content.** Empty is a valid state. The wall being quiet is what makes it
   loud when something happens. No spinners, ever — first paint reads cached CSV.
 - **There is no footer and there is no `as_of` stamp. This wall now cannot
