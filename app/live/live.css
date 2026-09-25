@@ -393,10 +393,68 @@ body:has(.lv-app[data-locked]) {
     margin-top: 56px;
   }
 
+  /* ── The team, standing on the money band (places 1-3) ──
+     Each crop is 450x440 with the face ~22% of its width, so neighbours step
+     at 34% of a crop: shoulders overlap, faces never do. The group is as wide
+     as the card allows — `--w` is one crop's width, solved from the card's
+     inner width for `--n` people — and no taller than the art area. The
+     card's own overflow never has to clip a face. */
+  .lv-pod-squad {
+    /* One crop's width: the smaller of what fits across (n crops stepping at
+       34%) and what fits in the height (crops are 450x440), so four fit a
+       phone's narrow third place whole. Solved in container units, so the
+       drawn image is exactly --w wide and the group is truly centred — an
+       image shrunk by `contain` inside a wider box sat off to the left. */
+    --gap: 12px;
+    --w: min(
+      calc((100cqw - 2 * var(--gap)) / (1 + 0.34 * (var(--n) - 1))),
+      calc(100cqh * 450 / 440),
+      132px
+    );
+    /* In the card's own column, between the numeral and the money band. */
+    position: relative;
+    z-index: 0;
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    margin-top: 34px;
+    /* Tucked 10px behind the band, so the team stands behind the label. */
+    margin-bottom: -10px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    pointer-events: none;
+    container-type: size;
+  }
+
+  .lv-pod-person {
+    position: relative;
+    flex: none;
+    align-self: stretch;
+    width: calc(var(--w) * 0.34);
+  }
+
+  .lv-pod-person:last-child {
+    width: var(--w);
+  }
+
+  .lv-pod-person img {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: var(--w);
+    max-width: none;
+    height: auto;
+  }
+
   /* The name and figure sit on the team's own money band, so a podium card
      and its row downstairs are visibly the same object. */
   .lv-pod-foot {
     position: relative;
+    z-index: 1;
+    /* Its shadow falls UP onto the team, which is what puts them behind the
+       label rather than standing on top of it. */
+    box-shadow: 0 -10px 18px -6px var(--lv-shade);
     display: flex;
     flex-direction: column;
     gap: 2px;

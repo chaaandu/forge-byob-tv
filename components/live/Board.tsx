@@ -4,6 +4,8 @@ import { AnimatePresence, motion } from 'motion/react'
 
 import { CountUp } from '@/components/live/CountUp'
 import { Emblem } from '@/components/live/Emblem'
+import { PodiumSquad } from '@/components/live/Lineup'
+import { PEOPLE_PHOTOS } from '@/config'
 import { formatRupees } from '@/lib/format'
 import { climbOf, liveryFor, type BoardKey, type Standing } from '@/lib/live'
 import { nameOf } from '@/lib/team'
@@ -85,7 +87,11 @@ export function Podium({
                     <span className="lv-pod-num" aria-hidden="true">
                       {slot + 1}
                     </span>
-                    <Emblem team={standing.team} size={slot === 0 ? 52 : 42} className="lv-pod-mark" />
+                    {PEOPLE_PHOTOS.some((p) => p.startsWith(`${standing.team.teamId}/`)) ? (
+                      <PodiumSquad team={standing.team} />
+                    ) : (
+                      <Emblem team={standing.team} size={slot === 0 ? 52 : 42} className="lv-pod-mark" />
+                    )}
                     <span className="lv-pod-foot">
                       <span className="lv-pod-name">{nameOf(standing.team)}</span>
                       <CountUp className="lv-pod-fig" value={standing.figure} from={arriving ? 0 : undefined} />

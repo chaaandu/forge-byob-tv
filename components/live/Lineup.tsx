@@ -119,6 +119,40 @@ function Person({
 }
 
 /**
+ * The team's line-up on a podium card — places 1, 2 and 3 only.
+ *
+ * Asked for directly on 25 September 2026: the podium carried the team's
+ * emblem, and the faces were one tap away in the sheet. The same people, in
+ * the same order and layering as the sheet and the wall (`lineup`), standing
+ * on the card's money band. Sized by the card, not by a constant: the group's
+ * width is `n` crops overlapping at 34% steps and it scales to fill the art
+ * area without leaving it, so four on a phone's narrow third place are small
+ * but whole — never a face cut by the card's edge. Renders nothing when the
+ * team has no photographs, and the card keeps its emblem.
+ */
+export function PodiumSquad({ team }: { team: Team }) {
+  const shown = membersOf(team).filter((name) =>
+    PEOPLE_PHOTOS.includes(`${team.teamId}/${photoSlug(name)}`),
+  )
+  if (shown.length === 0) return null
+  const placed = lineup(team.teamId, shown.map(photoSlug))
+  const n = placed.length
+  return (
+    <span
+      className="lv-pod-squad"
+      aria-hidden="true"
+      style={{ '--n': n } as React.CSSProperties}
+    >
+      {placed.map((p) => (
+        <span key={p.slug} className="lv-pod-person" style={{ zIndex: p.z }}>
+          <Image src={p.src} alt="" width={450} height={440} unoptimized />
+        </span>
+      ))}
+    </span>
+  )
+}
+
+/**
  * The students behind a venture, by name, each one a way to reach them.
  *
  * **This is where the names are, which is why the squad has none.** The
