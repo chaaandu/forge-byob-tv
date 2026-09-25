@@ -545,6 +545,7 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC108/vatsal',
   'VBC109/ajitwsh-s',
   'VBC109/ridhima-gupta',
+  'VBC109/sahil-agrawal',
   'VBC109/shweta-singh',
   'VBC110/diya-harish',
   'VBC110/happy-panjwani',
@@ -635,7 +636,6 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC137/atharva-agrawal',
   'VBC137/kaavya-goenka',
   'VBC137/riya-khurana',
-  'VBC138/sahil-agrawal',
   'VBC139/aditya-singhal',
   'VBC139/bhavit-gupta',
   'VBC139/harsh-nain',
@@ -662,7 +662,8 @@ export const PEOPLE_PHOTOS: readonly string[] = [
  * (`1fe854b`), both confirmed directly. Trigo and SAAJ have left; Preethi S
  * joined Kirdaaar (VBC121) and Udhav Kothari Tea-riffic (VBC114), confirmed
  * directly on 24-25 September 2026, each with the tracker's link and their
- * photograph from the shoot. Sahil Agrawal is unplaced and not here. Two
+ * photograph from the shoot. Sahil Agrawal (ex-SAAJ) joined WeKrave Healthy
+ * (VBC109), confirmed directly on 25 September 2026, the same way. Two
  * students left the programme altogether and are in no roster. Riya Khurana is on ZAAREE, confirmed directly on 23 September 2026
  * after `Groups List` and `Team Links` disagreed about her. Her link is the
  * tracker's, matched on her Forge email like everyone else's.
@@ -734,6 +735,7 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
     { name: 'Shweta Singh', linkedin: 'https://www.linkedin.com/in/shweta-singh', photo: 'shweta-singh' },
     { name: 'Ajitesh Senthilkumar', linkedin: 'https://www.linkedin.com/in/ajitesh-senthilkumar-0b8a85216?utm_source=share_via&utm_content=profile&utm_medium=member_android', photo: 'ajitwsh-s' },
     { name: 'Ridhima Gupta', linkedin: 'https://www.linkedin.com/in/ridhima-gupta-a2b3a026a/', photo: 'ridhima-gupta' },
+    { name: 'Sahil Agrawal', linkedin: 'https://www.linkedin.com/in/sahil-agrawal-92aa383a3?utm_source=share_via&utm_content=profile&utm_medium=member_android', photo: 'sahil-agrawal' },
   ],
   VBC110: [
     { name: 'Happy Panjwani', linkedin: 'https://www.linkedin.com/in/happy-panjwani-652909241/', photo: 'happy-panjwani' },
