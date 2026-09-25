@@ -44,6 +44,7 @@ export function Nazar({ value, board }: { value: number; board: string }) {
     <span className="lv-nz-slot" aria-hidden="true">
     <span className="lv-nz">
       <span className="lv-nz-thread" />
+      <span className="lv-nz-charm lv-nz-charm-black" />
       <span className="lv-nz-charm" />
       <span className="lv-nz-cap" />
       <span className="lv-nz-bead">

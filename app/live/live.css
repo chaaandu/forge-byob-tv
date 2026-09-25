@@ -2234,6 +2234,16 @@ body:has(.lv-app[data-locked]) {
     border-radius: 50%;
     background: radial-gradient(circle at 35% 30%, var(--lv-nz-gloss) 0 12%, transparent 30%), var(--lv-nz-glass);
   }
+  /* The wall's black glass bead, above the blue one. Phone only: a phone has
+     ~40px of visible thread and room for both; a desktop shows ~14px. */
+  .lv-nz-charm-black {
+    bottom: calc(var(--nz-s) + 20px);
+    width: 7px;         /* the blue bead's size, so the two read as a pair */
+    height: 7px;
+    margin-left: -3.5px;
+    background: radial-gradient(circle at 35% 30%, var(--lv-nz-gloss) 0 12%, transparent 30%), var(--lv-nz-charm);
+    box-shadow: inset 0 0 0 1px var(--lv-nz-rim);
+  }
   .lv-nz-svg { display: block; width: 100%; height: 100%; overflow: visible; }
 
   .lv-nz-white { fill: var(--lv-nz-white); }
@@ -2286,6 +2296,7 @@ body:has(.lv-app[data-locked]) {
     /* On a desktop the eye stands LEFT of the total, as on the wall. */
     .lv-summary-amount { margin-top: 2px; justify-content: flex-end; }
     .lv-nz-slot { order: -1; --nz-s: 32px; }
+    .lv-nz-charm-black { display: none; }
   }
 }
 
