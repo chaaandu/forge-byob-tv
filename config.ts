@@ -531,7 +531,6 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC103/annashri-mahato',
   'VBC103/kavya-zala',
   'VBC103/pragati-singh',
-  'VBC104/udhav-kothari',
   'VBC105/harsh-malani',
   'VBC105/meith-jain',
   'VBC105/ritesh-oswal',
@@ -563,6 +562,7 @@ export const PEOPLE_PHOTOS: readonly string[] = [
   'VBC114/abhishek-kamblath',
   'VBC114/aditi-roy',
   'VBC114/kalika-srivastava',
+  'VBC114/udhav-kothari',
   'VBC115/dev-mehra',
   'VBC115/maitree-shah',
   'VBC115/risheet-gangar',
@@ -660,9 +660,10 @@ export const PEOPLE_PHOTOS: readonly string[] = [
  * **The roster is the programme's, corrected where this repo already knows
  * better**: Aditi Bhateja is on Mugshot (`30662d9`) and Radha Hutkey on Mello
  * (`1fe854b`), both confirmed directly. Trigo and SAAJ have left; Preethi S
- * joined Kirdaaar (VBC121), confirmed directly on 24 September 2026, with the
- * tracker's link and her photograph from the shoot. Rohit Singh, Udhav
- * Kothari and Sahil Agrawal are unplaced and not here. Riya Khurana is on ZAAREE, confirmed directly on 23 September 2026
+ * joined Kirdaaar (VBC121) and Udhav Kothari Tea-riffic (VBC114), confirmed
+ * directly on 24-25 September 2026, each with the tracker's link and their
+ * photograph from the shoot. Sahil Agrawal is unplaced and not here. Two
+ * students left the programme altogether and are in no roster. Riya Khurana is on ZAAREE, confirmed directly on 23 September 2026
  * after `Groups List` and `Team Links` disagreed about her. Her link is the
  * tracker's, matched on her Forge email like everyone else's.
  *
@@ -759,6 +760,7 @@ export const TEAM_PEOPLE: Readonly<Record<string, readonly Person[]>> = {
     { name: 'Abhishek Kambalath', linkedin: 'https://www.linkedin.com/in/abhishek-kambalath-20337a25a', photo: 'abhishek-kamblath' },
     { name: 'Kalika Srivastava', linkedin: 'https://www.linkedin.com/in/kalika-srivastava-73aa20267', photo: 'kalika-srivastava' },
     { name: 'Aditi Roy', linkedin: 'https://www.linkedin.com/in/aditi-roy-a9ab212bb/', photo: 'aditi-roy' },
+    { name: 'Udhav Kothari', linkedin: 'https://www.linkedin.com/in/udhav-kothari/', photo: 'udhav-kothari' },
   ],
   VBC115: [
     { name: 'Risheet Gangar', linkedin: 'https://www.linkedin.com/in/risheet-gangar?utm_source=share_via&utm_content=profile&utm_medium=member_ios', photo: 'risheet-gangar' },

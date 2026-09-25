@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 
 import { Emblem } from '@/components/live/Emblem'
-import { BOARD_KEYS, boardLabel, liveryFor, matchesQuery, type BoardKey, type Standing } from '@/lib/live'
+import { BOARD_KEYS, boardLabel, liveryFor, matchesQuery, memberMatch, type BoardKey, type Standing } from '@/lib/live'
 import { nameOf } from '@/lib/team'
 import type { BoardMode } from '@/lib/types'
 
@@ -178,7 +178,7 @@ export function SearchSheet({
               type="search"
               inputMode="search"
               autoComplete="off"
-              placeholder="Venture name or team ID"
+              placeholder="Venture, team ID or student"
               value={query}
               onChange={(event) => setQuery(event.target.value)}
             />
@@ -187,7 +187,11 @@ export function SearchSheet({
             </button>
           </div>
           <ul className="lv-search-list">
-            {results.map((s) => (
+            {results.map((s) => {
+              /* Found by a student's name: say whose, in place of the
+                 product, so it is clear why this team came up. */
+              const byName = fold(nameOf(s.team)).includes(fold(query.trim())) ? null : memberMatch(s.team, query)
+              return (
               <li key={s.team.teamId} className="lv-search-item">
                 <button type="button" className="lv-search-pick" onClick={() => onPick(s.team.teamId)}>
                   {/* The team id, not the rank. Somebody looking for their
@@ -199,11 +203,12 @@ export function SearchSheet({
                   </span>
                   <span className="lv-search-name">
                     {nameOf(s.team)}
-                    {s.team.product ? <small>{s.team.product}</small> : null}
+                    {byName ? <small>{byName}</small> : s.team.product ? <small>{s.team.product}</small> : null}
                   </span>
                 </button>
               </li>
-            ))}
+              )
+            })}
             {results.length === 0 ? <li className="lv-search-none">No team matches “{query}”</li> : null}
           </ul>
         </motion.div>
@@ -211,6 +216,10 @@ export function SearchSheet({
       ) : null}
     </AnimatePresence>
   )
+}
+
+function fold(text: string): string {
+  return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
 }
 
 function SearchIcon() {

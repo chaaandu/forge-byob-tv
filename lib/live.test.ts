@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest'
 import { PEOPLE_PHOTOS, SPARE_TEAM_IDS, TEAM_LINKS, TEAM_PEOPLE } from '@/config'
 import type { Team, TeamId } from '@/lib/types'
 import { rankForMode } from '@/lib/board'
-import { EMBLEM_COUNT, LIVERY_COUNT, MAX_MEMBERS, avgTicket, climbOf, emblemFor, facebookUrl, initialsOf, instagramUrl, linkLabel, linkedinUrl, linksOf, liveryFor, matchesQuery, membersOf, peopleOf, photoSlug, raceFor, shareOf, standingsFor, websiteUrl } from '@/lib/live'
+import { EMBLEM_COUNT, LIVERY_COUNT, MAX_MEMBERS, avgTicket, climbOf, emblemFor, facebookUrl, initialsOf, instagramUrl, linkLabel, linkedinUrl, linksOf, liveryFor, matchesQuery, memberMatch, membersOf, peopleOf, photoSlug, raceFor, shareOf, standingsFor, websiteUrl } from '@/lib/live'
 import { competingTeams, rankByWeek, rankTeams } from '@/lib/ranking'
 import { COMPETING_SIZE, team, teams } from '@/test/fixtures'
 
@@ -197,8 +197,8 @@ describe('membersOf', () => {
   // `titleCase`'s rule, inherited: a name the student cased themselves is left
   // alone, so an initial survives and `McCarthy` would too.
   it('keeps a name that was cased by a human', () => {
-    expect(membersOf(team({ members: 'Rohit, Preethi S, Udhav Kothari' }))).toEqual([
-      'Rohit',
+    expect(membersOf(team({ members: 'Aarav, Preethi S, Udhav Kothari' }))).toEqual([
+      'Aarav',
       'Preethi S',
       'Udhav Kothari',
     ])
@@ -329,6 +329,14 @@ describe('matchesQuery', () => {
     expect(matchesQuery(team({ ventureName: 'YŌKI' }), 'yoki')).toBe(true)
     expect(matchesQuery(team({ teamId: 'VBC117' }), 'c117')).toBe(true)
     expect(matchesQuery(team({ ventureName: 'Snapp' }), 'dosa')).toBe(false)
+  })
+
+  it('finds a team by any of its students, and says which', () => {
+    const kirdaaar = team({ teamId: 'VBC121' as TeamId, ventureName: 'Kirdaaar' })
+    expect(matchesQuery(kirdaaar, 'preethi')).toBe(true)
+    expect(memberMatch(kirdaaar, 'PREETHI')).toBe('Preethi S')
+    expect(memberMatch(kirdaaar, 'kirdaaar')).toBeNull()
+    expect(matchesQuery(kirdaaar, 'udhav')).toBe(false)
   })
 })
 

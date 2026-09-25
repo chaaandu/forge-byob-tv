@@ -256,7 +256,7 @@ export function sellsCategory(product: string): Sells {
  *     Harsh Malani, Meith Jain and Ritesh Oswal           the last one joined by "and"
  *     Aarav, Divy, Tushar.                                a trailing full stop
  *     happy panjwani, diya harish , rishika choudhary     lowercase, stray spaces
- *     Rohit, Preethi S, Udhav Kothari                     an initial as a surname
+ *     Aarav, Preethi S, Udhav Kothari                     an initial as a surname
  *
  * `titleCase` from `lib/team.ts` does the casing, which is the same rule the
  * whole project uses on venture names: a name with both cases in it is left
@@ -489,14 +489,32 @@ export function linkLabel(url: string): string {
   return `${host}${path}`
 }
 
-/** Case- and accent-insensitive search over venture name and team id. */
+/** Case- and accent-insensitive search over venture name, team id and the team's students. */
 export function matchesQuery(team: Team, query: string): boolean {
-  const fold = (text: string) =>
-    text
-      .normalize('NFD')
-      .replace(/\p{M}/gu, '')
-      .toLowerCase()
   const needle = fold(query.trim())
   if (needle === '') return true
   return fold(team.ventureName).includes(needle) || fold(team.teamId).includes(needle)
+    || memberMatch(team, query) !== null
+}
+
+/**
+ * The student a search found this team by, or null.
+ *
+ * Search by a person's name, added 25 September 2026: "which team is Preethi
+ * on" is the question a phone gets asked most, and the answer was only
+ * findable by opening teams one at a time. Reads the same two rosters the
+ * team sheet does — `TEAM_PEOPLE` (names written by hand) and `membersOf`
+ * (the sheet's cell, or the photographs) — so anyone shown on a team can be
+ * found by name. Matches any part of the name, case- and accent-blind.
+ */
+export function memberMatch(team: Team, query: string): string | null {
+  const needle = fold(query.trim())
+  if (needle === '') return null
+  const names = [...peopleOf(team.teamId).map((p) => p.name), ...membersOf(team)]
+  return names.find((name) => fold(name).includes(needle)) ?? null
+}
+
+/** Case- and accent-blind text, for search. */
+function fold(text: string): string {
+  return text.normalize('NFD').replace(/\p{M}/gu, '').toLowerCase()
 }
