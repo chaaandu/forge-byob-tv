@@ -1719,6 +1719,33 @@ body:has(.lv-app[data-locked]) {
   .lv-livery-10 { --livery-a: var(--lv-10-a); --livery-b: var(--lv-10-b); --livery-ink: var(--lv-10-ink); --livery-band: var(--lv-10-band); --livery-band-ink: var(--lv-10-band-ink); }
   .lv-livery-11 { --livery-a: var(--lv-11-a); --livery-b: var(--lv-11-b); --livery-ink: var(--lv-11-ink); --livery-band: var(--lv-11-band); --livery-band-ink: var(--lv-11-band-ink); }
   .lv-livery-12 { --livery-a: var(--lv-12-a); --livery-b: var(--lv-12-b); --livery-ink: var(--lv-12-ink); --livery-band: var(--lv-12-band); --livery-band-ink: var(--lv-12-band-ink); }
+  .lv-livery-13 { --livery-a: var(--lv-13-a); --livery-b: var(--lv-13-b); --livery-ink: var(--lv-13-ink); --livery-band: var(--lv-13-band); --livery-band-ink: var(--lv-13-band-ink); }
+  .lv-livery-14 { --livery-a: var(--lv-14-a); --livery-b: var(--lv-14-b); --livery-ink: var(--lv-14-ink); --livery-band: var(--lv-14-band); --livery-band-ink: var(--lv-14-band-ink); }
+  .lv-livery-15 { --livery-a: var(--lv-15-a); --livery-b: var(--lv-15-b); --livery-ink: var(--lv-15-ink); --livery-band: var(--lv-15-band); --livery-band-ink: var(--lv-15-band-ink); }
+  .lv-livery-16 { --livery-a: var(--lv-16-a); --livery-b: var(--lv-16-b); --livery-ink: var(--lv-16-ink); --livery-band: var(--lv-16-band); --livery-band-ink: var(--lv-16-band-ink); }
+  .lv-livery-17 { --livery-a: var(--lv-17-a); --livery-b: var(--lv-17-b); --livery-ink: var(--lv-17-ink); --livery-band: var(--lv-17-band); --livery-band-ink: var(--lv-17-band-ink); }
+  .lv-livery-18 { --livery-a: var(--lv-18-a); --livery-b: var(--lv-18-b); --livery-ink: var(--lv-18-ink); --livery-band: var(--lv-18-band); --livery-band-ink: var(--lv-18-band-ink); }
+  .lv-livery-19 { --livery-a: var(--lv-19-a); --livery-b: var(--lv-19-b); --livery-ink: var(--lv-19-ink); --livery-band: var(--lv-19-band); --livery-band-ink: var(--lv-19-band-ink); }
+  .lv-livery-20 { --livery-a: var(--lv-20-a); --livery-b: var(--lv-20-b); --livery-ink: var(--lv-20-ink); --livery-band: var(--lv-20-band); --livery-band-ink: var(--lv-20-band-ink); }
+  .lv-livery-21 { --livery-a: var(--lv-21-a); --livery-b: var(--lv-21-b); --livery-ink: var(--lv-21-ink); --livery-band: var(--lv-21-band); --livery-band-ink: var(--lv-21-band-ink); }
+  .lv-livery-22 { --livery-a: var(--lv-22-a); --livery-b: var(--lv-22-b); --livery-ink: var(--lv-22-ink); --livery-band: var(--lv-22-band); --livery-band-ink: var(--lv-22-band-ink); }
+  .lv-livery-23 { --livery-a: var(--lv-23-a); --livery-b: var(--lv-23-b); --livery-ink: var(--lv-23-ink); --livery-band: var(--lv-23-band); --livery-band-ink: var(--lv-23-band-ink); }
+  .lv-livery-24 { --livery-a: var(--lv-24-a); --livery-b: var(--lv-24-b); --livery-ink: var(--lv-24-ink); --livery-band: var(--lv-24-band); --livery-band-ink: var(--lv-24-band-ink); }
+  .lv-livery-25 { --livery-a: var(--lv-25-a); --livery-b: var(--lv-25-b); --livery-ink: var(--lv-25-ink); --livery-band: var(--lv-25-band); --livery-band-ink: var(--lv-25-band-ink); }
+  .lv-livery-26 { --livery-a: var(--lv-26-a); --livery-b: var(--lv-26-b); --livery-ink: var(--lv-26-ink); --livery-band: var(--lv-26-band); --livery-band-ink: var(--lv-26-band-ink); }
+  .lv-livery-27 { --livery-a: var(--lv-27-a); --livery-b: var(--lv-27-b); --livery-ink: var(--lv-27-ink); --livery-band: var(--lv-27-band); --livery-band-ink: var(--lv-27-band-ink); }
+  .lv-livery-28 { --livery-a: var(--lv-28-a); --livery-b: var(--lv-28-b); --livery-ink: var(--lv-28-ink); --livery-band: var(--lv-28-band); --livery-band-ink: var(--lv-28-band-ink); }
+  .lv-livery-29 { --livery-a: var(--lv-29-a); --livery-b: var(--lv-29-b); --livery-ink: var(--lv-29-ink); --livery-band: var(--lv-29-band); --livery-band-ink: var(--lv-29-band-ink); }
+  .lv-livery-30 { --livery-a: var(--lv-30-a); --livery-b: var(--lv-30-b); --livery-ink: var(--lv-30-ink); --livery-band: var(--lv-30-band); --livery-band-ink: var(--lv-30-band-ink); }
+  .lv-livery-31 { --livery-a: var(--lv-31-a); --livery-b: var(--lv-31-b); --livery-ink: var(--lv-31-ink); --livery-band: var(--lv-31-band); --livery-band-ink: var(--lv-31-band-ink); }
+  .lv-livery-32 { --livery-a: var(--lv-32-a); --livery-b: var(--lv-32-b); --livery-ink: var(--lv-32-ink); --livery-band: var(--lv-32-band); --livery-band-ink: var(--lv-32-band-ink); }
+  .lv-livery-33 { --livery-a: var(--lv-33-a); --livery-b: var(--lv-33-b); --livery-ink: var(--lv-33-ink); --livery-band: var(--lv-33-band); --livery-band-ink: var(--lv-33-band-ink); }
+  .lv-livery-34 { --livery-a: var(--lv-34-a); --livery-b: var(--lv-34-b); --livery-ink: var(--lv-34-ink); --livery-band: var(--lv-34-band); --livery-band-ink: var(--lv-34-band-ink); }
+  .lv-livery-35 { --livery-a: var(--lv-35-a); --livery-b: var(--lv-35-b); --livery-ink: var(--lv-35-ink); --livery-band: var(--lv-35-band); --livery-band-ink: var(--lv-35-band-ink); }
+  .lv-livery-36 { --livery-a: var(--lv-36-a); --livery-b: var(--lv-36-b); --livery-ink: var(--lv-36-ink); --livery-band: var(--lv-36-band); --livery-band-ink: var(--lv-36-band-ink); }
+  .lv-livery-37 { --livery-a: var(--lv-37-a); --livery-b: var(--lv-37-b); --livery-ink: var(--lv-37-ink); --livery-band: var(--lv-37-band); --livery-band-ink: var(--lv-37-band-ink); }
+  .lv-livery-38 { --livery-a: var(--lv-38-a); --livery-b: var(--lv-38-b); --livery-ink: var(--lv-38-ink); --livery-band: var(--lv-38-band); --livery-band-ink: var(--lv-38-band-ink); }
+  .lv-livery-39 { --livery-a: var(--lv-39-a); --livery-b: var(--lv-39-b); --livery-ink: var(--lv-39-ink); --livery-band: var(--lv-39-band); --livery-band-ink: var(--lv-39-band-ink); }
 }
 
 /* ============================================================

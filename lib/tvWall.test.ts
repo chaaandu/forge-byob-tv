@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 
 import { PEOPLE_PHOTOS, PROGRAMME_START_ISO, SPARE_TEAM_IDS } from '@/config'
 import { lineup } from '@/lib/lineup'
+import { LIVERY_COUNT, liveryFor } from '@/lib/live'
 import { compareChallenge, compareDaily, compareTeams, compareWeek } from '@/lib/ranking'
 import type { Team, TeamId } from '@/lib/types'
 
@@ -214,6 +215,33 @@ describe('the static wall ranks exactly as lib/ranking does', () => {
     const entries = [...map![1].matchAll(/"(VBC\d+)":\s*(\d+)/g)]
     expect(entries).toHaveLength(39)
     expect(new Set(entries.map((e) => e[2])).size).toBe(39)
+  })
+
+  /**
+   * ── A venture is the same colour on /weekly and on a phone ──
+   *
+   * `/live` wore twelve hashed F1 liveries until 28 September 2026 and agreed
+   * with the TV about nobody's colour. It now carries the wall's map and a copy
+   * of the wall's thirty-nine liveries in `forge-tokens.css` §8, and both
+   * copies are held here: the slab, its ink, and the money band, which is the
+   * wall's `edge` / `disc-ink` pair rather than its pale `band`.
+   */
+  it('colours every team on /live exactly as the wall does', () => {
+    const map = WALL.match(/const TEAM_LIVERY = \{([\s\S]*?)\}/)
+    const entries = [...map![1].matchAll(/"(VBC\d+)":\s*(\d+)/g)]
+    for (const [, id, n] of entries) expect(liveryFor(id as TeamId), id).toBe(Number(n))
+    expect(LIVERY_COUNT).toBe(Number(WALL.match(/const LIVERY_COUNT = (\d+)/)![1]))
+
+    const wallCss = readFileSync('public/tv/tv.css', 'utf8')
+    const tokens = readFileSync('app/forge-tokens.css', 'utf8')
+    const hex = (css: string, name: string) => css.match(new RegExp(`${name}:\\s*(#[0-9a-f]{6})`))?.[1]
+    const pairs = [['a', 'a'], ['b', 'b'], ['ink', 'ink'], ['band', 'edge'], ['band-ink', 'disc-ink']]
+    for (let n = 1; n <= LIVERY_COUNT; n += 1)
+      for (const [live, wall] of pairs) {
+        const want = hex(wallCss, `--l${n}-${wall}`)
+        expect(want, `--l${n}-${wall}`).toBeDefined()
+        expect(hex(tokens, `--lv-${n}-${live}`), `--lv-${n}-${live}`).toBe(want)
+      }
   })
 
   /**

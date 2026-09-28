@@ -135,12 +135,24 @@ function mix(value: number): number {
   return h >>> 0
 }
 
-export const LIVERY_COUNT = 12
+export const LIVERY_COUNT = 39
 export const EMBLEM_COUNT = 12
 
-/** 1–12, matching `--lv-N-*` in `forge-tokens.css` §8. Keyed by id, so a climb never recolours a team. */
+/**
+ * The wall's locked map, `TEAM_LIVERY` in `public/tv/tv.js`, so a venture is
+ * the same colour here as on `/weekly`. `lib/tvWall.test.ts` holds the two equal.
+ */
+const TEAM_LIVERY: Readonly<Record<string, number>> = Object.fromEntries(
+  Array.from({ length: LIVERY_COUNT }, (_, i) => [`VBC${101 + i}`, i + 1]),
+)
+
+/**
+ * 1–39, matching `--lv-N-*` in `forge-tokens.css` §8. Keyed by id, so a climb
+ * never recolours a team; an id the map has never seen falls back to the same
+ * hash the wall uses.
+ */
 export function liveryFor(teamId: TeamId): number {
-  return (mix(hashTeamId(teamId)) % LIVERY_COUNT) + 1
+  return TEAM_LIVERY[teamId] ?? (mix(hashTeamId(teamId)) % LIVERY_COUNT) + 1
 }
 
 /**

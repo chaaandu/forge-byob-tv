@@ -635,15 +635,18 @@ is the one page here that a person holds. Added 17 September 2026.
   setting because a TV laptop's OS says nothing about who is walking past; a
   phone's says exactly who is holding it.
 - **The colour rule is unchanged, and each row now carries two of them.**
-  Twelve liveries plus a per-livery **money band** are §8 of
-  `forge-tokens.css`; `lib/live.test.ts` fails on any hex or `rgba(` under
-  `app/live/` or `components/live/`. The band replaced one violet column down
-  the whole board, asked for directly. It is the *opposite value* to its slab
-  rather than a darker version — a dark livery given a darker band puts a hole
-  at the end of the row, and five of the twelve measured under 1.4:1 against
-  the page that way. Violet is now chrome only (tabs, podium steps, the search
-  key) and there is still no green livery: §7's note on the podium's second
-  place has that argument.
+  **The liveries are the wall's thirty-nine, from 28 September 2026** — a
+  venture is the same colour on `/live` as on `/weekly`, asked for directly.
+  They are copied into §8 of `forge-tokens.css`, `liveryFor` carries the
+  wall's locked `TEAM_LIVERY` map, and `lib/tvWall.test.ts` fails if either
+  copy drifts from `public/tv/`. `lib/live.test.ts` still fails on any hex or
+  `rgba(` under `app/live/` or `components/live/`. Each row's **money band**
+  is the *opposite value* to its slab rather than a darker version — a dark
+  livery given a darker band puts a hole at the end of the row — and it is
+  the wall's `edge` / `disc-ink` pair, not the wall's own pale `band`. **What
+  this cost:** six of the wall's liveries are violet, so rows can now sit
+  close to the chrome (tabs, podium steps, the search key), which the twelve
+  were chosen to avoid. There is still no green livery.
 - **It ships a second face, and that is a per-surface decision rather than a
   loosened rule.** `AGENTS.md`'s "one face" rule is about one surface carrying
   four; `/live` carries exactly one, **Archivo**, and the wall carries exactly

@@ -94,10 +94,10 @@ describe('liveries and emblems', () => {
     }
   })
 
-  // Every id shares a `VBC1` prefix; a hash without mixing would bunch them.
-  it('spread across the cohort', () => {
+  // One colour per venture, never shared — the wall's bijection.
+  it('give every venture in the cohort its own colour', () => {
     const used = new Set(Array.from({ length: 39 }, (_, i) => liveryFor(`VBC${101 + i}`)))
-    expect(used.size).toBeGreaterThanOrEqual(10)
+    expect(used.size).toBe(39)
   })
 
   it('has a CSS class and token for every livery', () => {

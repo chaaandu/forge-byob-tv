@@ -858,13 +858,18 @@
    nothing under `app/live/` or `components/live/` spells one out.
    `lib/live.test.ts` fails on a hex or an `rgba(` in either place.
 
-   ── Twelve liveries, because F1 teams wear a colour ──
+   ── Thirty-nine liveries, and they are the wall's ──
 
-   A venture is assigned one by hashing its team id (`liveryFor` in
-   `lib/live.ts`), so it keeps its colour as it climbs, exactly as a mark's
-   tint does on the wall. Each is a left-to-right pair with **its own ink**:
-   some are light enough to need dark type, as Mercedes' teal and Haas' white
-   do in the references.
+   From 28 September 2026 a venture wears **the same colour here as on
+   `/weekly`**, asked for directly. These are copies of `--l1`…`--l39` in
+   `public/tv/tv.css`, and `liveryFor` in `lib/live.ts` carries the wall's
+   locked `TEAM_LIVERY` map — one colour per venture, never shared, keyed by
+   id so a climb never recolours a team. `lib/tvWall.test.ts` holds every
+   value here equal to the wall's, so a recolour on one surface fails until
+   the other follows. It replaced twelve hashed F1 liveries, which put two or
+   three ventures in every colour and agreed with the TV on none of them.
+
+   Each is a left-to-right pair with **its own ink**, the wall's `--lN-ink`.
 
    ── And each carries its own money band ──
 
@@ -872,22 +877,22 @@
    what F1's red points column does. Asked to take the row's colour instead,
    so every row is now one object in one hue: slab, then band.
 
-   **The band is the maximum value step from the slab, not simply a darker
-   version of it.** A dark livery — navy, carbon, crimson — given a darker
-   band produces a hole at the end of the row rather than a block, and five of
-   the twelve measured under 1.4:1 against the page that way. So a dark livery
-   gets a *light* band with dark ink and a bright one gets a deep band with
-   white ink. Measured, ink against band and the band's step against the slab's
-   own end:
+   **The band is the opposite value to the slab, not simply a darker version
+   of it.** A dark livery given a darker band produces a hole at the end of
+   the row. The band is the wall's `--lN-edge` and its ink `--lN-disc-ink` —
+   the pair `/weekly` and `/daily` already use for the contrasting disc on a
+   card, deep on a pale livery and pale on a deep one. **Not the wall's own
+   `--lN-band`**, which is pale on every livery and measured 1.19–1.64:1
+   against the slab's end on the twenty pale ones: no edge at all.
+   Measured: ink on band 4.63–12.72:1 (worst: livery 6), band against the
+   slab's end 1.67–5.91:1 (worst: livery 1). Lower than the twelve's
+   2.95 floor, and the rake's gap between slab and band is what carries it.
 
-     raspberry  7.14 · 4.31    azure   8.61 · 5.13    coral    7.43 · 3.96
-     crimson    7.59 · 4.79    navy    8.91 · 7.80    pearl    8.33 · 4.76
-     tangerine 10.60 · 2.95    orchid  9.17 · 3.51    carbon  12.35 · 12.35
-     gold       8.31 · 4.00    teal    9.25 · 3.51    copper   8.72 · 5.56
-
-   **No violet livery and no green one.** Violet is the chrome — tabs, podium
-   steps, the search key — and the board would blur into it. Green is Mesa's
-   parent brand; §7's note on the podium's second place has the argument.
+   **The old rule here was "no violet livery and no green one", and the
+   wall's palette breaks the first half.** Six of the thirty-nine sit at
+   267–305°, beside the tabs, podium steps and search key. Following `/weekly`
+   was asked for over it. Green is still out: the wall skips 100–165° for the
+   same Mesa-parent-brand reason §7 gives.
 
    Rows are full-bleed, so a band no longer has to separate itself from the
    page: it ends at the edge of the screen. What it does have to do is step
@@ -931,19 +936,46 @@
 
   --lv-ink-dark: var(--aubergine-900);
 
-  /* livery:     slab start     slab end       money band       band ink */
-  --lv-1-a: #d81b69;  --lv-1-b: #8a0c43;  --lv-1-band: #ff8ab5;  --lv-1-band-ink: #4a0524;  --lv-1-ink: var(--white);        /* raspberry */
-  --lv-2-a: #e0241b;  --lv-2-b: #8c0a08;  --lv-2-band: #ff9b93;  --lv-2-band-ink: #4f0705;  --lv-2-ink: var(--white);        /* crimson */
-  --lv-3-a: #ff8a2b;  --lv-3-b: #e0600a;  --lv-3-band: #6d2a00;  --lv-3-band-ink: var(--white);  --lv-3-ink: var(--lv-ink-dark);  /* tangerine */
-  --lv-4-a: #ffcf4a;  --lv-4-b: #f0a51c;  --lv-4-band: #6d4600;  --lv-4-band-ink: var(--white);  --lv-4-ink: var(--lv-ink-dark);  /* gold */
-  --lv-5-a: #46d9d1;  --lv-5-b: #1fb0b8;  --lv-5-band: #0b4f57;  --lv-5-band-ink: var(--white);  --lv-5-ink: var(--lv-ink-dark);  /* teal */
-  --lv-6-a: #2f6fec;  --lv-6-b: #1a3fb0;  --lv-6-band: #a9c6ff;  --lv-6-band-ink: #0c235e;  --lv-6-ink: var(--white);        /* azure */
-  --lv-7-a: #27358f;  --lv-7-b: #111a52;  --lv-7-band: #9db0ff;  --lv-7-band-ink: #080f36;  --lv-7-ink: var(--white);        /* navy */
-  --lv-8-a: #f0b3ff;  --lv-8-b: #d77cf0;  --lv-8-band: #6f2489;  --lv-8-band-ink: var(--white);  --lv-8-ink: var(--lv-ink-dark);  /* orchid */
-  --lv-9-a: #d42a4a;  --lv-9-b: #a8173a;  --lv-9-band: #ffa5b4;  --lv-9-band-ink: #5c0a20;  --lv-9-ink: var(--white);        /* coral */
-  --lv-10-a: #f7f3fb; --lv-10-b: #c9c0d6; --lv-10-band: #514a66; --lv-10-band-ink: var(--white); --lv-10-ink: var(--lv-ink-dark); /* pearl */
-  --lv-11-a: #3a3645; --lv-11-b: #121017; --lv-11-band: #d3cfdd; --lv-11-band-ink: #121017; --lv-11-ink: var(--white);       /* carbon */
-  --lv-12-a: #b9592b; --lv-12-b: #6f2f10; --lv-12-band: #f0b48d; --lv-12-band-ink: #3d1806; --lv-12-ink: var(--white);       /* copper */
+  /* livery: slab start · slab end · ink · money band (the wall's --lN-edge) · band ink (--lN-disc-ink) */
+  --lv-1-a: #ffd9aa; --lv-1-b: #de9e43; --lv-1-ink: #140a1f; --lv-1-band: #af761f; --lv-1-band-ink: #140a1f; /* 72deg */
+  --lv-2-a: #60fedb; --lv-2-b: #2cc6a8; --lv-2-ink: #140a1f; --lv-2-band: #14917a; --lv-2-band-ink: #140a1f; /* 176deg */
+  --lv-3-a: #8ff2ff; --lv-3-b: #62bcc8; --lv-3-ink: #140a1f; --lv-3-band: #158d99; --lv-3-band-ink: #140a1f; /* 206deg */
+  --lv-4-a: #bee6ff; --lv-4-b: #85b3d1; --lv-4-ink: #140a1f; --lv-4-band: #1c87bb; --lv-4-band-ink: #140a1f; /* 236deg */
+  --lv-5-a: #ffedbe; --lv-5-b: #e0b436; --lv-5-ink: #140a1f; --lv-5-band: #6d4600; --lv-5-band-ink: #ffffff; /* 88deg */
+  --lv-6-a: #d2e0ff; --lv-6-b: #96acde; --lv-6-ink: #140a1f; --lv-6-band: #5d7ac5; --lv-6-band-ink: #140a1f; /* 267deg */
+  --lv-7-a: #e3d9ff; --lv-7-b: #b2a1dd; --lv-7-ink: #140a1f; --lv-7-band: #7f66b5; --lv-7-band-ink: #ffffff; /* 297deg */
+  --lv-8-a: #fccefb; --lv-8-b: #c59dc4; --lv-8-ink: #140a1f; --lv-8-band: #9c5c9b; --lv-8-band-ink: #ffffff; /* 327deg */
+  --lv-9-a: #ffd1df; --lv-9-b: #d598ac; --lv-9-ink: #140a1f; --lv-9-band: #ae5677; --lv-9-band-ink: #ffffff; /* 358deg */
+  --lv-10-a: #ffd5c5; --lv-10-b: #df997d; --lv-10-ink: #140a1f; --lv-10-band: #b15c3a; --lv-10-band-ink: #ffffff; /* 42deg */
+  --lv-11-a: #4ee7b7; --lv-11-b: #0eb187; --lv-11-ink: #140a1f; --lv-11-band: #047558; --lv-11-band-ink: #ffffff; /* 168deg */
+  --lv-12-a: #4de1e6; --lv-12-b: #0eacb0; --lv-12-ink: #140a1f; --lv-12-band: #087175; --lv-12-band-ink: #ffffff; /* 198deg */
+  --lv-13-a: #7cd6ff; --lv-13-b: #16a5d6; --lv-13-ink: #140a1f; --lv-13-band: #0a6d8f; --lv-13-band-ink: #ffffff; /* 229deg */
+  --lv-14-a: #a9cbff; --lv-14-b: #6d98da; --lv-14-ink: #140a1f; --lv-14-band: #3662a7; --lv-14-band-ink: #ffffff; /* 259deg */
+  --lv-15-a: #c7c0ff; --lv-15-b: #958ad8; --lv-15-ink: #140a1f; --lv-15-band: #6355a3; --lv-15-band-ink: #ffffff; /* 289deg */
+  --lv-16-a: #d8b8ff; --lv-16-b: #ab7ede; --lv-16-ink: #140a1f; --lv-16-band: #764aa3; --lv-16-band-ink: #ffffff; /* 305deg */
+  --lv-17-a: #ffa7ec; --lv-17-b: #d26cbe; --lv-17-ink: #140a1f; --lv-17-band: #973786; --lv-17-band-ink: #ffffff; /* 335deg */
+  --lv-18-a: #ffafc0; --lv-18-b: #d7738b; --lv-18-ink: #140a1f; --lv-18-band: #9b3f59; --lv-18-band-ink: #ffffff; /* 5deg */
+  --lv-19-a: #ffb68e; --lv-19-b: #d77c45; --lv-19-ink: #140a1f; --lv-19-band: #9c4805; --lv-19-band-ink: #ffffff; /* 50deg */
+  --lv-20-a: #fdbd3f; --lv-20-b: #c28c10; --lv-20-ink: #140a1f; --lv-20-band: #815c06; --lv-20-band-ink: #ffffff; /* 80deg */
+  --lv-21-a: #e0974a; --lv-21-b: #a7681e; --lv-21-ink: #140a1f; --lv-21-band: #673c02; --lv-21-band-ink: #ffffff; /* 65deg */
+  --lv-22-a: #fcf8ff; --lv-22-b: #c9c4d0; --lv-22-ink: #140a1f; --lv-22-band: #514a66; --lv-22-band-ink: #ffffff; /* 307deg */
+  --lv-23-a: #37bfba; --lv-23-b: #038b86; --lv-23-ink: #140a1f; --lv-23-band: #045350; --lv-23-band-ink: #ffffff; /* 191deg */
+  --lv-24-a: #fd4234; --lv-24-b: #ba0605; --lv-24-ink: #ffffff; --lv-24-band: #ff9b93; --lv-24-band-ink: #140a1f; /* 29deg */
+  --lv-25-a: #36badf; --lv-25-b: #0286a4; --lv-25-ink: #140a1f; --lv-25-band: #055063; --lv-25-band-ink: #ffffff; /* 221deg */
+  --lv-26-a: #60adff; --lv-26-b: #067ad7; --lv-26-ink: #140a1f; --lv-26-band: #014884; --lv-26-band-ink: #ffffff; /* 251deg */
+  --lv-27-a: #9c9dff; --lv-27-b: #6c66d9; --lv-27-ink: #140a1f; --lv-27-band: #3f319d; --lv-27-band-ink: #ffffff; /* 282deg */
+  --lv-28-a: #e372fd; --lv-28-b: #aa44c1; --lv-28-ink: #140a1f; --lv-28-band: #710185; --lv-28-band-ink: #ffffff; /* 320deg */
+  --lv-29-a: #fa72b9; --lv-29-b: #bd4686; --lv-29-ink: #140a1f; --lv-29-band: #810453; --lv-29-band-ink: #ffffff; /* 350deg */
+  --lv-30-a: #f18586; --lv-30-b: #b6585a; --lv-30-ink: #140a1f; --lv-30-band: #7c252b; --lv-30-band-ink: #ffffff; /* 20deg */
+  --lv-31-a: #2482c1; --lv-31-b: #055281; --lv-31-ink: #ffffff; --lv-31-band: #a0d4ff; --lv-31-band-ink: #140a1f; /* 183deg */
+  --lv-32-a: #787385; --lv-32-b: #4a4756; --lv-32-ink: #ffffff; --lv-32-band: #d3cfdd; --lv-32-band-ink: #140a1f; /* 296deg */
+  --lv-33-a: #2c8a9c; --lv-33-b: #065967; --lv-33-ink: #ffffff; --lv-33-band: #5ee2fd; --lv-33-band-ink: #140a1f; /* 214deg */
+  --lv-34-a: #c7379c; --lv-34-b: #890668; --lv-34-ink: #ffffff; --lv-34-band: #ffb2e1; --lv-34-band-ink: #140a1f; /* 244deg */
+  --lv-35-a: #5a64fd; --lv-35-b: #3616d5; --lv-35-ink: #ffffff; --lv-35-band: #bfcbff; --lv-35-band-ink: #140a1f; /* 274deg */
+  --lv-36-a: #2c8d81; --lv-36-b: #065b52; --lv-36-ink: #ffffff; --lv-36-band: #61e7d5; --lv-36-band-ink: #140a1f; /* 312deg */
+  --lv-37-a: #a93ddd; --lv-37-b: #74019e; --lv-37-ink: #ffffff; --lv-37-band: #e4bafe; --lv-37-band-ink: #140a1f; /* 343deg */
+  --lv-38-a: #d5375b; --lv-38-b: #940434; --lv-38-ink: #ffffff; --lv-38-band: #feb8bf; --lv-38-band-ink: #140a1f; /* 13deg */
+  --lv-39-a: #b26622; --lv-39-b: #773d00; --lv-39-ink: #ffffff; --lv-39-band: #ffbe8f; --lv-39-band-ink: #140a1f; /* 57deg */
 
   /* The nazar beside the board total (`components/live/Nazar.tsx`) — the
      wall's own glass, from `public/tv/tv.css`. Blue because the charm is
